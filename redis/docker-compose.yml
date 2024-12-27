@@ -1,0 +1,17 @@
+name: redis
+
+services:
+  redis:
+    image: redis:latest
+    profiles: [ redis, infrastructure, all ]
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data-1:/data
+    networks:
+      - agent-poc
+    restart: unless-stopped
+
+volumes:
+  redis-data-1:
+    driver: local

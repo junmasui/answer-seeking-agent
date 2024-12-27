@@ -1,0 +1,47 @@
+name: pgvector
+
+services:
+  pgvector:
+    image: localdomain-postgres:17.2-pgvector
+    profiles: [ postgres, infrastructure, all ]
+    entrypoint: [ 'docker-entrypoint.sh' ]
+    command: [ postgres ]
+    ports:
+      - '25432:5432'
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    env_file:
+      - pgvector.env
+      - pgvector.secrets.env
+    volumes:
+      - pgvector-data-1:/var/lib/postgresql/data
+    networks:
+      - agent-poc
+    restart: unless-stopped
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+
+  pgvector-init:
+    image: localdomain-postgres:17.2-pgvector
+    profiles: [ postgres, infrastructure, all ]
+    entrypoint: [ '/bin/sh' ]
+    command: [ /init-postgres.sh ]
+    # Attach postgres-init directly to main container's network stack
+    network_mode: service:pgvector
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      POSTGRES_HOST: pgvector
+    env_file:
+      - pgvector-init.env
+      - pgvector-init.secrets.env
+    depends_on:
+      - pgvector
+
+volumes:
+  pgvector-data-1:
+    driver: local

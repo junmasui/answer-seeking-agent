@@ -1,0 +1,43 @@
+name: minio
+
+services:
+  minio:
+    image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
+    profiles: [ minio, infrastructure, all ]
+    command: server /data --console-address ':9001'
+    ports:
+      - '29000:9000'
+      - '29001:9001'
+    volumes:
+      - type: volume
+        source: minio-data-2
+        target: /data
+    networks:
+      - agent-poc
+    env_file:
+      - minio.env
+      - minio.secrets.env
+    restart: unless-stopped
+
+  minio-init:
+    image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
+    profiles: [ minio, infrastructure, all ]
+    entrypoint: [ /bin/sh ]
+    command: /init-minio.sh
+    # Attach minio-init directly to main container's network stack
+    network_mode: service:minio
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      MINIO_ENDPOINT_URL: http://minio:9000
+    env_file:
+      - minio-init.env
+      - minio-init.secrets.env
+    restart: 'no'
+    depends_on:
+      - minio
+
+volumes:
+  minio-data-2:
+    driver: local

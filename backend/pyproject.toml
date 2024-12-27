@@ -1,0 +1,35 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [{ name = "", email = "" }]
+dependencies = [
+  "celery[redis]",
+  "cloudpathlib[s3]",
+  "icecream",
+  "fastapi[standard]",
+  "langchain",
+  "langchain-community",
+  "langchain-huggingface",
+  "langchain-openai",
+  "langchain-postgres",
+  "langchain-unstructured",
+  "langgraph",
+  "onnx",
+  "psycopg[binary,pool]",
+  "python-dotenv",
+  "redis",
+  "unstructured[pdf]",
+  "pdfplumber>=0.11.4",
+  "pydantic-settings>=2.7.0",
+  "langgraph-checkpoint-postgres>=2.0.9",
+  "langchain-google-genai>=2.0.8",
+  "langchain-ollama>=0.2.2",
+  "langchain-anthropic>=0.3.1",
+]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+
+[dependency-groups]
+dev = ["pytest", "watchdog[watchmedo]"]
