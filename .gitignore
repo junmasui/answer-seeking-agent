@@ -1,0 +1,10 @@
+# Logs
+logs
+*.log
+
+
+# Editor directories and files
+.vscode/*
+
+# secrets never to be committed
+*.secrets.env

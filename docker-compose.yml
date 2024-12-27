@@ -1,0 +1,21 @@
+name: agent
+
+include:
+  - backend/docker-compose.yml
+  - backend/docker-compose.alpha.yml
+  - frontend/docker-compose.yml
+  - minio/docker-compose.yml
+  - postgres/docker-compose.yml
+  - redis/docker-compose.yml
+
+networks:
+  agent-poc:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: 1500
+    ipam:
+      config:
+        - subnet: 172.31.1.0/28
+          gateway: 172.31.1.1
+

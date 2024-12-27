@@ -1,0 +1,272 @@
+<template>
+    <v-banner class="pa-2 ma-2" icon="mdi-alert-circle" color="warning" lines="one" v-if="tableOutdated">
+        <v-banner-text>
+            Newer table data is available.
+        </v-banner-text>
+
+        <template v-slot:actions>
+            <v-btn variant="text" @click="loadItems">Refresh</v-btn>
+        </template>
+    </v-banner>
+    <v-data-table-server show-select v-model="selectedItems" v-model:page="page" v-model:items-per-page="itemsPerPage"
+        :items-per-page-options="itemsPerPageOptions" :items-length="totalItems" :headers="headers" :items="items"
+        density="compact" item-key="name" @update:options="loadItems">
+        <template v-slot:item.actions="{ item, index }">
+            <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
+                mdi-database-import
+            </v-icon>
+            <v-icon size="small" @click="deleteItem(item, index)">
+                mdi-delete
+            </v-icon>
+            <!-- <v-dialog v-model="confirmIngest" max-width="500px">
+                <v-card>
+                    <v-card-title class="text-h5">Are you sure you want to ingest this item?</v-card-title>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="blue-darken-1" variant="text" @click="closeIngest">Cancel</v-btn>
+                        <v-btn color="blue-darken-1" variant="text" @click="ingestItemConfirm">OK</v-btn>
+                        <v-spacer></v-spacer>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog> -->
+            <confirmation-dialog v-model:active="confirmIngest" @canceled="closeIngest" @confirmed="ingestItemConfirm">
+                Are you sure you want to ingest this item?
+            </confirmation-dialog>
+            <!-- <v-dialog v-model="confirmDelete" max-width="500px">
+                <v-card>
+                    <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
+                        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
+                        <v-spacer></v-spacer>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog> -->
+            <confirmation-dialog v-model:active="confirmDelete" @canceled="closeDelete" @confirmed="deleteItemConfirm">
+                Are you sure you want to delete this item?
+            </confirmation-dialog>
+
+        </template>
+    </v-data-table-server>
+
+</template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { storeToRefs } from 'pinia'
+
+import { useDocumentStore } from './DocStore';
+import ConfirmationDialog from './ConfirmationDialog.vue';
+
+const documentStore = useDocumentStore()
+
+const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentStore);
+const tableUpdatedAt = ref();
+const tableOutdated = ref(false);
+
+const loading = ref(false);
+
+const headers = ref([
+    { title: 'File Name', value: 'name' },
+    { title: 'Size', key: 'sizeBytes' },
+    {
+        title: 'Last Modified Date',
+        key: 'modificationTime'
+    },
+    { title: 'Status', key: 'status' },
+    {
+        title: 'Ingestion Date',
+        key: 'ingestionTime'
+    },
+    { title: 'Actions', key: 'actions', sortable: false },
+])
+
+const itemsPerPageOptions = ([
+    { value: 2, title: '2' },
+    { value: 5, title: '5' },
+    { value: 10, title: '10' },
+    { value: 25, title: '25' },
+    { value: 50, title: '50' }
+]
+)
+
+const editedIndex = ref(-1)
+const editedItem = ref({})
+
+const confirmIngest = ref(false)
+
+function ingestItem(item, index) {
+    console.log('ingestItem', item, index)
+    confirmIngest.value = true
+    editedIndex.value = index
+    editedItem.value = Object.assign({}, item)
+}
+
+async function ingestItemConfirm() {
+    console.log('ingestItemConfirm', editedItem.value)
+
+    await ingestDocument(editedItem.value.id)
+
+    await closeIngest()
+}
+
+async function ingestDocument(doc_uuid) {
+    console.log('ingest', doc_uuid)
+    try {
+
+        const response = await fetch(`/api/documents/${doc_uuid}/ingest`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error('Ingest failed');
+        }
+
+        const data = await response.json();
+        console.log('Ingest started successfully:', data);
+
+    } catch (error) {
+        console.error('Error ingesting:', error);
+    }
+}
+
+
+async function closeIngest() {
+    // confirmIngest.value = false
+
+    await loadItems()
+
+    nextTick(() => {
+        editedItem.value = {}
+        editedIndex.value = -1
+    })
+}
+
+
+const confirmDelete = ref(false)
+
+function deleteItem(item, index) {
+    console.log('deleteItem', item, index)
+    confirmDelete.value = true
+    editedIndex.value = index
+    editedItem.value = Object.assign({}, item)
+}
+
+async function deleteItemConfirm() {
+    console.log('deleteItemConfirm', editedItem.value)
+
+    await deleteDocument(editedItem.value.id)
+
+    await closeDelete()
+}
+
+async function deleteDocument(doc_uuid) {
+    console.log('delete', doc_uuid)
+    try {
+
+        const response = await fetch(`/api/documents/${doc_uuid}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error('Delete failed');
+        }
+
+        const data = await response.json();
+        console.log('Deleted successfully:', data);
+    } catch (error) {
+        console.error('Error deleting:', error);
+    }
+}
+
+
+async function closeDelete() {
+    // confirmDelete.value = false
+
+    await loadItems()
+
+    nextTick(() => {
+        editedItem.value = {}
+        editedIndex.value = -1
+    })
+}
+
+var intervalId = null;
+
+onMounted(async () => {
+    await loadItems();
+
+    intervalId = setInterval(async () => {
+        await loadTableStats()
+    },
+        30000)
+})
+
+onBeforeUnmount(async () => {
+    clearInterval(intervalId);
+    intervalId = null;
+})
+
+async function loadTableStats() {
+    console.log('table stats')
+    try {
+
+        const response = await fetch(`/api/documents/stats`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error('Getting table stats failed');
+        }
+
+        const data = await response.json();
+
+        totalItems.value = data.documentCount;
+        if (tableUpdatedAt.value !== data.tableUpdatedTime) {
+            tableOutdated.value = true;
+            tableUpdatedAt.value = data.tableUpdatedTime;
+        }
+    } catch (error) {
+        console.error('Error getting table stats:', error);
+    }
+}
+
+async function loadItems() {
+    loading.value = true
+
+    try {
+        const params = new URLSearchParams({
+            // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
+            page: page.value - 1,
+            itemsPerPage: itemsPerPage.value
+        })
+
+        const response = await fetch(`/api/documents/?${params}`, {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get files');
+        }
+
+        const data = await response.json();
+
+        totalItems.value = data.documentCount;
+        tableUpdatedAt.value = data.tableUpdatedTime
+        tableOutdated.value = false
+        items.value = data.documents;
+
+    } catch (error) {
+        totalItems.value = 0;
+        items.value = [];
+        loading.value = false
+        console.error('Error getting files:', error);
+    }
+    loading.value = false
+}
+
+
+</script>
+
+<style></style>
