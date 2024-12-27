@@ -1,0 +1,24 @@
+{
+    // Sets the default path that VS Code should open when connecting to the container
+    "workspaceFolder": "/app",
+  
+    // Adds *default* settings.json values into a container/machine specific settings file.
+    "settings": {
+      "terminal.integrated.defaultProfile.linux": "bash"
+    },
+  
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "vue.volar",
+        "dbaeumer.vscode-eslint"
+    ],
+  
+    // An array port numbers to forward
+    "forwardPorts": [],
+  
+    // Container user VS Code should use when connecting
+    "remoteUser": "node",
+  
+    // Set environment variables for VS Code and sub-processes
+    "remoteEnv": { }
+  }

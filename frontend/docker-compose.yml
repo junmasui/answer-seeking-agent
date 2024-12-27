@@ -1,0 +1,58 @@
+
+services:
+  init-frontend-volumes:
+    image: 'debian:12.8-slim'
+    profiles: [ frontend, all ]
+    # No network is needed to initialize named volumes
+    network_mode: none
+    user: '0:0' 
+    volumes:
+      - node_modules:/var/node_modules-1
+    entrypoint: 'bash'
+    command: [ '-c', 'chmod a+rwx /var/node_modules-1' ]
+    restart: 'no'
+
+  vite-dev-server:
+    image: 'localdomain-frontend:node-22-bookworm'
+    profiles: [ frontend, all ]
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      - CHOKIDAR_USEPOLLING=true
+    #   - NODE_ENV=production
+    volumes:
+      # Mount the project directory to /app in the container
+      - ./app:/app
+      # Mount a named volume at node_modules. This results in two benefits: 1. the
+      # node_modules constitutients are isolated away from the source. 2. restarting
+      # this service does not trigger a reinstallation of node_modules.
+      - node_modules:/app/node_modules
+    ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
+    ## traffic to go thru the reserve-proxy server at 15173.
+    # ports:
+    #   - '5173:5173'
+    networks:
+      - agent-poc
+    user: '1000:1000'
+    command: [ '/run_dev_server.sh' ]
+    depends_on:
+      - init-frontend-volumes
+
+  proxy:
+    image: 'nginx:1.27.3-bookworm'
+    profiles: [ frontend, all ]
+    volumes:
+      # Mount the Nginx configuration file.
+      - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      # Expose the vite server to the host machine
+      - '15173:15173'
+    networks:
+      - agent-poc
+    depends_on:
+      - vite-dev-server
+
+volumes:
+  node_modules:
+    driver: local
