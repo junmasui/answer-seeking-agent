@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="confirmIngest" max-width="500px">
+    <v-dialog v-model="active" max-width="500px">
         <v-card>
             <v-card-title class="text-h5">
                 <slot></slot>
