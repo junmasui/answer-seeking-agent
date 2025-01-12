@@ -65,7 +65,7 @@ async def handle_list_files(page: Union[int, None] = 0, itemsPerPage: Union[int,
 async def handle_table_stats():
     """Returns table statistics.
     """
-    
+
     return get_document_stats('documents')
 
 

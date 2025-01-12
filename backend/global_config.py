@@ -20,6 +20,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 MinimalStr = Annotated[str, StringConstraints(to_lower=True, min_length=3)]
 LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
+PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 class Settings(BaseSettings):
     # We assume that the .env files were loaded into the environment
@@ -39,7 +40,7 @@ class Settings(BaseSettings):
                                 validation_alias='POSTGRES_CONNECTION_URL')    
     postgres_user_name: MinimalStr = Field(default='',
                                     validation_alias='BACKEND_POSTGRES_USER_NAME')
-    postgres_user_password: MinimalStr = Field(default='',
+    postgres_user_password: PasswordOrKeyStr = Field(default='',
                                     validation_alias='BACKEND_POSTGRES_USER_PASSWORD')
 
 
@@ -56,7 +57,7 @@ class Settings(BaseSettings):
     minio_endpoint_url: AnyHttpUrl =Field(default='', validation_alias='MINIO_ENDPOINT_URL')
     minio_bucket_name: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_BUCKET')
     minio_user_name: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_USER_NAME')
-    minio_user_password: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_USER_PASSWORD')
+    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='BACKEND_MINIO_USER_PASSWORD')
 
 @cache
 def get_global_config():

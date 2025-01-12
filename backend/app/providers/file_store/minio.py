@@ -1,5 +1,6 @@
 from functools import cache
 import os
+from urllib.parse import unquote,quote_plus
 
 from cloudpathlib.s3 import S3Client, S3Path
 
@@ -12,7 +13,7 @@ def get_s3_client():
     config = get_global_config()
     return S3Client(
         aws_access_key_id=config.minio_user_name,
-        aws_secret_access_key=config.minio_user_password,
+        aws_secret_access_key=quote_plus(config.minio_user_password),
         endpoint_url=str(config.minio_endpoint_url)
     )
 

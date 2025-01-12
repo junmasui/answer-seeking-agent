@@ -168,7 +168,339 @@ Then run:
 ./quick_fill_secrets.sh
 ```
 
-### Launch
+## FIRST TIME START
+
+### Start Infrastructure Layer
+
+Run the following command.
+This command will start the Redis, Postgres, and MinIO services.
+Also, the database initialize scripts will be run
+in run-and-done containers.
+
+```bash
+docker compose --profile infrastructure up -d
+```
+
+### Verify Infrastructure Layer
+
+#### Verify Redis Service
+
+Run the following command.
+This will show logging output from the Redis service.
+
+```bash
+docker compose logs redis
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the service is listening on port 6379 within the container.
+
+```console
+redis-1  | 1:C 12 Jan 2025 16:39:57.498 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis-1  | 1:C 12 Jan 2025 16:39:57.498 * Redis version=7.2.5, bits=64, commit=00000000, modified=0, pid=1, just started
+
+...
+
+redis-1  | 1:M 12 Jan 2025 16:39:57.499 * Running mode=standalone, port=6379.
+redis-1  | 1:M 12 Jan 2025 16:39:57.500 * Server initialized
+redis-1  | 1:M 12 Jan 2025 16:39:57.500 * Ready to accept connections tcp
+```
+
+#### Verify MinIO Service
+
+Run the following command.
+This will show logging output from the MinIO service.
+
+```bash
+docker compose logs minio
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the service is listening on ports 9000 and 9001 within the container.
+
+```console
+minio-1  | INFO: Formatting 1st pool, 1 set(s), 1 drives per set.
+minio-1  | INFO: WARNING: Host local has more than 0 drives of set. A host failure will result in data becoming unavailable.
+minio-1  | MinIO Object Storage Server
+minio-1  | Copyright: 2015-2025 MinIO, Inc.
+minio-1  | License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
+minio-1  | Version: RELEASE.2024-12-13T22-19-12Z (go1.23.4 linux/amd64)
+minio-1  | 
+minio-1  | API: http://172.31.1.3:9000  http://127.0.0.1:9000 
+minio-1  | WebUI: http://172.31.1.3:9001 http://127.0.0.1:9001  
+
+...
+```
+
+Run the following command.
+This will show logging output from
+the initialization of the MinIO storage.
+
+```bash
+docker compose logs minio-init
+```
+
+```console
+minio-init-1  | Waiting for Minio server to be ready...
+minio-init-1  | mc: <ERROR> Unable to initialize new alias from the provided credentials. Get "http://minio:9000/probe-bsign-ojanuc24grlq5mpejvnfw319ustmvk/?location=": dial tcp 172.31.1.3:9000: connect: connection refused.
+minio-init-1  | Added `local_server` successfully.
+
+...
+
+minio-init-1  | Bucket created successfully `local_server/documents`.
+minio-init-1  | Added user `langchain` successfully.
+minio-init-1  | Attached Policies: [readwrite]
+minio-init-1  | To User: langchain
+```
+
+#### Verify Postgres Service
+
+Run the following command.
+This will show logging output from the Postgres service.
+
+```
+docker compose logs pgvector
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the service is listening on port 5432 within the container.
+
+```console
+...
+
+pgvector-1  | Success. You can now start the database server using:
+pgvector-1  | 
+pgvector-1  |     pg_ctl -D /var/lib/postgresql/data/pgdata -l logfile start
+pgvector-1  | 
+pgvector-1  | waiting for server to start....2025-01-12 16:39:59.593 UTC [49] LOG:  starting PostgreSQL 17.2 (Debian 17.2-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+
+...
+
+pgvector-1  | 
+pgvector-1  | PostgreSQL init process complete; ready for start up.
+pgvector-1  | 
+
+...
+
+pgvector-1  | 2025-01-12 16:39:59.950 UTC [1] LOG:  starting PostgreSQL 17.2 (Debian 17.2-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+pgvector-1  | 2025-01-12 16:39:59.951 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+
+...
+
+pgvector-1  | 2025-01-12 16:39:59.989 UTC [1] LOG:  database system is ready to accept connections
+```
+
+Run the following command.
+This will show logging output from the initialization
+of the Postgres database.
+
+```bash
+docker compose logs pgvector-init
+```
+
+```console
+pgvector-init-1  | DO
+pgvector-init-1  | DO
+pgvector-init-1  | CREATE DATABASE
+pgvector-init-1  | You are now connected to database "langchain" as user "postgres".
+pgvector-init-1  | CREATE EXTENSION
+
+```
+
+### Start Backend Layer
+
+Run the following command:
+
+```bash
+docker compose --profile backend up -d
+```
+
+### Verify Backend Layer
+
+#### Verify FastAPI Server
+
+Run the following command.
+This will show logging output from
+the FastAPI developement-mode server.
+
+```bash
+docker compose logs fastapi-dev-server
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the server is listening on port 8100 within the container.
+
+```console
+fastapi-dev-server-1  | Using Python 3.12.8 environment at: .local/venv
+fastapi-dev-server-1  | Resolved 221 packages in 4.94s
+fastapi-dev-server-1  | Prepared 221 packages in 2m 07s
+fastapi-dev-server-1  | Installed 221 packages in 12.83s
+
+...
+
+fastapi-dev-server-1  | Uninstalled 26 packages in 254ms
+fastapi-dev-server-1  | Installed 32 packages in 367ms
+fastapi-dev-server-1  | INFO:     Started server process [118]
+fastapi-dev-server-1  | INFO:     Waiting for application startup.
+fastapi-dev-server-1  | INFO:     Application startup complete.
+fastapi-dev-server-1  | INFO:     Uvicorn running on http://0.0.0.0:8100 (Press CTRL+C to quit)
+```
+
+#### Verify Celery Worker
+
+Run the following command.
+This will show logging output from
+the Celery worker.
+
+```bash
+docker compose logs celery-worker
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the worker is connected to Redis
+and running within the container.
+
+```console
+celery-worker-1  | Using Python 3.12.8 environment at: .local/venv
+celery-worker-1  | Resolved 221 packages in 4.90s
+celery-worker-1  | Prepared 221 packages in 2m 06s
+celery-worker-1  | Installed 221 packages in 8.05s
+
+...
+
+celery-worker-1  | [2025-01-12 16:49:40,344: INFO/MainProcess] Connected to redis://agent-redis-1:6379/0
+
+...
+
+celery-worker-1  | [2025-01-12 16:49:39,421: DEBUG/MainProcess] | Worker: Preparing bootsteps.
+celery-worker-1  | [2025-01-12 16:49:39,428: DEBUG/MainProcess] | Worker: Building graph...
+celery-worker-1  | [2025-01-12 16:49:39,428: DEBUG/MainProcess] | Worker: New boot order: {StateDB, Beat, Timer, Hub, Pool, Autoscaler, Consumer}
+
+...
+
+celery-worker-1  | [2025-01-12 16:49:41,390: DEBUG/MainProcess] | Consumer: Starting event loop
+celery-worker-1  | [2025-01-12 16:49:41,390: DEBUG/MainProcess] | Worker: Hub.register Pool...
+celery-worker-1  | [2025-01-12 16:49:41,391: INFO/MainProcess] celery@476c184cd474 ready.
+```
+
+### Start Frontend Layer
+
+Run the following command:
+
+```bash
+docker compose --profile frontend up -d
+```
+
+### Verify Frontend Layer
+
+#### Verify ViteJS Server
+
+Run the following command.
+This will show logging output from
+the ViteJS developement-mode server.
+
+```bash
+docker compose logs vite-dev-server
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the server
+is listening on post 5173 within the container.
+
+```console
+vite-dev-server-1  | 
+vite-dev-server-1  | added 252 packages, and audited 253 packages in 7s
+vite-dev-server-1  | 
+
+...
+
+vite-dev-server-1  | > vite --host 0.0.0.0 --logLevel info
+vite-dev-server-1  | 
+vite-dev-server-1  | 
+vite-dev-server-1  |   VITE v5.4.11  ready in 885 ms
+vite-dev-server-1  | 
+vite-dev-server-1  |   ➜  Local:   http://localhost:5173/
+vite-dev-server-1  |   ➜  Network: http://172.31.1.7:5173/
+vite-dev-server-1  |   ➜  Vue DevTools: Open http://localhost:5173/__devtools__/ as a separate window
+vite-dev-server-1  |   ➜  Vue DevTools: Press Alt(⌥)+Shift(⇧)+D in App to toggle the Vue DevTools
+
+...
+```
+
+#### Verify NginX Server
+
+Run the following command.
+This will show logging output from
+the NginX reverse proxy server.
+
+```bash
+docker compose logs proxy
+```
+
+Read the output.
+Verify that there are no errors (self-correction is acceptable),
+and
+that the NginX service has started its NginX workers.
+
+```console
+...
+
+proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: using the "epoll" event method
+proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: nginx/1.27.3
+proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
+
+...
+
+proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: start worker processes
+
+...
+```
+
+## CONTINUOUS LOGGING
+
+To start continuous logging
+of the ViteJS server, the FastAPI server, and
+the Celery worker,
+run the following command.
+
+```bash
+docker compose logs -f vite-dev-server fastapi-dev-server celery-worker
+```
+
+## CHECK DOCKER HEALTH
+
+To get a list of running services,
+run the following command.
+
+```bash
+docker compose ps --format "table {{.Name}}\t{{.Service}}\t{{.Status}}"
+```
+
+The output should list all of the expected services
+
+```console
+agent-celery-worker-1        celery-worker        Up About an hour
+agent-fastapi-dev-server-1   fastapi-dev-server   Up About an hour
+agent-minio-1                minio                Up About an hour
+agent-pgvector-1             pgvector             Up About an hour
+agent-proxy-1                proxy                Up About an hour
+agent-redis-1                redis                Up About an hour
+agent-vite-dev-server-1      vite-dev-server      Up About an hour
+```
+
+## SECOND TIME AND ADDITIONAL START UP
 
 Start all Docker services simultaneously:
 
@@ -176,85 +508,18 @@ Start all Docker services simultaneously:
 docker compose --profile all up -d
 ```
 
-Wait half-minute.
-When services are launched for the first time,
-named Docker volumes are created.
-The named volumes for the front and back ends
-hold the package installations for VueJS and for Python.
-These take a number of seconds to populate because
-the package managers have to actually install packages.
+## TEST THE APPLICATION
 
-```bash
-docker compose ps --format "table {{.Name}}\t{{.Service}}\t{{.Status}}"
-```
-
-```console
-NAME                         SERVICE              STATUS
-agent-celery-worker-1        celery-worker        Up 42 seconds
-agent-fastapi-dev-server-1   fastapi-dev-server   Up 42 seconds
-agent-minio-1                minio                Up 42 seconds
-agent-pgvector-1             pgvector             Up 42 seconds
-agent-proxy-1                proxy                Up 42 seconds
-agent-redis-1                redis                Up 42 seconds
-agent-vite-dev-server-1      vite-dev-server      Up 42 seconds
-```
-
-For more detailed information about running containers, 
-run the following command.
-
-```bash
-docker compose ps
-```
-
-Next verify that the services came up without errors:
-
-```bash
-docker compose logs pgvector
-```
-
-Check that Postgres is running and internally listening on port 5432.
-
-```bash
-docker compose logs redis
-```
-
-Check that Redis is running and internally listening on port 6379.
-
-```bash
-docker compose logs minio
-```
-
-Check that Redis is running and internally listening on ports 9000 and 9001.
-
-
-```bash
-docker compose logs fastapi-dev-server
-```
-
-Check that the Python virtual environment was installed and `uvicorn` started and is listening.
-
-```bash
-docker compose logs celery-worker
-```
-
-Check that the Python virtual environment was installed and `celery` started and is listening.
-
-```bash
-docker compose logs vite-dev-server
-```
-
-Check that the node modules were installed and `vite` started and is internally listening on port 5173.
-
-```bash
-docker compose logs proxy
-```
-
-Check that nginx is running.
-
-
-## Use the Application
+### Go To Health Check
 
 In Chrome, go to the URL `http://localhost:15173/health`.
 
 It should show a status of `healthy`.
 
+### Go To Document Manager
+
+Upload some documents. Then ingest them.
+
+### Go To Conversation
+
+Ask some questions.

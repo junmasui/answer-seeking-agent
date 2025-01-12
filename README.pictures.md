@@ -8,7 +8,7 @@ architecture-beta
     group cloud(cloud)[Cloud Services]
 
     service vuejs(server)[Frontend] in frontend
-    service proxy(server)[Server-Side Proxy] in frontend
+    service proxy(server)[Server Side Proxy] in frontend
 
     service fastapi(server)[Backend Server] in backend
     service worker(server)[Worker] in backend

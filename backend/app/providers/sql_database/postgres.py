@@ -4,8 +4,7 @@ This provides the vector store used by this application.
 import os
 from functools import cache
 import string
-from urllib.parse import unquote
-
+import urllib.parse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from psycopg_pool import ConnectionPool
@@ -20,12 +19,12 @@ __all__ = ['get_connection_str', 'get_engine', 'get_sessionmaker', 'get_connecti
 def get_connection_str():
     config = get_global_config()
     # Remember to URL decode the value!
-    template = unquote(str(config.postgres_connection_url))
+    template = urllib.parse.unquote(str(config.postgres_connection_url))
     template = string.Template(template)
 
     connection_str = template.safe_substitute({
         'BACKEND_POSTGRES_USER_NAME': config.postgres_user_name,
-        'BACKEND_POSTGRES_USER_PASSWORD': config.postgres_user_password,
+        'BACKEND_POSTGRES_USER_PASSWORD': urllib.parse.quote_plus(config.postgres_user_password),
     })
 
     # The connection string must use psycopg3!
