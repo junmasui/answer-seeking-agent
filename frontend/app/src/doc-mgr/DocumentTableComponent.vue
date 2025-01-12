@@ -18,31 +18,9 @@
             <v-icon size="small" @click="deleteItem(item, index)">
                 mdi-delete
             </v-icon>
-            <!-- <v-dialog v-model="confirmIngest" max-width="500px">
-                <v-card>
-                    <v-card-title class="text-h5">Are you sure you want to ingest this item?</v-card-title>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue-darken-1" variant="text" @click="closeIngest">Cancel</v-btn>
-                        <v-btn color="blue-darken-1" variant="text" @click="ingestItemConfirm">OK</v-btn>
-                        <v-spacer></v-spacer>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog> -->
             <confirmation-dialog v-model:active="confirmIngest" @canceled="closeIngest" @confirmed="ingestItemConfirm">
                 Are you sure you want to ingest this item?
             </confirmation-dialog>
-            <!-- <v-dialog v-model="confirmDelete" max-width="500px">
-                <v-card>
-                    <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                        <v-spacer></v-spacer>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog> -->
             <confirmation-dialog v-model:active="confirmDelete" @canceled="closeDelete" @confirmed="deleteItemConfirm">
                 Are you sure you want to delete this item?
             </confirmation-dialog>
@@ -133,8 +111,6 @@ async function ingestDocument(doc_uuid) {
 
 
 async function closeIngest() {
-    // confirmIngest.value = false
-
     await loadItems()
 
     nextTick(() => {
@@ -182,8 +158,6 @@ async function deleteDocument(doc_uuid) {
 
 
 async function closeDelete() {
-    // confirmDelete.value = false
-
     await loadItems()
 
     nextTick(() => {

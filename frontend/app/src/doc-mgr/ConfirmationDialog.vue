@@ -6,8 +6,8 @@
             </v-card-title>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue-darken-1" variant="text" @click="onCancel">Cancel</v-btn>
-                <v-btn color="blue-darken-1" variant="text" @click="onConfirm">OK</v-btn>
+                <v-btn color="primary" variant="text" @click="onCancel">Cancel</v-btn>
+                <v-btn color="primary" variant="text" @click="onConfirm">OK</v-btn>
                 <v-spacer></v-spacer>
             </v-card-actions>
         </v-card>

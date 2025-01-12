@@ -20,7 +20,7 @@
 import { ref, onMounted } from 'vue';
 
 const healthStatus = ref('unknown')
-const statusColor = ref('indigo')
+const statusColor = ref('primary')
 
 async function onCheckHealth() {
     healthStatus.value = 'unknown'
