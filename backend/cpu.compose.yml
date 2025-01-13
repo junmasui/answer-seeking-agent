@@ -1,0 +1,59 @@
+services:
+  init-backend-volumes-cpu:
+    image: 'debian:12.8-slim'
+    profiles: [ backend, all ]
+    user: '0:0' 
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - local-cpu-1:/var/.local-1
+      - local-cpu-2:/var/.local-2
+    entrypoint: 'bash'
+    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2' ]
+    restart: 'no'
+
+  fastapi-dev-server:
+    extends:
+      file: compose.yml
+      service: fastapi-dev-server
+
+    image: 'localdomain-backend:python-3.12-cpu'
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      # Mounting a local area to use container-installed dependencies
+      - local-cpu-1:/app/.local
+      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh
+    deploy:
+      resources:
+        reservations:
+          devices: []
+    depends_on:
+      - init-backend-volumes-cpu
+
+  celery-worker:
+    extends:
+      file: compose.yml
+      service: celery-worker
+
+    image: 'localdomain-backend:python-3.12-cpu'
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      # Mounting a local area to use container-installed dependencies
+      - local-cpu-2:/app/.local
+      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh
+    deploy:
+      resources:
+        reservations:
+          devices: []
+    depends_on:
+      - init-backend-volumes-cpu
+
+volumes:
+  local-cpu-1:
+    driver: local
+  local-cpu-2:
+    driver: local

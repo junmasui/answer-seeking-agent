@@ -1,12 +1,10 @@
 name: agent
 
 include:
-  - backend/docker-compose.yml
-  - backend/docker-compose.alpha.yml
-  - frontend/docker-compose.yml
-  - minio/docker-compose.yml
-  - postgres/docker-compose.yml
-  - redis/docker-compose.yml
+  - frontend/compose.yml
+  - minio/compose.yml
+  - postgres/compose.yml
+  - redis/compose.yml
 
 networks:
   agent-poc:
@@ -18,4 +16,3 @@ networks:
       config:
         - subnet: 172.31.1.0/28
           gateway: 172.31.1.1
-

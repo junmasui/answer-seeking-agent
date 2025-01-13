@@ -508,6 +508,19 @@ Start all Docker services simultaneously:
 docker compose --profile all up -d
 ```
 
+## CPU ONLY SYSTEMS
+
+The start up installations need to be modified for CPU-only systems.
+The modification is that `docker compose` should include an additional
+option `--file cpu.compose.yml`.
+
+For example, the command for starting the backend becomes:
+
+```bash
+docker compose --file cpu.compose.yml --profile backend up -d
+```
+
+
 ## TEST THE APPLICATION
 
 ### Go To Health Check
