@@ -56,3 +56,4 @@ class Answer(CamelModel):
     question: str
     answer: str
     thread_id: UUID
+    user_id: Optional[str] = None

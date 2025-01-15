@@ -8,12 +8,34 @@
       <v-spacer></v-spacer>
 
       <v-btn icon="mdi-theme-light-dark" @click="toggleTheme" variant="text"></v-btn>
-      <v-btn icon="mdi-dots-vertical" variant="text"></v-btn>
+      <v-tooltip max-width="300" text="Optional sign-in will enable long-memory personalization" location="bottom">
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" icon="mdi-login" @click="signIn" variant="text">
+          </v-btn>
+        </template>
+      </v-tooltip>
+
+      <v-btn icon="mdi-dots-vertical" id="overflow-button" variant="text">
+      </v-btn>
+
+      <v-menu activator="#overflow-button">
+        <v-list>
+          <v-list-item @click="signOut">
+            <template v-slot:prepend>
+              <v-icon icon="mdi-logout"></v-icon>
+            </template>
+            <v-list-item-title>Sign Out</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
     </v-app-bar>
+    <sign-in-dialog v-model:active="performSignIn">
+    </sign-in-dialog>
 
     <v-main>
       <v-container fluid class="pa=0 ma-0">
-        <router-view/>
+        <router-view />
       </v-container>
     </v-main>
 
@@ -32,13 +54,30 @@
 <script setup>
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
+import { useCurrentUserStore } from './CurrentUserStore.js'
+import { storeToRefs } from 'pinia'
+
+import SignInDialog from './SignInDialog.vue'
 
 const theme = useTheme()
 
 const drawerModel = ref(false)
+const performSignIn = ref(false)
+
+const currentUserStore = useCurrentUserStore();
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 function toggleDrawer() {
   drawerModel.value = !drawerModel.value;
+}
+
+function signIn() {
+  performSignIn.value = true
+}
+
+function signOut() {
+  accessToken.value = ''
+  signedIn.value = false
 }
 
 function toggleTheme() {
@@ -47,5 +86,4 @@ function toggleTheme() {
 
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

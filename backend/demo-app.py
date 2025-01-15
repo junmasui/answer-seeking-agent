@@ -1,6 +1,9 @@
+from mock_auth import User, get_current_user_from_token
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends
 import early_config
 
-from typing import Union, Optional
+from typing import Union, Optional, Annotated
 import logging
 import uuid
 
@@ -12,17 +15,22 @@ from app import health_check, seek_answer, list_documents, upload_document, uplo
 from app.public_models import CamelModel, Answer, DocumentList, DocumentStats, IngestRequestBody
 
 from worker import ingest_task
+import mock_auth_app
 
 logger = logging.getLogger(__name__)
 
-
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
+
+app.mount('/mock_auth', mock_auth_app.app)
 
 
 @app.get('/')
 async def handle_root():
     return {'Tag': 'Seeking answers'}
+
 
 @app.get('/health')
 async def handle_health_check():
@@ -45,9 +53,24 @@ async def get_user(email: str):
     }
 
 
+# authentication is optional: When HTTP Authorization header is not available,
+# the dependency will return None instead of throwing a 401.
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="token",
+    auto_error=False)
+
+
+async def get_current_active_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    return await get_current_user_from_token(token)
+
+
 @app.get('/answer', response_model=Answer)
-async def handle_question(q: Union[str, None] = None, threadId: Union[uuid.UUID, None] = None):
-    answer = seek_answer(user_input=q, thread_id=threadId)
+async def handle_question(q: Union[str, None] = None, threadId: Union[uuid.UUID, None] = None,
+                          current_user: Annotated[User, Depends(get_current_active_user)] = None):
+
+    user_id = current_user.username if current_user is not None else None
+
+    answer = seek_answer(user_input=q, thread_id=threadId, user_id=user_id)
 
     logger.info(f'returning {answer}')
 
@@ -58,8 +81,9 @@ async def handle_question(q: Union[str, None] = None, threadId: Union[uuid.UUID,
 async def handle_list_files(page: Union[int, None] = 0, itemsPerPage: Union[int, None] = 10):
     """Returns a list of documents.
     """
-    
+
     return list_documents('documents', start=page*itemsPerPage, length=itemsPerPage)
+
 
 @app.get('/documents/stats', response_model=DocumentStats)
 async def handle_table_stats():
@@ -70,19 +94,22 @@ async def handle_table_stats():
 
 
 @app.post('/documents/upload')
-async def handle_upload(file: UploadFile, totalChunks: int = Form(), chunkIndex: int = Form() ):
+async def handle_upload(file: UploadFile, totalChunks: int = Form(), chunkIndex: int = Form()):
     """Uploads a file. Chunked upload of large files is supported.
     """
-    logger.debug(f'handling %s chunk: %d %d', file.filename, chunkIndex, totalChunks)
+    logger.debug(f'handling %s chunk: %d %d',
+                 file.filename, chunkIndex, totalChunks)
 
     if totalChunks > 1:
         upload_chunk('upload_chunks', file.filename, chunkIndex, file.file)
 
         if chunkIndex == totalChunks - 1:
-            merge_chunked_document('documents', 'upload_chunks', file.filename, totalChunks)
+            merge_chunked_document(
+                'documents', 'upload_chunks', file.filename, totalChunks)
         return
-    
+
     upload_document('documents', file.filename, file.file)
+
 
 @app.post('/documents/{doc_uuid}/ingest')
 async def handle_single_ingest(doc_uuid):
@@ -95,6 +122,7 @@ async def handle_single_ingest(doc_uuid):
 
     return {'task_id': task.id}
 
+
 @app.delete('/documents/{doc_uuid}')
 async def handle_single_delete(doc_uuid):
     """Deletes the file and associated embeddings specified by the document UUID.
@@ -103,7 +131,6 @@ async def handle_single_delete(doc_uuid):
     success = delete_document(doc_uuid)
 
     return {}
-
 
 
 @app.post('/ingest')
@@ -118,7 +145,7 @@ async def handle_ingest(body: Optional[IngestRequestBody] = None):
     doc_uuid = body.doc_uuid if body is not None else None
 
     file_dir = 'documents'
-        
+
     if glob_pattern:
         task = ingest_task.delay(file_dir, glob_pattern=glob_pattern)
     if doc_uuid:

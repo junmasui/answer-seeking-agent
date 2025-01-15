@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     postgres_user_password: PasswordOrKeyStr = Field(default='',
                                     validation_alias='BACKEND_POSTGRES_USER_PASSWORD')
 
+    application_jwt_secret: str = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
     use_unstructured_cloud_api: bool = Field(default=False,
                       validation_alias='USE_UNSTRUCTURED_API')

@@ -49,13 +49,16 @@ import { ref } from 'vue'
 
 import { storeToRefs } from 'pinia'
 
-import { useConversationStore } from './ConversationStore';
+import { useConversationStore } from './ConversationStore'
+import { useCurrentUserStore } from '../CurrentUserStore'
 
 import SystemMessageComponent from './SystemMessageComponent.vue'
 import UserMessageComponent from './UserMessageComponent.vue'
 
 const conversationStore = useConversationStore();
 const { userInput, messages, threadId } = storeToRefs(conversationStore);
+const currentUserStore = useCurrentUserStore();
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 const querySubmitted = ref(false)
 
@@ -84,12 +87,17 @@ async function submit(event) {
 
     querySubmitted.value = true
 
+    const headers = {
+          'Accept': 'application/json'
+    }
+    if ( signedIn.value ) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
     const response = await fetch('/api/answer?' + queryParams.toString(),
       {
         method: 'GET', // GET is the default, so you could omit this line
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: headers
       }
     );
 
