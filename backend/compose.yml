@@ -12,9 +12,10 @@ services:
     command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2' ]
     restart: 'no'
 
-  fastapi-dev-server:
-    image: 'localdomain-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
+  fastapi-dev-server-common:
+    image: ''
+    profiles: [ never-use-directly ]
+
     environment:
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
@@ -30,34 +31,46 @@ services:
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       - PYTHONPYCACHEPREFIX=/app/.local/pycache
+    ports: # use if it is necessary to expose the container to the host machine
+      - '8100:8100'
+    user: '1000:1000'
+    networks:
+      agent-poc:
+        aliases:
+          - fastapi-dev-server
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_fastapi_dev_server.sh' ]
+    deploy:
+      resources:
+        limits:
+          memory: 4G # Give enough to run local model
+
+  fastapi-dev-server:
+    extends:
+      service: fastapi-dev-server-common
+
+    image: 'localdomain-backend:python-3.12-cuda12'
+    profiles: [ backend, all ]
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
       # Mounting a local area to use container-installed dependencies
       - local-1:/app/.local
       - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-    ports: # use if it is necessary to expose the container to the host machine
-      - '8100:8100'
-    user: '1000:1000'
-    networks:
-      - agent-poc
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_fastapi_dev_server.sh' ]
     depends_on:
       - init-backend-volumes
     deploy:
       resources:
-        limits:
-          memory: 4G # Give enough to run local model
         reservations:
           devices:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
 
-  celery-worker:
-    image: 'localdomain-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
+  celery-worker-common:
+    image: ''
+    profiles: [ never-use-directly ]
+
     environment:
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
@@ -70,6 +83,26 @@ services:
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       - PYTHONPYCACHEPREFIX=/app/.local/pycache
+    ports: # use if it is necessary to expose the container to the host machine
+      - '8101:8101'
+    networks:
+      agent-poc:
+        aliases:
+          - celery-worker
+    user: '1000:1000'
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_celery_worker.sh' ]
+    deploy:
+      resources:
+        limits:
+          memory: 8G # Give enough to run Tesseract and local model
+
+  celery-worker:
+    extends:
+      service: celery-worker-common
+
+    image: 'localdomain-backend:python-3.12-cuda12'
+    profiles: [ backend, all ]
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
@@ -77,27 +110,78 @@ services:
       - local-2:/app/.local
       ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - ./run_celery_worker.sh:/run_celery_worker.sh
-    ports: # use if it is necessary to expose the container to the host machine
-      - '8101:8101'
-    networks:
-      - agent-poc
-    user: '1000:1000'
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_celery_worker.sh' ]
     depends_on:
       - init-backend-volumes
     deploy:
       resources:
-        limits:
-          memory: 8G # Give enough to run Tesseract and local model
         reservations:
           devices:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+  #
+  # CPU only
+  #
 
+  init-backend-volumes-cpu:
+    image: 'debian:12.8-slim'
+    profiles: [ backend-cpu, all-cpu ]
+    user: '0:0' 
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - local-cpu-1:/var/.local-1
+      - local-cpu-2:/var/.local-2
+    entrypoint: 'bash'
+    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2' ]
+    restart: 'no'
+
+  fastapi-dev-server-cpu:
+    extends:
+      service: fastapi-dev-server-common
+
+    image: 'localdomain-backend:python-3.12-cpu'
+    profiles: [ backend-cpu, all-cpu ]
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      # Mounting a local area to use container-installed dependencies
+      - local-cpu-1:/app/.local
+      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh
+    depends_on:
+      - init-backend-volumes-cpu
+
+  celery-worker-cpu:
+    extends:
+      service: celery-worker-common
+
+    image: 'localdomain-backend:python-3.12-cpu'
+    profiles: [ backend-cpu, all-cpu ]
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      # Mounting a local area to use container-installed dependencies
+      - local-cpu-2:/app/.local
+      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh
+    depends_on:
+      - init-backend-volumes-cpu
+
+
+#
+# Named volumes are not created until the dependent service
+# is started.
+#
 volumes:
   local-1:
     driver: local
   local-2:
+    driver: local
+  #
+  # CPU only
+  #
+  local-cpu-1:
+    driver: local
+  local-cpu-2:
     driver: local

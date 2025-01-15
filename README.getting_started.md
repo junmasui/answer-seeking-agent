@@ -5,6 +5,28 @@ then installation.
 
 ## SYSTEM RECOMMENDATIONS
 
+### HARDWARE MINIMUMS
+
+Hardware minimums are presented as recommendations
+and not requirements because
+there has been no effort made on a proper assessment.
+Proper assessment take much effort.
+Minimums based on merely installed
+a software system then working with a small first data load
+is not sufficient for producing a proper requirement.
+
+The hardware minimums will also vary depending on
+the configuration of this agent. When the configuration
+demands more local computing, then the hardware minimums
+will be significantly larger.
+
+With guidances not provided, one working system will be described instead.
+With the out-of-box configuration,
+reasonable response times are observed with
+about 100 GB disk space,
+8 GB RAM memory, 8 or more GB GPU memory on a CUDA 12 compatible NVidia GPU, and an 8-core Xeon processor.
+
+
 ### SUPPORTED OPERATING SYSTEMS
 
 #### Debian 12 (Bookworm)
@@ -99,6 +121,18 @@ This is optional but highly recommended on systems with newer Nvidia GPU's.
 ### Software: Visual Studo Code
 
 Only one IDE is supported in this repository.
+
+
+### Software:
+
+The command line utility `envsubst` is used by a few installation steps.
+
+Install the Debian package that includes the command line utility `envsubst`.
+
+```bash
+sudo apt update
+sudo apt-get install gettext-base
+```
 
 ## CLOUD SERVICE REQUIREMENTS
 
@@ -511,13 +545,19 @@ docker compose --profile all up -d
 ## CPU ONLY SYSTEMS
 
 The start up installations need to be modified for CPU-only systems.
-The modification is that `docker compose` should include an additional
-option `--file cpu.compose.yml`.
+The modification is that the profiles `backend-cpu` or `all-cpu` should be
+used.
 
 For example, the command for starting the backend becomes:
 
 ```bash
-docker compose --file cpu.compose.yml --profile backend up -d
+docker compose --profile infrastrucutre up -d
+docker compose --profile backend-cpu up -d
+docker compose --profile frontend up -d
+```
+
+```bash
+docker compose --profile all-cpu up -d
 ```
 
 
