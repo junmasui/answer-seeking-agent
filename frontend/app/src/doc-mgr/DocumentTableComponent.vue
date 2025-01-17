@@ -27,6 +27,7 @@
 
         </template>
     </v-data-table-server>
+    <v-btn class="mt-2" size="large" @click="loadItems">Refresh</v-btn>
 
 </template>
 
@@ -34,11 +35,14 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 
+import { useCurrentUserStore } from '../CurrentUserStore'
 import { useDocumentStore } from './DocStore';
 import ConfirmationDialog from './ConfirmationDialog.vue';
 
+const currentUserStore = useCurrentUserStore();
 const documentStore = useDocumentStore()
 
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentStore);
 const tableUpdatedAt = ref();
 const tableOutdated = ref(false);
@@ -75,26 +79,29 @@ const editedItem = ref({})
 const confirmIngest = ref(false)
 
 function ingestItem(item, index) {
-    console.log('ingestItem', item, index)
     confirmIngest.value = true
     editedIndex.value = index
     editedItem.value = Object.assign({}, item)
 }
 
 async function ingestItemConfirm() {
-    console.log('ingestItemConfirm', editedItem.value)
-
     await ingestDocument(editedItem.value.id)
 
     await closeIngest()
 }
 
 async function ingestDocument(doc_uuid) {
-    console.log('ingest', doc_uuid)
     try {
 
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
         const response = await fetch(`/api/documents/${doc_uuid}/ingest`, {
             method: 'POST',
+            headers: headers
         });
 
         if (!response.ok) {
@@ -102,8 +109,7 @@ async function ingestDocument(doc_uuid) {
         }
 
         const data = await response.json();
-        console.log('Ingest started successfully:', data);
-
+        console.log('Ingest queued successfully:', data);
     } catch (error) {
         console.error('Error ingesting:', error);
     }
@@ -123,26 +129,30 @@ async function closeIngest() {
 const confirmDelete = ref(false)
 
 function deleteItem(item, index) {
-    console.log('deleteItem', item, index)
     confirmDelete.value = true
     editedIndex.value = index
     editedItem.value = Object.assign({}, item)
 }
 
 async function deleteItemConfirm() {
-    console.log('deleteItemConfirm', editedItem.value)
-
     await deleteDocument(editedItem.value.id)
 
     await closeDelete()
 }
 
 async function deleteDocument(doc_uuid) {
-    console.log('delete', doc_uuid)
     try {
+
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
 
         const response = await fetch(`/api/documents/${doc_uuid}`, {
             method: 'DELETE',
+            headers: headers
         });
 
         if (!response.ok) {
@@ -183,11 +193,18 @@ onBeforeUnmount(async () => {
 })
 
 async function loadTableStats() {
-    console.log('table stats')
     try {
+
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
 
         const response = await fetch(`/api/documents/stats`, {
             method: 'GET',
+            headers: headers
         });
 
         if (!response.ok) {
@@ -216,8 +233,16 @@ async function loadItems() {
             itemsPerPage: itemsPerPage.value
         })
 
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
         const response = await fetch(`/api/documents/?${params}`, {
-            method: 'GET'
+            method: 'GET',
+            headers: headers
         });
 
         if (!response.ok) {
@@ -233,6 +258,7 @@ async function loadItems() {
 
     } catch (error) {
         totalItems.value = 0;
+        tableOutdated.value = false
         items.value = [];
         loading.value = false
         console.error('Error getting files:', error);

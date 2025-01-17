@@ -8,5 +8,6 @@ export const useCurrentUserStore = defineStore('currentUser', {
             username: '',
             accessToken: ''
         }
-    }
+    },
+    persist: true,
 })

@@ -78,5 +78,4 @@ app.config_from_object(celeryconfig)
 def ingest_task(doc_ids=None):
     """Ingest
     """
-
     return ingest_documents(doc_ids)

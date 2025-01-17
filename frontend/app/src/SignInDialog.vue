@@ -26,16 +26,21 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useCurrentUserStore } from './CurrentUserStore.js'
-import { storeToRefs } from 'pinia'
-
-const currentUserStore = useCurrentUserStore();
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 const active = defineModel('active', {
     type: Boolean,
     default: false
 });
+const signedIn = defineModel('signedIn', {
+    type: Boolean,
+    default: false
+});
+const accessToken = defineModel('acccessToken', {
+    type: String,
+    default: ''
+});
+
+const emit = defineEmits(['onSuccess'])
 
 const username = ref('')
 const passwordVisible = ref(false)
@@ -66,7 +71,6 @@ async function onConfirm() {
         }
 
         const data = await response.json();
-        console.log('Tokens:', data);
 
         signedIn.value = true
         accessToken.value = data['access_token']
@@ -76,6 +80,8 @@ async function onConfirm() {
     }
 
     active.value = false
+
+    emit('onSuccess')
 }
 
 </script>
