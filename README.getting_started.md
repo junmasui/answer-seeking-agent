@@ -123,7 +123,9 @@ This is optional but highly recommended on systems with newer Nvidia GPU's.
 Only one IDE is supported in this repository.
 
 
-### Software:
+### Software: Debian Packages
+
+#### Install gettext-base
 
 The command line utility `envsubst` is used by a few installation steps.
 
@@ -132,6 +134,35 @@ Install the Debian package that includes the command line utility `envsubst`.
 ```bash
 sudo apt update
 sudo apt-get install gettext-base
+```
+
+#### Verify openssl
+
+The command line utility `openssl` is used in an installation step
+to generate a key.
+
+Verify that it is installed with the following command.
+
+```bash
+apt list --installed openssl
+```
+
+The output should contain a line with the installed package.
+
+```console
+openssl/stable,now 3.0.15-1~deb12u1 amd64 [installed,automatic]
+```
+
+#### Verify gpg
+
+```bash
+apt list --installed gpg
+```
+
+The output should contain a line with the installed package.
+
+```console
+gpg/stable,now 2.2.40-1.1 amd64 [installed]
 ```
 
 ## CLOUD SERVICE REQUIREMENTS

@@ -7,5 +7,5 @@ export const useConversationStore = defineStore('upload', {
             userInput: '',
             threadId: ''
         }
-    }
+    },
 })

@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def generate_uuid_from_name(name):
-    namespace = uuid.NAMESPACE_URL
+    # Custom namespace
+    namespace = uuid.UUID(hex='a2e3faca15a640a6b3db1021ac43d11e')
 
     # Generate the UUID from the namespace and name
     return uuid.uuid5(namespace, name)
@@ -30,8 +31,6 @@ def list_tracking_records(start: int, length: int):
     ROW_NUMBER values fall into the page range are choosen. Finally, the row
     data minus the ROW_NUMBER values are returned.
     """
-    create_tables_if_not_existing()
-
     sessionmaker = get_sessionmaker()
 
     with sessionmaker() as session:
@@ -61,22 +60,21 @@ def list_tracking_records(start: int, length: int):
 
 
 def get_tracking_stats():
-    """Return the count of records and maximum updated_at time
+    """Return the count of records and maximum updated_date time
     in the tracking table.
     """
-    create_tables_if_not_existing()
 
     sessionmaker = get_sessionmaker()
 
     with sessionmaker() as session:
         stmt = select(
             func.count().label('doc_count'),
-            func.max(TrackedDocument.updated_at).label('max_updated_at')
+            func.max(TrackedDocument.update_time).label('max_update_time')
         )
         result = session.execute(stmt).first()
     return {
         'doc_count': result[0],
-        'max_updated_at': result[1]
+        'max_update_time': result[1]
     }
 
 
@@ -101,10 +99,9 @@ def get_tracking_records(doc_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket_path):
+def add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket_path, user_id):
     """Adds or updates the tracking record for the document.
     """
-    create_tables_if_not_existing()
 
     doc_uuid = generate_uuid_from_name(file_dir+'/'+file_name)
 
@@ -130,6 +127,7 @@ def add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket_path):
                 existing_obj.size_bytes = size_bytes
                 existing_obj.file_modified_time = file_modification_time
                 existing_obj.s3_rel_path = str(s3_rel_path)
+                existing_obj.last_user_id = user_id
             else:
                 new_obj = TrackedDocument(
                     id=doc_uuid,
@@ -138,7 +136,8 @@ def add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket_path):
                     filename=file_name,
                     size_bytes=size_bytes,
                     file_modified_time=file_modification_time,
-                    s3_rel_path=str(s3_rel_path)
+                    s3_rel_path=str(s3_rel_path),
+                    last_user_id=user_id
                 )
                 session.add(new_obj)
 

@@ -46,15 +46,18 @@
 
 <script setup>
 import { ref } from 'vue'
-
 import { storeToRefs } from 'pinia'
 
-import { useConversationStore } from './ConversationStore';
+import { useCurrentUserStore } from '../CurrentUserStore'
+import { useConversationStore } from './ConversationStore'
 
 import SystemMessageComponent from './SystemMessageComponent.vue'
 import UserMessageComponent from './UserMessageComponent.vue'
 
+const currentUserStore = useCurrentUserStore();
 const conversationStore = useConversationStore();
+
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { userInput, messages, threadId } = storeToRefs(conversationStore);
 
 const querySubmitted = ref(false)
@@ -84,12 +87,17 @@ async function submit(event) {
 
     querySubmitted.value = true
 
+    const headers = {
+          'Accept': 'application/json'
+    }
+    if ( signedIn.value ) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
     const response = await fetch('/api/answer?' + queryParams.toString(),
       {
         method: 'GET', // GET is the default, so you could omit this line
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: headers
       }
     );
 
@@ -102,17 +110,11 @@ async function submit(event) {
 
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
-      // throw new TypeError("Oops, we haven't got JSON!");
-      console.log(`response ${contentType}`)
+      console.log(`Response content type: ${contentType}`)
+      throw new TypeError("Oops, we haven't got JSON!");
     }
 
     const data = await response.json();
-    console.log(`response: ${JSON.stringify(data, null, 2)}`)
-    // EXAMPLE:
-    // {
-    //   "question": "What is Medicare cost?",
-    //   "answer": "Medicare costs vary by part: for 2024, the Part A monthly premium can be up to $505, but most people do not pay it if they have paid Medicare taxes while working. The standard Part B monthly premium is $174.70, but it can increase based on income. Additionally, the national base beneficiary premium for Part D is $34.70."
-    // }
 
     messages.value.push({ type: 'user', message: userInput.value })
     userInput.value = ''

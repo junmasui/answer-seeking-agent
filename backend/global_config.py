@@ -18,6 +18,9 @@ from pydantic import (
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Regular expression should match between 32 to 160 hexdecimal characters ( [0-9a-f] )
+JwtSecretStr = Annotated[str, StringConstraints(pattern='[0-9a-f]{32,160}')]
+
 MinimalStr = Annotated[str, StringConstraints(to_lower=True, min_length=3)]
 LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
@@ -43,6 +46,7 @@ class Settings(BaseSettings):
     postgres_user_password: PasswordOrKeyStr = Field(default='',
                                     validation_alias='BACKEND_POSTGRES_USER_PASSWORD')
 
+    application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
     use_unstructured_cloud_api: bool = Field(default=False,
                       validation_alias='USE_UNSTRUCTURED_API')
