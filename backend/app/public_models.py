@@ -22,6 +22,7 @@ class CamelModel(BaseModel):
 class DocumentStatus(str, enum.Enum):
     UPLOADING = "uploading"
     UPLOADED = "uploaded"
+    QUEUING = "queuing"
     QUEUED = "queued"
     INGESTING = "ingesting"
     INGESTED = "ingested"
@@ -56,3 +57,4 @@ class Answer(CamelModel):
     question: str
     answer: str
     thread_id: UUID
+    user_id: Optional[str] = None

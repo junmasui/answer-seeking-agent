@@ -12,10 +12,14 @@
 
 <script setup>
 import { storeToRefs } from 'pinia'
+
+import { useCurrentUserStore } from '../CurrentUserStore'
 import { useUploadStore } from './UploadStore';
 
+const currentUserStore = useCurrentUserStore();
 const updateStore = useUploadStore()
 
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { fileList } = storeToRefs(updateStore);
 
 
@@ -39,9 +43,16 @@ async function onUpload() {
                 formData.append('chunkIndex', chunkIndex);
                 formData.append('totalChunks', totalChunks);
 
+                const headers = {
+                    'Accept': 'application/json'
+                }
+                if (signedIn.value) {
+                    headers['Authorization'] = `Bearer ${accessToken.value}`
+                }
                 const response = await fetch('/api/documents/upload', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: headers
                 });
 
                 if (!response.ok) {

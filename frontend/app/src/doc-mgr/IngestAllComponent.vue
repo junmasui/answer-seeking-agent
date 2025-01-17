@@ -9,10 +9,26 @@
 </template>
 
 <script setup>
+import { storeToRefs } from 'pinia'
+
+import { useCurrentUserStore } from '../CurrentUserStore'
+
+const currentUserStore = useCurrentUserStore();
+
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
+
 async function onIngest(event) {
     try {
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
         const response = await fetch('/api/ingest', {
-            method: 'POST'
+            method: 'POST',
+            headers: headers
         });
 
         if (!response.ok) {

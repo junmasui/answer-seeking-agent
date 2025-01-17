@@ -26,6 +26,12 @@ if [ -z "$BACKEND_POSTGRES_USER_PASSWORD" ]; then
     echo "BACKEND_POSTGRES_USER_PASSWORD=\"${BACKEND_POSTGRES_USER_PASSWORD}\"" >> quick_fill.secrets.env
 fi
 
+if [ -z "$APPLICATION_JWT_SECRET" ]; then
+    export APPLICATION_JWT_SECRET="$(openssl rand -hex 32)"
+    echo -e "\n# APPLICATION_JWT_SECRET is created thur openssl rand -hex 32" >> quick_fill.secrets.env
+    echo "APPLICATION_JWT_SECRET=\"${APPLICATION_JWT_SECRET}\"" >> quick_fill.secrets.env
+fi
+
 # Generate the services' .secrets.env
 
 for RELPATH in "backend/backend.secrets.env" \

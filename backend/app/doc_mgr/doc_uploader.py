@@ -8,7 +8,7 @@ from .model_ops import add_or_update_tracking_record
 logger = logging.getLogger(__name__)
 
 
-def upload_document(file_dir, file_name, local_file):
+def upload_document(file_dir, file_name, local_file, user_id):
     """Upload a complete document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
@@ -24,7 +24,7 @@ def upload_document(file_dir, file_name, local_file):
         return
 
     bucket = get_s3_bucket()
-    add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket)
+    add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket, user_id)
 
 
 def upload_chunk(chunk_dir, file_name, chunk_index, local_file):
@@ -40,7 +40,7 @@ def upload_chunk(chunk_dir, file_name, chunk_index, local_file):
         return False
     return True
 
-def merge_chunked_document(file_dir, chunk_dir, file_name, total_chunks):
+def merge_chunked_document(file_dir, chunk_dir, file_name, total_chunks, user_id):
     """Merge then upload a chunked document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
@@ -56,7 +56,7 @@ def merge_chunked_document(file_dir, chunk_dir, file_name, total_chunks):
         return
 
     bucket = get_s3_bucket()
-    add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket)
+    add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket, user_id)
 
 
 

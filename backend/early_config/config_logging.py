@@ -21,19 +21,24 @@ def configure_logging():
     if not has_rich_handler:
         logger.addHandler(rich_handler)
         logger.propagate = False
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     logger2 = logging.getLogger('logic')
     has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger2.handlers])
     if not has_rich_handler:
         logger2.addHandler(rich_handler)
         logger2.propagate = False
-    logger2.setLevel(logging.DEBUG)
+    logger2.setLevel(logging.INFO)
 
     logger2 = logging.getLogger('worker')
     has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger2.handlers])
     if not has_rich_handler:
         logger2.addHandler(rich_handler)
         logger2.propagate = False
-    logger2.setLevel(logging.DEBUG)
+    logger2.setLevel(logging.INFO)
 
+    logger = logging.getLogger()
+    has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger.handlers])
+    if not has_rich_handler:
+        logger.addHandler(rich_handler)
+    logger.setLevel(logging.INFO)

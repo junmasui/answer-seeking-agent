@@ -15,8 +15,6 @@
 </template>
 
 <script setup>
-import { defineModel } from 'vue';
-
 const active = defineModel('active', {
     type: Boolean,
     default: false

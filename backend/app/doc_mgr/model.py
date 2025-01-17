@@ -29,6 +29,15 @@ def create_tables_if_not_existing():
 
     metadata_obj.create_all(engine)
 
+def drop_all_tables():
+    """Drops all tables for model objects defined with this module's `Base`.
+    """
+    logger.info('dropping all registered tables')
+    engine = get_engine()
+
+    metadata_obj.drop_all(engine)
+
+
 
 class TrackedDocument(Base):
 
@@ -47,6 +56,9 @@ class TrackedDocument(Base):
     pg_doc_ids: Mapped[list[str]] = mapped_column(MutableList.as_mutable(ARRAY(String)), nullable=True)
     ingested_time: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
+    # Used to track the last user who acted on this document.
+    last_user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=True)
+
     # 1. `server_default` means that the value is set inside the "CREATE TABLE" statement
     #    by defining a default value that calls the current_timestamp function.
     # 2. `onupdate` means that the value is set within the "UPDATE" statement.
@@ -55,7 +67,7 @@ class TrackedDocument(Base):
     # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.onupdate
     # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_onupdate.
     #
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
-    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, 
+    create_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
+    update_time: Mapped[datetime.datetime] = mapped_column(DateTime, 
         server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )

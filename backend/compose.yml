@@ -54,9 +54,10 @@ services:
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
+      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       # Mounting a local area to use container-installed dependencies
       - local-1:/app/.local
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
     depends_on:
       - init-backend-volumes
     deploy:
@@ -106,10 +107,10 @@ services:
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh
       # Mounting a local area to use container-installed dependencies
       - local-2:/app/.local
-      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_worker.sh:/run_celery_worker.sh
     depends_on:
       - init-backend-volumes
     deploy:
@@ -145,10 +146,10 @@ services:
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
       # Mounting a local area to use container-installed dependencies
       - local-cpu-1:/app/.local
-      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_worker.sh:/run_celery_worker.sh
     depends_on:
       - init-backend-volumes-cpu
 
@@ -161,10 +162,10 @@ services:
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh
       # Mounting a local area to use container-installed dependencies
       - local-cpu-2:/app/.local
-      ## - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_worker.sh:/run_celery_worker.sh
     depends_on:
       - init-backend-volumes-cpu
 

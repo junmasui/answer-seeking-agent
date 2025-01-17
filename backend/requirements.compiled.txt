@@ -531,6 +531,8 @@ pygments==2.18.0
     # via
     #   icecream
     #   rich
+pyjwt==2.10.1
+    # via app (pyproject.toml)
 pyparsing==3.2.0
     # via
     #   httplib2

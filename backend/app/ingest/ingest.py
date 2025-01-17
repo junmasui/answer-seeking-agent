@@ -2,6 +2,8 @@ import os
 import logging
 from datetime import datetime
 
+from sqlalchemy import func
+
 from ..doc_mgr.model import DocumentStatus
 
 from ..doc_mgr.model_ops import get_tracking_records, update_tracking_record
@@ -12,6 +14,7 @@ from ..providers.vector_store import get_vector_store
 
 logger = logging.getLogger(__name__)
 
+__all__ = ['ingest_documents']
 
 def ingest_documents(doc_ids):
     """Ingest cloud files. Ingesting is the process of extracting textual data
@@ -63,7 +66,7 @@ def ingest_documents(doc_ids):
 
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
                 updateable_record.status = DocumentStatus.INGESTED
-                updateable_record.ingested_time = datetime.now()
+                updateable_record.ingested_time = func.current_timestamp()
                 if updateable_record.pg_doc_ids is None:
                     updateable_record.pg_doc_ids = []
                 updateable_record.pg_doc_ids.extend(pg_doc_ids)

@@ -75,7 +75,7 @@ def get_agent_graph():
     graph = graph_builder.compile(checkpointer=checkpointer)
     return graph
 
-def seek_answer(user_input: str, thread_id: Optional[uuid.UUID]):
+def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
 
     logger.info('user input: %s  thread_id: %s', user_input, thread_id)
 
@@ -98,7 +98,10 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID]):
     latest_value = {}
     answer = None
     try:
-        run_config = {'recursion_limit': 15, 'configurable': {'thread_id': thread_id.hex}}
+        extra_data = {'thread_id': thread_id.hex}
+        if user_id:
+            extra_data['user_id'] = user_id
+        run_config = {'recursion_limit': 15, 'configurable': extra_data}
         for output in graph.stream(input=input, config=run_config):
             for key, value in output.items():
                 # Node
@@ -124,5 +127,6 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID]):
     return Answer(
         question = user_input,
         answer = answer,
-        thread_id = thread_id
+        thread_id = thread_id,
+        user_id = user_id
     )
