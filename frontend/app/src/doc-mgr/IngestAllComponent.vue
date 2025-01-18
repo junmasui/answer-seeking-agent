@@ -11,7 +11,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../CurrentUserStore'
+import { useCurrentUserStore } from '../common/CurrentUserStore'
 
 const currentUserStore = useCurrentUserStore();
 

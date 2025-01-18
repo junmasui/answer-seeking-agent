@@ -13,7 +13,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../CurrentUserStore'
+import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useUploadStore } from './UploadStore';
 
 const currentUserStore = useCurrentUserStore();

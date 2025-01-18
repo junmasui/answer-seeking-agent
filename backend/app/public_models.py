@@ -48,9 +48,7 @@ class DocumentStats(CamelModel):
 
 
 class IngestRequestBody(CamelModel):
-    file_dir: Optional[str] = None
-    glob_pattern: Optional[str] = None
-    doc_uuid: Optional[UUID] = None
+    doc_uuid: Optional[list[UUID]] = None
 
 
 class Answer(CamelModel):

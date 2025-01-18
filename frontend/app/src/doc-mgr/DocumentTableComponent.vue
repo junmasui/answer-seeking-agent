@@ -35,9 +35,9 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../CurrentUserStore'
+import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useDocumentStore } from './DocStore';
-import ConfirmationDialog from './ConfirmationDialog.vue';
+import ConfirmationDialog from '../common/ConfirmationDialog.vue';
 
 const currentUserStore = useCurrentUserStore();
 const documentStore = useDocumentStore()

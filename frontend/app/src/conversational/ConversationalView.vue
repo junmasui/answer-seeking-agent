@@ -48,7 +48,7 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../CurrentUserStore'
+import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useConversationStore } from './ConversationStore'
 
 import SystemMessageComponent from './SystemMessageComponent.vue'
