@@ -15,7 +15,7 @@ from app import (health_check, seek_answer, list_documents, upload_document, upl
 from app.public_models import CamelModel, Answer, DocumentList, DocumentStats, IngestRequestBody, DocumentStatus
 
 from worker import ingest_task
-import mock_auth_app
+import sim_auth_app
 from simple_auth import User, get_scoped_current_user, get_current_user, Scope
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount('/mock_auth', mock_auth_app.app)
+app.mount('/sim_auth', sim_auth_app.app)
 
 
 @app.get('/')

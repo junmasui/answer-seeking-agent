@@ -30,7 +30,8 @@
       </v-menu>
 
     </v-app-bar>
-    <sign-in-dialog v-model:active="performSignIn" v-model:accessToken="accessToken" v-model:signedIn="signedIn" @onSuccess="signInSucceeded">
+    <sign-in-dialog v-model:active="performSignIn" v-model:accessToken="accessToken" v-model:signedIn="signedIn"
+      @onSuccess="signInSucceeded">
     </sign-in-dialog>
 
     <v-main>
@@ -42,10 +43,12 @@
     <v-navigation-drawer v-model:model-value="drawerModel" temporary>
       <v-list>
         <v-list-item title="Home" to="/"></v-list-item>
-        <v-list-item title="About" to="/about"></v-list-item>
-        <v-list-item title="Conversational" to="/conversational"></v-list-item>
-        <v-list-item title="Document Manager" to="/doc-mgr"></v-list-item>
+        <!-- Reinsert when we have meaningful info:
+          <v-list-item title="About" to="/about"></v-list-item>
+        -->
         <v-list-item title="Health" to="/health"></v-list-item>
+        <v-list-item title="Document Manager" to="/doc-mgr"></v-list-item>
+        <v-list-item title="Conversational" to="/conversational"></v-list-item>
         <v-list-item title="Administrator" to="/admin"></v-list-item>
       </v-list>
     </v-navigation-drawer>

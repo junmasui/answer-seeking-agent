@@ -1,24 +1,9 @@
 <template>
-    <h2>AboutView</h2>
+    <h2>About</h2>
 </template>
 
 <script setup>
 </script>
 
 <style>
-nav,
-main {
-    border: 2px solid #000;
-    margin-bottom: 10px;
-    padding: 10px;
-}
-
-nav>a+a {
-    margin-left: 10px;
-}
-
-h2 {
-    border-bottom: 1px solid #ccc;
-    margin: 0 0 20px;
-}
 </style>
