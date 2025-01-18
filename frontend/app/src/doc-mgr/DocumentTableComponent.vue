@@ -8,7 +8,7 @@
             <v-btn variant="text" @click="loadItems">Refresh</v-btn>
         </template>
     </v-banner>
-    <v-data-table-server show-select v-model="selectedItems" v-model:page="page" v-model:items-per-page="itemsPerPage"
+    <v-data-table-server show-select return-object v-model="selectedItems" v-model:page="page" v-model:items-per-page="itemsPerPage"
         :items-per-page-options="itemsPerPageOptions" :items-length="totalItems" :headers="headers" :items="items"
         density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.actions="{ item, index }">
@@ -21,14 +21,17 @@
             <confirmation-dialog v-model:active="confirmIngest" @canceled="closeIngest" @confirmed="ingestItemConfirm">
                 Are you sure you want to ingest this item?
             </confirmation-dialog>
+            <confirmation-dialog v-model:active="confirmIngestSelected" @canceled="closeIngestSelected" @confirmed="ingestSelectedConfirm">
+                Are you sure you want to ingest the selected items?
+            </confirmation-dialog>
             <confirmation-dialog v-model:active="confirmDelete" @canceled="closeDelete" @confirmed="deleteItemConfirm">
                 Are you sure you want to delete this item?
             </confirmation-dialog>
 
         </template>
     </v-data-table-server>
-    <v-btn class="mt-2" size="large" @click="loadItems">Refresh</v-btn>
-
+    <v-btn class="ma-2" size="large" @click="ingestSelectedItems">Ingest Selected</v-btn>
+    <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
 </template>
 
 <script setup>
@@ -175,6 +178,59 @@ async function closeDelete() {
         editedIndex.value = -1
     })
 }
+
+
+const confirmIngestSelected = ref(false)
+
+async function ingestSelectedItems() {
+    confirmIngestSelected.value = true
+
+}
+
+async function ingestSelectedConfirm() {
+    await ingestSelectedDocuments()
+
+    await closeIngestSelected()
+}
+
+async function ingestSelectedDocuments() {
+    try {
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const body = {
+            docUuids: selectedItems.value.map(x => x.id)
+        }
+
+        const response = await fetch(`/api/documents/ingest`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body, null, 2)
+        });
+
+        if (!response.ok) {
+            throw new Error('Ingest failed');
+        }
+
+        const data = await response.json();
+        console.log('Ingest queued successfully:', data);
+    } catch (error) {
+        console.error('Error ingesting:', error);
+    }
+}
+
+
+async function closeIngestSelected() {
+    await loadItems()
+}
+
+
 
 var intervalId = null;
 

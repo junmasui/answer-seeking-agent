@@ -48,7 +48,7 @@ class DocumentStats(CamelModel):
 
 
 class IngestRequestBody(CamelModel):
-    doc_uuid: Optional[list[UUID]] = None
+    doc_uuids: list[UUID]
 
 
 class Answer(CamelModel):
