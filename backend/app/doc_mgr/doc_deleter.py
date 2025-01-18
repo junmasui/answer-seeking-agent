@@ -13,8 +13,6 @@ def delete_document(document_id):
     """Delete file from cloud storage.
     """
 
-    logger.info('deleting unimplemeted  %s', document_id)
-
     # Retrieve tracking record.
 
     tracking_records = get_tracking_records(doc_uuid_list=[document_id])
@@ -45,4 +43,3 @@ def delete_document(document_id):
     delete_tracking_record(tracking_record.id)
 
     return success
-

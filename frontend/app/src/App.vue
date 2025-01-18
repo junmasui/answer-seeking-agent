@@ -46,6 +46,7 @@
         <v-list-item title="Conversational" to="/conversational"></v-list-item>
         <v-list-item title="Document Manager" to="/doc-mgr"></v-list-item>
         <v-list-item title="Health" to="/health"></v-list-item>
+        <v-list-item title="Administrator" to="/admin"></v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-app>
@@ -57,9 +58,9 @@ import { useTheme } from 'vuetify'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from './CurrentUserStore.js'
+import { useCurrentUserStore } from './common/CurrentUserStore.js'
 
-import SignInDialog from './SignInDialog.vue'
+import SignInDialog from './common/SignInDialog.vue'
 
 const theme = useTheme()
 

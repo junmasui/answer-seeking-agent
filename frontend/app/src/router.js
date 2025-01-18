@@ -7,6 +7,7 @@ import DocManagerView from './doc-mgr/DocManagerView.vue'
 import DocManagerIngestTab from './doc-mgr/DocManagerIngestTab.vue'
 import DocManagerUploadTab from './doc-mgr/DocManagerUploadTab.vue'
 import HealthCheckView from './core/HealthCheckView.vue'
+import AdminCheckView from './core/AdminView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
@@ -19,6 +20,7 @@ const routes = [
     ]
    },
   { path: '/health', component: HealthCheckView },
+  { path: '/admin', component: AdminCheckView },
 ]
 
 // See createWebHistory at: https://router.vuejs.org/guide/essentials/history-mode#HTML5-Mode
