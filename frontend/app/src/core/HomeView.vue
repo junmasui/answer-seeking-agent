@@ -1,6 +1,19 @@
 <template>
-  <h2>HomeView</h2>
-  <button @click="goToAbout">Go to About</button>
+  <h2>Home</h2>
+  <v-sheet class="pa-2">
+    <p class="pa-2">
+      This is an all-in-one user interface to demostrate
+      and experiment with
+      a modern agentic system.
+    </p>
+    <p class="pa-2">
+      The user interface is separated into a page
+      per role of      a possible workflow.
+      Each role could have a different level of authorization
+      due to considerations such as data access and data destruction possibilities,
+      local computing resource demands, cloud service usages, etc.
+    </p>
+  </v-sheet>
 </template>
 
 <script setup>
@@ -14,20 +27,4 @@ function goToAbout() {
 
 </script>
 
-<style>
-nav,
-main {
-  border: 2px solid #000;
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
-nav>a+a {
-  margin-left: 10px;
-}
-
-h2 {
-  border-bottom: 1px solid #ccc;
-  margin: 0 0 20px;
-}
-</style>
+<style></style>
