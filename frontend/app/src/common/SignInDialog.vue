@@ -2,18 +2,25 @@
     <v-dialog v-model="active" max-width="500px">
         <v-card class="pa-2 ma-2">
             <v-card-title class="text-h5">
+                Sign In
+            </v-card-title>
+            <v-card-text>
+                <v-alert closable title="Simulated authentication in use"
+                    text="Do not expose to beyond local system before replacing witha real OAuth2 service. Email/username and password are not being validated."
+                    type="info" variant="tonal" v-model="alertVisible" class="mb-2"></v-alert>
+
+
                 <v-form>
-                    <!-- alternative icon was mdi-email-outline -->
+                    <!-- alternative prepend-inner-icon was mdi-email-outline -->
                     <v-text-field variant="outlined" v-model="username" prepend-inner-icon="mdi-account-outline"
-                        label="Enter your username"  density="compact"
-                        placeholder="Enter your username"
-                        ></v-text-field>
+                        label="Enter your email or username" density="compact"
+                        placeholder="Enter your email or username"></v-text-field>
                     <v-text-field variant="outlined" v-model="password" prepend-inner-icon="mdi-lock-outline"
                         label="Enter your password" :append-inner-icon="passwordVisible ? 'mdi-eye-off' : 'mdi-eye'"
                         :type="passwordVisible ? 'text' : 'password'" density="compact"
-                        placeholder="Enter your password" @click:append-inner="toggleVisibility"></v-text-field>
+                        placeholder="Enter your password" @click:append-inner="togglePasswordVisibility"></v-text-field>
                 </v-form>
-            </v-card-title>
+            </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" variant="text" @click="onCancel">Cancel</v-btn>
@@ -25,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const active = defineModel('active', {
     type: Boolean,
@@ -42,11 +49,28 @@ const accessToken = defineModel('acccessToken', {
 
 const emit = defineEmits(['onSuccess'])
 
+const alertVisible = ref(true)
+
 const username = ref('')
 const passwordVisible = ref(false)
 const password = ref('')
 
-function toggleVisibility() {
+
+var alertTimeoutId;
+
+watch(alertVisible, (newValue, oldValue) => {
+    // Clear any existing timeout
+    clearTimeout(alertTimeoutId);
+    alertTimeoutId = 0;
+    if (newValue === false) {
+        // Set a timeout to make the alert visible after 5 minutes
+        alertTimeoutId = setTimeout(() => {
+            alertVisible.value = true; // Reset the value
+        }, 300000); // 5 minutes in milliseconds
+    }
+});
+
+function togglePasswordVisibility() {
     passwordVisible.value = !passwordVisible.value
 }
 
@@ -61,7 +85,7 @@ async function onConfirm() {
         formData.append('username', username.value);
         formData.append('password', password.value);
 
-        const response = await fetch(`/api/mock_auth/token`, {
+        const response = await fetch(`/api/sim_auth/token`, {
             method: 'POST',
             body: formData
         });

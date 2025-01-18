@@ -11,7 +11,7 @@ import AdminCheckView from './core/AdminView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
-  { path: '/about', component: AboutView },
+  // Reinsert when we have meaningful info: { path: '/about', component: AboutView },
   { path: '/conversational', component: ConversationalView },
   { path: '/doc-mgr', component: DocManagerView,
     children: [
