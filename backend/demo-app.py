@@ -1,11 +1,11 @@
 import early_config
 
-from typing import Union, Optional, Annotated
+from typing import Union, Optional, Annotated, Any
 import logging
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, UploadFile, Form, Depends
+from fastapi import FastAPI, UploadFile, Form, Depends, Request
 from pydantic.alias_generators import to_camel, to_snake
 from celery.result import AsyncResult
 
@@ -140,16 +140,17 @@ async def handle_single_delete(doc_uuid,
     return {}
 
 
-@app.post('/ingest')
-async def handle_ingest(body: Optional[IngestRequestBody] = None,
-                        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST_ALL))] = None):
+@app.post('/documents/ingest')
+async def handle_ingest(
+        body: Optional[IngestRequestBody] = None,
+        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
     """Ingest the files specified in the list of document UUIDs
     """
     user_id = current_user.userid if current_user is not None else None
 
-    doc_uuids = body.doc_uuid_list if body.doc_uuid_list else []
+    doc_uuids = body.doc_uuids if body.doc_uuids else []
 
-    task_ids = {}
+    task_ids = []
     for doc_uuid in doc_uuids:
 
         update_document_status(
@@ -157,7 +158,7 @@ async def handle_ingest(body: Optional[IngestRequestBody] = None,
 
         task = ingest_task.delay(doc_ids=[doc_uuid])
 
-        task_ids[doc_uuid] = task.id
+        task_ids.append({'doc_uuid': doc_uuid, 'task_id': task.id})
 
     return {'task_ids': task_ids}
 
