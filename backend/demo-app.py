@@ -10,7 +10,8 @@ from pydantic.alias_generators import to_camel, to_snake
 from celery.result import AsyncResult
 
 from app import (health_check, seek_answer, list_documents, upload_document, upload_chunk,
-                 merge_chunked_document, delete_document, get_document_stats, update_document_status, documents_startup)
+                 merge_chunked_document, delete_document, get_document_stats, update_document_status,
+                 documents_startup, documents_reset)
 from app.public_models import CamelModel, Answer, DocumentList, DocumentStats, IngestRequestBody, DocumentStatus
 
 from worker import ingest_task
@@ -67,8 +68,9 @@ async def handle_question(q: Union[str, None] = None,
 
 @app.get('/documents/', response_model=DocumentList)
 async def handle_list_files(page: Union[int, None] = 0,
-                            itemsPerPage: Union[int, None] = 10 ,
-                            current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None
+                            itemsPerPage: Union[int, None] = 10,
+                            current_user: Annotated[User, Depends(
+                                get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None
                             ):
     """Returns a list of documents.
     """
@@ -78,7 +80,7 @@ async def handle_list_files(page: Union[int, None] = 0,
 
 @app.get('/documents/stats', response_model=DocumentStats)
 async def handle_table_stats(current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None
-):
+                             ):
     """Returns statistics about tracking table.
     """
 
@@ -117,7 +119,8 @@ async def handle_single_ingest(doc_uuid,
 
     user_id = current_user.userid if current_user is not None else None
 
-    update_document_status(doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
+    update_document_status(
+        doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
 
     task = ingest_task.delay(doc_ids=[doc_uuid])
 
@@ -140,23 +143,23 @@ async def handle_single_delete(doc_uuid,
 @app.post('/ingest')
 async def handle_ingest(body: Optional[IngestRequestBody] = None,
                         current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST_ALL))] = None):
-    """Ingest the files matched to the glob pattern or to the document UUID
+    """Ingest the files specified in the list of document UUIDs
     """
-    logger.info(f'ingest {body}')
+    user_id = current_user.userid if current_user is not None else None
 
-    file_dir = body.file_dir if body is not None else None
-    glob_pattern = body.glob_pattern if body is not None else None
+    doc_uuids = body.doc_uuid_list if body.doc_uuid_list else []
 
-    doc_uuid = body.doc_uuid if body is not None else None
+    task_ids = {}
+    for doc_uuid in doc_uuids:
 
-    file_dir = 'documents'
+        update_document_status(
+            doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
 
-    if glob_pattern:
-        task = ingest_task.delay(file_dir, glob_pattern=glob_pattern)
-    if doc_uuid:
         task = ingest_task.delay(doc_ids=[doc_uuid])
 
-    return {'taskId': task.id}
+        task_ids[doc_uuid] = task.id
+
+    return {'task_ids': task_ids}
 
 
 @app.get('/tasks/{task_id}')
@@ -169,5 +172,15 @@ def get_status(task_id,
         'taskId': task_id,
         'taskStatus': task_result.status,
         'taskResult': task_result.result
+    }
+    return result
+
+
+@app.post('/admin/resetDatabase')
+def reset_database(current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None):
+    """Reset database.
+    """
+    documents_reset()
+    result = {
     }
     return result
