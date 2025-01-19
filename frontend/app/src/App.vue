@@ -46,7 +46,7 @@
         <!-- Reinsert when we have meaningful info:
           <v-list-item title="About" to="/about"></v-list-item>
         -->
-        <v-list-item title="Health" to="/health"></v-list-item>
+        <v-list-item title="Status" to="/status"></v-list-item>
         <v-list-item title="Document Manager" to="/doc-mgr"></v-list-item>
         <v-list-item title="Conversational" to="/conversational"></v-list-item>
         <v-list-item title="Administrator" to="/admin"></v-list-item>

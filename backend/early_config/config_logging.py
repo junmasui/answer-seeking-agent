@@ -23,7 +23,7 @@ def configure_logging():
         logger.propagate = False
     logger.setLevel(logging.INFO)
 
-    logger2 = logging.getLogger('logic')
+    logger2 = logging.getLogger('app')
     has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger2.handlers])
     if not has_rich_handler:
         logger2.addHandler(rich_handler)

@@ -4,7 +4,9 @@ import logging
 import importlib
 
 from celery import Celery
-from celery.signals import worker_shutting_down
+from celery.signals import worker_shutting_down, worker_ready
+
+from log_config_watch import get_logging_conf_watcher
 
 from app import ingest_documents, update_document_status
 from app.public_models import DocumentStatus
@@ -12,13 +14,18 @@ from app.public_models import DocumentStatus
 logger = logging.getLogger(__name__)
 
 
-# @celeryd_init.connect
-# def worker_init(sender, instance, **kwargs):
-#     logger.warning('worker init %s %s', sender, instance)
+
+@worker_ready.connect
+def handle_worker_ready(**kwargs):
+    logger.info('worker ready')
+
+    get_logging_conf_watcher().start()
 
 @worker_shutting_down.connect
-def worker_shutting_down(sig, how, exitcode, **kwargs):
-    logger.warning('worker shutting down %s %s %s', sig, how, exitcode)
+def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
+    logger.info('worker shutting down %s %s %s', sig, how, exitcode)
+
+    get_logging_conf_watcher().stop()
 
 # Real-time monitoring with Celery events.
 #
@@ -67,15 +74,24 @@ def setup_monitoring(app):
         recv.capture(limit=None, timeout=None, wakeup=True)
 
 
-app = Celery(main=__name__)
+celery_app = Celery(main=__name__)
 
 # Load the configuration from the celeryconfig.py file
 celeryconfig = importlib.import_module('celeryconfig')
-app.config_from_object(celeryconfig)
+
+celery_app.config_from_object(celeryconfig)
 
 
-@app.task(name='ingest-files')
+@celery_app.task(name='ingest-files')
 def ingest_task(doc_ids=None):
     """Ingest
     """
     return ingest_documents(doc_ids)
+
+@celery_app.task(name='get-logger-tree')
+def get_worker_logger_tree(include_all=False):
+    """Get the actual logger tree of the celery worker
+    """
+    from app.utils.logger_tree import dump_logger_tree
+
+    return dump_logger_tree(include_all=include_all) 
