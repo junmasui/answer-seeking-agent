@@ -27,10 +27,11 @@ dependencies = [
   "python-dotenv",
   "redis",
   "unstructured[pdf]",
+  "watchdog[watchmedo]"
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 
 [dependency-groups]
-dev = ["pytest", "watchdog[watchmedo]"]
+dev = ["pytest"]
