@@ -1,12 +1,12 @@
 import { createWebHistory, createRouter } from 'vue-router'
 
 import HomeView from './core/HomeView.vue'
-import AboutView from './core/AboutView.vue'
+// Reinsert when we have meaningful info: import AboutView from './core/AboutView.vue'
 import ConversationalView from './conversational/ConversationalView.vue'
 import DocManagerView from './doc-mgr/DocManagerView.vue'
 import DocManagerIngestTab from './doc-mgr/DocManagerIngestTab.vue'
 import DocManagerUploadTab from './doc-mgr/DocManagerUploadTab.vue'
-import HealthCheckView from './core/HealthCheckView.vue'
+import StatusCheckView from './core/StatusCheckView.vue'
 import AdminCheckView from './core/AdminView.vue'
 
 const routes = [
@@ -19,7 +19,7 @@ const routes = [
       { name: 'ingest', path: 'ingest', component: DocManagerIngestTab },
     ]
    },
-  { path: '/health', component: HealthCheckView },
+  { path: '/status', component: StatusCheckView },
   { path: '/admin', component: AdminCheckView },
 ]
 

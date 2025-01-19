@@ -3,7 +3,7 @@ This is a small stand-alone module that
 provides a global configuration object.
 """
 from typing_extensions import Annotated
-
+import pathlib
 from functools import cache
 
 from pydantic import (
@@ -30,9 +30,7 @@ class Settings(BaseSettings):
     # on an earlier step.
     model_config = SettingsConfigDict(env_file=None)
 
-    # auth_key: str = Field(validation_alias='my_auth_key')
-
-    # api_key: str = Field(alias='my_api_key')  
+    logging_config_path: pathlib.Path = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
 
     redis_dsn: RedisDsn = Field(
         default='',

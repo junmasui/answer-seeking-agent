@@ -4,13 +4,13 @@
         <v-col cols="auto">
             <v-card :color="statusColor" variant="elevated" class="mx-auto pa-2 ma-2">
                 <div>
-                    Status: {{ healthStatus }}
+                    Status: {{ systemStatus }}
                 </div>
             </v-card>
         </v-col>
 
         <v-col cols="auto">
-            <v-btn class="ma-2" size="large" @click="onCheckHealth">Refresh</v-btn>
+            <v-btn class="ma-2" size="large" @click="onCheckStatus">Refresh</v-btn>
         </v-col>
 
     </v-container>
@@ -19,39 +19,39 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-const healthStatus = ref('unknown')
+const systemStatus = ref('unknown')
 const statusColor = ref('primary')
 
-async function onCheckHealth() {
-    healthStatus.value = 'unknown'
-    await checkHealth()
+async function onCheckStatus() {
+    systemStatus.value = 'unknown'
+    await checkStatus()
 }
 
-onMounted(async () => { await checkHealth() })
+onMounted(async () => { await checkStatus() })
 
 
-async function checkHealth() {
+async function checkStatus() {
     try {
-        const response = await fetch('/api/health', {
+        const response = await fetch('/api/status', {
             method: 'GET'
         });
 
         if (!response.ok) {
-            healthStatus.value = 'unhealthy'
+            systemStatus.value = 'offline'
 
-            throw new Error('Health check failed');
+            throw new Error('Status check failed');
         }
 
         const data = await response.json();
-        console.log('Health check success:', data);
+        console.log('Status check success:', data);
 
-        if (data['status'] === 'healthy') {
-            healthStatus.value = 'healthy'
+        if (data['status']) {
+            systemStatus.value = data['status']
         }
 
 
     } catch (error) {
-        console.error('Error during health check:', error);
+        console.error('Error during status check:', error);
     }
 }
 

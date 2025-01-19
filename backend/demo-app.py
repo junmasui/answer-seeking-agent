@@ -4,24 +4,23 @@ from typing import Union, Optional, Annotated, Any
 import logging
 import uuid
 from contextlib import asynccontextmanager
+import asyncio
 
 from fastapi import FastAPI, UploadFile, Form, Depends, Request
 from pydantic.alias_generators import to_camel, to_snake
 from celery.result import AsyncResult
 
-from app import (health_check, seek_answer, list_documents, upload_document, upload_chunk,
+from app import (status_check, seek_answer, list_documents, upload_document, upload_chunk,
                  merge_chunked_document, delete_document, get_document_stats, update_document_status,
                  documents_startup, documents_reset)
 from app.public_models import CamelModel, Answer, DocumentList, DocumentStats, IngestRequestBody, DocumentStatus
 
-from worker import ingest_task
+from worker import ingest_task, get_worker_logger_tree
 import sim_auth_app
 from simple_auth import User, get_scoped_current_user, get_current_user, Scope
+from log_config_watch import get_logging_conf_watcher
 
 logger = logging.getLogger(__name__)
-
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
 
 
 @asynccontextmanager
@@ -30,7 +29,13 @@ async def lifespan(app: FastAPI):
     logger.info('Application is starting up...')
     documents_startup()
 
+    logger.info('Logging config watcher starting')
+    get_logging_conf_watcher().start()
+
     yield
+
+    logger.info('Logging config watcher stopping')
+    get_logging_conf_watcher().stop()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -38,14 +43,44 @@ app = FastAPI(lifespan=lifespan)
 app.mount('/sim_auth', sim_auth_app.app)
 
 
+@app.get('/loggers')
+async def dump_loggers(includeAll: Union[bool, None] = False, worker: bool = False):
+    from app.utils.logger_tree import dump_logger_tree
+
+    if worker:
+        task = get_worker_logger_tree.delay(include_all=includeAll)
+        task_id = task.id
+        task_result = AsyncResult(task_id)
+        # For possible values:
+        # see https://docs.celeryq.dev/en/latest/reference/celery.result.html#celery.result.AsyncResult.status
+        #
+        # Celery 5 does not have async-await support. We will wait the old-fashioned way,
+        # which is to loop and poll. The sleep itself is async so that we don't block
+        # the process from getting other work done. 
+        loop = 0
+        while task_result.status not in [ 'SUCCESS', 'FAILURE' ] and loop < 30:
+            await asyncio.sleep(1)
+            loop += 1
+
+        if task_result.status == 'SUCCESS':
+            result = task_result.result
+        else:
+            logger.info('celery task failed: %s', repr(task_result), task_result.status, task_result.result)
+            result = {}
+
+        return result
+
+    return dump_logger_tree(include_all=includeAll)
+
+
 @app.get('/')
 async def handle_root():
     return {'Tag': 'Seeking answers'}
 
 
-@app.get('/health')
-async def handle_health_check():
-    return health_check()
+@app.get('/status')
+async def handle_status_check():
+    return status_check()
 
 
 class GetUserResponse(CamelModel):
@@ -165,7 +200,8 @@ async def handle_ingest(
 
 @app.get('/tasks/{task_id}')
 def get_status(task_id,
-               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None):
+               # current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None
+               ):
     """Returns the status of specified task.
     """
     task_result = AsyncResult(task_id)

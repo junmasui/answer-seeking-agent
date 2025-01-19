@@ -1,0 +1,17 @@
+# Logging configuration
+#
+# For TOML syntax:
+# see: https://toml.io/en/v1.0.0
+#
+# For configuration schema
+# see: https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema
+
+[root]
+  level = "INFO"
+
+[celery]
+  [celery.task]
+    level = "DEBUG"
+
+[sqlalchemy]
+  level = "INFO"
