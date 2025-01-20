@@ -8,9 +8,25 @@ services:
     volumes:
       - local-1:/var/.local-1
       - local-2:/var/.local-2
+      - local-3:/var/.local-3
     entrypoint: 'bash'
-    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2' ]
+    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2 /var/.local-3' ]
     restart: 'no'
+
+  init-backend-volumes-cpu:
+    image: 'debian:12.8-slim'
+    profiles: [ backend-cpu, all-cpu ]
+    user: '0:0' 
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - local-cpu-1:/var/.local-1
+      - local-cpu-2:/var/.local-2
+      - local-cpu-3:/var/.local-3
+    entrypoint: 'bash'
+    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2 /var/.local-3' ]
+    restart: 'no'
+
 
   fastapi-dev-server-common:
     image: ''
@@ -45,12 +61,15 @@ services:
         limits:
           memory: 4G # Give enough to run local model
 
+
   fastapi-dev-server:
     extends:
       service: fastapi-dev-server-common
 
     image: 'localdomain-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
+    environment:
+      - GPU_MODE=cuda12
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
@@ -67,6 +86,26 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+
+
+  fastapi-dev-server-cpu:
+    extends:
+      service: fastapi-dev-server-common
+
+    image: 'localdomain-backend:python-3.12-cpu'
+    profiles: [ backend-cpu, all-cpu ]
+    environment:
+      - GPU_MODE=cpu
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      # Mounting a local area to use container-installed dependencies
+      - local-cpu-1:/app/.local
+    depends_on:
+      - init-backend-volumes-cpu
+
 
   celery-worker-common:
     image: ''
@@ -98,12 +137,15 @@ services:
         limits:
           memory: 8G # Give enough to run Tesseract and local model
 
+
   celery-worker:
     extends:
       service: celery-worker-common
 
     image: 'localdomain-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
+    environment:
+      - GPU_MODE=cuda12
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
@@ -120,38 +162,7 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  #
-  # CPU only
-  #
 
-  init-backend-volumes-cpu:
-    image: 'debian:12.8-slim'
-    profiles: [ backend-cpu, all-cpu ]
-    user: '0:0' 
-    # No network is needed to initialize named volumes
-    network_mode: none
-    volumes:
-      - local-cpu-1:/var/.local-1
-      - local-cpu-2:/var/.local-2
-    entrypoint: 'bash'
-    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2' ]
-    restart: 'no'
-
-  fastapi-dev-server-cpu:
-    extends:
-      service: fastapi-dev-server-common
-
-    image: 'localdomain-backend:python-3.12-cpu'
-    profiles: [ backend-cpu, all-cpu ]
-    volumes:
-      # Mount the project directory to /app in the container
-      - .:/app
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
-      # Mounting a local area to use container-installed dependencies
-      - local-cpu-1:/app/.local
-    depends_on:
-      - init-backend-volumes-cpu
 
   celery-worker-cpu:
     extends:
@@ -159,6 +170,8 @@ services:
 
     image: 'localdomain-backend:python-3.12-cpu'
     profiles: [ backend-cpu, all-cpu ]
+    environment:
+      - GPU_MODE=cpu
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
@@ -170,6 +183,75 @@ services:
       - init-backend-volumes-cpu
 
 
+  celery-flower-common:
+    image: ''
+    profiles: [ never-use-directly ]
+
+    environment:
+      # Only environment variables that are important to a Docker environment
+      # will be configured here. The reason is that changes to environment variables
+      # configured here do require a restart before they take effect:
+      # application-centric ones should be designed to avoiid a Docker container restart.
+      #
+      # The `uv` cache should be moved away from the bind-mount because there is no
+      # need for it to be shared with the host.
+      - UV_CACHE_DIR=/app/.local/uv_cache
+      # The Python bytecode cache should be moved away from the bind-mount because
+      # there is no need for it shared with the host.
+      - PYTHONPYCACHEPREFIX=/app/.local/pycache
+    ports: # use if it is necessary to expose the container to the host machine
+      - '15555:5555'
+    networks:
+      agent-poc:
+        aliases:
+          - celery-flower
+    user: '1000:1000'
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_celery_flower.sh' ]
+          
+  celery-flower:
+    extends:
+      service: celery-flower-common
+
+    image: 'localdomain-backend:python-3.12-cuda12'
+    profiles: [ backend, all ]
+    environment:
+      - GPU_MODE=cuda12
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_flower.sh:/run_celery_flower.sh
+      # Mounting a local area to use container-installed dependencies
+      - local-3:/app/.local
+    depends_on:
+      - init-backend-volumes
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  celery-flower-cpu:
+    extends:
+      service: celery-flower-common
+
+    image: 'localdomain-backend:python-3.12-cpu'
+    profiles: [ backend-cpu, all-cpu ]
+    environment:
+      - GPU_MODE=cpu
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./run_celery_flower.sh:/run_celery_flower.sh
+      # Mounting a local area to use container-installed dependencies
+      - local-cpu-3:/app/.local
+    depends_on:
+      - init-backend-volumes-cpu
+
 #
 # Named volumes are not created until the dependent service
 # is started.
@@ -179,10 +261,14 @@ volumes:
     driver: local
   local-2:
     driver: local
+  local-3:
+    driver: local
   #
   # CPU only
   #
   local-cpu-1:
     driver: local
   local-cpu-2:
+    driver: local
+  local-cpu-3:
     driver: local

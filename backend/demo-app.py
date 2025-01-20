@@ -202,7 +202,7 @@ async def handle_ingest(
 def get_status(task_id,
                # current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None
                ):
-    """Returns the status of specified task.
+    """Return the status of specified task.
     """
     task_result = AsyncResult(task_id)
     result = {
@@ -215,7 +215,7 @@ def get_status(task_id,
 
 @app.post('/admin/resetDatabase')
 def reset_database(current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None):
-    """Reset database.
+    """Reset database, vector store, and file store.
     """
     documents_reset()
     result = {

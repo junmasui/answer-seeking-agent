@@ -11,6 +11,7 @@ else
     exit -1
 fi
 
+
 uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
-   -- celery --app=worker worker -l INFO
+   -- celery --app=worker flower

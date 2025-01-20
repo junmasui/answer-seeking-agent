@@ -4,34 +4,81 @@ version = "0.1.0"
 description = "Default template for PDM package"
 authors = [{ name = "", email = "" }]
 dependencies = [
-  "celery[redis]",
-  "cloudpathlib[s3]",
-  "icecream",
-  "fastapi[standard]",
-  "langchain",
+  "celery[redis]>=5.4.0",
+  "cloudpathlib[s3]>=0.20.0",
+  "fastapi[standard]>=0.115.6",
+  "flower>=2.0.1",
+  "icecream>=2.1.4",
+  "langchain>=0.3.14",
   "langchain-anthropic>=0.3.1",
-  "langchain-community",
+  "langchain-community>=0.3.14",
   "langchain-google-genai>=2.0.8",
-  "langchain-huggingface",
+  "langchain-huggingface>=0.1.2",
   "langchain-ollama>=0.2.2",
-  "langchain-openai",
-  "langchain-postgres",
-  "langchain-unstructured",
-  "langgraph",
+  "langchain-openai>=0.3.0",
+  "langchain-postgres>=0.0.12",
+  "langchain-unstructured>=0.1.6",
+  "langgraph>=0.2.64",
   "langgraph-checkpoint-postgres>=2.0.9",
-  "onnx",
-  "psycopg[binary,pool]",
-  "pdfplumber>=0.11.4",
+  # onnx is implicit dependency of unstructured
+  "onnx>=1.17.0",
+  # layoutparser has incorrect versions in its metadata
+  "pdfplumber>=0.11.5",
+  "psycopg[binary,pool]>=3.2.4",
   "pydantic-settings>=2.7.0",
-  "pyjwt",
-  "python-dotenv",
-  "redis",
-  "unstructured[pdf]",
-  "watchdog[watchmedo]"
+  "pyjwt>=2.10.1",
+  "python-dotenv>=1.0.1",
+  "redis>=5.2.1",
+  "transformers>=4.48.0",
+  "unstructured[pdf]>=0.16.13",
+  "watchdog[watchmedo]>=6.0.0",
+  #---
+  # Move these dependencies after groups are supported
+  # in "uv pip compile"
+  # See: https://github.com/astral-sh/uv/issues/8969
+  "pytest>=8.3.4",
+  "ruff>=0.9.2",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 
 [dependency-groups]
-dev = ["pytest"]
+dev = [
+]
+
+[project.optional-dependencies]
+cpu = [
+  "torch>=2.5.1",
+  "torchaudio>=2.5.1",
+  "torchvision>=0.20.0"
+]
+cuda12 = [
+  "torch>=2.5.1",
+  "torchaudio>=2.5.1",
+  "torchvision>=0.20.0"
+]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cuda12", extra = "cuda12" }
+]
+torchaudio = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cuda12", extra = "cuda12" }
+]
+torchvision = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cuda12", extra = "cuda12" }
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cuda12"
+url = "https://pypi.org/simple"
+explicit = true
