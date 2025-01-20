@@ -4,12 +4,13 @@ import logging
 import importlib
 
 from celery import Celery
-from celery.signals import worker_shutting_down, worker_ready
+from celery.signals import worker_shutting_down, worker_ready, worker_process_init, worker_process_shutdown
 
 from log_config_watch import get_logging_conf_watcher
 
 from app import ingest_documents, update_document_status
 from app.public_models import DocumentStatus
+from app.signals import send_start_up
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +22,24 @@ def handle_worker_ready(**kwargs):
 
     get_logging_conf_watcher().start()
 
+    send_start_up(is_worker=True)
+
+@worker_process_init.connect
+def handle_worker_ready(**kwargs):
+    logger.info('worker ready')
+
+    get_logging_conf_watcher().start()
+
+
 @worker_shutting_down.connect
 def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
-    logger.info('worker shutting down %s %s %s', sig, how, exitcode)
+    logger.info('worker process shutting down %s %s %s', sig, how, exitcode)
+
+    get_logging_conf_watcher().stop()
+
+@worker_process_shutdown.connect
+def handle_worker_shutting_down(pid, exitcode, **kwargs):
+    logger.info('worker process shutting down %s %s', pid, exitcode)
 
     get_logging_conf_watcher().stop()
 
