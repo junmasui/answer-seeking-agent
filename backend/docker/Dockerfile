@@ -44,13 +44,16 @@ RUN pip install uv
 
 COPY ./custom-docker-entrypoint.sh /
 COPY --from=parent-dir ./run_celery_worker.sh /
+COPY --from=parent-dir ./run_celery_flower.sh /
 COPY --from=parent-dir ./run_fastapi_dev_server.sh /
 
-RUN chmod +x /custom-docker-entrypoint.sh \
-    && chmod +x /run_celery_worker.sh \
-    && chmod +x /run_fastapi_dev_server.sh \
+RUN chmod a+x /custom-docker-entrypoint.sh \
+    && chmod a+x /run_celery_worker.sh \
+    && chmod a+x /run_celery_flower.sh \
+    && chmod a+x /run_fastapi_dev_server.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_worker.sh \
+    && chown ${USER_ID}:${GROUP_ID} /run_celery_flower.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_fastapi_dev_server.sh
 
 # Switch to the custom user

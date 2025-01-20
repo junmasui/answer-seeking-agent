@@ -12,6 +12,11 @@
 [celery]
   [celery.task]
     level = "DEBUG"
+  [celery.worker]
+    level = "DEBUG"
 
 [sqlalchemy]
   level = "INFO"
+
+[unstructured]
+  level = "DEBUG"

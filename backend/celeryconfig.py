@@ -1,8 +1,10 @@
-import os
 
-from global_config import get_global_config
+from global_config import get_global_config as _get_global_config
 
-redis_url = str(get_global_config().redis_dsn)
+# Use underscore to mark variables as private to this module. Non-private
+# variables will show up in Flower's Config tab for the worker process.
+#
+_redis_url = str(_get_global_config().redis_dsn)
 
 # For complete list of customizable settings, see:
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html
@@ -12,14 +14,14 @@ redis_url = str(get_global_config().redis_dsn)
 #
 
 ## Default broker URL. Must be in the form: transport://userid:password@hostname:port/virtual_host
-broker_url = redis_url
+broker_url = _redis_url
 
 #
 # Backend settings
 #
 
 ## The backend used to store task results (tombstones)
-result_backend = redis_url
+result_backend = _redis_url
 
 #
 # Worker settings
