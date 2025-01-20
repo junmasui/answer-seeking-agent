@@ -22,6 +22,11 @@ def _apply_incremental_configuration(log_config_path):
     if not isinstance(config, dict):
         return
 
+    if logger.getEffectiveLevel() <= logging.DEBUG:
+        import pprint
+        formatted = pprint.pformat(object=config, width=120, indent=2, sort_dicts=True)
+        logger.debug('Incremental logging config to be applied:\n%s', formatted)
+
     # Incremental configuration change will affect only `level` in handlers, loggers and root
     # and `propagate` in loggers and root.
     #

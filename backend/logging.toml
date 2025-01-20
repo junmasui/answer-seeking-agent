@@ -6,17 +6,32 @@
 # For configuration schema
 # see: https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema
 
-[root]
-  level = "INFO"
 
-[celery]
-  [celery.task]
-    level = "DEBUG"
-  [celery.worker]
-    level = "DEBUG"
 
-[sqlalchemy]
-  level = "INFO"
+[loggers.log_config_watch]
+level = "DEBUG"
 
-[unstructured]
-  level = "DEBUG"
+[loggers."celery.task"]
+level = "DEBUG"
+
+[loggers."celery.worker"]
+level = "DEBUG"
+
+[loggers.sqlalchemy]
+level = "WARNING"
+
+[loggers.unstructured]
+level = "DEBUG"
+
+[loggers.pypdf]
+level = "INFO"
+
+[loggers."botocore"]
+level = "INFO"
+
+[loggers."botocore.httpchecksum"]
+# Minio and Boto are skewed regarding checksum. Maybe the resolution
+# is as simple as newer version. Until there is time to look, change
+# logging level.
+# https://github.com/minio/minio/issues/18608
+level = "WARNING"

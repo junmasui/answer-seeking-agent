@@ -12,8 +12,26 @@ from langchain_unstructured import UnstructuredLoader
 from unstructured.chunking import add_chunking_strategy, Chunker
 from unstructured.chunking.title import chunk_by_title
 
+import nltk
+
 from global_config import get_global_config
-from ..file_store import get_s3_bucket
+from ...signals import start_up_handler
+
+
+@start_up_handler
+def start(sender):
+    if not sender.is_worker:
+        return
+    # Some version combinations of unstructured and NLTK throw an error about
+    # loading 'punkt_tab'. 
+    #
+    # https://github.com/Unstructured-IO/unstructured/issues/3511
+    #
+    # Which in turn must respect the solution to:
+    # https://github.com/nltk/nltk/issues/3266
+
+    nltk.download('punkt_tab')
+    nltk.download('averaged_perceptron_tagger_eng')
 
 
 

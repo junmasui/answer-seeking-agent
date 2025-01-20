@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Default template for PDM package"
 authors = [{ name = "", email = "" }]
 dependencies = [
+  "blinker>=1.9.0",
   "celery[redis]>=5.4.0",
   "cloudpathlib[s3]>=0.20.0",
   "fastapi[standard]>=0.115.6",
@@ -20,6 +21,8 @@ dependencies = [
   "langchain-unstructured>=0.1.6",
   "langgraph>=0.2.64",
   "langgraph-checkpoint-postgres>=2.0.9",
+  # Explicitly specifyin min-version. See https://github.com/nltk/nltk/issues/3266
+  "nltk>=3.9.1",
   # onnx is implicit dependency of unstructured
   "onnx>=1.17.0",
   # layoutparser has incorrect versions in its metadata

@@ -6,6 +6,9 @@ from cloudpathlib.s3 import S3Client, S3Path
 
 from global_config import get_global_config
 
+from ...signals import start_up_handler, reset_data_handler
+
+
 @cache
 def get_s3_client():
     """Returns S3 client.
@@ -34,3 +37,21 @@ def get_s3_directory(dir_name):
     if not dir_path.exists():
         dir_path.mkdir(parents=True)
     return dir_path
+
+@start_up_handler
+def startup(sender):
+    pass
+
+@reset_data_handler
+def reset(sender):
+    if sender.is_worker:
+        return
+
+    bucket = get_s3_bucket()
+    for dirpath, dirnames, filenames in bucket.walk(top_down=False):
+        for subdirname in dirnames:
+            subdirpath = dirpath / subdirname
+            subdirpath.rmdir()
+        for filename in filenames:
+            filepath = dirpath / filename
+            filepath.unlink()

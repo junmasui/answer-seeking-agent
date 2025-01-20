@@ -4,37 +4,28 @@ from sqlalchemy import func
 
 from .model_ops import list_tracking_records, get_tracking_stats, update_tracking_record
 from .model import create_tables_if_not_existing, drop_all_tables
-from ..public_models import Document, DocumentList, DocumentStats, DocumentStatus
+from ..public_models import Document, DocumentList, DocumentStats
 
-from ..providers.vector_store import get_vector_store
-from ..providers.file_store import get_s3_bucket
+from ..signals import start_up_handler, reset_data_handler
+
 
 logger = logging.getLogger(__name__)
 
-def documents_startup():
+@start_up_handler
+def documents_startup(sender):
+    if sender.is_worker:
+        return
     create_tables_if_not_existing()
 
-    vector_store = get_vector_store()
-    vector_store.create_vector_extension()
-    vector_store.create_tables_if_not_exists()
 
-
-def documents_reset():
+@reset_data_handler
+def documents_reset(sender):
+    if sender.is_worker:
+        return
     drop_all_tables()
     create_tables_if_not_existing()
 
-    vector_store = get_vector_store()
-    vector_store.drop_tables()
-    vector_store.create_tables_if_not_exists()
 
-    bucket = get_s3_bucket()
-    for dirpath, dirnames, filenames in bucket.walk(top_down=False):
-        for subdirname in dirnames:
-            subdirpath = dirpath / subdirname
-            subdirpath.rmdir()
-        for filename in filenames:
-            filepath = dirpath / filename
-            filepath.unlink()
 
 
 def list_documents(file_dir, start, length):
