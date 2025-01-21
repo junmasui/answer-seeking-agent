@@ -6,11 +6,30 @@ services:
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - local-1:/var/.local-1
-      - local-2:/var/.local-2
-      - local-3:/var/.local-3
+      - local-backend-1:/var/.local-1
+      - local-backend-2:/var/.local-2
+      - local-backend-3:/var/.local-3
     entrypoint: 'bash'
-    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2 /var/.local-3' ]
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -eux ;
+
+        for VOL in '/var/.local-1' '/var/.local-2' '/var/.local-3' ;
+        do
+          chmod a+rwx $$VOL
+
+          for SUBDIR in home venv ;
+          do
+            [ -d $$VOL/$$SUBDIR ] || mkdir $$VOL/$$SUBDIR
+            chown 1000:1000 $$VOL/$$SUBDIR
+          done
+          # ls -la $$VOL
+        done
+        # ls -la /var ;
     restart: 'no'
 
   init-backend-volumes-cpu:
@@ -20,11 +39,31 @@ services:
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - local-cpu-1:/var/.local-1
-      - local-cpu-2:/var/.local-2
-      - local-cpu-3:/var/.local-3
+      - local-backend-cpu-1:/var/.local-1
+      - local-backend-cpu-2:/var/.local-2
+      - local-backend-cpu-3:/var/.local-3
     entrypoint: 'bash'
-    command: [ '-c', 'chmod a+rwx /var/.local-1 /var/.local-2 /var/.local-3' ]
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -eux ;
+
+        for VOL in '/var/.local-1' '/var/.local-2' '/var/.local-3' ;
+        do
+          chmod a+rwx $$VOL
+
+          for SUBDIR in home venv ;
+          do
+            [ -d $$VOL/$$SUBDIR ] || mkdir $$VOL/$$SUBDIR
+            chmod a+rwx $$VOL/$$SUBDIR
+            chown 1000:1000 $$VOL/$$SUBDIR
+          done
+          ls -la $$VOL
+        done
+        # ls -la /var ;
     restart: 'no'
 
 
@@ -38,12 +77,6 @@ services:
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
       #
-      # The `uv` cache should be moved away from the bind-mount because there is no
-      # need for it to be shared with the host.
-      - UV_CACHE_DIR=/app/.local/uv_cache
-      # The `uv` default venv should also be moved away from the bind-mount because there is no
-      # need for it to be shared with the host.
-      - UV_PROJECT_ENVIRONMENT=/app/.local/venv
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       - PYTHONPYCACHEPREFIX=/app/.local/pycache
@@ -72,11 +105,20 @@ services:
       - GPU_MODE=cuda12
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
       # Mounting a local area to use container-installed dependencies
-      - local-1:/app/.local
+      - type: volume
+        source: local-backend-1
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-1
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
     depends_on:
       - init-backend-volumes
     deploy:
@@ -98,11 +140,20 @@ services:
       - GPU_MODE=cpu
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
       # Mounting a local area to use container-installed dependencies
-      - local-cpu-1:/app/.local
+      - type: volume
+        source: local-backend-cpu-1
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-cpu-1
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
     depends_on:
       - init-backend-volumes-cpu
 
@@ -117,9 +168,6 @@ services:
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
       #
-      # The `uv` cache should be moved away from the bind-mount because there is no
-      # need for it to be shared with the host.
-      - UV_CACHE_DIR=/app/.local/uv_cache
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       - PYTHONPYCACHEPREFIX=/app/.local/pycache
@@ -148,11 +196,20 @@ services:
       - GPU_MODE=cuda12
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_worker.sh:/run_celery_worker.sh
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
       # Mounting a local area to use container-installed dependencies
-      - local-2:/app/.local
+      - type: volume
+        source: local-backend-2
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-2
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
     depends_on:
       - init-backend-volumes
     deploy:
@@ -174,11 +231,20 @@ services:
       - GPU_MODE=cpu
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_worker.sh:/run_celery_worker.sh
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
       # Mounting a local area to use container-installed dependencies
-      - local-cpu-2:/app/.local
+      - type: volume
+        source: local-backend-cpu-2
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-cpu-2
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
     depends_on:
       - init-backend-volumes-cpu
 
@@ -193,9 +259,6 @@ services:
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
       #
-      # The `uv` cache should be moved away from the bind-mount because there is no
-      # need for it to be shared with the host.
-      - UV_CACHE_DIR=/app/.local/uv_cache
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       - PYTHONPYCACHEPREFIX=/app/.local/pycache
@@ -219,11 +282,20 @@ services:
       - GPU_MODE=cuda12
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_flower.sh:/run_celery_flower.sh
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
       # Mounting a local area to use container-installed dependencies
-      - local-3:/app/.local
+      - type: volume
+        source: local-backend-3
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-3
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
     depends_on:
       - init-backend-volumes
     deploy:
@@ -244,11 +316,20 @@ services:
       - GPU_MODE=cpu
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./run_celery_flower.sh:/run_celery_flower.sh
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
       # Mounting a local area to use container-installed dependencies
-      - local-cpu-3:/app/.local
+      - type: volume
+        source: local-backend-cpu-3
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-cpu-3
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
     depends_on:
       - init-backend-volumes-cpu
 
@@ -257,18 +338,18 @@ services:
 # is started.
 #
 volumes:
-  local-1:
+  local-backend-1:
     driver: local
-  local-2:
+  local-backend-2:
     driver: local
-  local-3:
+  local-backend-3:
     driver: local
   #
   # CPU only
   #
-  local-cpu-1:
+  local-backend-cpu-1:
     driver: local
-  local-cpu-2:
+  local-backend-cpu-2:
     driver: local
-  local-cpu-3:
+  local-backend-cpu-3:
     driver: local
