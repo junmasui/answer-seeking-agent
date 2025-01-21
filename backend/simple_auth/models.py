@@ -15,7 +15,7 @@ class Scope(StrEnum):
     DOC_READ = 'doc:read'
     DOC_WRITE = 'doc:write'
     DOC_INGEST = 'doc:ingest'
-    DOC_INGEST_ALL = 'doc:ingest:all'
+    DOC_INGEST_BULK = 'doc:ingest:bulk'
 
     QUERY = 'query'
 

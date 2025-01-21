@@ -1,6 +1,7 @@
 from functools import cache
 import os
 from urllib.parse import unquote
+import logging
 
 from cloudpathlib.s3 import S3Client, S3Path
 
@@ -8,6 +9,8 @@ from global_config import get_global_config
 
 from ...signals import start_up_handler, reset_data_handler
 
+
+logger = logging.getLogger(__name__)
 
 @cache
 def get_s3_client():
@@ -52,6 +55,10 @@ def reset(sender):
         for subdirname in dirnames:
             subdirpath = dirpath / subdirname
             subdirpath.rmdir()
+        if len(dirnames) > 0:
+            logger.debug('cleared %d subdirs from %s', len(dirnames), str(dirpath))
         for filename in filenames:
             filepath = dirpath / filename
             filepath.unlink()
+        if len(filenames) > 0:
+            logger.debug('cleared %d files from %s', len(dirnames), str(dirpath))

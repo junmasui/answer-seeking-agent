@@ -3,7 +3,7 @@ This provides the vector store used by this application.
 """
 import os
 from functools import cache
-import string
+import logging
 
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
@@ -16,6 +16,8 @@ from ...signals import start_up_handler, reset_data_handler
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/
 #
+
+logger = logging.getLogger(__name__)
 
 @cache
 def get_vector_store():
