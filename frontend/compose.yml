@@ -7,9 +7,31 @@ services:
     network_mode: none
     user: '0:0' 
     volumes:
-      - node_modules:/var/node_modules-1
+      - local-frontend-1:/var/local-1
     entrypoint: 'bash'
-    command: [ '-c', 'chmod a+rwx /var/node_modules-1' ]
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -eux ;
+
+        for VOL in '/var/local-1' ;
+        do
+          chmod a+rwx $$VOL
+
+          for SUBDIR in home node_modules ;
+          do
+            [ -d $$VOL/$$SUBDIR ] || mkdir $$VOL/$$SUBDIR
+          done
+
+          chown -R 1000:1000 $$VOL
+          chmod -R a+rwx $$VOL
+
+          # ls -la $$VOL
+        done
+        # ls -la /var ;
     restart: 'no'
 
   vite-dev-server:
@@ -23,11 +45,19 @@ services:
     #   - NODE_ENV=production
     volumes:
       # Mount the project directory to /app in the container
-      - ./app:/app
-      # Mount a named volume at node_modules. This results in two benefits: 1. the
-      # node_modules constitutients are isolated away from the source. 2. restarting
-      # this service does not trigger a reinstallation of node_modules.
-      - node_modules:/app/node_modules
+      - { type: bind, source: ./app, target: /app }
+      # Mount important script into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_dev_server.sh, target: /run_dev_server.sh }
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-frontend-1
+        target: /home/node
+        volume: { subpath: home }
+      - type: volume
+        source: local-frontend-1
+        target: /app/node_modules
+        volume: { nocopy: true, subpath: node_modules }
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
     ## traffic to go thru the reserve-proxy server at 15173.
     # ports:
@@ -52,5 +82,5 @@ services:
       - agent-poc
 
 volumes:
-  node_modules:
+  local-frontend-1:
     driver: local

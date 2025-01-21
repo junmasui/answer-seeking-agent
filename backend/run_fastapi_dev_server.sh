@@ -11,6 +11,8 @@ else
     exit -1
 fi
 
+echo uv run
+
 uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
    -- uvicorn demo-app:app --host 0.0.0.0 --port 8100
