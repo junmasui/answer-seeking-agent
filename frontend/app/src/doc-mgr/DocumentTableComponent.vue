@@ -8,9 +8,9 @@
             <v-btn variant="text" @click="loadItems">Refresh</v-btn>
         </template>
     </v-banner>
-    <v-data-table-server show-select return-object v-model="selectedItems" v-model:page="page" v-model:items-per-page="itemsPerPage"
-        :items-per-page-options="itemsPerPageOptions" :items-length="totalItems" :headers="headers" :items="items"
-        density="compact" item-key="name" @update:options="loadItems">
+    <v-data-table-server show-select return-object v-model="selectedItems" v-model:page="page"
+        v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
+        :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.actions="{ item, index }">
             <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
                 mdi-database-import
@@ -21,8 +21,9 @@
             <confirmation-dialog v-model:active="confirmIngest" @canceled="closeIngest" @confirmed="ingestItemConfirm">
                 Are you sure you want to ingest this item?
             </confirmation-dialog>
-            <confirmation-dialog v-model:active="confirmIngestSelected" @canceled="closeIngestSelected" @confirmed="ingestSelectedConfirm">
-                Are you sure you want to ingest the selected items?
+            <confirmation-dialog v-model:active="confirmIngestSelected" @canceled="closeIngestSelected"
+                @confirmed="ingestSelectedConfirm">
+                Are you sure you want to ingest {{ selectedItemCount }} selected items?
             </confirmation-dialog>
             <confirmation-dialog v-model:active="confirmDelete" @canceled="closeDelete" @confirmed="deleteItemConfirm">
                 Are you sure you want to delete this item?
@@ -30,12 +31,13 @@
 
         </template>
     </v-data-table-server>
-    <v-btn class="ma-2" size="large" @click="ingestSelectedItems">Ingest Selected</v-btn>
+    <v-btn class="ma-2" size="large" @click="ingestSelectedItems" :disabled="selectedItemCount === 0">Ingest
+        Selected</v-btn>
     <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
@@ -76,19 +78,27 @@ const itemsPerPageOptions = ([
 ]
 )
 
-const editedIndex = ref(-1)
-const editedItem = ref({})
+const selectedItemCount = computed(() => {
+    return selectedItems.value.length;
+})
+
+const targetIndex = ref(-1)
+const targetItem = ref({})
+
+//
+// Confirmation dialog for one-file ingestion
+//
 
 const confirmIngest = ref(false)
 
 function ingestItem(item, index) {
     confirmIngest.value = true
-    editedIndex.value = index
-    editedItem.value = Object.assign({}, item)
+    targetIndex.value = index
+    targetItem.value = Object.assign({}, item)
 }
 
 async function ingestItemConfirm() {
-    await ingestDocument(editedItem.value.id)
+    await ingestDocument(targetItem.value.id)
 
     await closeIngest()
 }
@@ -123,22 +133,25 @@ async function closeIngest() {
     await loadItems()
 
     nextTick(() => {
-        editedItem.value = {}
-        editedIndex.value = -1
+        targetItem.value = {}
+        targetIndex.value = -1
     })
 }
 
+//
+// Confirmation dialog for one-file deletion
+//
 
 const confirmDelete = ref(false)
 
 function deleteItem(item, index) {
     confirmDelete.value = true
-    editedIndex.value = index
-    editedItem.value = Object.assign({}, item)
+    targetIndex.value = index
+    targetItem.value = Object.assign({}, item)
 }
 
 async function deleteItemConfirm() {
-    await deleteDocument(editedItem.value.id)
+    await deleteDocument(targetItem.value.id)
 
     await closeDelete()
 }
@@ -174,11 +187,14 @@ async function closeDelete() {
     await loadItems()
 
     nextTick(() => {
-        editedItem.value = {}
-        editedIndex.value = -1
+        targetItem.value = {}
+        targetIndex.value = -1
     })
 }
 
+//
+// Confirmation dialog for ingestion of selected files
+//
 
 const confirmIngestSelected = ref(false)
 
@@ -231,6 +247,9 @@ async function closeIngestSelected() {
 }
 
 
+//
+// Polling for server table updates.
+//
 
 var intervalId = null;
 
@@ -278,6 +297,10 @@ async function loadTableStats() {
         console.error('Error getting table stats:', error);
     }
 }
+
+//
+// Loading data from server
+//
 
 async function loadItems() {
     loading.value = true

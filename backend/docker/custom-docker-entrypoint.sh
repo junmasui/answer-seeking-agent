@@ -3,11 +3,6 @@ set -eu
 
 cd /app
 
-ls -la .
-ls -la .venv
-ls -la /home
-ls -la /home/python
-
 # Create the virtual environment only once.
 #
 # For the CACHEDIR.TAG specification, see https://bford.info/cachedir/
