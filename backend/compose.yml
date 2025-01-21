@@ -22,7 +22,7 @@ services:
         do
           chmod a+rwx $$VOL
 
-          for SUBDIR in home venv ;
+          for SUBDIR in home venv staging ;
           do
             [ -d $$VOL/$$SUBDIR ] || mkdir $$VOL/$$SUBDIR
             chown 1000:1000 $$VOL/$$SUBDIR
@@ -79,7 +79,7 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      - PYTHONPYCACHEPREFIX=/app/.local/pycache
+      - PYTHONPYCACHEPREFIX=/home/python/.cache/pycache
     ports: # use if it is necessary to expose the container to the host machine
       - '8100:8100'
     user: '1000:1000'
@@ -119,6 +119,10 @@ services:
         source: local-backend-1
         target: /app/.venv
         volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-1
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
     depends_on:
       - init-backend-volumes
     deploy:
@@ -154,6 +158,10 @@ services:
         source: local-backend-cpu-1
         target: /app/.venv
         volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-cpu-1
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
     depends_on:
       - init-backend-volumes-cpu
 
@@ -170,7 +178,7 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      - PYTHONPYCACHEPREFIX=/app/.local/pycache
+      - PYTHONPYCACHEPREFIX=/home/python/.cache/pycache
     ports: # use if it is necessary to expose the container to the host machine
       - '8101:8101'
     networks:
@@ -210,6 +218,10 @@ services:
         source: local-backend-2
         target: /app/.venv
         volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-2
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
     depends_on:
       - init-backend-volumes
     deploy:
@@ -245,6 +257,10 @@ services:
         source: local-backend-cpu-2
         target: /app/.venv
         volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-cpu-2
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
     depends_on:
       - init-backend-volumes-cpu
 
@@ -261,7 +277,7 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      - PYTHONPYCACHEPREFIX=/app/.local/pycache
+      - PYTHONPYCACHEPREFIX=/home/python/.cache/pycache
     ports: # use if it is necessary to expose the container to the host machine
       - '15555:5555'
     networks:

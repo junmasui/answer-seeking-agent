@@ -6,5 +6,8 @@ logs
 # Editor directories and files
 .vscode/*
 
-# secrets never to be committed
+# local overrides, should not be committed
+*.overrides.env
+
+# secrets, should never be committed
 *.secrets.env

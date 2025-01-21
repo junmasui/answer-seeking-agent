@@ -82,6 +82,7 @@ def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depe
         Scope.DOC_READ,
         Scope.DOC_WRITE,
         Scope.DOC_INGEST,
+        Scope.DOC_INGEST_BULK,
         Scope.QUERY,
         Scope.ADMIN
     ]

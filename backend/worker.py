@@ -4,25 +4,41 @@ import logging
 import importlib
 
 from celery import Celery
-from celery.signals import worker_shutting_down, worker_ready, worker_process_init, worker_process_shutdown
+from celery.signals import (after_setup_task_logger,
+                            worker_shutting_down, worker_init,
+                            worker_ready, worker_process_init, worker_process_shutdown)
+from celery.app.log import TaskFormatter
 
 from log_config_watch import get_logging_conf_watcher
 
-from app import ingest_documents, update_document_status
+from app import ingest_documents, update_document_status, reset_worker_data
 from app.public_models import DocumentStatus
 from app.signals import send_start_up
 
 logger = logging.getLogger(__name__)
 
+@after_setup_task_logger.connect
+def setup_task_logger(logger, *args, **kwargs):
+    """
+    See: https://celery.school/custom-celery-task-logger
+    """
+    for handler in logger.handlers:
+        handler.setFormatter(TaskFormatter('%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s'))
+
+
+@worker_init.connect
+def handle_worker_init(**kwargs):
+    logger.info('worker init')
+
+    get_logging_conf_watcher().start()
+
+    send_start_up(is_worker=True)
 
 
 @worker_ready.connect
 def handle_worker_ready(**kwargs):
     logger.info('worker ready')
 
-    get_logging_conf_watcher().start()
-
-    send_start_up(is_worker=True)
 
 @worker_process_init.connect
 def handle_worker_ready(**kwargs):
@@ -36,6 +52,7 @@ def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
     logger.info('worker process shutting down %s %s %s', sig, how, exitcode)
 
     get_logging_conf_watcher().stop()
+
 
 @worker_process_shutdown.connect
 def handle_worker_shutting_down(pid, exitcode, **kwargs):
@@ -98,11 +115,12 @@ celeryconfig = importlib.import_module('celeryconfig')
 celery_app.config_from_object(celeryconfig)
 
 
-@celery_app.task(name='ingest-files')
+@celery_app.task(name='ingest-docs')
 def ingest_task(doc_ids=None):
     """Ingest
     """
     return ingest_documents(doc_ids)
+
 
 @celery_app.task(name='get-logger-tree')
 def get_worker_logger_tree(include_all=False):
@@ -110,4 +128,11 @@ def get_worker_logger_tree(include_all=False):
     """
     from app.utils.logger_tree import dump_logger_tree
 
-    return dump_logger_tree(include_all=include_all) 
+    return dump_logger_tree(include_all=include_all)
+
+
+@celery_app.task(name='reset-data')
+def reset_data_task():
+    """Handles reset-data event.
+    """
+    return reset_worker_data()

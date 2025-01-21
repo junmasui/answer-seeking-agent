@@ -2,6 +2,7 @@
 This is a small stand-alone module that
 provides a global configuration object.
 """
+from typing import Union
 from typing_extensions import Annotated
 import pathlib
 from functools import cache
@@ -11,7 +12,10 @@ from pydantic import (
     PostgresDsn,
     RedisDsn,
     AnyHttpUrl,
-    StringConstraints
+    StringConstraints,
+    DirectoryPath,
+    FilePath,
+    NewPath
 )
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
@@ -30,7 +34,9 @@ class Settings(BaseSettings):
     # on an earlier step.
     model_config = SettingsConfigDict(env_file=None)
 
-    logging_config_path: pathlib.Path = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
+    logging_config_path: Union[FilePath, NewPath] = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
+
+    staging_dir: DirectoryPath = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
     redis_dsn: RedisDsn = Field(
         default='',

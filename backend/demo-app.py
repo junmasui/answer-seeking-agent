@@ -16,7 +16,7 @@ from app.public_models import CamelModel, Answer, DocumentList, DocumentStats, I
 from app.signals import send_start_up, send_reset_data
 
 
-from worker import ingest_task, get_worker_logger_tree
+from worker import ingest_task, get_worker_logger_tree, reset_data_task
 import sim_auth_app
 from simple_auth import User, get_scoped_current_user, get_current_user, Scope
 from log_config_watch import get_logging_conf_watcher
@@ -148,7 +148,7 @@ async def handle_single_delete(doc_uuid,
 @app.post('/documents/ingest')
 async def handle_ingest(
         body: Optional[IngestRequestBody] = None,
-        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
+        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST_BULK))] = None):
     """Ingest the files specified in the list of document UUIDs
     """
     user_id = current_user.userid if current_user is not None else None
@@ -188,6 +188,8 @@ def reset_database(current_user: Annotated[User, Depends(get_scoped_current_user
     """Reset database, vector store, and file store.
     """
     send_reset_data(is_worker=False)
+
+    task = reset_data_task.delay()
 
     result = {
     }
