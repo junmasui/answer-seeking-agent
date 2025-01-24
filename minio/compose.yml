@@ -19,6 +19,13 @@ services:
       - minio.secrets.env
     restart: unless-stopped
 
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
   minio-init:
     image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
     profiles: [ minio, infrastructure, all, all-cpu ]
@@ -36,7 +43,8 @@ services:
       - minio-init.secrets.env
     restart: 'no'
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy
 
 volumes:
   minio-data-2:

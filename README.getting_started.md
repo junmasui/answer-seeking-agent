@@ -235,6 +235,25 @@ Then run:
 
 ## FIRST TIME START
 
+### Create Named Volumes
+
+The desired objective is that this step is automatic.
+The current reality is that this step requires a manual push.
+
+Run the following command.
+This command will create Docker named volumes provisioned with requiste
+empty subdirectories, ownership, and mod flags.
+
+```bash
+docker compose --profile init-volumes up -d
+```
+
+The compose.yml definition do have dependencies for a future automatic creation.
+Currently, there is an un-understood timing issue where the subpath mounts
+on the dependents are not seeing the subdirectories in the named volumes
+until a latter time. So the work-around is to manually push this step.
+
+
 ### Start Infrastructure Layer
 
 Run the following command.
@@ -570,6 +589,7 @@ agent-vite-dev-server-1      vite-dev-server      Up About an hour
 Start all Docker services simultaneously:
 
 ```bash
+docker compose --profile init-volumes up -d
 docker compose --profile all up -d
 ```
 
@@ -582,12 +602,14 @@ used.
 For example, the command for starting the backend becomes:
 
 ```bash
+docker compose --profile init-volumes-cpu up -d
 docker compose --profile infrastrucutre up -d
 docker compose --profile backend-cpu up -d
 docker compose --profile frontend up -d
 ```
 
 ```bash
+docker compose --profile init-volumes-cpu up -d
 docker compose --profile all-cpu up -d
 ```
 
@@ -602,8 +624,58 @@ It should show a status of `healthy`.
 
 ### Go To Document Manager
 
-Upload some documents. Then ingest them.
+Upload some documents thru the user interface. Then use the UI to ingest them.
 
 ### Go To Conversation
 
-Ask some questions.
+Ask some questions in the user interface.
+
+## SOME OPERATIONAL NOTES
+
+### Prune Docker Filesystem Footprint
+
+To view the current footprint, run the below command.
+This command is explained in [docker system df](https://docs.docker.com/reference/cli/docker/system/df/)
+
+```bash
+docker system df
+```
+
+To reduce the unnecessary footprint from multiple causes, run the below command.
+This command is explained in [docker system prune](https://docs.docker.com/reference/cli/docker/system/prune/)
+
+```bash
+ docker system prune --all --volumes
+```
+
+The output starts with:
+
+```console
+WARNING! This will remove:
+  - all stopped containers
+  - all networks not used by at least one container
+  - all anonymous volumes not used by at least one container
+  - all images without at least one container associated to them
+  - all build cache
+...
+```
+
+As explained in the output, this command removes multiple sources of unused footprint.
+Typically, the largest footprints are from stopped containers, unused images, the build cache,
+and anonymous volumes. This command does not remove unused local volumes.
+
+To remove unused local volumes, run the below command.
+This command is explained in [docker volume prune](https://docs.docker.com/reference/cli/docker/volume/prune/)
+
+```bash
+docker volume prune --all
+```
+
+The output starts with:
+
+```console
+WARNING! This will remove all local volumes not used by at least one container.
+...
+```
+
+This will remove the last large cause of unnecessary filesystem footprint.

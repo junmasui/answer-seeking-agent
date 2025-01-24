@@ -24,6 +24,14 @@ services:
     # set shared memory limit when using docker-compose
     shm_size: 128mb
 
+    healthcheck:
+      # POSTGRES_USER is defined inside pgvector.env
+      test: [ 'CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}' ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
+
   pgvector-init:
     image: localdomain-postgres:17.2-pgvector
     profiles: [ postgres, infrastructure, all, all-cpu ]
@@ -40,7 +48,8 @@ services:
       - pgvector-init.env
       - pgvector-init.secrets.env
     depends_on:
-      - pgvector
+      pgvector:
+        condition: service_healthy
 
 volumes:
   pgvector-data-1:
