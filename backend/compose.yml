@@ -1,7 +1,7 @@
 services:
   init-backend-volumes:
     image: 'debian:12.8-slim'
-    profiles: [ backend, all ]
+    profiles: [ init-volumes, backend, all ]
     user: '0:0' 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -20,21 +20,22 @@ services:
 
         for VOL in '/var/.local-1' '/var/.local-2' '/var/.local-3' ;
         do
-          chmod a+rwx $$VOL
-
           for SUBDIR in home venv staging ;
           do
-            [ -d $$VOL/$$SUBDIR ] || mkdir $$VOL/$$SUBDIR
-            chown 1000:1000 $$VOL/$$SUBDIR
+            if [ ! -d $$VOL/$$SUBDIR ]
+            then
+              mkdir $$VOL/$$SUBDIR
+              chmod a+rwx $$VOL/$$SUBDIR
+              chown 1000:1000 $$VOL/$$SUBDIR
+            fi
           done
-          # ls -la $$VOL
+          ls -la $$VOL
         done
-        # ls -la /var ;
     restart: 'no'
 
   init-backend-volumes-cpu:
     image: 'debian:12.8-slim'
-    profiles: [ backend-cpu, all-cpu ]
+    profiles: [ init-volumes-cpu, backend-cpu, all-cpu ]
     user: '0:0' 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -53,17 +54,17 @@ services:
 
         for VOL in '/var/.local-1' '/var/.local-2' '/var/.local-3' ;
         do
-          chmod a+rwx $$VOL
-
-          for SUBDIR in home venv ;
+          for SUBDIR in home venv staging ;
           do
-            [ -d $$VOL/$$SUBDIR ] || mkdir $$VOL/$$SUBDIR
-            chmod a+rwx $$VOL/$$SUBDIR
-            chown 1000:1000 $$VOL/$$SUBDIR
+            if [ ! -d $$VOL/$$SUBDIR ]
+            then
+              mkdir $$VOL/$$SUBDIR
+              chmod a+rwx $$VOL/$$SUBDIR
+              chown 1000:1000 $$VOL/$$SUBDIR
+            fi
           done
           ls -la $$VOL
         done
-        # ls -la /var ;
     restart: 'no'
 
 
@@ -93,6 +94,19 @@ services:
       resources:
         limits:
           memory: 4G # Give enough to run local model
+    healthcheck:
+      # When this service start for the first time, there is multiple minutes while the
+      # python environment is sync'ed to the requirements file then when the FastAPI server
+      # is starting up. A health-check based on API pinging will fail during the sync and the
+      # start up.
+      #
+      # For now, we just check if python3 can run. Later, we will  try to come up  
+      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      test: ['CMD', 'python3', '--version']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 
   fastapi-dev-server:
@@ -124,7 +138,8 @@ services:
         target: /staging
         volume: { nocopy: true, subpath: staging }
     depends_on:
-      - init-backend-volumes
+      init-backend-volumes:
+        condition: service_completed_successfully
     deploy:
       resources:
         reservations:
@@ -163,7 +178,8 @@ services:
         target: /staging
         volume: { nocopy: true, subpath: staging }
     depends_on:
-      - init-backend-volumes-cpu
+      init-backend-volumes-cpu:
+        condition: service_completed_successfully
 
 
   celery-worker-common:
@@ -192,6 +208,19 @@ services:
       resources:
         limits:
           memory: 8G # Give enough to run Tesseract and local model
+    healthcheck:
+      # When this service start for the first time, there is multiple minutes while the
+      # python environment is sync'ed to the requirements file then when the celery worker
+      # is starting up. A health-check based on API pinging will fail during the sync and the
+      # start up.
+      #
+      # For now, we just check if python3 can run. Later, we will  try to come up  
+      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      test: ['CMD', 'python3', '--version']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 
   celery-worker:
@@ -223,7 +252,8 @@ services:
         target: /staging
         volume: { nocopy: true, subpath: staging }
     depends_on:
-      - init-backend-volumes
+      init-backend-volumes:
+        condition: service_completed_successfully
     deploy:
       resources:
         reservations:
@@ -262,7 +292,8 @@ services:
         target: /staging
         volume: { nocopy: true, subpath: staging }
     depends_on:
-      - init-backend-volumes-cpu
+      init-backend-volumes-cpu:
+        condition: service_completed_successfully
 
 
   celery-flower-common:
@@ -287,6 +318,19 @@ services:
     user: '1000:1000'
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_celery_flower.sh' ]
+    healthcheck:
+      # When this service start for the first time, there is multiple minutes while the
+      # python environment is sync'ed to the requirements file then when the celery flower node
+      # is starting up. A health-check based on API pinging will fail during the sync and the
+      # start up.
+      #
+      # For now, we just check if python3 can run. Later, we will  try to come up  
+      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      test: ['CMD', 'python3', '--version']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
           
   celery-flower:
     extends:
@@ -313,7 +357,10 @@ services:
         target: /app/.venv
         volume: { nocopy: true, subpath: venv }
     depends_on:
-      - init-backend-volumes
+      init-backend-volumes:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     deploy:
       resources:
         reservations:
@@ -347,7 +394,11 @@ services:
         target: /app/.venv
         volume: { nocopy: true, subpath: venv }
     depends_on:
-      - init-backend-volumes-cpu
+      init-backend-volumes-cpu:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      
 
 #
 # Named volumes are not created until the dependent service

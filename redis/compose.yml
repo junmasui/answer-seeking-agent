@@ -12,6 +12,13 @@ services:
       - agent-poc
     restart: unless-stopped
 
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
+
 volumes:
   redis-data-1:
     driver: local
