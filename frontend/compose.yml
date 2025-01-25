@@ -86,6 +86,23 @@ services:
       - '15173:15173'
     networks:
       - agent-poc
+    # Why is there no depends_on section??
+    #   The nginx conf references vite-dev-server and fastapi-dev-server.
+    #   Those two must be up and running before nginx. The reason is nginx will
+    #   try to find them on the network during its startup.
+    #   
+    #   We could automate the dependency handling. And there are many technical
+    #   choices, which would be driven by various scenarios, including system start
+    #   up. Another scenario is a restart of either vite-dev-server or fastapi-dev-server.
+    #   Ideally we don't have a cascade of restarts.
+    #
+    #   For now, we don't automate the dependency handling. It's obvious enough
+    #   when corrective action is needed: the UI has 404 not found or 502 gatway error!
+    # depends_on:
+    #   vite-dev-server:
+    #     condition: service_healthy
+    #   fastapi-dev-server:
+    #     condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:15173']
       interval: 10s
