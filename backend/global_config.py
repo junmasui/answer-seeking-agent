@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     logging_config_path: Union[FilePath, NewPath] = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
 
-    staging_dir: DirectoryPath = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
+    staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
     redis_dsn: RedisDsn = Field(
         default='',
