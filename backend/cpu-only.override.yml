@@ -1,0 +1,74 @@
+services:
+  init-backend-volumes:
+    volumes:
+      - local-backend-cpu-1:/var/.local-1
+      - local-backend-cpu-2:/var/.local-2
+      - local-backend-cpu-3:/var/.local-3
+
+  fastapi-dev-server:
+    image: 'localdomain-backend:python-3.12-cpu'
+    environment:
+      GPU_MODE: cpu
+    volumes:
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-backend-cpu-1
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-cpu-1
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-cpu-1
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
+
+  celery-worker:
+    image: 'localdomain-backend:python-3.12-cpu'
+    environment:
+      GPU_MODE: cpu
+    volumes:
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-backend-cpu-2
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-cpu-2
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-cpu-2
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
+
+  celery-flower:
+    image: 'localdomain-backend:python-3.12-cpu'
+    environment:
+      GPU_MODE: cpu
+    volumes:
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-backend-cpu-3
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-cpu-3
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
+
+#
+# Named volumes are not created until the dependent service
+# is started.
+#
+volumes:
+  #
+  # CPU only
+  #
+  local-backend-cpu-1:
+    driver: local
+  local-backend-cpu-2:
+    driver: local
+  local-backend-cpu-3:
+    driver: local

@@ -6,7 +6,7 @@ nvidia-smi
 if [ "$GPU_MODE" == "cuda12" ]; then
     uv pip sync --index-strategy=unsafe-best-match requirements-cuda12.compiled.txt
 elif [ "$GPU_MODE" == "cpu" ]; then
-    uv pip sync --index-strategy=unsafe-best-match requirements.compiled.txt
+    uv pip sync --index-strategy=unsafe-best-match requirements-cpu.compiled.txt
 else
     exit -1
 fi

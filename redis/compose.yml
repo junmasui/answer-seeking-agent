@@ -3,7 +3,7 @@ name: redis
 services:
   redis:
     image: redis:latest
-    profiles: [ redis, infrastructure, all, all-cpu ]
+    profiles: [ redis, infrastructure, all ]
     ports:
       - '6379:6379'
     volumes:
