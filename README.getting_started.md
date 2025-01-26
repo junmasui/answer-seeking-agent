@@ -613,24 +613,8 @@ docker compose --profile all up -d
 
 ## CPU ONLY SYSTEMS
 
-The start up installations need to be modified for CPU-only systems.
-The modification is that the profiles `backend-cpu` or `all-cpu` should be
-used.
-
-For example, the command for starting the backend becomes:
-
-```bash
-docker compose --profile init-volumes-cpu up -d
-docker compose --profile infrastrucutre up -d
-docker compose --profile backend-cpu up -d
-docker compose --profile frontend up -d
-```
-
-```bash
-docker compose --profile init-volumes-cpu up -d
-docker compose --profile all-cpu up -d
-```
-
+As stated above, CPU-only systems are now managed with a single
+environment variable: `export COMPOSE_FILE=cpu-only.compose.yml`.
 
 ## TEST THE APPLICATION
 
