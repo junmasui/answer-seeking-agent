@@ -2,7 +2,6 @@ name: agent
 
 include:
   - frontend/compose.yml
-  - backend/compose.yml
   - minio/compose.yml
   - postgres/compose.yml
   - redis/compose.yml

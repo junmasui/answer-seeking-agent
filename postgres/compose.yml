@@ -3,7 +3,7 @@ name: pgvector
 services:
   pgvector:
     image: localdomain-postgres:17.2-pgvector
-    profiles: [ postgres, infrastructure, all, all-cpu ]
+    profiles: [ postgres, infrastructure, all ]
     entrypoint: [ 'docker-entrypoint.sh' ]
     command: [ postgres ]
     ports:
@@ -34,7 +34,7 @@ services:
 
   pgvector-init:
     image: localdomain-postgres:17.2-pgvector
-    profiles: [ postgres, infrastructure, all, all-cpu ]
+    profiles: [ postgres, infrastructure, all ]
     entrypoint: [ '/bin/sh' ]
     command: [ /init-postgres.sh ]
     # Attach postgres-init directly to main container's network stack

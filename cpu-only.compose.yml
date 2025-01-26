@@ -1,0 +1,5 @@
+name: agent
+
+include:
+  - common.compose.yml
+  - backend/cpu-only.compose.yml

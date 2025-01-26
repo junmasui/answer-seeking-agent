@@ -8,7 +8,7 @@ services:
     #
     # If the 
     #
-    profiles: [ init-volumes, init-volumes-cpu, frontend, all, all-cpu ]
+    profiles: [ init-volumes, init-volumes-cpu, frontend, all ]
     # No network is needed to initialize named volumes
     network_mode: none
     user: '0:0' 
@@ -41,12 +41,12 @@ services:
 
   vite-dev-server:
     image: 'localdomain-frontend:node-22-bookworm'
-    profiles: [ frontend, all, all-cpu ]
+    profiles: [ frontend, all ]
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
-      - CHOKIDAR_USEPOLLING=true
+      CHOKIDAR_USEPOLLING: "true"
     #   - NODE_ENV=production
     volumes:
       # Mount the project directory to /app in the container
@@ -77,7 +77,7 @@ services:
 
   proxy:
     image: 'nginx:1.27.3-bookworm'
-    profiles: [ frontend, all, all-cpu ]
+    profiles: [ frontend, all ]
     volumes:
       # Mount the Nginx configuration file.
       - ./nginx_default.conf:/etc/nginx/conf.d/default.conf

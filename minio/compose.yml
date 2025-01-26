@@ -3,7 +3,7 @@ name: minio
 services:
   minio:
     image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
-    profiles: [ minio, infrastructure, all, all-cpu ]
+    profiles: [ minio, infrastructure, all ]
     command: server /data --console-address ':9001'
     ports:
       - '29000:9000'
@@ -28,7 +28,7 @@ services:
 
   minio-init:
     image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
-    profiles: [ minio, infrastructure, all, all-cpu ]
+    profiles: [ minio, infrastructure, all ]
     entrypoint: [ /bin/sh ]
     command: /init-minio.sh
     # Attach minio-init directly to main container's network stack
