@@ -235,6 +235,24 @@ Then run:
 
 ## FIRST TIME START
 
+### Choose between GPU and CPU-only
+
+There are two modes for local computational resources: CUDA 12, and CPU only.
+
+To run with Nvidia CUDA 12 computational resources, set the shell environment
+variable as follows:
+
+```bash
+export COMPOSE_FILE=cuda.compose.yml
+```
+
+To run with CPU-only computational resources, set the shell environment
+variable as follows:
+
+```bash
+export COMPOSE_FILE=cpu-only.compose.yml
+```
+
 ### Create Named Volumes
 
 The desired objective is that this step is automatic.

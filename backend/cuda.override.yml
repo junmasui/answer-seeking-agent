@@ -1,0 +1,92 @@
+services:
+  init-backend-volumes:
+    volumes:
+      - local-backend-1:/var/.local-1
+      - local-backend-2:/var/.local-2
+      - local-backend-3:/var/.local-3
+
+  fastapi-dev-server:
+    image: 'localdomain-backend:python-3.12-cuda12'
+    environment:
+      GPU_MODE: cuda12
+    volumes:
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-backend-1
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-1
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-1
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  celery-worker:
+    image: 'localdomain-backend:python-3.12-cuda12'
+    environment:
+      GPU_MODE: cuda12
+    volumes:
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-backend-2
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-2
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
+      - type: volume
+        source: local-backend-2
+        target: /staging
+        volume: { nocopy: true, subpath: staging }
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  celery-flower:
+    image: 'localdomain-backend:python-3.12-cuda12'
+    environment:
+      GPU_MODE: cuda12
+    volumes:
+      # Mounting a local area to use container-installed dependencies
+      - type: volume
+        source: local-backend-3
+        target: /home/python
+        volume: { subpath: home }  # copy original home dir files
+      - type: volume
+        source: local-backend-3
+        target: /app/.venv
+        volume: { nocopy: true, subpath: venv }
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+#
+# Named volumes are not created until the dependent service
+# is started.
+#
+volumes:
+  local-backend-1:
+    driver: local
+  local-backend-2:
+    driver: local
+  local-backend-3:
+    driver: local
