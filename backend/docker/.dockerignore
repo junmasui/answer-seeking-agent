@@ -1,5 +1,5 @@
 
-build_image.sh
+build_images.sh
 
 Dockerfile
 *.Dockerfile

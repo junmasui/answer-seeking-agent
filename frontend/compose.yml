@@ -76,33 +76,25 @@ services:
         condition: service_completed_successfully
 
   proxy:
-    image: 'nginx:1.27.3-bookworm'
+    image: 'localdomain-nginx:1.27-bookworm'
     profiles: [ frontend, all ]
     volumes:
       # Mount the Nginx configuration file.
       - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/90-wait-for-services.sh:/docker-entrypoint.d/90-wait-for-services.sh
     ports:
       # Expose the vite server to the host machine
       - '15173:15173'
     networks:
       - agent-poc
-    # Why is there no depends_on section??
-    #   The nginx conf references vite-dev-server and fastapi-dev-server.
-    #   Those two must be up and running before nginx. The reason is nginx will
-    #   try to find them on the network during its startup.
-    #   
-    #   We could automate the dependency handling. And there are many technical
-    #   choices, which would be driven by various scenarios, including system start
-    #   up. Another scenario is a restart of either vite-dev-server or fastapi-dev-server.
-    #   Ideally we don't have a cascade of restarts.
-    #
-    #   For now, we don't automate the dependency handling. It's obvious enough
-    #   when corrective action is needed: the UI has 404 not found or 502 gatway error!
-    # depends_on:
-    #   vite-dev-server:
-    #     condition: service_healthy
-    #   fastapi-dev-server:
-    #     condition: service_healthy
+    # NOTE regardng "depends_on":
+    # The nginx conf references DNS names "vite-dev-server" and "fastapi-dev-server".
+    #   These names exist in Docker's internal DNS server. Due to the mechanics of
+    #   registering names in the internal DNS server, those Docker services must be
+    #   running before this service starts.
+    # One of those names ("fastapi-dev-server") is unknown within this compose file.
+    #   Thus we avoid using the "depends_on" functionality at the compose level. Instead
+    #   we wait for those DNS names in one of the start-up scripts of the container.
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:15173']
       interval: 10s
