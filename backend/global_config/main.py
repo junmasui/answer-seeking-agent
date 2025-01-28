@@ -4,7 +4,6 @@ provides a global configuration object.
 """
 from typing import Union
 from typing_extensions import Annotated
-import pathlib
 from functools import cache
 
 from pydantic import (

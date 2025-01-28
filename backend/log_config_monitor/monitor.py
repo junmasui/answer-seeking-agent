@@ -81,7 +81,7 @@ class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
         self._handle(event)
 
 
-class LogConfigWatcher:
+class LogConfigMonitor:
     observer = None
 
     def start(self):
@@ -111,5 +111,5 @@ class LogConfigWatcher:
 
 
 @cache
-def get_logging_conf_watcher():
-    return LogConfigWatcher()
+def get_logging_conf_monitor():
+    return LogConfigMonitor()
