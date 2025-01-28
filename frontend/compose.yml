@@ -81,7 +81,7 @@ services:
     volumes:
       # Mount the Nginx configuration file.
       - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
-      - ./90-wait-for-services.sh:/docker-entrypoint.d/90-wait-for-services.sh
+      - ./docker/90-wait-for-services.sh:/docker-entrypoint.d/90-wait-for-services.sh
     ports:
       # Expose the vite server to the host machine
       - '15173:15173'

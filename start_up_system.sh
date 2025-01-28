@@ -27,4 +27,4 @@ docker compose --profile backend up -d
 docker compose --profile frontend --profile backend up -d
 
 
-./show_system_status.sh
+./display_processes.sh
