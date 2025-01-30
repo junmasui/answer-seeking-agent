@@ -8,6 +8,7 @@ from celery.app.log import TaskFormatter
 from log_config_monitor import get_logging_conf_monitor
 
 from core.signals import send_start_up
+from .metrics import start_metrics, child_exit
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ def handle_worker_init(**kwargs):
 
     get_logging_conf_monitor().start()
 
+    start_metrics(is_main_worker=True)
+
     send_start_up(is_worker=True)
 
 
@@ -42,6 +45,9 @@ def handle_worker_process_init(**kwargs):
 
     get_logging_conf_monitor().start()
 
+    start_metrics(is_main_worker=False)
+
+
 
 @worker_shutting_down.connect
 def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
@@ -53,5 +59,7 @@ def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
 @worker_process_shutdown.connect
 def handle_worker_shutting_down(pid, exitcode, **kwargs):
     logger.info('worker process shutting down %s %s', pid, exitcode)
+
+    child_exit(pid)
 
     get_logging_conf_monitor().stop()

@@ -347,7 +347,9 @@ nest-asyncio==1.6.0
 networkx==3.4.2
     # via torch
 nltk==3.9.1
-    # via unstructured
+    # via
+    #   app (pyproject.toml)
+    #   unstructured
 numpy==1.26.4
     # via
     #   contourpy
@@ -473,7 +475,11 @@ pluggy==1.5.0
 portalocker==3.1.1
     # via iopath
 prometheus-client==0.21.1
-    # via flower
+    # via
+    #   flower
+    #   prometheus-fastapi-instrumentator
+prometheus-fastapi-instrumentator==7.0.2
+    # via app (pyproject.toml)
 prompt-toolkit==3.0.48
     # via click-repl
 propcache==0.2.1
@@ -672,7 +678,9 @@ sqlalchemy==2.0.37
     #   langchain-community
     #   langchain-postgres
 starlette==0.41.3
-    # via fastapi
+    # via
+    #   fastapi
+    #   prometheus-fastapi-instrumentator
 sympy==1.13.1
     # via
     #   onnxruntime

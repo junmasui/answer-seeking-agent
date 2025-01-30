@@ -1,0 +1,14 @@
+services:
+  grafana:
+    profiles: [ grafana, infrastructure, all ]
+    image: grafana/grafana
+    env_file:
+      - grafana.env
+      - grafana.secrets.env
+    volumes:
+      - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    ports:
+      - 13000:3000
+    networks:
+      - agent-poc
+    restart: unless-stopped

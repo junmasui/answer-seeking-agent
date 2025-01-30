@@ -6,6 +6,7 @@ import asyncio
 
 from fastapi import FastAPI
 from celery.result import AsyncResult
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from core import (status_check)
 from core.public_models import CamelModel
@@ -26,6 +27,8 @@ async def lifespan(app: FastAPI):
     logger.info('Logging config watcher starting')
     get_logging_conf_monitor().start()
 
+    instrumentator.expose(app, include_in_schema=False, should_gzip=False)
+
     logger.info('Application is starting up...')
     send_start_up(is_worker=False)
 
@@ -37,11 +40,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+instrumentator = Instrumentator().instrument(app)
+
 app.include_router(router=admin.router, prefix='/admin', )
 app.include_router(router=answer.router, prefix='/answer')
 app.include_router(router=documents.router, prefix='/documents')
 
 app.mount('/sim_auth', sim_auth_app.app)
+
+
+
 
 @app.get('/')
 async def handle_root():

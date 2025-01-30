@@ -139,6 +139,7 @@ services:
       # #   volume: { nocopy: true, subpath: staging }
     ports: # use if it is necessary to expose the container to the host machine
       - '8101:8101'
+      - '18989:8989'
     networks:
       agent-poc:
         aliases:
@@ -237,6 +238,22 @@ services:
       retries: 5
       start_period: 5s
 
+  celery-exporter:
+    image: 'danihodovic/celery-exporter'
+    profiles: [ backend, all ]
+    environment:
+      CE_BUCKETS: .005,.01,.025,.05,.1,.25,.5,1,2.5,5,10,30,60,300,600,900,1800
+    command: [ '--broker-url', 'redis://agent-redis-1:6379/0' ]
+    ports:
+      - '19808:9808'
+    networks:
+      agent-poc: {}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
       
 
 #
