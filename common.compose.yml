@@ -5,6 +5,8 @@ include:
   - minio/compose.yml
   - postgres/compose.yml
   - redis/compose.yml
+  - grafana/compose.yml
+  - prometheus/compose.yml
 
 networks:
   agent-poc:

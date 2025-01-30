@@ -27,6 +27,8 @@ dependencies = [
   "onnx>=1.17.0",
   # layoutparser has incorrect versions in its metadata
   "pdfplumber>=0.11.5",
+  "prometheus-client>=0.21.1",
+  "prometheus-fastapi-instrumentator>=7.0.2",
   "psycopg[binary,pool]>=3.2.4",
   "pydantic-settings>=2.7.0",
   "pyjwt>=2.10.1",

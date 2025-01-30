@@ -1,0 +1,45 @@
+groups:
+  - name: celery_alerts
+    rules:
+      # Alert for high task failure rate
+      - alert: CeleryHighFailureRate
+        expr: |
+          rate(celery_tasks_failed_total[5m]) 
+          / 
+          rate(celery_tasks_total[5m]) 
+          > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Celery task failure rate"
+          description: "Celery task failure rate is above 10% for the past 5 minutes"
+
+      - alert: CeleryTaskRunningTooLong
+        expr: celery_task_duration_seconds > 20
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery task running too long"
+          description: "A Celery task has been running for more than 20 seconds."
+
+      # Alert for tasks stuck in reserved state
+      - alert: CeleryTasksStuck
+        expr: celery_tasks_reserved > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery tasks stuck in reserved state"
+          description: "Tasks have been in reserved state for more than 15 minutes"
+
+      # Alert for worker down
+      - alert: CeleryWorkerDown
+        expr: celery_workers_online < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Celery worker down"
+          description: "No Celery workers are online"
