@@ -11,6 +11,6 @@ else
     exit -1
 fi
 
-uv run --frozen --no-sync -- watchmedo auto-restart \
+PYTHONPATH=./src uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
    -- celery --app=core_worker worker -l INFO

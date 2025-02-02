@@ -12,6 +12,7 @@ else
 fi
 
 
+PYTHONPATH=./src \
 uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
    -- celery --app=core_worker flower
