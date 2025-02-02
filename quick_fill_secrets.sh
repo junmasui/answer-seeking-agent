@@ -26,6 +26,12 @@ if [ -z "$BACKEND_POSTGRES_USER_PASSWORD" ]; then
     echo "BACKEND_POSTGRES_USER_PASSWORD=\"${BACKEND_POSTGRES_USER_PASSWORD}\"" >> quick_fill.secrets.env
 fi
 
+if [ -z "$GRAFANA_ADMIN_PASSWORD" ]; then
+    export GRAFANA_ADMIN_PASSWORD=grafana_$(gpg --gen-random --armor 1 16)
+    echo -e "\n# GRAFANA_ADMIN_PASSWORD contains Grafrana's admin account's password" >> quick_fill.secrets.env
+    echo "GRAFANA_ADMIN_PASSWORD=\"${GRAFANA_ADMIN_PASSWORD}\"" >> quick_fill.secrets.env
+fi
+
 if [ -z "$APPLICATION_JWT_SECRET" ]; then
     export APPLICATION_JWT_SECRET="$(openssl rand -hex 32)"
     echo -e "\n# APPLICATION_JWT_SECRET is created thur openssl rand -hex 32" >> quick_fill.secrets.env
@@ -35,6 +41,7 @@ fi
 # Generate the services' .secrets.env
 
 for RELPATH in "backend/backend.secrets.env" \
+               "grafana/grafana.secrets.env" \
                "minio/minio-init.secrets.env" \
                "minio/minio.secrets.env" \
                "postgres/pgvector-init.secrets.env" \
