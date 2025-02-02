@@ -22,12 +22,14 @@ RUN apt-get update \
         tesseract-ocr \
         libmagic1 \
     && apt-get install -y \
+        dnsutils \
         libglx-mesa0 \
         libgl1 \
         libgl1-mesa-dri \
         libglu1-mesa \
         libxext6 \
-        libx11-6
+        libx11-6 \
+    && apt-get clean
 
 #
 # Install uv package manager

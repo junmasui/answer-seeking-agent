@@ -10,6 +10,7 @@ RUN apt-get update \
         gnupg2 \
         curl \
         ca-certificates \
+    && apt-get clean \
     && curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
        | apt-key add - \
     && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
@@ -29,6 +30,7 @@ RUN apt-get update \
    && apt-get install -y --no-install-recommends \
       cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
       cuda-compat-12-6 \
+   && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
 
 # Required for nvidia-docker v1
@@ -117,6 +119,7 @@ RUN apt-get update \
         cuda-nvtx-12-6=${NV_NVTX_VERSION} \
         libcusparse-12-6=${NV_LIBCUSPARSE_VERSION} \
         libcublas-12-6=${NV_LIBCUBLAS_VERSION} \
+    && apt-get clean \
     && apt-mark hold libcublas-12-6 \
     && rm -rf /var/lib/apt/lists/*
 #         libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
@@ -133,6 +136,7 @@ ENV NV_CUDNN_VERSION=9.5.1.17-1
 RUN apt-get update \
    && apt-get install -y --no-install-recommends \
       libcudnn9-cuda-12=${NV_CUDNN_VERSION} \
+   && apt-get clean \
    && apt-mark hold \
       libcudnn9-cuda-12 \
    && rm -rf /var/lib/apt/lists/*
