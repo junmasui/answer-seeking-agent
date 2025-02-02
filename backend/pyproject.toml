@@ -64,6 +64,8 @@ cuda12 = [
   "torchvision>=0.20.0"
 ]
 
+
+
 [tool.uv.sources]
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
