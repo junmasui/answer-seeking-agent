@@ -7,8 +7,13 @@ services:
       - grafana.secrets.env
     volumes:
       - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - grafana-data-1:/var/lib/grafana
     ports:
       - 13000:3000
     networks:
       - agent-poc
     restart: unless-stopped
+
+volumes:
+  grafana-data-1:
+    driver: local
