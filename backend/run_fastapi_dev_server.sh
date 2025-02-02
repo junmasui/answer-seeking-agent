@@ -11,8 +11,8 @@ else
     exit -1
 fi
 
-echo uv run
 
+PYTHONPATH=./src \
 uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
    -- uvicorn core_app:app --host 0.0.0.0 --port 8100
