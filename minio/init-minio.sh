@@ -5,7 +5,9 @@ WAIT_INTERVAL=5
 ELAPSED=0
 
 echo "Waiting for Minio server to be ready..."
-until ( mc alias set local_server http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info local_server ) || [ $ELAPSED -ge $WAIT_LIMIT ]; do
+until ( mc alias set local_server http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} \
+        && mc admin info local_server ) \
+      || [ $ELAPSED -ge $WAIT_LIMIT ]; do
   sleep $WAIT_INTERVAL
   # The $((...)) syntax is for shell arithematic operations.
   ELAPSED=$((ELAPSED + WAIT_INTERVAL))
@@ -23,3 +25,12 @@ mc admin user add local_server ${BACKEND_MINIO_USER_NAME} ${BACKEND_MINIO_USER_P
 
 mc admin policy attach local_server readwrite --user ${BACKEND_MINIO_USER_NAME}
 
+#
+#
+#
+
+mc mb local_server/${LANGFUSE_MINIO_BUCKET}
+
+mc admin user add local_server ${LANGFUSE_MINIO_USER_NAME} ${LANGFUSE_MINIO_USER_PASSWORD}
+
+mc admin policy attach local_server readwrite --user ${LANGFUSE_MINIO_USER_NAME}

@@ -11,3 +11,6 @@ logs
 
 # secrets, should never be committed
 *.secrets.env
+
+# Clickhouse admin user configuration contains password. Should not be committed
+clickhouse/admin-user.xml

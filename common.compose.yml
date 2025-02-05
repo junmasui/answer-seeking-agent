@@ -1,12 +1,14 @@
 name: agent
 
 include:
+  - clickhouse/compose.yml
   - frontend/compose.yml
+  - grafana/compose.yml
+  - langfuse/compose.yml
   - minio/compose.yml
   - postgres/compose.yml
-  - redis/compose.yml
-  - grafana/compose.yml
   - prometheus/compose.yml
+  - redis/compose.yml
 
 networks:
   agent-poc:
@@ -16,5 +18,5 @@ networks:
       com.docker.network.driver.mtu: 1500
     ipam:
       config:
-        - subnet: 172.31.1.0/28
+        - subnet: 172.31.1.0/24
           gateway: 172.31.1.1

@@ -1,0 +1,64 @@
+services:
+  langfuse-web:
+    image: localhost/localdomain-langfuse:3.24
+    profiles: [ langfuse, infrastructure, all ]
+    ports:
+      - "24000:3000"
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      HOSTNAME: 0.0.0.0
+    env_file:
+      - langfuse.env
+      - langfuse.secrets.env
+      - langfuse-web.env
+      - langfuse-web.secrets.env
+    networks:
+      - agent-poc
+    restart: unless-stopped
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      clickhouse-init:
+        condition: service_completed_successfully
+      pgvector:
+        condition: service_healthy
+      pgvector-init:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/public/ready']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  langfuse-worker:
+    image: localhost/localdomain-langfuse:3.24
+    profiles: [ langfuse, infrastructure, all ]
+    ports:
+      - "24030:3030"
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      HOSTNAME: 0.0.0.0
+    env_file:
+      - langfuse.env
+      - langfuse.secrets.env
+    networks:
+      - agent-poc
+    restart: unless-stopped
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    depends_on:
+      langfuse-web:
+        condition: service_healthy

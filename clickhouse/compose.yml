@@ -1,0 +1,68 @@
+name: clickhouse
+
+services:
+  clickhouse:
+    image: clickhouse:24.12.3
+    profiles: [ clickhouse, infrastructure, all ]
+    # entrypoint: [ 'docker-entrypoint.sh' ]
+    # command: [ clickhouse ]
+    ports:
+      - '28123:8123'
+      - '28125:9000'
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      PGDATA: /var/lib/clickhouse/data/pgdata
+    # env_file:
+    #   - clickhouse.env
+    #   - clickhouse.secrets.env
+    volumes:
+      - clickhouse-data-1:/var/lib/clickhouse
+      - clickhouse-data-2:/var/lib/clickhouse-server
+      - ./admin-user.xml:/etc/clickhouse-server/users.d/admin-user.xml
+    networks:
+      - agent-poc
+    restart: unless-stopped
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    mem_limit: 512m
+    memswap_limit: 1g
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8123/ping' ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
+
+  clickhouse-init:
+    image: clickhouse:24.12.3
+    profiles: [ clickhouse, infrastructure, all ]
+    entrypoint: [ '/bin/bash' ]
+    command: [ /init-clickhouse.sh ]
+    # Attach clickhouse-init directly to main container's network stack
+    network_mode: service:clickhouse
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      clickhouse_HOST: clickhouse
+    env_file:
+      - clickhouse-init.env
+      - clickhouse-init.secrets.env
+    volumes:
+      - ./init-clickhouse.sh:/init-clickhouse.sh
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+volumes:
+  clickhouse-data-1:
+    driver: local
+  clickhouse-data-2:
+    driver: local

@@ -10,6 +10,7 @@ import uuid
 from langgraph.graph import StateGraph, START, END
 from langgraph.errors import GraphRecursionError
 
+from langfuse.callback import CallbackHandler
 
 from .agent_state import GraphState
 from .checkpointer import get_checkpointer
@@ -87,6 +88,10 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     graph = get_agent_graph()
     logger.info('streaming_mode: %s', graph.stream_mode)
 
+    # Initialize Langfuse CallbackHandler for Langchain (tracing)
+    langfuse_handler = CallbackHandler()
+
+
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
     input = {
@@ -102,6 +107,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         if user_id:
             extra_data['user_id'] = user_id
         run_config = {'recursion_limit': 15, 'configurable': extra_data}
+        run_config['callback_handler'] = [ langfuse_handler ]
         for output in graph.stream(input=input, config=run_config):
             for key, value in output.items():
                 # Node
