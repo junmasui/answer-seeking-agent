@@ -87,12 +87,12 @@ if [ -z "$LANGFUSE_INIT_USER_PASSWORD" ]; then
     echo "LANGFUSE_INIT_USER_PASSWORD=${LANGFUSE_INIT_USER_PASSWORD}" >> quick_fill.secrets.env
 fi
 if [ -z "$LANGFUSE_INIT_PROJECT_SECRET_KEY" ]; then
-    export LANGFUSE_INIT_PROJECT_SECRET_KEY=lf_sk_$(openssl rand -hex 8)
+    export LANGFUSE_INIT_PROJECT_SECRET_KEY=sk-lf-$( uuidgen )
     echo -e "\n# (Auto-generated)  langfuse's initial project's secret key." >> quick_fill.secrets.env
     echo "LANGFUSE_INIT_PROJECT_SECRET_KEY=${LANGFUSE_INIT_PROJECT_SECRET_KEY}" >> quick_fill.secrets.env
 fi
 if [ -z "$LANGFUSE_INIT_PROJECT_PUBLIC_KEY" ]; then
-    export LANGFUSE_INIT_PROJECT_PUBLIC_KEY=lf_pk_$(openssl rand -hex 8)
+    export LANGFUSE_INIT_PROJECT_PUBLIC_KEY=pk-lf-$( uuidgen )
     echo -e "\n# # (Auto-generated)  langfuse's initial project's public key." >> quick_fill.secrets.env
     echo "LANGFUSE_INIT_PROJECT_PUBLIC_KEY=${LANGFUSE_INIT_PROJECT_PUBLIC_KEY}" >> quick_fill.secrets.env
 fi

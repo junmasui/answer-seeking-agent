@@ -8,6 +8,7 @@ import logging
 import uuid
 
 from langgraph.graph import StateGraph, START, END
+from langgraph.pregel import Pregel
 from langgraph.errors import GraphRecursionError
 
 from langfuse.callback import CallbackHandler
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @cache
-def get_agent_graph():
+def get_agent_graph() -> Pregel:
 
     # Build graph
 
@@ -89,7 +90,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     logger.info('streaming_mode: %s', graph.stream_mode)
 
     # Initialize Langfuse CallbackHandler for Langchain (tracing)
-    langfuse_handler = CallbackHandler()
+    langfuse_handler = CallbackHandler(debug=True)
 
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
@@ -107,7 +108,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         if user_id:
             extra_data['user_id'] = user_id
         run_config = {'recursion_limit': 15, 'configurable': extra_data}
-        run_config['callback_handler'] = [ langfuse_handler ]
+        run_config['callbacks'] = [ langfuse_handler ]
         for output in graph.stream(input=input, config=run_config):
             for key, value in output.items():
                 # Node
