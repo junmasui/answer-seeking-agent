@@ -18,14 +18,8 @@ __all__ = ['get_connection_str', 'get_engine', 'get_sessionmaker', 'get_connecti
 @cache
 def get_connection_str():
     config = get_global_config()
-    # Remember to URL decode the value!
-    template = urllib.parse.unquote(str(config.postgres_connection_url))
-    template = string.Template(template)
 
-    connection_str = template.safe_substitute({
-        'BACKEND_POSTGRES_USER_NAME': config.postgres_user_name,
-        'BACKEND_POSTGRES_USER_PASSWORD': urllib.parse.quote_plus(config.postgres_user_password),
-    })
+    connection_str = config.safe_postgres_connection_url
 
     # The connection string must use psycopg3!
     if not connection_str.startswith('postgresql+psycopg://'):

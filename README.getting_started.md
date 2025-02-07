@@ -354,9 +354,9 @@ minio-init-1  | Added `local_server` successfully.
 ...
 
 minio-init-1  | Bucket created successfully `local_server/documents`.
-minio-init-1  | Added user `langchain` successfully.
+minio-init-1  | Added user `answers` successfully.
 minio-init-1  | Attached Policies: [readwrite]
-minio-init-1  | To User: langchain
+minio-init-1  | To User: answers
 ```
 
 #### Verify Postgres Service
@@ -410,7 +410,7 @@ docker compose logs pgvector-init
 pgvector-init-1  | DO
 pgvector-init-1  | DO
 pgvector-init-1  | CREATE DATABASE
-pgvector-init-1  | You are now connected to database "langchain" as user "postgres".
+pgvector-init-1  | You are now connected to database "answers" as user "postgres".
 pgvector-init-1  | CREATE EXTENSION
 
 ```

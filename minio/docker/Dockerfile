@@ -1,4 +1,4 @@
-FROM minio/minio:RELEASE.2024-12-13T22-19-12Z-cpuv1
+FROM minio/minio:RELEASE.2024-12-13T22-19-12Z
 
 # This script lives in the parent of the current directory, so we must define
 # the parent as a named build-context on the command line.

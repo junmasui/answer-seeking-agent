@@ -2,7 +2,7 @@ name: minio
 
 services:
   minio:
-    image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
+    image: localdomain-minio:2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure, all ]
     command: server /data --console-address ':9001'
     ports:
@@ -18,6 +18,8 @@ services:
       - minio.env
       - minio.secrets.env
     restart: unless-stopped
+    mem_limit: 512m
+    memswap_limit: 1g
 
     healthcheck:
       test: ['CMD', 'mc', 'ready', 'local']
@@ -27,7 +29,7 @@ services:
       start_period: 5s
 
   minio-init:
-    image: localdomain-minio:2024-12-13T22-19-12Z-cpuv1
+    image: localdomain-minio:2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure, all ]
     entrypoint: [ /bin/sh ]
     command: /init-minio.sh
@@ -41,6 +43,8 @@ services:
     env_file:
       - minio-init.env
       - minio-init.secrets.env
+    volumes:
+      - ./init-minio.sh:/init-minio.sh
     restart: 'no'
     depends_on:
       minio:

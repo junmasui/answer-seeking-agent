@@ -20,6 +20,14 @@ level = "DEBUG"
 [loggers.sqlalchemy]
 level = "WARNING"
 
+
+[loggers."langfuse"]
+level = "DEBUG"
+
+[loggers."langfuse._task_manager.media_manager"]
+level = "INFO"
+
+
 [loggers.unstructured]
 level = "DEBUG"
 

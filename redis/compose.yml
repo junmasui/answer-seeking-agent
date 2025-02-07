@@ -8,9 +8,11 @@ services:
       - '6379:6379'
     volumes:
       - redis-data-1:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - agent-poc
     restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

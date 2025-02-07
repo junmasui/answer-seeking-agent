@@ -19,6 +19,7 @@ dependencies = [
   "langchain-openai>=0.3.0",
   "langchain-postgres>=0.0.12",
   "langchain-unstructured>=0.1.6",
+  "langfuse>=2.58.2",
   "langgraph>=0.2.64",
   "langgraph-checkpoint-postgres>=2.0.9",
   # Explicitly specifyin min-version. See https://github.com/nltk/nltk/issues/3266

@@ -15,7 +15,8 @@ from global_config import get_global_config as _get_global_config
 #
 
 ## The backend used to store task results (tombstones)
-result_backend = str(_get_global_config().redis_dsn)
+result_backend = str(_get_global_config().safe_redis_dsn)
+print(f'result_backend: {result_backend}')
 
 #
 # Broker settings
@@ -24,7 +25,8 @@ result_backend = str(_get_global_config().redis_dsn)
 #
 
 ## Default broker URL. Must be in the form: transport://userid:password@hostname:port/virtual_host
-broker_url = str(_get_global_config().redis_dsn)
+broker_url = str(_get_global_config().safe_redis_dsn)
+print(f'broker_url: {broker_url}')
 
 #
 # Worker settings

@@ -94,7 +94,7 @@ async function submit(event) {
       headers['Authorization'] = `Bearer ${accessToken.value}`
     }
 
-    const response = await fetch('/api/answer?' + queryParams.toString(),
+    const response = await fetch('/api/answer/?' + queryParams.toString(),
       {
         method: 'GET', // GET is the default, so you could omit this line
         headers: headers
