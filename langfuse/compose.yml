@@ -42,7 +42,7 @@ services:
       start_period: 15s
 
   langfuse-worker:
-    image: localhost/localdomain-langfuse:3.24
+    image: localhost/localdomain-langfuse-worker:3.24
     profiles: [ langfuse, infrastructure, all ]
     ports:
       - "24030:3030"

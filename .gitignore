@@ -14,3 +14,6 @@ logs
 
 # Clickhouse admin user configuration contains password. Should not be committed
 clickhouse/admin-user.xml
+
+# Redis configuration contains password. Should not be committed
+redis/redis.conf
