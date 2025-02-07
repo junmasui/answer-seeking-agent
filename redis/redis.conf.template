@@ -1,0 +1,13 @@
+# Redis configuration file
+
+# Specify the default user and set the password
+# ~* grants permissions to all keys
+# &* grants permissions to all pub/sub channels
+# +@all grants permissions to all commands
+user default on >${REDIS_DEFAULT_PASSWORD} ~* &* +@all
+
+# Run in protected-mode
+protected-mode yes
+
+# Listen on all IP addresses.
+bind 0.0.0.0

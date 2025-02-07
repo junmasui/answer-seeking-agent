@@ -1,0 +1,24 @@
+<clickhouse>
+    <!-- Docs: <https://clickhouse.com/docs/en/operations/settings/settings_users/> -->
+    <users>
+        <default>
+            <profile>default</profile>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <password>${CLICKHOUSE_DEFAULT_USER_PASSWORD}</password>
+            <quota>default</quota>
+            <access_management>0</access_management>
+        </default>
+
+        <admin>
+            <profile>default</profile>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <password>${CLICKHOUSE_ADMIN_USER_PASSWORD}</password>
+            <quota>default</quota>
+            <access_management>1</access_management>
+        </admin>
+    </users>
+</clickhouse>

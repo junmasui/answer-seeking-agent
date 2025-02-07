@@ -33,6 +33,7 @@ anyio==4.8.0
     # via
     #   anthropic
     #   httpx
+    #   langfuse
     #   openai
     #   starlette
     #   watchfiles
@@ -44,7 +45,9 @@ attrs==24.3.0
     # via aiohttp
     # from https://pypi.org/simple
 backoff==2.2.1
-    # via unstructured
+    # via
+    #   langfuse
+    #   unstructured
     # from https://pypi.org/simple
 beautifulsoup4==4.12.3
     # via unstructured
@@ -269,6 +272,7 @@ httpx==0.27.2
     # via
     #   anthropic
     #   fastapi
+    #   langfuse
     #   langgraph-sdk
     #   langsmith
     #   ollama
@@ -301,6 +305,7 @@ idna==3.10
     #   anyio
     #   email-validator
     #   httpx
+    #   langfuse
     #   requests
     #   yarl
     # from https://pypi.org/simple
@@ -394,6 +399,9 @@ langchain-unstructured==0.1.6
     # from https://pypi.org/simple
 langdetect==1.0.9
     # via unstructured
+    # from https://pypi.org/simple
+langfuse==2.58.2
+    # via app (pyproject.toml)
     # from https://pypi.org/simple
 langgraph==0.2.64
     # via app (pyproject.toml)
@@ -527,6 +535,7 @@ packaging==24.2
     # via
     #   huggingface-hub
     #   langchain-core
+    #   langfuse
     #   marshmallow
     #   matplotlib
     #   onnxruntime
@@ -582,6 +591,7 @@ portalocker==3.1.1
     # from https://pypi.org/simple
 prometheus-client==0.21.1
     # via
+    #   app (pyproject.toml)
     #   flower
     #   prometheus-fastapi-instrumentator
     # from https://pypi.org/simple
@@ -655,6 +665,7 @@ pydantic==2.10.5
     #   langchain-anthropic
     #   langchain-core
     #   langchain-google-genai
+    #   langfuse
     #   langsmith
     #   ollama
     #   openai
@@ -761,6 +772,7 @@ requests==2.32.3
     #   huggingface-hub
     #   langchain
     #   langchain-community
+    #   langfuse
     #   langsmith
     #   requests-toolbelt
     #   tiktoken
@@ -996,6 +1008,7 @@ websockets==14.2
 wrapt==1.17.2
     # via
     #   deprecated
+    #   langfuse
     #   unstructured
     # from https://pypi.org/simple
 yarl==1.18.3
