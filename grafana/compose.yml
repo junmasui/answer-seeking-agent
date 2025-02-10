@@ -1,7 +1,10 @@
 services:
   grafana:
+    restart: unless-stopped
+
     profiles: [ grafana, infrastructure, all ]
     image: grafana/grafana
+
     env_file:
       - grafana.env
       - grafana.secrets.env
@@ -12,7 +15,14 @@ services:
       - 13000:3000
     networks:
       - agent-poc
-    restart: unless-stopped
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
 
 volumes:
   grafana-data-1:

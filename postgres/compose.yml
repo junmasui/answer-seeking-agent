@@ -2,12 +2,11 @@ name: pgvector
 
 services:
   pgvector:
+    restart: unless-stopped
+
     image: localdomain-postgres:17.2-pgvector
     profiles: [ postgres, infrastructure, all ]
-    entrypoint: [ 'docker-entrypoint.sh' ]
-    command: [ postgres ]
-    ports:
-      - '25432:5432'
+
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
@@ -16,11 +15,17 @@ services:
     env_file:
       - pgvector.env
       - pgvector.secrets.env
-    volumes:
-      - pgvector-data-1:/var/lib/postgresql/data
+    ports:
+      - '25432:5432'
     networks:
       - agent-poc
-    restart: unless-stopped
+    volumes:
+      - pgvector-data-1:/var/lib/postgresql/data
+
+    entrypoint: [ 'docker-entrypoint.sh' ]
+    command: [ postgres ]
+    mem_limit: 512m
+    memswap_limit: 1g
     # set shared memory limit when using docker-compose
     shm_size: 128mb
 
@@ -33,12 +38,13 @@ services:
       start_period: 5s
 
   pgvector-init:
+    depends_on:
+      pgvector:
+        condition: service_healthy
+
     image: localdomain-postgres:17.2-pgvector
     profiles: [ postgres, infrastructure, all ]
-    entrypoint: [ '/bin/sh' ]
-    command: [ /init-postgres.sh ]
-    # Attach postgres-init directly to main container's network stack
-    network_mode: service:pgvector
+
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
@@ -47,9 +53,13 @@ services:
     env_file:
       - pgvector-init.env
       - pgvector-init.secrets.env
-    depends_on:
-      pgvector:
-        condition: service_healthy
+    # Attach postgres-init directly to main container's network stack
+    network_mode: service:pgvector
+
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    entrypoint: [ '/bin/sh' ]
+    command: [ /init-postgres.sh ]
 
 volumes:
   pgvector-data-1:

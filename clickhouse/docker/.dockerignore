@@ -1,0 +1,7 @@
+
+build_images.sh
+
+Dockerfile
+*.Dockerfile
+
+*.log

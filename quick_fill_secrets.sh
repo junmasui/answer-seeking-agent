@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # Read in from the top directory's secrets.env file
 export $(grep -v '^#' quick_fill.secrets.env | xargs -d '\n')
@@ -104,6 +105,7 @@ fi
 # Generate the services' .secrets.env
 
 for RELPATH in "backend/backend.secrets.env" \
+               "backend/celery-exporter.secrets.env" \
                "clickhouse/admin-user.xml" \
                "clickhouse/clickhouse-init.secrets.env" \
                "grafana/grafana.secrets.env" \

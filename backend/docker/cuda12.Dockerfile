@@ -28,7 +28,8 @@ RUN apt-get update \
         libglu1-mesa \
         libxext6 \
         libx11-6 \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 #
 # Install uv package manager
