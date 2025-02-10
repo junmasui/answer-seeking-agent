@@ -18,3 +18,4 @@ RUN curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail http
 COPY --from=parent-dir init-db.sql.template /
 COPY --from=parent-dir init-postgres.sh /
 RUN chmod +x /init-postgres.sh
+

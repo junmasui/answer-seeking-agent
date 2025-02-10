@@ -1,13 +1,22 @@
+#!/usr/bin/env bash
+
+set -eu
+
+#
+# Build the customized Langfuse images.
+#
+# NOTE: Use environment variables BUILDKIT_PROGRESS, BUILDKIT_COLOR, etc to
+#       control the progress output.
+# NOTE: Use `docker builder prune` to clean up the build cache.
+#
 docker buildx build \
   --build-context parent-dir=.. \
-  --file Dockerfile \
-  --progress=plain \
+  --file langfuse.Dockerfile \
   --tag localhost/localdomain-langfuse:3.24 \
   .
 
 docker buildx build \
   --build-context parent-dir=.. \
-  --file worker.Dockerfile \
-  --progress=plain \
+  --file langfuse-worker.Dockerfile \
   --tag localhost/localdomain-langfuse-worker:3.24 \
   .

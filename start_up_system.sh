@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 if [ -z "$COMPOSE_FILE" ]
 then
@@ -10,15 +11,6 @@ then
     echo "set environment variable COMPOSE_PROFILES to all"
     exit 1
 fi
-
-
-# Some named volumes need to be initialized (with
-# subdirectories) before the true services are launched.
-#
-# These are run-and-done containers, so we can launch
-# not in daemon mode. The simple exit is so much simpler
-# than a wait-loop :-)
-docker compose --profile init-volumes up
 
 # Start up the system.
 #

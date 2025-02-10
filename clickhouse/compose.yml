@@ -2,13 +2,11 @@ name: clickhouse
 
 services:
   clickhouse:
+    restart: unless-stopped
+
     image: clickhouse:24.12.3
     profiles: [ clickhouse, infrastructure, all ]
-    # entrypoint: [ 'docker-entrypoint.sh' ]
-    # command: [ clickhouse ]
-    ports:
-      - '28123:8123'
-      - '28125:9000'
+
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
@@ -17,13 +15,20 @@ services:
     # env_file:
     #   - clickhouse.env
     #   - clickhouse.secrets.env
+    ports:
+      - '28123:8123'
+      - '28125:9000'
+    networks:
+      - agent-poc
     volumes:
       - clickhouse-data-1:/var/lib/clickhouse
       - clickhouse-data-2:/var/lib/clickhouse-server
       - ./admin-user.xml:/etc/clickhouse-server/users.d/admin-user.xml
-    networks:
-      - agent-poc
-    restart: unless-stopped
+
+    # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    # entrypoint: [ 'docker-entrypoint.sh' ]
+    # command: [ clickhouse ]
     # set shared memory limit when using docker-compose
     shm_size: 128mb
     mem_limit: 512m
@@ -41,12 +46,13 @@ services:
       start_period: 5s
 
   clickhouse-init:
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
     image: clickhouse:24.12.3
     profiles: [ clickhouse, infrastructure, all ]
-    entrypoint: [ '/bin/bash' ]
-    command: [ /init-clickhouse.sh ]
-    # Attach clickhouse-init directly to main container's network stack
-    network_mode: service:clickhouse
+
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
@@ -55,11 +61,13 @@ services:
     env_file:
       - clickhouse-init.env
       - clickhouse-init.secrets.env
+    # Attach clickhouse-init directly to main container's network stack
+    network_mode: service:clickhouse
     volumes:
       - ./init-clickhouse.sh:/init-clickhouse.sh
-    depends_on:
-      clickhouse:
-        condition: service_healthy
+
+    entrypoint: [ '/bin/bash' ]
+    command: [ /init-clickhouse.sh ]
 
 volumes:
   clickhouse-data-1:

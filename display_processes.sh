@@ -9,7 +9,7 @@ EOS
 docker compose ps --all --format json \
   | jq --compact-output "$JQ_1"
 
-echo "Failed processes:"
+echo "Suspicious or failed processes:"
 JQ_2=$(cat << EOS
 . 
   | select( ( .Health == "healthy" ) | not )

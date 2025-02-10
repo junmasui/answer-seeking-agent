@@ -1,28 +1,32 @@
 services:
   init-backend-volumes:
     volumes:
-      - local-backend-1:/var/.local-1
-      - local-backend-2:/var/.local-2
-      - local-backend-3:/var/.local-3
+      - local-backend-cuda-home-1:/home/python/home-1
+      - local-backend-cuda-home-2:/home/python/home-2
+      - local-backend-cuda-home-3:/home/python/home-3
+      - local-backend-cuda-venv-1:/home/python/venv-1
+      - local-backend-cuda-venv-2:/home/python/venv-2
+      - local-backend-cuda-venv-3:/home/python/venv-3
+      - local-backend-cuda-staging-1:/home/python/staging-1
+      - local-backend-cuda-staging-2:/home/python/staging-2
 
   fastapi-dev-server:
     image: 'localdomain-backend:python-3.12-cuda12'
+
     environment:
       GPU_MODE: cuda12
     volumes:
       # Mounting a local area to use container-installed dependencies
       - type: volume
-        source: local-backend-1
+        source: local-backend-cuda-home-1
         target: /home/python
-        volume: { subpath: home }  # copy original home dir files
       - type: volume
-        source: local-backend-1
+        source: local-backend-cuda-venv-1
         target: /app/.venv
-        volume: { nocopy: true, subpath: venv }
       - type: volume
-        source: local-backend-1
+        source: local-backend-cuda-staging-1
         target: /staging
-        volume: { nocopy: true, subpath: staging }
+
     deploy:
       resources:
         reservations:
@@ -33,22 +37,15 @@ services:
 
   celery-worker:
     image: 'localdomain-backend:python-3.12-cuda12'
+
     environment:
       GPU_MODE: cuda12
     volumes:
       # Mounting a local area to use container-installed dependencies
-      - type: volume
-        source: local-backend-2
-        target: /home/python
-        volume: { subpath: home }  # copy original home dir files
-      - type: volume
-        source: local-backend-2
-        target: /app/.venv
-        volume: { nocopy: true, subpath: venv }
-      - type: volume
-        source: local-backend-2
-        target: /staging
-        volume: { nocopy: true, subpath: staging }
+      - local-backend-cuda-home-2:/home/python
+      - local-backend-cuda-venv-2:/app/.venv
+      - local-backend-cuda-staging-2:/staging
+
     deploy:
       resources:
         reservations:
@@ -59,18 +56,14 @@ services:
 
   celery-flower:
     image: 'localdomain-backend:python-3.12-cuda12'
+
     environment:
       GPU_MODE: cuda12
     volumes:
       # Mounting a local area to use container-installed dependencies
-      - type: volume
-        source: local-backend-3
-        target: /home/python
-        volume: { subpath: home }  # copy original home dir files
-      - type: volume
-        source: local-backend-3
-        target: /app/.venv
-        volume: { nocopy: true, subpath: venv }
+      - local-backend-cuda-home-3:/home/python
+      - local-backend-cuda-venv-3:/app/.venv
+
     deploy:
       resources:
         reservations:
@@ -84,9 +77,19 @@ services:
 # is started.
 #
 volumes:
-  local-backend-1:
+  local-backend-cuda-home-1:
     driver: local
-  local-backend-2:
+  local-backend-cuda-venv-1:
     driver: local
-  local-backend-3:
+  local-backend-cuda-staging-1:
+    driver: local
+  local-backend-cuda-home-2:
+    driver: local
+  local-backend-cuda-venv-2:
+    driver: local
+  local-backend-cuda-staging-2:
+    driver: local
+  local-backend-cuda-home-3:
+    driver: local
+  local-backend-cuda-venv-3:
     driver: local
