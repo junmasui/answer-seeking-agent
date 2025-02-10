@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+
+set -eu
 
 for SUBDIR in langfuse minio postgres frontend backend
 do

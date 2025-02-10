@@ -8,7 +8,8 @@ ARG GROUP_ID=1000
 RUN apt-get update \
   && apt-get install -y \
      curl wget \
-  && apt-get clean
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 
 # Create a custom group with GROUP_ID

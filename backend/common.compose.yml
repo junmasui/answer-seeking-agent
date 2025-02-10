@@ -1,14 +1,14 @@
 services:
   init-backend-volumes:
-    image: 'debian:12.8-slim'
+    restart: 'no'
+
+    image: 'python:3.12.8-slim-bookworm'
     profiles: [ init-volumes, backend, all ]
-    user: '0:0' 
+
     # No network is needed to initialize named volumes
     network_mode: none
-    volumes:
-      - local-backend-1:/var/.local-1
-      - local-backend-2:/var/.local-2
-      - local-backend-3:/var/.local-3
+    volumes: []
+
     entrypoint: 'bash'
     command:
       - '-c'
@@ -16,26 +16,27 @@ services:
       # So we need to escape the dollar sign with $$name so that bash
       # will recieve our embedded script with $name. 
       - |
-        set -eux ;
+        set -ex ;
 
-        for VOL in '/var/.local-1' '/var/.local-2' '/var/.local-3' ;
+        ls -ld /home/python/
+
+        for VOL in 'home-1' 'home-2' 'home-3' 'venv-1' 'venv-2' 'venv-3' \
+          'staging-1' 'staging-2'
         do
-          for SUBDIR in home venv staging ;
-          do
-            if [ ! -d $$VOL/$$SUBDIR ]
-            then
-              mkdir $$VOL/$$SUBDIR
-              chmod a+rwx $$VOL/$$SUBDIR
-              chown 1000:1000 $$VOL/$$SUBDIR
-            fi
-          done
-          ls -la $$VOL
+          touch /home/python/$$VOL/.initialized
+          chown -R 1000:1000 /home/python/$$VOL
+          chmod -R 755 /home/python/$$VOL
+          ls -ld /home/python/$$VOL
         done
-    restart: 'no'
 
   fastapi-dev-server:
+    depends_on:
+      init-backend-volumes:
+        condition: service_completed_successfully
+
     image: 'localdomain-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
+
     environment:
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
@@ -44,15 +45,30 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: "/home/python/.cache/pycache"
-      GPU_MODE: cuda12
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
     ports: # use if it is necessary to expose the container to the host machine
       - '8100:8100'
-    user: '1000:1000'
     networks:
-      agent-poc:
-        aliases:
-          - fastapi-dev-server
+      - agent-poc
+    volumes:
+      # Mount the project directory to /app in the container
+      - { type: bind, source: ., target: /app }
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
+      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
+      ##
+      ## Override YML is responsible for mounting:
+      ##   target: /home/python
+      ##   target: /app/.venv
+      ##
+
+    user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_fastapi_dev_server.sh' ]
     deploy:
@@ -64,29 +80,7 @@ services:
         # #     - driver: nvidia
         # #       count: 1
         # #       capabilities: [gpu]
-    volumes:
-      # Mount the project directory to /app in the container
-      - { type: bind, source: ., target: /app }
-      # Mount important scripts into the container when we are
-      # avoiding rebuilding images to capture their latest version.
-      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
-      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
-      # # # Mounting a local area to use container-installed dependencies
-      # # - type: volume
-      # #   source: local-backend-1
-      # #   target: /home/python
-      # #   volume: { subpath: home }  # copy original home dir files
-      # # - type: volume
-      # #   source: local-backend-1
-      # #   target: /app/.venv
-      # #   volume: { nocopy: true, subpath: venv }
-      # # - type: volume
-      # #   source: local-backend-1
-      # #   target: /staging
-      # #   volume: { nocopy: true, subpath: staging }
-    depends_on:
-      init-backend-volumes:
-        condition: service_completed_successfully
+
     healthcheck:
       # When this service start for the first time, there is multiple minutes while the
       # python environment is sync'ed to the requirements file then when the FastAPI server
@@ -101,12 +95,14 @@ services:
       retries: 5
       start_period: 5s
 
-
-
-
   celery-worker:
+    depends_on:
+      init-backend-volumes:
+        condition: service_completed_successfully
+
     image: 'localdomain-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
+
     environment:
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
@@ -115,8 +111,15 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: "/home/python/.cache/pycache"
-      GPU_MODE: cuda12
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
+    ports: # use if it is necessary to expose the container to the host machine
+      - '8101:8101'
+      - '18989:8989'
+    networks:
+      - agent-poc
     volumes:
       # Mount the project directory to /app in the container
       - { type: bind, source: ., target: /app }
@@ -124,27 +127,15 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - { type: bind, source: ./run_celery_worker.sh, target: /run_celery_worker.sh }
       - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
-      # # # Mounting a local area to use container-installed dependencies
-      # # - type: volume
-      # #   source: local-backend-2
-      # #   target: /home/python
-      # #   volume: { subpath: home }  # copy original home dir files
-      # # - type: volume
-      # #   source: local-backend-2
-      # #   target: /app/.venv
-      # #   volume: { nocopy: true, subpath: venv }
-      # # - type: volume
-      # #   source: local-backend-2
-      # #   target: /staging
-      # #   volume: { nocopy: true, subpath: staging }
-    ports: # use if it is necessary to expose the container to the host machine
-      - '8101:8101'
-      - '18989:8989'
-    networks:
-      agent-poc:
-        aliases:
-          - celery-worker
+      ##
+      ## Override YML is responsible for mounting:
+      ##   target: /home/python
+      ##   target: /app/.venv
+      ##
+
     user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_celery_worker.sh' ]
     deploy:
@@ -156,9 +147,7 @@ services:
         # #     - driver: nvidia
         # #       count: 1
         # #       capabilities: [gpu]
-    depends_on:
-      init-backend-volumes:
-        condition: service_completed_successfully
+
     healthcheck:
       # When this service start for the first time, there is multiple minutes while the
       # python environment is sync'ed to the requirements file then when the celery worker
@@ -173,12 +162,15 @@ services:
       retries: 5
       start_period: 5s
 
-
-
           
   celery-flower:
+    depends_on:
+      init-backend-volumes:
+        condition: service_completed_successfully
+
     image: 'localdomain-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
+
     environment:
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
@@ -187,8 +179,14 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: "/home/python/.cache/pycache"
-      GPU_MODE: cuda12
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
+    ports: # use if it is necessary to expose the container to the host machine
+      - '15555:5555'
+    networks:
+      - agent-poc
     volumes:
       # Mount the project directory to /app in the container
       - { type: bind, source: ., target: /app }
@@ -196,34 +194,18 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - { type: bind, source: ./run_celery_flower.sh, target: /run_celery_flower.sh }
       - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
-      # # # Mounting a local area to use container-installed dependencies
-      # # - type: volume
-      # #   source: local-backend-3
-      # #   target: /home/python
-      # #   volume: { subpath: home }  # copy original home dir files
-      # # - type: volume
-      # #   source: local-backend-3
-      # #   target: /app/.venv
-      # #   volume: { nocopy: true, subpath: venv }
-    ports: # use if it is necessary to expose the container to the host machine
-      - '15555:5555'
-    networks:
-      agent-poc:
-        aliases:
-          - celery-flower
+      ##
+      ## Override YML is responsible for mounting:
+      ##   target: /home/python
+      ##   target: /app/.venv
+      ##
+
     user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_celery_flower.sh' ]
-    depends_on:
-      init-backend-volumes:
-        condition: service_completed_successfully
-    # # deploy:
-    # #   resources:
-    # #     reservations:
-    # #       devices:
-    # #         - driver: nvidia
-    # #           count: 1
-    # #           capabilities: [gpu]
+
     healthcheck:
       # When this service start for the first time, there is multiple minutes while the
       # python environment is sync'ed to the requirements file then when the celery flower node
@@ -241,13 +223,16 @@ services:
   celery-exporter:
     image: 'danihodovic/celery-exporter'
     profiles: [ backend, all ]
-    environment:
-      CE_BUCKETS: .005,.01,.025,.05,.1,.25,.5,1,2.5,5,10,30,60,300,600,900,1800
-    command: [ '--broker-url', 'redis://agent-redis-1:6379/0' ]
+
+    env_file:
+      - celery-exporter.env
+      - celery-exporter.secrets.env
     ports:
       - '19808:9808'
     networks:
       agent-poc: {}
+
+
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']
       interval: 10s

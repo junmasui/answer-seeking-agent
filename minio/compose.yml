@@ -2,22 +2,25 @@ name: minio
 
 services:
   minio:
+    restart: unless-stopped
+
     image: localdomain-minio:2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure, all ]
-    command: server /data --console-address ':9001'
+
+    env_file:
+      - minio.env
+      - minio.secrets.env
     ports:
       - '29000:9000'
       - '29001:9001'
+    networks:
+      - agent-poc
     volumes:
       - type: volume
         source: minio-data-2
         target: /data
-    networks:
-      - agent-poc
-    env_file:
-      - minio.env
-      - minio.secrets.env
-    restart: unless-stopped
+
+    command: server /data --console-address ':9001'
     mem_limit: 512m
     memswap_limit: 1g
 
@@ -29,12 +32,14 @@ services:
       start_period: 5s
 
   minio-init:
+    restart: 'no'
+    depends_on:
+      minio:
+        condition: service_healthy
+
     image: localdomain-minio:2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure, all ]
-    entrypoint: [ /bin/sh ]
-    command: /init-minio.sh
-    # Attach minio-init directly to main container's network stack
-    network_mode: service:minio
+
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
@@ -43,12 +48,15 @@ services:
     env_file:
       - minio-init.env
       - minio-init.secrets.env
+    # Attach minio-init directly to main container's network stack
+    network_mode: service:minio
     volumes:
       - ./init-minio.sh:/init-minio.sh
-    restart: 'no'
-    depends_on:
-      minio:
-        condition: service_healthy
+
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    entrypoint: [ /bin/sh ]
+    command: /init-minio.sh
 
 volumes:
   minio-data-2:

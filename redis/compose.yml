@@ -2,20 +2,25 @@ name: redis
 
 services:
   redis:
+    restart: unless-stopped
+
     image: redis:latest
     profiles: [ redis, infrastructure, all ]
+
     ports:
       - '6379:6379'
+    networks:
+      - agent-poc
     volumes:
       - redis-data-1:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - agent-poc
-    restart: unless-stopped
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
+    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+    mem_limit: 512m
+    memswap_limit: 1g
 
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 15s
       timeout: 10s
       retries: 10
