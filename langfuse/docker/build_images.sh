@@ -12,11 +12,11 @@ set -eu
 docker buildx build \
   --build-context parent-dir=.. \
   --file langfuse.Dockerfile \
-  --tag localhost/localdomain-langfuse:3.24 \
+  --tag localhost/langfuse:3.24-plus-extras \
   .
 
 docker buildx build \
   --build-context parent-dir=.. \
   --file langfuse-worker.Dockerfile \
-  --tag localhost/localdomain-langfuse-worker:3.24 \
+  --tag localhost/langfuse-worker:3.24-plus-extras \
   .

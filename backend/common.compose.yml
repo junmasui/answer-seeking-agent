@@ -34,7 +34,7 @@ services:
       init-backend-volumes:
         condition: service_completed_successfully
 
-    image: 'localdomain-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
 
     environment:
@@ -100,7 +100,7 @@ services:
       init-backend-volumes:
         condition: service_completed_successfully
 
-    image: 'localdomain-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
 
     environment:
@@ -168,7 +168,7 @@ services:
       init-backend-volumes:
         condition: service_completed_successfully
 
-    image: 'localdomain-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
 
     environment:

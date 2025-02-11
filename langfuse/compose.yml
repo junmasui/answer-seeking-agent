@@ -2,7 +2,7 @@ services:
   langfuse-web:
     restart: unless-stopped
 
-    image: localhost/localdomain-langfuse:3.24
+    image: localhost/langfuse:3.24-plus-extras
     profiles: [ langfuse, infrastructure, all ]
 
     environment:
@@ -19,12 +19,7 @@ services:
       - '24000:3000'
     networks:
       - agent-poc
-    volumes:
-      - ./custom-web-entrypoint.sh:/custom-web-entrypoint.sh
-    # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    # entrypoint: [ 'dumb-init', '--', '/custom-web-entrypoint.sh' ]
-    # command: [   'node', './web/server.js', '--keepAliveTimeout', '110000' ]
+
     # set shared memory limit when using docker-compose
     shm_size: 128mb
 
@@ -41,7 +36,7 @@ services:
       langfuse-web:
         condition: service_healthy
 
-    image: localhost/localdomain-langfuse-worker:3.24
+    image: localhost/langfuse-worker:3.24-plus-extras
     profiles: [ langfuse, infrastructure, all ]
 
     environment:
@@ -56,12 +51,6 @@ services:
       - '24030:3030'
     networks:
       - agent-poc
-    volumes:
-      - ./custom-worker-entrypoint.sh:/custom-worker-entrypoint.sh
 
-    # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    # entrypoint: [ 'dumb-init', '--', '/custom-worker-entrypoint.sh' ]
-    # command: ['node', 'worker/dist/index.js' ]
     # set shared memory limit when using docker-compose
     shm_size: 128mb
