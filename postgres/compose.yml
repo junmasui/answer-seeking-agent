@@ -4,7 +4,7 @@ services:
   pgvector:
     restart: unless-stopped
 
-    image: localdomain-postgres:17.2-pgvector
+    image: localhost/postgres:17.2-with-pgvector
     profiles: [ postgres, infrastructure, all ]
 
     environment:
@@ -42,7 +42,7 @@ services:
       pgvector:
         condition: service_healthy
 
-    image: localdomain-postgres:17.2-pgvector
+    image: localhost/postgres:17.2-with-pgvector
     profiles: [ postgres, infrastructure, all ]
 
     environment:
@@ -55,6 +55,9 @@ services:
       - pgvector-init.secrets.env
     # Attach postgres-init directly to main container's network stack
     network_mode: service:pgvector
+    volumes:
+      - ./init-db.sql.template:/init-db.sql.template
+      - ./init-postgres.sh:/init-postgres.sh
 
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint

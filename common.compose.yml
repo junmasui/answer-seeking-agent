@@ -8,6 +8,7 @@ include:
   - minio/compose.yml
   - postgres/compose.yml
   - prometheus/compose.yml
+  - readiness-checker/compose.yml
   - redis/compose.yml
 
 networks:

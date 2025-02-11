@@ -13,7 +13,7 @@ services:
 
 
   fastapi-dev-server:
-    image: 'localdomain-backend:python-3.12-cpu'
+    image: 'localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
@@ -30,7 +30,7 @@ services:
         target: /staging
 
   celery-worker:
-    image: 'localdomain-backend:python-3.12-cpu'
+    image: 'localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
@@ -47,7 +47,7 @@ services:
         target: /staging
 
   celery-flower:
-    image: 'localdomain-backend:python-3.12-cpu'
+    image: 'localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu

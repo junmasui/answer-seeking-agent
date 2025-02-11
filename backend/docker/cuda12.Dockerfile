@@ -1,4 +1,4 @@
-FROM localdomain-python:3.12.8-bookworm-cuda12-cudnn9
+FROM localhost/python:3.12.8-bookworm-cuda12-cudnn9
 
 
 ARG USER_ID=1000

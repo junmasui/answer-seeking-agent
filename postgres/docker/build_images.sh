@@ -13,5 +13,5 @@ set -eu
 docker buildx build \
   --build-context parent-dir=.. \
   --file Dockerfile \
-  --tag localdomain-postgres:17.2-pgvector \
+  --tag localhost/postgres:17.2-with-pgvector \
   .
