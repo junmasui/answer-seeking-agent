@@ -4,8 +4,8 @@
 # See the original entrypoint that we are replacing:
 # https://github.com/langfuse/langfuse/blob/main/web/Dockerfile#L142
 
+# Error on unbound variables
 set -u
-set -x
 
 #
 # Wait for DNS /etc/resolv.conf to be correctly populated by Docker
@@ -37,8 +37,8 @@ function wait_for_nslookup {
 }
 
 
-
-if [ ! -z "$MINIO_ENDPOINT_URL" ]
+# Ensure that the case of unset MINIO_ENDPOINT_URL is handled.
+if [ ! -z "${MINIO_ENDPOINT_URL:-}" ]
 then
     #
     # Wait for DNS resolution of minio
@@ -61,7 +61,8 @@ then
     done
 fi
 
-if [ ! -z "$DATABASE_URL" ]
+# Ensure that the case of unset DATABASE_URL is handled.
+if [ ! -z "${DATABASE_URL:-}" ]
 then
     #
     # Wait for DNS resolution of postgres
@@ -84,8 +85,8 @@ then
     done
 fi
 
-
-if [ ! -z ${CLICKHOUSE_URL} ]
+# Ensure that the case of unset CLICKHOUSE_URL is handled.
+if [ ! -z "${CLICKHOUSE_URL:-}" ]
 then
     #
     # Wait for DNS resolution of clickhouse
@@ -111,8 +112,8 @@ fi
 #
 #
 #
-
-if [ ! -z ${REDIS_URL} ]
+# Ensure that the case of unset REDIS_URL is handled.
+if [ ! -z "${REDIS_URL:-}" ]
 then
     #
     # Wait for DNS resolution of redis
