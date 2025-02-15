@@ -1,6 +1,27 @@
 services:
+
+  langfuse-start-gate:
+    restart: 'no'
+
+    image: localhost/start-gate:1.0
+    profiles: [ langfuse, infrastructure, all ]
+
+    env_file:
+      - start-gate.env
+      - start-gate.secrets.env
+    networks:
+      - agent-poc
+
+    mem_limit: 128m
+    memswap_limit: 128m
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+
   langfuse-web:
     restart: unless-stopped
+    depends_on:
+      langfuse-start-gate:
+        condition: service_completed_successfully
 
     image: localhost/langfuse:3.24-plus-extras
     profiles: [ langfuse, infrastructure, all ]
@@ -35,6 +56,8 @@ services:
     depends_on:
       langfuse-web:
         condition: service_healthy
+      langfuse-start-gate:
+        condition: service_completed_successfully
 
     image: localhost/langfuse-worker:3.24-plus-extras
     profiles: [ langfuse, infrastructure, all ]

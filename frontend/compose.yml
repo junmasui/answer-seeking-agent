@@ -31,6 +31,46 @@ services:
           ls -ld /home/node/$$VOL
         done
 
+  frontend-start-gate:
+    restart: 'no'
+
+    image: localhost/start-gate:1.0
+    profiles: [ init-volumes, frontend, all ]
+
+    networks:
+      - agent-poc
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |-
+
+        set +e
+
+        function wait_for_nslookup {
+            declare TARGET_NAME=$${1}
+            echo $$TARGET_NAME
+            while true
+            do
+                nslookup $$TARGET_NAME 127.0.0.11
+                echo nslookup $$TARGET_NAME 127.0.0.11
+                if [ $$? -eq 0 ]
+                then
+                    echo "DNS name $$TARGET_NAME resolves"
+                    break
+                fi
+                sleep 2
+            done
+        }
+
+        wait_for_nslookup "vite-dev-server"
+        wait_for_nslookup "fastapi-dev-server"
+
+
+
   vite-dev-server:
     depends_on:
       init-frontend-volumes:
@@ -69,6 +109,10 @@ services:
     user: '1000:1000'
 
   proxy:
+    depends_on:
+      frontend-start-gate:
+        condition: service_completed_successfully
+
     image: 'nginx:1.27.3-bookworm'
     profiles: [ frontend, all ]
 
@@ -80,7 +124,6 @@ services:
     volumes:
       # Mount the Nginx configuration file.
       - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
-      - ./docker/90-wait-for-services.sh:/docker-entrypoint.d/90-wait-for-services.sh
 
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:15173']

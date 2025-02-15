@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 # See the original entrypoint that we are replacing:
@@ -6,6 +6,8 @@
 
 # Error on unbound variables
 set -u
+
+set -x
 
 #
 # Wait for DNS /etc/resolv.conf to be correctly populated by Docker
@@ -23,13 +25,14 @@ done
 
 
 function wait_for_nslookup {
-    TARGET_NAME=$1
+    declare LOOKUP_NAME="${1:-not.exist.invalid}"
     while true
     do
-        nslookup $TARGET_NAME 127.0.0.11
+        echo nslookup $LOOKUP_NAME 127.0.0.11
+        nslookup $LOOKUP_NAME 127.0.0.11
         if [ $? -eq 0 ]
         then
-            echo "DNS name ${TARGET_NAME} resolves"
+            echo "DNS name ${LOOKUP_NAME} resolves"
             break
         fi
         sleep 2
