@@ -13,3 +13,8 @@ RUN apt-get update \
         postgresql-client-15 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+COPY --from=parent-dir wait_for_resource.sh /wait_for_resource.sh
+
+ENTRYPOINT [ "bash" ]
+CMD [ "/wait_for_resource.sh" ]
