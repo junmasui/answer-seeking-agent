@@ -106,11 +106,13 @@ fi
 
 for RELPATH in "backend/backend.secrets.env" \
                "backend/celery-exporter.secrets.env" \
+               "backend/start-gate.secrets.env" \
                "clickhouse/admin-user.xml" \
                "clickhouse/clickhouse-init.secrets.env" \
                "grafana/grafana.secrets.env" \
                "langfuse/langfuse.secrets.env" \
                "langfuse/langfuse-web.secrets.env" \
+               "langfuse/start-gate.secrets.env" \
                "minio/minio-init.secrets.env" \
                "minio/minio.secrets.env" \
                "postgres/pgvector-init.secrets.env" \

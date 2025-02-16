@@ -13,13 +13,6 @@ set -eu
 
 docker buildx build \
   --build-context parent-dir=.. \
-  --tag localdomain-frontend:node-22-bookworm \
+  --tag localhost/answers-frontend:node-22-bookworm \
   .
 
-#
-# Build the customized Nginx image.
-#
-docker buildx build \
-  --file nginx.Dockerfile \
-  --tag localdomain-nginx:1.27-bookworm \
-  .
