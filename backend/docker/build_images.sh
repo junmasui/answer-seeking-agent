@@ -13,7 +13,7 @@ set -eu
 
 docker buildx build \
   --file python_bookworm_cuda12.Dockerfile \
-  --tag localdomain-python:3.12.8-bookworm-cuda12-cudnn9 \
+  --tag localhost/python:3.12.8-bookworm-cuda12-cudnn9 \
   . 2>&1 \
 | tee build-python-bookworm-cuda12-cudnn9.log
 
@@ -23,7 +23,7 @@ docker buildx build \
 docker buildx build \
   --file Dockerfile \
   --build-context parent-dir=.. \
-  --tag localdomain-backend:python-3.12-cpu \
+  --tag localhost/answers-backend:python-3.12-cpu \
   . 2>&1 \
 | tee build-backend-python-cpu.log
 
@@ -33,6 +33,6 @@ docker buildx build \
 docker buildx build \
   --file cuda12.Dockerfile \
   --build-context parent-dir=.. \
-  --tag localdomain-backend:python-3.12-cuda12 \
+  --tag localhost/answers-backend:python-3.12-cuda12 \
   . 2>&1 \
 | tee build-backend-python-cuda12.log

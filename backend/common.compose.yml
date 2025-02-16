@@ -29,12 +29,32 @@ services:
           ls -ld /home/python/$$VOL
         done
 
+  backend-start-gate:
+    restart: 'no'
+
+    image: localhost/start-gate:1.0
+    profiles: [ backend, infrastructure, all ]
+
+    env_file:
+      - start-gate.env
+      - start-gate.secrets.env
+    networks:
+      - agent-poc
+
+    mem_limit: 128m
+    memswap_limit: 128m
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+
+
   fastapi-dev-server:
     depends_on:
       init-backend-volumes:
         condition: service_completed_successfully
+      backend-start-gate:
+        condition: service_completed_successfully
 
-    image: 'localdomain-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
 
     environment:
@@ -99,8 +119,10 @@ services:
     depends_on:
       init-backend-volumes:
         condition: service_completed_successfully
+      backend-start-gate:
+        condition: service_completed_successfully
 
-    image: 'localdomain-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
 
     environment:
@@ -167,8 +189,10 @@ services:
     depends_on:
       init-backend-volumes:
         condition: service_completed_successfully
+      backend-start-gate:
+        condition: service_completed_successfully
 
-    image: 'localdomain-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend, all ]
 
     environment:
@@ -221,6 +245,10 @@ services:
       start_period: 5s
 
   celery-exporter:
+    depends_on:
+      backend-start-gate:
+        condition: service_completed_successfully
+
     image: 'danihodovic/celery-exporter'
     profiles: [ backend, all ]
 
@@ -233,12 +261,12 @@ services:
       agent-poc: {}
 
 
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+    # healthcheck:
+    #   test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+    #   start_period: 5s
       
 
 #

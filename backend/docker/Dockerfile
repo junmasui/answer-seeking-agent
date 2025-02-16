@@ -1,4 +1,3 @@
-# FROM localdomain/python:3.12-nvidia-cuda12-cudnn
 FROM python:3.12.8-slim-bookworm
 
 
@@ -22,7 +21,7 @@ RUN apt-get update \
         tesseract-ocr \
         libmagic1 \
     && apt-get install -y \
-        dnsutils \
+        bind9-dnsutils \
         libglx-mesa0 \
         libgl1 \
         libgl1-mesa-dri \
