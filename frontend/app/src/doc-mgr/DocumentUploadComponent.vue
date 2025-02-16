@@ -37,6 +37,7 @@ const downloading = ref(false)
 
 async function onUpload() {
     downloading.value = true;
+
     try {
         while (fileList.value.length > 0) {
             const file = fileList.value.pop()
