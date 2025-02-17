@@ -10,7 +10,7 @@ services:
     profiles: [ prometheus, infrastructure, all ]
 
     ports:
-      - 19090:9090
+      - 29090:9090
     networks:
       - agent-poc
     volumes:
@@ -48,7 +48,7 @@ services:
     profiles: [ prometheus, infrastructure, all ]
 
     ports:
-      - 19093:9093
+      - 29093:9093
     networks:
       - agent-poc
     volumes:

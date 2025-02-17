@@ -37,7 +37,7 @@ services:
       - langfuse-web.env
       - langfuse-web.secrets.env
     ports:
-      - '24000:3000'
+      - '23003:3000'
     networks:
       - agent-poc
 
