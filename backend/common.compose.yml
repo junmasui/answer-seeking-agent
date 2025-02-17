@@ -138,8 +138,7 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
     ports: # use if it is necessary to expose the container to the host machine
-      - '8101:8101'
-      - '18989:8989'
+      - '28989:8989'
     networks:
       - agent-poc
     volumes:
@@ -208,7 +207,7 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
     ports: # use if it is necessary to expose the container to the host machine
-      - '15555:5555'
+      - '25555:5555'
     networks:
       - agent-poc
     volumes:
@@ -256,7 +255,7 @@ services:
       - celery-exporter.env
       - celery-exporter.secrets.env
     ports:
-      - '19808:9808'
+      - '29808:9808'
     networks:
       agent-poc: {}
 
