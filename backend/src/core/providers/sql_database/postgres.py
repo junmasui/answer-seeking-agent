@@ -19,13 +19,14 @@ __all__ = ['get_connection_str', 'get_engine', 'get_sessionmaker', 'get_connecti
 def get_connection_str():
     config = get_global_config()
 
-    connection_str = config.safe_postgres_connection_url
+    connection_url = config.postgres_connection_url
 
     # The connection string must use psycopg3!
-    if not connection_str.startswith('postgresql+psycopg://'):
+    if not connection_url.scheme == 'postgresql+psycopg':
         raise ValueError
 
-    return connection_str
+    # Convert away from PyDantic's custom type and to Python string.
+    return str(connection_url)
 
 @cache
 def get_engine():

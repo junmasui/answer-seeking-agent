@@ -17,7 +17,8 @@ services:
     #   - clickhouse.secrets.env
     ports:
       - '28123:8123'
-      - '28125:9000'
+      - '28000:9000'
+      - '28009:9009'
     networks:
       - agent-poc
     volumes:

@@ -12,7 +12,7 @@ services:
       - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
       - grafana-data-1:/var/lib/grafana
     ports:
-      - 13000:3000
+      - 23000:3000
     networks:
       - agent-poc
 

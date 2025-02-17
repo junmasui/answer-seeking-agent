@@ -39,44 +39,10 @@ class Settings(BaseSettings):
 
     staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
-    redis_dsn: RedisDsn = Field(
-        default='',
-        validation_alias='REDIS_URL',  
-    )
-    redis_default_password: PasswordOrKeyStr = Field(default='',
-                                    validation_alias='REDIS_DEFAULT_PASSWORD')
-
-    @property
-    def safe_redis_dsn(self):
-        # Remember to URL decode the value!
-        template = urllib.parse.unquote(str(self.redis_dsn))
-        template = string.Template(template)
-
-        connection_str = template.safe_substitute({
-            'REDIS_DEFAULT_PASSWORD': self.redis_default_password,
-        })
-        return connection_str
-
+    redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
 
     postgres_connection_url: PostgresDsn = Field(default='',
                                 validation_alias='POSTGRES_CONNECTION_URL')    
-    postgres_user_name: MinimalStr = Field(default='',
-                                    validation_alias='BACKEND_POSTGRES_USER_NAME')
-    postgres_user_password: PasswordOrKeyStr = Field(default='',
-                                    validation_alias='BACKEND_POSTGRES_USER_PASSWORD')
-
-    @property
-    def safe_postgres_connection_url(self):
-        # Remember to URL decode the value!
-        template = urllib.parse.unquote(str(self.postgres_connection_url))
-        template = string.Template(template)
-
-        connection_str = template.safe_substitute({
-            'BACKEND_POSTGRES_USER_NAME': self.postgres_user_name,
-            'BACKEND_POSTGRES_USER_PASSWORD': urllib.parse.quote_plus(self.postgres_user_password),
-        })
-        return connection_str
-
 
     application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
