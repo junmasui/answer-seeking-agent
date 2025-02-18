@@ -29,3 +29,5 @@ sudo find frontend/ -type d -exec chmod ug+s \{\}  \; -exec chown rootless-1000:
 
 sudo find backend/ -type d -exec chmod ug+sw \{\}  \; -exec chown rootless-1000:rootless-1000 \{\} \;
 sudo find backend/ -type f -exec chmod ug+w \{\}  \; -exec chown rootless-1000:rootless-1000 \{\} \;
+
+sudo find clickhouse/ -iname '*.xml' -type f -exec chmod ug+w \{\}  \; -exec chown rootless-101:rootless-101 \{\} \;
