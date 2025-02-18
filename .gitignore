@@ -10,6 +10,7 @@ logs
 *.overrides.env
 
 # secrets, should never be committed
+secrets.env
 *.secrets.env
 
 # Clickhouse admin user configuration contains password. Should not be committed
