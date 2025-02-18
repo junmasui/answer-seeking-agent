@@ -1,20 +1,50 @@
 name: clickhouse
 
 services:
+  init-clickhouse-volumes:
+    restart: 'no'
+
+    image: 'debian:bookworm-slim'
+    profiles: [ init-volumes, clickhouse, infrastructure, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - clickhouse-data-1:/data-1
+      - clickhouse-data-2:/data-2
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        for VOL in 'data-1' 'data-2'
+        do
+          touch /$$VOL/.initialized
+          ## chown -R clickhouse:clickhouse /$$VOL
+          chmod -R 777 /$$VOL
+          ls -ld /$$VOL
+        done
+
+
   clickhouse:
     restart: unless-stopped
+    depends_on:
+      init-clickhouse-volumes:
+        condition: service_completed_successfully
 
     image: clickhouse:24.12.3
     profiles: [ clickhouse, infrastructure, all ]
 
-    environment:
-      # Only environment variables that are important to the Docker environment
-      # will be configured here. All other environment variables are extracted
-      # to .env files for easier and more isolated management.
-      PGDATA: /var/lib/clickhouse/data/pgdata
-    # env_file:
-    #   - clickhouse.env
-    #   - clickhouse.secrets.env
+    # environment:
+    #   # Only environment variables that are important to the Docker environment
+    #   # will be configured here. All other environment variables are extracted
+    #   # to .env files for easier and more isolated management.
+    #   CLICKHOUSE_RUN_AS_ROOT: 1
     ports:
       - '28123:8123'
       - '28000:9000'
@@ -23,7 +53,7 @@ services:
       - agent-poc
     volumes:
       - clickhouse-data-1:/var/lib/clickhouse
-      - clickhouse-data-2:/var/lib/clickhouse-server
+      - clickhouse-data-2:/var/log/clickhouse-server
       - ./admin-user.xml:/etc/clickhouse-server/users.d/admin-user.xml
 
     # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -31,6 +61,7 @@ services:
     # entrypoint: [ 'docker-entrypoint.sh' ]
     # command: [ clickhouse ]
     # set shared memory limit when using docker-compose
+    user: root
     shm_size: 128mb
     mem_limit: 512m
     memswap_limit: 1g

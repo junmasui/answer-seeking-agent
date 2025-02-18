@@ -127,6 +127,7 @@ for RELPATH in "backend/backend.secrets.env" \
                "postgres/pgvector.secrets.env" \
                "redis/redis.conf"
 do
+    sudo chmod go+rw ${RELPATH}
     ( envsubst < ${RELPATH}.template > ${RELPATH} )
-    chmod o-rwx ${RELPATH}
+    sudo chmod o-rwx ${RELPATH}
 done
