@@ -5,7 +5,7 @@ services:
     restart: 'no'
 
     image: 'debian:bookworm-slim'
-    profiles: [ init-volumes, clickhouse, all ]
+    profiles: [ init-volumes, clickhouse, infrastructure, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
