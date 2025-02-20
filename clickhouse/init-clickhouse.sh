@@ -47,6 +47,13 @@ call_clickhouse \
     admin \
     "${CLICKHOUSE_ADMIN_USER_PASSWORD}" \
 
+# Assign default profile to the user
+call_clickhouse \
+    "ALTER USER ${LANGFUSE_CLICKHOUSE_USER_NAME} SETTINGS PROFILE 'default'" \
+    admin \
+    "${CLICKHOUSE_ADMIN_USER_PASSWORD}" \
+
+
 call_clickhouse \
     "GRANT ALL ON ${LANGFUSE_CLICKHOUSE_DATABASE}.* TO ${LANGFUSE_CLICKHOUSE_USER_NAME};" \
     admin \

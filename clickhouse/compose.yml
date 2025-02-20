@@ -55,6 +55,7 @@ services:
       - clickhouse-data-1:/var/lib/clickhouse
       - clickhouse-data-2:/var/log/clickhouse-server
       - ./custom-config.xml:/etc/clickhouse-server/config.d/custom-config.xml
+      - ./custom-default.xml:/etc/clickhouse-server/users.d/custom-default.xml
       - ./admin-user.xml:/etc/clickhouse-server/users.d/admin-user.xml
 
     # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
