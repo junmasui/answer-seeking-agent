@@ -90,7 +90,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     logger.info('streaming_mode: %s', graph.stream_mode)
 
     # Initialize Langfuse CallbackHandler for Langchain (tracing)
-    langfuse_handler = CallbackHandler(debug=True, session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
+    langfuse_handler = CallbackHandler(session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
 
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
