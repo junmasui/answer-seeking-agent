@@ -1,0 +1,10 @@
+<clickhouse>
+
+    <max_server_memory_usage>2</max_server_memory_usage>
+
+    <!-- https://clickhouse.com/docs/en/operations/tips#ram -->
+    <mark_cache_size>524288000</mark_cache_size>
+    <index_mark_cache_size>524288000</index_mark_cache_size>
+    <max_thread_pool_size>1000</max_thread_pool_size>
+
+</clickhouse>
