@@ -234,6 +234,9 @@ async function ingestSelectedDocuments() {
             throw new Error('Ingest failed');
         }
 
+        // Clear the selections
+        selectedItems.value = []
+
         const data = await response.json();
         console.log('Ingest queued successfully:', data);
     } catch (error) {
