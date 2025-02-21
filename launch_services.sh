@@ -19,4 +19,12 @@ docker compose --profile backend up -d
 docker compose --profile frontend --profile backend up -d
 
 
-./display_processes.sh
+for LOOP in {1..10}
+do
+    ./display_processes.sh
+    if [ $? -eq 0 ]
+    then
+        break
+    fi
+    sleep 5
+done

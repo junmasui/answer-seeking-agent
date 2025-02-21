@@ -65,8 +65,8 @@ services:
     # set shared memory limit when using docker-compose
     user: root
     shm_size: 128mb
-    mem_limit: 1g
-    memswap_limit: 2g
+    mem_limit: 3g
+    memswap_limit: 4g
     ulimits:
       nofile:
         soft: 262144
