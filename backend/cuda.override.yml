@@ -3,10 +3,8 @@ services:
     volumes:
       - local-backend-cuda-home-1:/home/python/home-1
       - local-backend-cuda-home-2:/home/python/home-2
-      - local-backend-cuda-home-3:/home/python/home-3
       - local-backend-cuda-venv-1:/home/python/venv-1
       - local-backend-cuda-venv-2:/home/python/venv-2
-      - local-backend-cuda-venv-3:/home/python/venv-3
       - local-backend-cuda-staging-1:/home/python/staging-1
       - local-backend-cuda-staging-2:/home/python/staging-2
 
@@ -17,15 +15,9 @@ services:
       GPU_MODE: cuda12
     volumes:
       # Mounting a local area to use container-installed dependencies
-      - type: volume
-        source: local-backend-cuda-home-1
-        target: /home/python
-      - type: volume
-        source: local-backend-cuda-venv-1
-        target: /app/.venv
-      - type: volume
-        source: local-backend-cuda-staging-1
-        target: /staging
+      - local-backend-cuda-home-1:/home/python
+      - local-backend-cuda-venv-1:/app/.venv
+      - local-backend-cuda-staging-1:/staging
 
     deploy:
       resources:
@@ -54,24 +46,6 @@ services:
               count: 1
               capabilities: [gpu]
 
-  celery-flower:
-    image: 'localhost/answers-backend:python-3.12-cuda12'
-
-    environment:
-      GPU_MODE: cuda12
-    volumes:
-      # Mounting a local area to use container-installed dependencies
-      - local-backend-cuda-home-3:/home/python
-      - local-backend-cuda-venv-3:/app/.venv
-
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
 #
 # Named volumes are not created until the dependent service
 # is started.
@@ -88,8 +62,4 @@ volumes:
   local-backend-cuda-venv-2:
     driver: local
   local-backend-cuda-staging-2:
-    driver: local
-  local-backend-cuda-home-3:
-    driver: local
-  local-backend-cuda-venv-3:
     driver: local

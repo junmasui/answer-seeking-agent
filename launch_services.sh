@@ -14,17 +14,72 @@ fi
 
 # Start up the system.
 #
+MAX_RETRIES=9
+BACKOFF=1.5
+
 docker compose --profile infrastructure up -d
-docker compose --profile backend up -d
-docker compose --profile frontend --profile backend up -d
+if [ $? -ne 0 ]
+then
+    exit $?
+fi
 
-
-for LOOP in {1..10}
+SLEEP_TIME=2
+for LOOP in $(seq 1 $MAX_RETRIES)
 do
     ./display_processes.sh
     if [ $? -eq 0 ]
     then
         break
     fi
-    sleep 5
+    sleep $SLEEP_TIME
+    SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
 done
+if [ $? -ne 0 ]
+then
+    exit $?
+fi
+
+
+docker compose --profile backend up -d
+if [ $? -ne 0 ]
+then
+    exit $?
+fi
+
+SLEEP_TIME=2
+for LOOP in $(seq 1 $MAX_RETRIES)
+do
+    ./display_processes.sh
+    if [ $? -eq 0 ]
+    then
+        break
+    fi
+    sleep $SLEEP_TIME
+    SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
+done
+if [ $? -ne 0 ]
+then
+    exit $?
+fi
+
+docker compose up -d
+if [ $? -ne 0 ]
+then
+    exit $?
+fi
+
+SLEEP_TIME=2
+for LOOP in $(seq 1 $MAX_RETRIES)
+do
+    ./display_processes.sh
+    if [ $? -eq 0 ]
+    then
+        break
+    fi
+    sleep $SLEEP_TIME
+    SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
+done
+if [ $? -ne 0 ]
+then
+    exit $?
+fi

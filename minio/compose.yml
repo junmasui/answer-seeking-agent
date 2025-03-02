@@ -16,9 +16,7 @@ services:
     networks:
       - agent-poc
     volumes:
-      - type: volume
-        source: minio-data-2
-        target: /data
+      - minio-data-2:/data
 
     command: server /data --console-address ':9001'
     mem_limit: 512m

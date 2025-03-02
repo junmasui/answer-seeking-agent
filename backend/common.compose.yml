@@ -7,7 +7,9 @@ services:
 
     # No network is needed to initialize named volumes
     network_mode: none
-    volumes: []
+    volumes:
+      - local-backend-home-3:/home/python/home-3
+      - local-backend-venv-3:/home/python/venv-3
 
     entrypoint: 'bash'
     command:
@@ -75,11 +77,11 @@ services:
       - agent-poc
     volumes:
       # Mount the project directory to /app in the container
-      - { type: bind, source: ., target: /app }
+      - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - { type: bind, source: ./run_fastapi_dev_server.sh, target: /run_fastapi_dev_server.sh }
-      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
+      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       ##
       ## Override YML is responsible for mounting:
       ##   target: /home/python
@@ -143,11 +145,11 @@ services:
       - agent-poc
     volumes:
       # Mount the project directory to /app in the container
-      - { type: bind, source: ., target: /app }
+      - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - { type: bind, source: ./run_celery_worker.sh, target: /run_celery_worker.sh }
-      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
+      - ./run_celery_worker.sh:/run_celery_worker.sh
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       ##
       ## Override YML is responsible for mounting:
       ##   target: /home/python
@@ -191,7 +193,7 @@ services:
       backend-start-gate:
         condition: service_completed_successfully
 
-    image: 'localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/answers-backend:python-3.12-cpu'
     profiles: [ backend, all ]
 
     environment:
@@ -203,25 +205,20 @@ services:
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
-      ##
-      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
-      ##
+      GPU_MODE: cpu
     ports: # use if it is necessary to expose the container to the host machine
       - '25555:5555'
     networks:
-      - agent-poc
+      agent-poc: {}
     volumes:
       # Mount the project directory to /app in the container
-      - { type: bind, source: ., target: /app }
+      - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - { type: bind, source: ./run_celery_flower.sh, target: /run_celery_flower.sh }
-      - { type: bind, source: ./docker/custom-docker-entrypoint.sh, target: /custom-docker-entrypoint.sh }
-      ##
-      ## Override YML is responsible for mounting:
-      ##   target: /home/python
-      ##   target: /app/.venv
-      ##
+      - ./run_celery_flower.sh:/run_celery_flower.sh
+      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - local-backend-home-3:/home/python
+      - local-backend-venv-3:/app/.venv
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -242,6 +239,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+
+
 
   celery-exporter:
     depends_on:
@@ -272,10 +271,8 @@ services:
 # Named volumes are not created until the dependent service
 # is started.
 #
-volumes: {}
-  # local-backend-1:
-  #   driver: local
-  # local-backend-2:
-  #   driver: local
-  # local-backend-3:
-  #   driver: local
+volumes:
+  local-backend-home-3:
+    driver: local
+  local-backend-venv-3:
+    driver: local

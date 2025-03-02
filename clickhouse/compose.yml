@@ -25,7 +25,7 @@ services:
         for VOL in 'data-1' 'data-2'
         do
           touch /$$VOL/.initialized
-          ## chown -R clickhouse:clickhouse /$$VOL
+          ## chown -R 101:101 /$$VOL
           chmod -R 777 /$$VOL
           ls -ld /$$VOL
         done
@@ -57,6 +57,8 @@ services:
       - ./custom-config.xml:/etc/clickhouse-server/config.d/custom-config.xml
       - ./custom-default.xml:/etc/clickhouse-server/users.d/custom-default.xml
       - ./admin-user.xml:/etc/clickhouse-server/users.d/admin-user.xml
+      - ./server.crt:/etc/clickhouse-server/server.crt
+      - ./server.key:/etc/clickhouse-server/server.key
 
     # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
@@ -65,8 +67,8 @@ services:
     # set shared memory limit when using docker-compose
     user: root
     shm_size: 128mb
-    mem_limit: 3g
-    memswap_limit: 4g
+    mem_limit: 8g
+    memswap_limit: 16g
     ulimits:
       nofile:
         soft: 262144

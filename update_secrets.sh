@@ -115,7 +115,6 @@ fi
 for RELPATH in "backend/backend.secrets.env" \
                "backend/celery-exporter.secrets.env" \
                "backend/start-gate.secrets.env" \
-               "clickhouse/admin-user.xml" \
                "clickhouse/clickhouse-init.secrets.env" \
                "grafana/grafana.secrets.env" \
                "langfuse/langfuse.secrets.env" \
@@ -124,10 +123,22 @@ for RELPATH in "backend/backend.secrets.env" \
                "minio/minio-init.secrets.env" \
                "minio/minio.secrets.env" \
                "postgres/pgvector-init.secrets.env" \
-               "postgres/pgvector.secrets.env" \
-               "redis/redis.conf"
+               "postgres/pgvector.secrets.env"
 do
-    sudo chmod go+rw ${RELPATH}
     ( envsubst < ${RELPATH}.template > ${RELPATH} )
-    sudo chmod o-rwx ${RELPATH}
+done
+
+sudo chmod ugo+rw clickhouse/server.key clickhouse/server.crt
+openssl req -subj "/CN=localhost" -new -newkey rsa:2048 -days 365 -nodes -x509 \
+    -keyout clickhouse/server.key -out clickhouse/server.crt
+sudo chown rootless-101:rootless-101 clickhouse/server.key clickhouse/server.crt 
+
+for RELPATH in "clickhouse/admin-user.xml"
+do
+    ( envsubst < ${RELPATH}.template > ${RELPATH} )
+done
+
+for RELPATH in "redis/redis.conf"
+do
+    ( envsubst < ${RELPATH}.template > ${RELPATH} )
 done
