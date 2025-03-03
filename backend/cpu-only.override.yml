@@ -4,10 +4,8 @@ services:
     volumes:
       - local-backend-cpuonly-home-1:/home/python/home-1
       - local-backend-cpuonly-home-2:/home/python/home-2
-      - local-backend-cpuonly-home-3:/home/python/home-3
       - local-backend-cpuonly-venv-1:/home/python/venv-1
       - local-backend-cpuonly-venv-2:/home/python/venv-2
-      - local-backend-cpuonly-venv-3:/home/python/venv-3
       - local-backend-cpuonly-staging-1:/home/python/staging-1
       - local-backend-cpuonly-staging-2:/home/python/staging-2
 
@@ -19,15 +17,9 @@ services:
       GPU_MODE: cpu
     volumes:
       # Mounting a local area to use container-installed dependencies
-      - type: volume
-        source: local-backend-cpuonly-home-1
-        target: /home/python
-      - type: volume
-        source: local-backend-cpuonly-venv-1
-        target: /app/.venv
-      - type: volume
-        source: local-backend-cpuonly-staging-1
-        target: /staging
+      - local-backend-cpuonly-home-1:/home/python
+      - local-backend-cpuonly-venv-1:/app/.venv
+      - local-backend-cpuonly-staging-1:/staging
 
   celery-worker:
     image: 'localhost/answers-backend:python-3.12-cpu'
@@ -36,29 +28,9 @@ services:
       GPU_MODE: cpu
     volumes:
       # Mounting a local area to use container-installed dependencies
-      - type: volume
-        source: local-backend-cpuonly-home-2
-        target: /home/python
-      - type: volume
-        source: local-backend-cpuonly-venv-2
-        target: /app/.venv
-      - type: volume
-        source: local-backend-cpuonly-staging-2
-        target: /staging
-
-  celery-flower:
-    image: 'localhost/answers-backend:python-3.12-cpu'
-
-    environment:
-      GPU_MODE: cpu
-    volumes:
-      # Mounting a local area to use container-installed dependencies
-      - type: volume
-        source: local-backend-cpuonly-home-3
-        target: /home/python
-      - type: volume
-        source: local-backend-cpuonly-venv-3
-        target: /app/.venv
+      - local-backend-cpuonly-home-2:/home/python
+      - local-backend-cpuonly-venv-2:/app/.venv
+      - local-backend-cpuonly-staging-2:/staging
 
 #
 # Named volumes are not created until the dependent service
@@ -80,7 +52,4 @@ volumes:
     driver: local
   local-backend-cpuonly-staging-2:
     driver: local
-  local-backend-cpuonly-home-3:
-    driver: local
-  local-backend-cpuonly-venv-3:
-    driver: local
+

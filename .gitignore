@@ -13,6 +13,11 @@ logs
 secrets.env
 *.secrets.env
 
+# SSL certificates should not be committed
+*.crt
+*.key
+*.pem
+
 # Clickhouse admin user configuration contains password. Should not be committed
 clickhouse/admin-user.xml
 

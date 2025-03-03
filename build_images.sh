@@ -2,7 +2,7 @@
 
 set -eu
 
-for SUBDIR in postgres start-gate langfuse frontend backend
+for SUBDIR in postgres start-gate frontend backend
 do
     ( cd $SUBDIR/docker ; ./build_images.sh )
 done
