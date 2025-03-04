@@ -1,4 +1,5 @@
 from functools import cache
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 #
@@ -9,7 +10,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 @cache
-def get_chat_llm():
+def get_chat_llm() -> BaseChatModel:
     """
     """
 

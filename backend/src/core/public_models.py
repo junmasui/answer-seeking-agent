@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime
 import enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 
@@ -30,11 +30,22 @@ class DocumentStatus(str, enum.Enum):
 
 class Document(CamelModel):
     id: UUID
-    name: str
-    status: DocumentStatus
-    size_bytes: int
-    modification_time: datetime
-    ingestion_time: Optional[datetime] = None
+    name: str = Field(
+        description="File name of document.",
+    )
+    status: DocumentStatus = Field(
+        description="Status.",
+    )
+    size_bytes: int = Field(
+        description="Raw file size in bytes.",
+    )
+    modification_time: datetime = Field(
+        description="Latest time when document was modified.",
+    )
+    ingestion_time: Optional[datetime] = Field(
+        default=None,
+        description="Time when document was ingested.",
+    )
 
 
 class DocumentList(CamelModel):
@@ -50,9 +61,37 @@ class DocumentStats(CamelModel):
 class IngestRequestBody(CamelModel):
     doc_uuids: list[UUID]
 
+class Citation(CamelModel):
+    doc_uuid: UUID = Field(
+        description="Document UUID.",
+    )
+    text: str = Field(
+        description="Citation text.",
+    )
+    file_name: Optional[str] = Field(
+        default=None,
+        description="File name of source document.",
+    )
+    page_number: Optional[int] = Field(
+        default=None,
+        description="Page number of text within source document.",
+    )
+
 
 class Answer(CamelModel):
-    question: str
-    answer: str
-    thread_id: UUID
-    user_id: Optional[str] = None
+    question: str = Field(
+        description="User's question.",
+    )
+    answer: str = Field(
+        description="Answer to the user's question with citations.",
+    )
+    citations: list[Citation] = Field(
+        description="List of citations.",
+    )
+    thread_id: UUID = Field(
+        description="Conversation UUID. A conversation is a sequence of questions and answers.",
+    )
+    user_id: Optional[str] = Field(
+        default=None,
+        description="User UUID associated this question and answer.",
+    )

@@ -21,5 +21,9 @@ class GraphState(TypedDict):
     next_message_id: NotRequired[int]
 
     question: str
-    generation: NotRequired[str]
+
     documents: NotRequired[list[str]]
+
+    generation: NotRequired[str]
+    answer: NotRequired[str]
+    citations: NotRequired[list[dict[str, str]]]

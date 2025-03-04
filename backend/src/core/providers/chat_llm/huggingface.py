@@ -1,5 +1,6 @@
 
 from functools import cache
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingFacePipeline
 
 #
@@ -8,7 +9,7 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingF
 # See: https://python.langchain.com/docs/integrations/chat/huggingface/
 #
 @cache
-def get_chat_llm():
+def get_chat_llm() -> BaseChatModel:
 
     model_id='microsoft/Phi-3.5-mini-instruct'
 
