@@ -10,7 +10,7 @@ from langchain_core.runnables import RunnableConfig
 
 logger = logging.getLogger(__name__)
 
-class CitationParser(BaseGenerationOutputParser[dict[str, str]]):
+class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
     """Parse the output of an LLM call into a Dictionary using a regex."""
 
     regex_footnote: str = re.compile(r'''
