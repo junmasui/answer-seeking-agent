@@ -30,11 +30,10 @@ for RELPATH in "frontend/" "backend/"
 do
     sudo find $RELPATH -type d \
         -exec chown rootless-1000:rootless-1000 \{\} \; \
-        -exec chmod ugo+srwx \{\}  \;
+        -exec chmod ug=srwx,o=rx \{\} \;
     sudo find $RELPATH -type f \
         -exec chown rootless-1000:rootless-1000 \{\} \; \
-        -exec chmod ug+rw \{\}  \; \
-        -exec chmod o+r \{\}  \;
+        -exec chmod ug=rw,o=r \{\}  \;
 done
 
 
@@ -42,26 +41,21 @@ for RELPATH in "clickhouse/"
 do
     sudo find clickhouse/ -iname '*.xml' -type f \
         -exec chown rootless-101:rootless-101 \{\} \; \
-        -exec chmod ug+w \{\}  \; \
-        -exec chmod o+r \{\}  \;
+        -exec chmod ug=rw \{\}  \;
 done
 
 sudo find postgres/ -iname '*.sql.template' -type f \
     -exec chown rootless-999:rootless-999 \{\} \; \
-    -exec chmod ug+w \{\}  \; \
-    -exec chmod o+r \{\}  \;
+    -exec chmod ug=rw,o=r \{\}  \;
 
 sudo find postgres/ -iname '*.sh' -type f \
     -exec chown rootless-999:rootless-999 \{\} \; \
-    -exec chmod ug+w \{\}  \; \
-    -exec chmod o+r \{\}  \;
+    -exec chmod ug=rw,o=r \{\}  \;
 
 sudo find redis/ -iname '*.conf' -type f \
     -exec chown rootless-999:rootless-999 \{\} \; \
-    -exec chmod ug+w \{\}  \; \
-    -exec chmod o+r \{\}  \;
+    -exec chmod ug=rw \{\}  \;
 
 sudo find clickhouse/ -iname '*admin-user.xml' -type f \
     -exec chown rootless-101:rootless-101 \{\} \; \
-    -exec chmod ug+w \{\}  \; \
-    -exec chmod o+r \{\}  \;
+    -exec chmod ug=rw \{\}  \;
