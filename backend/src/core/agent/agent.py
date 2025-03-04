@@ -23,7 +23,7 @@ from .retrieval_grader import grade_documents
 from .answer_generator import generate_answer
 from .question_rewriter import rewrite_question
 
-from ..public_models import Answer
+from ..public_models import Answer, Citation
 
 
 logger = logging.getLogger(__name__)
@@ -102,7 +102,6 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     # graph's stream output's keys. In other words, the set of keys is dynamic not static.
     # And because we are not static, we avoid TypedDict and its subclasses (ex: GraphState).
     latest_value = {}
-    answer = None
     try:
         extra_data = {'thread_id': thread_id.hex}
         if user_id:
@@ -114,26 +113,35 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
                 # Node
                 logger.info("Node '%s':", key)
                 latest_value.update(value)
-            logger.info('\n---\n')
     except GraphRecursionError as e:
-        logger.error('Graph recursion error: %s', e)
+        logger.error('Graph recursion error', exc_info=e)
     except Exception as e:
-        logger.error('General error: %s', e)
+        logger.error('General error', exc_info=e)
 
     # If we haven't assigned the answer yet, then pull it from the
     # generated output.
-    if answer is None:
-        answer = latest_value.get('generation', None)
+    answer = latest_value.get('answer', None)
+    citations = []
+    if answer is not None:
+        citations = latest_value.get('citations', [])
 
     # If there was no generate output (for example, because there was an error),
     # then set it to a hard-wired generic answer.
     if answer is None:
         answer = 'I cannot find the answer to this question at this moment'
+        citations = []
+
+    citations = [Citation(doc_uuid=citation['doc_id'],
+                          text=citation['text'],
+                          page_number=citation.get('page_number'),
+                          file_name=citation.get('file_name'))
+                 for citation in citations]
 
     logger.info('answer: %s', answer)
     return Answer(
         question = user_input,
         answer = answer,
+        citations = citations,
         thread_id = thread_id,
         user_id = user_id
     )

@@ -19,7 +19,12 @@ def postprocess(state):
     """
     logger.info('---POSTPROCESS---')
 
-    answer = state['generation']
+    answer = state['answer']
+    citations = state['citations']
+    content = [{
+        'answer': answer,
+        'citations': citations
+    }]
 
     # Update agent state with new AI-generation entries in the message histories.
 
@@ -28,8 +33,8 @@ def postprocess(state):
     next_message_id += 1
 
     stateUpdates = {
-        'messages': [ AIMessage(content=answer, id=message_id) ],
-        'original_messages': [ AIMessage(content=answer, id=message_id) ],
+        'messages': [ AIMessage(content=content, id=message_id) ],
+        'original_messages': [ AIMessage(content=content, id=message_id) ],
         'next_message_id': next_message_id
     }
     return stateUpdates

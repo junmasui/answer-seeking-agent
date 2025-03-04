@@ -11,7 +11,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
-
+from .answer_citation_parser import AnswerCitationParser
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,18 @@ def answer_generator():
     # Prompt
     human = '''\
         You are an assistant for question-answering tasks.
-        Use the following chat history and pieces of retrieved context
+        Use the following chat history and pieces of retrieved source documents
         to answer the question. If you don't know the answer, just say
         that you don't know. Use three sentences maximum and keep
         the answer concise.
+
+        Make your response as informative as possible and make sure every sentence is
+        supported by the gathered information.
+        Each sentence must be backed up by a citation from a retrieved source document,
+        formatted as a footnote.
+        The reference marks should be in the format [^1], [^2], [^3], etc.
+        Each footnote should be formated as XML
+        with a schema <footnote><docId></docId><fileName></fileName><pageNumber></pageNumber></footnote>.
 
         Question:
         
@@ -33,9 +41,9 @@ def answer_generator():
         
         {chat_history}
 
-        Context:
+        Source Documents:
         
-        {context}
+        {documents}
 
         Answer:
         '''
@@ -58,7 +66,7 @@ def answer_generator():
 
 
     # Chain
-    rag_chain = prompt | llm | StrOutputParser()
+    rag_chain = prompt | llm | CitationParser()
 
     rag_chain = rag_chain.with_config({'run_name': 'answer_generator'})
 
@@ -83,8 +91,15 @@ def generate_answer(state):
     rag_chain = answer_generator()
 
     # RAG generation
-    generation = rag_chain.invoke({'context': documents, 'chat_history': history, 'question': question})
+    result = rag_chain.invoke(input={'documents': documents,
+                                     'chat_history': history,
+                                     'question': question},
+                                     config={'configurable': {'documents': documents}})
 
     # Update state with generated output
-    stateUpdates = { 'generation': generation }
+    stateUpdates = {
+        'generation': result['generation'],
+        'answer': result['answer'],
+        'citations': result['citations']
+    }
     return stateUpdates

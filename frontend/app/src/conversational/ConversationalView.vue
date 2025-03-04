@@ -121,7 +121,17 @@ async function submit(event) {
 
     threadId.value = data?.threadId ?? ''
 
-    messages.value.push({ type: 'system', message: data?.answer ?? '' })
+    var message = data?.answer ?? ''
+    if (data?.citations) {
+      message += '\n\n<p></p>'
+
+      data.citations.forEach((citation, index) => {
+        var formatted = `${citation['fileName']}, page ${citation['pageNumber']}`
+        message += `\n\n[^${index + 1}]: ${formatted}`
+      })
+    }
+
+    messages.value.push({ type: 'system', message: message })
 
   } catch (error) {
     console.error('Error: query failed', error);
