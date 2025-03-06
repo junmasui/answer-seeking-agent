@@ -2,8 +2,8 @@ import logging
 import datetime
 import uuid
 
-from sqlalchemy import DateTime, Enum, Integer, MetaData, String, Uuid
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, registry
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, MetaData, String, Uuid
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session, registry, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql.functions import current_timestamp
@@ -21,29 +21,46 @@ class Base(DeclarativeBase):
     registry = registry_obj
 
 
-def create_tables_if_not_existing():
-    """Creates tables for model objects defined with this module's `Base`.
-    """
-    logger.info('creating tables that are absent')
-    engine = get_engine()
-
-    metadata_obj.create_all(engine)
-
-def drop_all_tables():
-    """Drops all tables for model objects defined with this module's `Base`.
-    """
-    logger.info('dropping all registered tables')
-    engine = get_engine()
-
-    metadata_obj.drop_all(engine)
 
 
+class TrackedDocumentSet(Base):
+
+    __tablename__ = "tracked_document_sets"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    name: Mapped[str] = mapped_column(String(800), nullable=False)
+    is_new_doc_default: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    is_public_viewable: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+    filedir: Mapped[str] = mapped_column(String(800), nullable=True)
+
+    s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=True)
+
+    # Used to track the last user who acted on this document.
+    last_user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=True)
+
+    # 1. `server_default` means that the value is set inside the "CREATE TABLE" statement
+    #    by defining a default value that calls the current_timestamp function.
+    # 2. `onupdate` means that the value is set within the "UPDATE" statement.
+    #
+    # See https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_default
+    # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.onupdate
+    # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_onupdate.
+    #
+    create_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
+    update_time: Mapped[datetime.datetime] = mapped_column(DateTime, 
+        server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
+    )
+
+    # Define the relationship to TrackedDocument
+    documents: Mapped[list['TrackedDocument']] = relationship(order_by='TrackedDocument.id', back_populates='document_set')
 
 class TrackedDocument(Base):
 
     __tablename__ = "tracked_documents"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    doc_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{TrackedDocumentSet.__tablename__}.id'))
     status: Mapped[DocumentStatus] = mapped_column(Enum(DocumentStatus), nullable=False)
     filedir: Mapped[str] = mapped_column(String(800), nullable=False)
     filename: Mapped[str] = mapped_column(String(800), nullable=False)
@@ -71,3 +88,6 @@ class TrackedDocument(Base):
     update_time: Mapped[datetime.datetime] = mapped_column(DateTime, 
         server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )
+
+    # Define the relationship to TrackedDocumentSet
+    document_set: Mapped['TrackedDocumentSet'] = relationship(back_populates='documents')

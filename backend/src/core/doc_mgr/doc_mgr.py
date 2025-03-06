@@ -2,9 +2,14 @@ import logging
 
 from sqlalchemy import func
 
-from .model_ops import list_tracking_records, get_tracking_stats, update_tracking_record
-from .model import create_tables_if_not_existing, drop_all_tables
-from ..public_models import Document, DocumentList, DocumentStats
+from .model import TrackedDocument, TrackedDocumentSet
+from .model_ops import (create_tables_if_not_existing,
+                        drop_all_tables,
+                        list_tracking_records,
+                        get_tracking_stats,
+                        list_tracking_document_sets,
+                        update_tracking_record)
+from ..public_models import Document, DocumentList, DocumentSet, DocumentSetList, DocumentStats
 
 from ..signals import start_up_handler, reset_data_handler
 
@@ -26,7 +31,24 @@ def documents_reset(sender):
     create_tables_if_not_existing()
 
 
+def list_document_sets(start, length):
+    """Return the list of document sets.
+    """
 
+    existing_objs = list_tracking_document_sets(start=start, length=length)
+
+    def _to_dict(_x: TrackedDocumentSet):
+        return DocumentSet(
+            id = _x.id,
+            name = _x.name
+        )
+
+    doc_set_list = [_to_dict(x) for x in existing_objs]
+
+    return DocumentSetList(
+        document_sets = doc_set_list,
+        document_set_count = 0
+    )
 
 def list_documents(file_dir, start, length):
     """Return the list of files in cloud storage.
@@ -35,14 +57,16 @@ def list_documents(file_dir, start, length):
     existing_objs = list_tracking_records(start, length)
     table_stats = get_tracking_stats()
 
-    def _to_dict(_x):
+    def _to_dict(_x: TrackedDocument):
         return Document(
             id = _x.id,
             status = _x.status,
             name = _x.filename,
             size_bytes = _x.size_bytes,
             modification_time = _x.file_modified_time,
-            ingestion_time = _x.ingested_time
+            ingestion_time = _x.ingested_time,
+            document_set_id = _x.document_set.id,
+            document_set_name = _x.document_set.name
         )
 
     file_list = [_to_dict(x) for x in existing_objs]

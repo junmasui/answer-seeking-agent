@@ -17,7 +17,7 @@ import sim_auth_app
 from log_config_monitor import get_logging_conf_monitor, dump_logger_tree
 
 
-from .routers import admin, answer, documents
+from .routers import admin, answer, document_sets, documents
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ instrumentator = Instrumentator().instrument(app)
 
 app.include_router(router=admin.router, prefix='/admin', )
 app.include_router(router=answer.router, prefix='/answer')
+app.include_router(router=document_sets.router, prefix='/document-sets')
 app.include_router(router=documents.router, prefix='/documents')
 
 app.mount('/sim_auth', sim_auth_app.app)
