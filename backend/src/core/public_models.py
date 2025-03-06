@@ -46,12 +46,31 @@ class Document(CamelModel):
         default=None,
         description="Time when document was ingested.",
     )
+    document_set_id: Optional[UUID] = Field(
+        description="Document set UUID.",
+    )
+    document_set_name: Optional[str] = Field(
+        description="Document set name.",
+    )
 
 
 class DocumentList(CamelModel):
     documents: list[Document]
     document_count: Optional[int] = None
     table_updated_time: Optional[datetime] = None
+
+
+class DocumentSet(CamelModel):
+    id: UUID
+    name: str = Field(
+        description="Name of document set.",
+    )
+
+class DocumentSetList(CamelModel):
+    document_sets: list[DocumentSet]
+    document_set_count: Optional[int] = None
+    table_updated_time: Optional[datetime] = None
+
 
 class DocumentStats(CamelModel):
     document_count: int = None

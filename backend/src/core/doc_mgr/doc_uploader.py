@@ -2,7 +2,7 @@ import logging
 
 from ..providers.file_store import get_s3_directory, get_s3_bucket
 
-from .model_ops import add_or_update_tracking_record
+from .model_ops import add_or_update_tracking_record, list_tracking_document_sets
 
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,9 @@ def upload_document(file_dir, file_name, local_file, user_id):
         return
 
     bucket = get_s3_bucket()
-    add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket, user_id)
+    doc_sets = list_tracking_document_sets(is_default=True)
+    doc_set = doc_sets[0]
+    add_or_update_tracking_record(doc_set.id, file_dir, file_name, cloud_path, bucket, user_id)
 
 
 def upload_chunk(chunk_dir, file_name, chunk_index, local_file):
@@ -56,7 +58,9 @@ def merge_chunked_document(file_dir, chunk_dir, file_name, total_chunks, user_id
         return
 
     bucket = get_s3_bucket()
-    add_or_update_tracking_record(file_dir, file_name, cloud_path, bucket, user_id)
+    doc_sets = list_tracking_document_sets(is_default=True)
+    doc_set = doc_sets[0]
+    add_or_update_tracking_record(doc_set.id, file_dir, file_name, cloud_path, bucket, user_id)
 
 
 
