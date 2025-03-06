@@ -12,14 +12,16 @@
         v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
         :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.documentSetName="{ item, index }">
-            <v-autocomplete class="mt-2"
-                v-model="item.documentSetName"
-                :items="documentSets"
-                item-title="name"
-                item-value="id"
-                density="compact"
-                variant="outlined"
-                ></v-autocomplete>
+            {{ item.documentSetName }}
+            <v-icon size="small" @click="changeDocumentSet(item, index)">
+                mdi-menu-down
+            </v-icon>
+            <list-item-picker-dialog v-model:active="pickDocumentSet" v-model:selectedItem="selectedDocumentSet" :items="documentSets"
+                item-title="name" item-value="id"
+                @canceled="closePickDocSet" @selected="selectNewDocSet">
+                Select document set
+            </list-item-picker-dialog>
+
         </template>
         <template v-slot:item.actions="{ item, index }">
             <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
@@ -53,6 +55,7 @@ import { storeToRefs } from 'pinia'
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useDocumentStore } from './DocStore';
 import ConfirmationDialog from '../common/ConfirmationDialog.vue';
+import ListItemPickerDialog from '../common/ListItemPickerDialog.vue';
 
 const currentUserStore = useCurrentUserStore();
 const documentStore = useDocumentStore()
@@ -199,6 +202,68 @@ async function deleteDocument(doc_uuid) {
 
 
 async function closeDelete() {
+    await loadItems()
+
+    nextTick(() => {
+        targetItem.value = {}
+        targetIndex.value = -1
+    })
+}
+
+//
+// Dialog for one-file document set change
+//
+
+const pickDocumentSet = ref(false)
+const selectedDocumentSet = ref({})
+
+function changeDocumentSet(item, index) {
+    pickDocumentSet.value = true
+    targetIndex.value = index
+    targetItem.value = Object.assign({}, item)
+
+    selectedDocumentSet.value = documentSets.value.find(x => x.id === item.documentSetId)
+}
+
+async function selectNewDocSet() {
+    await updateDocSet(targetItem.value.id, selectedDocumentSet.value.id)
+
+    await closePickDocSet()
+}
+
+async function updateDocSet(doc_uuid, doc_set_uuid) {
+    try {
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const body = {
+            documentSetId: doc_set_uuid
+        }
+
+        const response = await fetch(`/api/documents/${doc_uuid}`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body, null, 2)
+        });
+
+        if (!response.ok) {
+            throw new Error('Update failed');
+        }
+
+        const data = await response.json();
+        console.log('Update successfully:', data);
+    } catch (error) {
+        console.error('Error updating document set:', error);
+    }
+}
+
+async function closePickDocSet() {
     await loadItems()
 
     nextTick(() => {

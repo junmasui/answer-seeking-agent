@@ -2,12 +2,13 @@
 
 from typing import Union, Optional, Annotated
 import logging
+import pprint
 
 from fastapi import UploadFile, Form, Depends, APIRouter
 
 from core import (list_documents, upload_document, upload_chunk,
-                  merge_chunked_document, delete_document, get_document_stats, update_document_status)
-from core.public_models import DocumentList, DocumentStats, IngestRequestBody, DocumentStatus
+                  merge_chunked_document, delete_document, get_document_stats, update_document, update_document_status)
+from core.public_models import DocumentList, DocumentStats, IngestRequestBody, DocumentStatus, DocumentUpdateRequest
 
 
 from core_worker import ingest_task
@@ -61,6 +62,22 @@ async def handle_upload(file: UploadFile,
         return
 
     upload_document('documents', file.filename, file.file, user_id)
+
+@router.post('/{doc_uuid}')
+async def handle_single_update(doc_uuid,
+                               body: Optional[DocumentUpdateRequest] = None,
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
+    """Ingest the file specified by the document UUID.
+    """
+
+    user_id = current_user.userid if current_user is not None else None
+
+    update_document(
+        doc_uuid, doc_set_uuid=body.document_set_id, last_user_id=user_id)
+
+    task = ingest_task.delay(doc_ids=[doc_uuid])
+
+    return {'task_id': task.id}
 
 
 @router.post('/{doc_uuid}/ingest')

@@ -32,10 +32,14 @@ def create_tables_if_not_existing():
     metadata_obj.create_all(engine)
 
     with Session(engine) as session:
-        doc_set_count = session.scalar(select(func.count()).select_from(TrackedDocumentSet).limit(1))
+        doc_set_count = session.scalar(select(func.count()).select_from(TrackedDocumentSet).limit(10))
         if doc_set_count == 0:
             doc_sets = [
-                TrackedDocumentSet(id=uuid.uuid4(), name='default', is_new_doc_default=True, is_public_viewable=True)
+                TrackedDocumentSet(id=uuid.uuid4(), name='default', is_new_doc_default=True, is_public_viewable=True),
+                TrackedDocumentSet(id=uuid.uuid4(), name='public 2', is_new_doc_default=False, is_public_viewable=True),
+                TrackedDocumentSet(id=uuid.uuid4(), name='public 3', is_new_doc_default=False, is_public_viewable=True),
+                TrackedDocumentSet(id=uuid.uuid4(), name='private A', is_new_doc_default=False, is_public_viewable=False),
+                TrackedDocumentSet(id=uuid.uuid4(), name='private B', is_new_doc_default=False, is_public_viewable=False)
                 ]
             session.add_all(doc_sets)
         session.commit()
@@ -285,6 +289,8 @@ def update_tracking_record(doc_uuid):
 
         with session.begin():
             yield existing_obj
+
+        logger.info('updating tracking record %s', existing_obj.doc_set_id)
 
 
 def delete_tracking_record(doc_uuid):

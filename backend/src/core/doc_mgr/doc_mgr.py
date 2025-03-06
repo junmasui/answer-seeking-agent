@@ -87,6 +87,17 @@ def get_document_stats(file_dir):
         table_updated_time = table_stats['max_update_time']
     )
 
+def update_document(doc_uuid, doc_set_uuid=None, last_user_id=None):
+    """Updates status field with option to update 
+    """
+    with update_tracking_record(doc_uuid=doc_uuid) as record:
+
+        if doc_set_uuid:
+            record.doc_set_id = doc_set_uuid
+
+        if last_user_id:
+            record.last_user_id = last_user_id
+
 def update_document_status(doc_uuid, status, last_user_id=None):
     """Updates status field with option to update 
     """
