@@ -11,6 +11,16 @@
     <v-data-table-server show-select return-object v-model="selectedItems" v-model:page="page"
         v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
         :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
+        <template v-slot:item.documentSetName="{ item, index }">
+            <v-autocomplete class="mt-2"
+                v-model="item.documentSetName"
+                :items="documentSets"
+                item-title="name"
+                item-value="id"
+                density="compact"
+                variant="outlined"
+                ></v-autocomplete>
+        </template>
         <template v-slot:item.actions="{ item, index }">
             <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
                 mdi-database-import
@@ -48,7 +58,7 @@ const currentUserStore = useCurrentUserStore();
 const documentStore = useDocumentStore()
 
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
-const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentStore);
+const { page, itemsPerPage, totalItems, items, selectedItems, documentSets } = storeToRefs(documentStore);
 const tableUpdatedAt = ref();
 const tableOutdated = ref(false);
 
@@ -60,6 +70,11 @@ const headers = ref([
     {
         title: 'Last Modified Date',
         key: 'modificationTime'
+    },
+    {
+        title: 'Document Set',
+        key: 'documentSetName',
+        width: '150px'
     },
     { title: 'Status', key: 'status' },
     {
@@ -258,6 +273,7 @@ var intervalId = null;
 
 onMounted(async () => {
     await loadItems();
+    await loadDocumentSets();
 
     intervalId = setInterval(async () => {
         await loadTableStats()
@@ -348,6 +364,37 @@ async function loadItems() {
     loading.value = false
 }
 
+
+async function loadDocumentSets() {
+    try {
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const params = new URLSearchParams({
+        })
+
+        const response = await fetch(`/api/document-sets/?${params}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get document sets');
+        }
+
+        const data = await response.json();
+
+        documentSets.value = data.documentSets;
+
+    } catch (error) {
+        documentSets.value = [];
+        console.error('Error getting document sets:', error);
+    }
+}
 
 </script>
 
