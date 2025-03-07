@@ -32,10 +32,14 @@ def create_tables_if_not_existing():
     metadata_obj.create_all(engine)
 
     with Session(engine) as session:
-        doc_set_count = session.scalar(select(func.count()).select_from(TrackedDocumentSet).limit(1))
+        doc_set_count = session.scalar(select(func.count()).select_from(TrackedDocumentSet).limit(10))
         if doc_set_count == 0:
             doc_sets = [
-                TrackedDocumentSet(id=uuid.uuid4(), name='default', is_new_doc_default=True, is_public_viewable=True)
+                TrackedDocumentSet(id=uuid.uuid4(), name='default', is_new_doc_default=True, is_public_viewable=True),
+                TrackedDocumentSet(id=uuid.uuid4(), name='public 2', is_new_doc_default=False, is_public_viewable=True),
+                TrackedDocumentSet(id=uuid.uuid4(), name='public 3', is_new_doc_default=False, is_public_viewable=True),
+                TrackedDocumentSet(id=uuid.uuid4(), name='private A', is_new_doc_default=False, is_public_viewable=False),
+                TrackedDocumentSet(id=uuid.uuid4(), name='private B', is_new_doc_default=False, is_public_viewable=False)
                 ]
             session.add_all(doc_sets)
         session.commit()
@@ -70,7 +74,7 @@ def list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public:
         if is_public is not None:
             core_query = core_query.where(TrackedDocumentSet.is_public_viewable == is_public)
 
-        #
+        # Apply pagination if requested
         if paginate:
             # When paginating, we add a windowing function to the selected fields.
             cte_query= core_query.add_columns(
@@ -151,6 +155,7 @@ def list_tracking_records(start: Optional[int] = None, length: Optional[int] = N
 
         core_query = select(TrackedDocument)
 
+        # Apply pagination if requested
         if paginate:
             # When paginating, we add a windowing function to the selected fields.
             cte_query = core_query.add_columns(
@@ -219,11 +224,11 @@ def get_tracking_records(doc_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def add_or_update_tracking_record(doc_set_uuid, file_dir, file_name, cloud_path, bucket_path, user_id):
+def add_or_update_tracking_record(document_set_uuid, file_dir, file_name, cloud_path, bucket_path, user_id):
     """Adds or updates the tracking record for the document.
     """
-    if not isinstance(doc_set_uuid, uuid.UUID):
-        raise TypeError('doc_set_uuid must be a UUID object')
+    if not isinstance(document_set_uuid, uuid.UUID):
+        raise TypeError('document_set_uuid must be a UUID object')
 
     doc_uuid = generate_uuid_from_name('doc:'+file_dir+'/'+file_name)
 
@@ -246,7 +251,7 @@ def add_or_update_tracking_record(doc_set_uuid, file_dir, file_name, cloud_path,
 
         with session.begin():
             if existing_obj:
-                existing_obj.doc_set_id = doc_set_uuid
+                existing_obj.document_set_id = document_set_uuid
                 existing_obj.size_bytes = size_bytes
                 existing_obj.file_modified_time = file_modification_time
                 existing_obj.s3_rel_path = str(s3_rel_path)
@@ -254,7 +259,7 @@ def add_or_update_tracking_record(doc_set_uuid, file_dir, file_name, cloud_path,
             else:
                 new_obj = TrackedDocument(
                     id=doc_uuid,
-                    doc_set_id=doc_set_uuid,
+                    document_set_id=document_set_uuid,
                     status=DocumentStatus.UPLOADED,
                     filedir=file_dir,
                     filename=file_name,

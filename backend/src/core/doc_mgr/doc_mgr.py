@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from sqlalchemy import func
 
@@ -31,7 +32,7 @@ def documents_reset(sender):
     create_tables_if_not_existing()
 
 
-def list_document_sets(start, length):
+def list_document_sets(is_default: Optional[bool] = None, is_public: Optional[bool] = None, start=None, length=None):
     """Return the list of document sets.
     """
 
@@ -86,6 +87,17 @@ def get_document_stats(file_dir):
         document_count = table_stats['doc_count'],
         table_updated_time = table_stats['max_update_time']
     )
+
+def update_document(doc_uuid, doc_set_uuid=None, last_user_id=None):
+    """Updates status field with option to update 
+    """
+    with update_tracking_record(doc_uuid=doc_uuid) as record:
+
+        if doc_set_uuid:
+            record.document_set_id = doc_set_uuid
+
+        if last_user_id:
+            record.last_user_id = last_user_id
 
 def update_document_status(doc_uuid, status, last_user_id=None):
     """Updates status field with option to update 

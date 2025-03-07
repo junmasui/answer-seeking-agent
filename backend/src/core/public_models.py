@@ -53,6 +53,11 @@ class Document(CamelModel):
         description="Document set name.",
     )
 
+class DocumentUpdateRequest(CamelModel):
+    document_set_id: Optional[UUID] = Field(
+        description="Document set UUID.",
+    )
+
 
 class DocumentList(CamelModel):
     documents: list[Document]

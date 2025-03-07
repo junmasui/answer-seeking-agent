@@ -66,7 +66,7 @@ def answer_generator():
 
 
     # Chain
-    rag_chain = prompt | llm | CitationParser()
+    rag_chain = prompt | llm | AnswerCitationParser()
 
     rag_chain = rag_chain.with_config({'run_name': 'answer_generator'})
 

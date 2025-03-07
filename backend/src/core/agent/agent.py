@@ -25,6 +25,7 @@ from .question_rewriter import rewrite_question
 
 from ..public_models import Answer, Citation
 
+from ..doc_mgr import list_document_sets
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,9 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     elif isinstance(thread_id, str):
         thread_id = uuid.UUID(hex=thread_id)
 
+    result = list_document_sets(is_public=True)
+    doc_set_ids = [doc_set.id for doc_set in result.document_sets]
+
     graph = get_agent_graph()
     logger.info('streaming_mode: %s', graph.stream_mode)
 
@@ -96,7 +100,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
     input = {
-        'question': user_input
+        'question': user_input,
+        'document_set_ids': doc_set_ids,
     }
     # Capture into a dict, not TypedDict. We want to make zero assumptions about the
     # graph's stream output's keys. In other words, the set of keys is dynamic not static.

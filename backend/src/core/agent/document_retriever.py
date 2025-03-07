@@ -27,10 +27,21 @@ def retrieve_documents(state):
     logger.info('---RETRIEVE---')
     question = state['question']
 
+    kwargs = {}
+
+    doc_set_ids = state['document_set_ids']
+    doc_set_ids = [str(x) for x in doc_set_ids]
+    if doc_set_ids and len(doc_set_ids) > 0:
+        kwargs['filter'] = {
+            'document_set_id': {
+                '$in': doc_set_ids
+            }
+        }
+
     retriever = get_retriever()
 
     # Retrieval
-    documents = retriever.invoke(question)
+    documents = retriever.invoke(question, **kwargs)
 
     # Update agent state with retrieved documents
     stateUpdates = { 'documents': documents }
