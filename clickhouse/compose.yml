@@ -75,7 +75,7 @@ services:
         hard: 262144
 
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:8123/ping' ]
+      test: [ 'CMD', 'wget', 'http://localhost:8123/ping' ]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -86,7 +86,7 @@ services:
       clickhouse:
         condition: service_healthy
 
-    image: clickhouse:24.12.3
+    image: localhost/start-gate:1.0
     profiles: [ clickhouse, infrastructure, all ]
 
     environment:
