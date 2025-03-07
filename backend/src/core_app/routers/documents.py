@@ -63,7 +63,7 @@ async def handle_upload(file: UploadFile,
 
     upload_document('documents', file.filename, file.file, user_id)
 
-@router.post('/{doc_uuid}')
+@router.post('/{doc_uuid}/update')
 async def handle_single_update(doc_uuid,
                                body: Optional[DocumentUpdateRequest] = None,
                                current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
@@ -75,9 +75,7 @@ async def handle_single_update(doc_uuid,
     update_document(
         doc_uuid, doc_set_uuid=body.document_set_id, last_user_id=user_id)
 
-    task = ingest_task.delay(doc_ids=[doc_uuid])
-
-    return {'task_id': task.id}
+    return {}
 
 
 @router.post('/{doc_uuid}/ingest')

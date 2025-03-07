@@ -1,6 +1,7 @@
 
 from typing import Annotated, NotRequired
 from typing_extensions import TypedDict
+from uuid import UUID
 
 from langgraph.graph.message import add_messages
 
@@ -21,6 +22,7 @@ class GraphState(TypedDict):
     next_message_id: NotRequired[int]
 
     question: str
+    document_set_ids: NotRequired[list[UUID]]
 
     documents: NotRequired[list[str]]
 

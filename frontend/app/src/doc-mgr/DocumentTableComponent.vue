@@ -246,7 +246,7 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
             documentSetId: doc_set_uuid
         }
 
-        const response = await fetch(`/api/documents/${doc_uuid}`, {
+        const response = await fetch(`/api/documents/${doc_uuid}/update`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(body, null, 2)

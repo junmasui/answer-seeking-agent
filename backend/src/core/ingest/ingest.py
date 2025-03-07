@@ -35,7 +35,7 @@ def ingest_documents(doc_ids):
     staging_dir = config.staging_dir / 'ingest'
     staging_dir.mkdir(parents=True, exist_ok=True)
 
-    def _load_one_source(source_path, tracked_rel_path):
+    def _load_one_source(source_path, tracked_rel_path, tracked_doc_set_id):
 
         loader = get_doc_loader(file_path=source_path)
 
@@ -56,6 +56,9 @@ def ingest_documents(doc_ids):
             doc.metadata['source'] = str(doc.metadata['source'])
 
             doc.metadata['relative_path'] = tracked_rel_path
+
+            # Add metadata useful for search-time pre-filtering, such as the document set ID.
+            doc.metadata['document_set_id'] = str(tracked_doc_set_id)
 
             yield doc
 
@@ -88,8 +91,11 @@ def ingest_documents(doc_ids):
                 # Something was unexpected. Maybe a broken clean up. Let's log it and move on.
                 logger.debug('unexpected actual local path: %s, expected: %s', actual_local_path, local_path)
 
+            # From the tracking record, get metadata useful for search-time pre-filtering, such as the document-set ID.
+            doc_set_id = detached_record.document_set_id
+
             # Process the file
-            documents = list(_load_one_source(actual_local_path, rel_path))
+            documents = list(_load_one_source(actual_local_path, rel_path, doc_set_id))
 
             # Update the vector store. Since the file is fully processed, the vector store
             # will not represent a partially processed file.
@@ -114,11 +120,11 @@ def ingest_documents(doc_ids):
 
             logger.info('stored %d vectors regarding %s', len(new_pg_doc_ids), rel_path)
 
-            new_pg_doc_set_id = set(new_pg_doc_ids)
-            prior_pg_doc_set_id = set(prior_pg_doc_ids)
+            new_pg_doc_id_coll = set(new_pg_doc_ids)
+            prior_pg_doc_id_coll = set(prior_pg_doc_ids)
             # Subtract the set of new IDs from the set of prior IDs. The result
             # will be the set of orphans to delete from the vector store.
-            to_remove = list(prior_pg_doc_set_id - new_pg_doc_set_id)
+            to_remove = list(prior_pg_doc_id_coll - new_pg_doc_id_coll)
             if len(to_remove) > 0:
                 vector_store.delete(to_remove)
 

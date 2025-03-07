@@ -60,7 +60,7 @@ class TrackedDocument(Base):
     __tablename__ = "tracked_documents"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
-    doc_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{TrackedDocumentSet.__tablename__}.id'))
+    document_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{TrackedDocumentSet.__tablename__}.id'))
     status: Mapped[DocumentStatus] = mapped_column(Enum(DocumentStatus), nullable=False)
     filedir: Mapped[str] = mapped_column(String(800), nullable=False)
     filename: Mapped[str] = mapped_column(String(800), nullable=False)
