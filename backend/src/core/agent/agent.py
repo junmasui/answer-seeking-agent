@@ -14,14 +14,16 @@ from langgraph.errors import GraphRecursionError
 from langfuse.callback import CallbackHandler
 
 from .agent_state import GraphState
-from .checkpointer import get_checkpointer
-from .deciders import decide_to_generate, grade_generation_v_documents_and_question
-from .document_retriever import retrieve_documents
-from .postprocess import postprocess
-from .preprocess import preprocess
-from .retrieval_grader import grade_documents
 from .answer_generator import generate_answer
+from .answer_grader import grade_answer
+from .checkpointer import get_checkpointer
+from .deciders import check_for_relevant_documents, check_for_halluciation, check_for_answer_relevancy
+from .document_retriever import retrieve_documents
+from .hallucination_grader import grade_hallucination
+from .postprocess import add_response_to_history
+from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
+from .retrieval_grader import grade_documents
 
 from ..public_models import Answer, Citation
 
@@ -31,52 +33,82 @@ logger = logging.getLogger(__name__)
 
 
 
-@cache
-def get_agent_graph() -> Pregel:
+def _get_uncompiled_agent_graph() -> Pregel:
 
     # Build graph
 
     graph_builder = StateGraph(GraphState)
 
     # Define the nodes
-    graph_builder.add_node('preprocess', preprocess)  # capture
-    graph_builder.add_node('postprocess', postprocess)  # capture
+    graph_builder.add_node('add_query_to_history', add_input_to_history)  # capture
+    graph_builder.add_node('add_response_to_history', add_response_to_history)  # capture
 
-    graph_builder.add_node('retrieve', retrieve_documents)  # retrieve
+    graph_builder.add_node('retrieve_documents', retrieve_documents)  # retrieve
     graph_builder.add_node('grade_documents', grade_documents)  # grade documents
-    graph_builder.add_node('generate', generate_answer)  # generatae
+    graph_builder.add_node('generate_answer', generate_answer)  # generate answer from documents
     graph_builder.add_node('rewrite_query', rewrite_question)  # rewrite_query
+    graph_builder.add_node('grade_hallucination', grade_hallucination)  # grade hallucination
+    graph_builder.add_node('grade_answer', grade_answer)  # grade answers
 
     # Build graph
-    graph_builder.add_edge(START, 'preprocess')
-    graph_builder.add_edge('preprocess', 'retrieve')
-    graph_builder.add_edge('retrieve', 'grade_documents')
+    graph_builder.add_edge(START, 'add_query_to_history')
+    graph_builder.add_edge('add_query_to_history', 'retrieve_documents')
+    graph_builder.add_edge('retrieve_documents', 'grade_documents')
     graph_builder.add_conditional_edges(
         'grade_documents',
-        decide_to_generate,
+        check_for_relevant_documents,
         {
-            'rewrite_query': 'rewrite_query',
-            'generate': 'generate',
+            'no relevant docs': 'rewrite_query',
+            'relevant docs found': 'generate_answer',
         },
     )
-    graph_builder.add_edge('rewrite_query', 'retrieve')
+    graph_builder.add_edge('rewrite_query', 'retrieve_documents')
+    graph_builder.add_edge('generate_answer', 'grade_hallucination')
     graph_builder.add_conditional_edges(
-        'generate',
-        grade_generation_v_documents_and_question,
+        'grade_hallucination',
+        check_for_halluciation,
         {
-            'not supported': 'generate',
-            'useful': 'postprocess',
+            'is hallucinating': 'generate_answer',
+            'not hallucinating': 'grade_answer',
+        },
+    )
+    graph_builder.add_conditional_edges(
+        'grade_answer',
+        check_for_answer_relevancy,
+        {
+            'useful': 'add_response_to_history',
             'not useful': 'rewrite_query',
         },
     )
-    graph_builder.add_edge('postprocess', END)
+    graph_builder.add_edge('add_response_to_history', END)
+
+    return graph_builder
+
+@cache
+def get_agent_graph() -> Pregel:
+
+    uncompiled_graph = _get_uncompiled_agent_graph()
 
     # Create a checkpointer
     checkpointer = get_checkpointer()
 
     # Compile the graph with a checkpointer
-    graph = graph_builder.compile(checkpointer=checkpointer)
+    graph = uncompiled_graph.compile(checkpointer=checkpointer)
     return graph
+
+def get_mermaid_graph():
+    """
+    Return a mermaid graph of the agent.
+    """
+    logger.info('-- MERMAID --')
+
+    graph = get_agent_graph()
+    mermaid_graph = graph.get_graph().draw_mermaid()
+
+    logger.info('-- MERMAID -- %s', mermaid_graph)
+
+    return mermaid_graph
+
 
 def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
 
@@ -111,7 +143,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         extra_data = {'thread_id': thread_id.hex}
         if user_id:
             extra_data['user_id'] = user_id
-        run_config = {'recursion_limit': 15, 'configurable': extra_data}
+        run_config = {'recursion_limit': 30, 'configurable': extra_data}
         run_config['callbacks'] = [ langfuse_handler ]
         for output in graph.stream(input=input, config=run_config):
             for key, value in output.items():

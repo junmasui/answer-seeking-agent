@@ -5,9 +5,10 @@ import logging
 import uuid
 
 from fastapi import Depends, APIRouter
+from fastapi.responses import Response
 from celery.result import AsyncResult
 
-from core import (seek_answer)
+from core import (seek_answer, get_mermaid_graph)
 from core.public_models import Answer
 from core.signals import send_start_up, send_reset_data
 
@@ -31,3 +32,15 @@ async def handle_question(q: Union[str, None] = None,
     logger.info(f'returning {answer}')
 
     return answer
+
+@router.get('/mermaid')
+async def handle_mermaid_graph(current_user: Annotated[User, Depends(get_current_user)] = None):
+    """
+    For the MIME type, https://www.iana.org/assignments/media-types/application/vnd.mermaid
+    See https://github.com/mermaid-js/mermaid/issues/3098 and https://github.com/mermaid-js/mermaid/pull/4485
+    """
+
+    media_type = 'application/vnd.mermaid'
+    content = get_mermaid_graph()
+
+    return Response(content=content, media_type=media_type)
