@@ -7,9 +7,9 @@ from langchain_core.messages import AIMessage
 logger = logging.getLogger(__name__)
 
 
-def postprocess(state):
+def add_response_to_history(state):
     """
-    Capture raw question
+    Capture generated response
 
     Args:
         state (dict): The current graph state
@@ -17,7 +17,7 @@ def postprocess(state):
     Returns:
         state updates (dict)
     """
-    logger.info('---POSTPROCESS---')
+    logger.info('---ADD RESPONSE TO HISTORY---')
 
     answer = state['answer']
     citations = state['citations']

@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage
 logger = logging.getLogger(__name__)
 
 
-def preprocess(state):
+def add_input_to_history(state):
     """
     Capture raw question
 
@@ -16,7 +16,7 @@ def preprocess(state):
     Returns:
         state updates (dict)
     """
-    logger.info('---PREPROCESS---')
+    logger.info('---ADD INPUT TO CHAT HISTORY---')
 
     question = state['question']
 

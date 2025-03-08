@@ -10,7 +10,7 @@ from .answer_grader import get_answer_grader
 logger = logging.getLogger(__name__)
 
 
-def decide_to_generate(state):
+def check_for_relevant_documents(state):
     """
     Determines whether to generate an answer, or re-generate a question.
 
@@ -31,14 +31,14 @@ def decide_to_generate(state):
         logger.info(
             '---DECISION: ALL DOCUMENTS ARE NOT RELEVANT TO QUESTION, TRANSFORM QUERY---'
         )
-        return 'rewrite_query'
+        return 'no relevant docs'
     else:
         # We have relevant documents, so generate answer
         logger.info('---DECISION: GENERATE---')
-        return 'generate'
+        return 'relevant docs found'
 
 
-def grade_generation_v_documents_and_question(state):
+def check_for_halluciation(state):
     """
     Determines whether the generation is grounded in the document and answers question.
 
@@ -49,33 +49,31 @@ def grade_generation_v_documents_and_question(state):
         str: Decision for next node to call
     """
 
-    logger.info('---CHECK HALLUCINATIONS---')
-    question = state['question']
-    documents = state['documents']
-    generation = state['generation']
+    grade = state['grounded_in_facts']
 
-    hallucination_grader = get_hallucination_grader()
-    answer_grader = get_answer_grader()
-
-    score = hallucination_grader.invoke(
-        {'documents': documents, 'generation': generation}
-    )
-    grade = score.binary_score if score is not None else 'no'
-
-    # Check hallucination
     if grade == 'yes':
-        logger.info('---DECISION: GENERATION IS GROUNDED IN DOCUMENTS---')
-        
-        # Check question-answering
-        logger.info('---GRADE GENERATION vs QUESTION---')
-        score = answer_grader.invoke({'question': question, 'generation': generation})
-        grade = score.binary_score
-        if grade == 'yes':
-            logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
-            return 'useful'
-        else:
-            logger.info('---DECISION: GENERATION DOES NOT ADDRESS QUESTION---')
-            return 'not useful'
-    else:
-        logger.info('---DECISION: GENERATION IS NOT GROUNDED IN DOCUMENTS, RE-TRY---')
-        return 'not supported'
+        logger.info('---DECISION: GENERATION IS GROUNDED IN FACTS FROM DOCUMENTS---')
+        return 'not hallucinating'
+    logger.info('---DECISION: GENERATION IS NOT GROUNDED IN FACTS FROM DOCUMENTS---')
+    return 'is hallucinating'
+
+
+def check_for_answer_relevancy(state):
+    """
+    Determines whether the generation the answers question.
+
+    Args:
+        state (dict): The current graph state
+
+    Returns:
+        str: Decision for next node to call
+    """
+
+    grade = state['answer_relevancy_grade']
+
+    if grade == 'yes':
+        logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
+        return 'useful'
+
+    logger.info('---DECISION: GENERATION DOES NOT ADDRESS QUESTION---')
+    return 'not useful'

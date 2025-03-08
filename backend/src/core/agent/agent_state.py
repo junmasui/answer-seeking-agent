@@ -29,3 +29,6 @@ class GraphState(TypedDict):
     generation: NotRequired[str]
     answer: NotRequired[str]
     citations: NotRequired[list[dict[str, str]]]
+
+    grounded_in_facts: NotRequired[str]
+    answer_addresses_question: NotRequired[str]
