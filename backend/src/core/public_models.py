@@ -81,6 +81,10 @@ class DocumentStats(CamelModel):
     document_count: int = None
     table_updated_time: Optional[datetime] = None
 
+class AnswerRequestBody(CamelModel):
+    input: str
+    thread_id: Optional[UUID] = None
+
 
 class IngestRequestBody(CamelModel):
     doc_uuids: list[UUID]

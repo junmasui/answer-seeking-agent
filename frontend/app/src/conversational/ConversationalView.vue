@@ -76,11 +76,12 @@ function onClear(event) {
 async function submit(event) {
   try {
 
-    const queryParams = new URLSearchParams();
-    queryParams.append('q', userInput.value);
+    const queryParams = {
+      input: userInput.value
+    };
     // Nuance about false-y: null, undefined and zero-length strings are falsey
     if (threadId.value) {
-      queryParams.append('threadId', threadId.value);
+      queryParams.threadId = threadId.value;
     }
 
     //threadId on queryParams
@@ -88,16 +89,18 @@ async function submit(event) {
     querySubmitted.value = true
 
     const headers = {
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
     }
     if ( signedIn.value ) {
       headers['Authorization'] = `Bearer ${accessToken.value}`
     }
 
-    const response = await fetch('/api/answer/?' + queryParams.toString(),
+    const response = await fetch('/api/answer/',
       {
-        method: 'GET', // GET is the default, so you could omit this line
-        headers: headers
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(queryParams, null, 2)
       }
     );
 

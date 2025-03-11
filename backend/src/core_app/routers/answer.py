@@ -1,6 +1,6 @@
 
 
-from typing import Union, Annotated
+from typing import Union, Annotated, Optional
 import logging
 import uuid
 
@@ -9,7 +9,7 @@ from fastapi.responses import Response
 from celery.result import AsyncResult
 
 from core import (seek_answer, get_mermaid_graph)
-from core.public_models import Answer
+from core.public_models import Answer, AnswerRequestBody
 from core.signals import send_start_up, send_reset_data
 
 
@@ -28,6 +28,18 @@ async def handle_question(q: Union[str, None] = None,
     user_id = current_user.user_id if current_user is not None else None
 
     answer = seek_answer(user_input=q, thread_id=threadId, user_id=user_id)
+
+    logger.info(f'returning {answer}')
+
+    return answer
+
+@router.post('/', response_model=Answer)
+async def handler_question(body: AnswerRequestBody,
+                           current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None):
+
+    user_id = current_user.user_id if current_user is not None else None
+
+    answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
 
     logger.info(f'returning {answer}')
 
