@@ -11,8 +11,11 @@ else
     exit -1
 fi
 
+PYTHON_CMD=python3 -m debugpy --listen 0.0.0.0:5678 -m uvicorn core_app:app --host 0.0.0.0 --port 8100
+
+APP_CMD=watchmedo auto-restart \
+   --directory=.  --recursive --pattern='*.py;*.env' \
+   -- ${PYTHON_CMD}
 
 PYTHONPATH=./src \
-uv run --frozen --no-sync -- watchmedo auto-restart \
-   --directory=.  --recursive --pattern='*.py;*.env' \
-   -- python3 -m debugpy --listen 0.0.0.0:5678 -m uvicorn core_app:app --host 0.0.0.0 --port 8100
+    uv run --frozen --no-sync -- ${APP_CMD}

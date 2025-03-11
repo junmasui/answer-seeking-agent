@@ -11,7 +11,11 @@ else
     exit -1
 fi
 
-PYTHONPATH=./src \
-uv run --frozen --no-sync -- watchmedo auto-restart \
+PYTHON_CMD=python3 -m debugpy --listen 0.0.0.0:5678 -m celery --app=core_worker worker -l INFO
+
+APP_CMD=watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
-   -- python3 -m debugpy --listen 0.0.0.0:5678 -m celery --app=core_worker worker -l INFO
+   -- ${PYTHON_CMD}
+
+PYTHONPATH=./src \
+    uv run --frozen --no-sync -- ${APP_CMD}
