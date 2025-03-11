@@ -15,4 +15,4 @@ fi
 PYTHONPATH=./src \
 uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
-   -- uvicorn core_app:app --host 0.0.0.0 --port 8100
+   -- python3 -m debugpy --listen 0.0.0.0:5678 -m uvicorn core_app:app --host 0.0.0.0 --port 8100

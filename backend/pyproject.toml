@@ -7,6 +7,8 @@ dependencies = [
   "blinker>=1.9.0",
   "celery[redis]>=5.4.0",
   "cloudpathlib[s3]>=0.20.0",
+  # Implementation of the Debug Adapter Protocol for Python.
+  "debugpy>=1.8.13",
   "fastapi[standard]>=0.115.6",
   "flower>=2.0.1",
   "icecream>=2.1.4",

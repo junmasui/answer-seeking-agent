@@ -102,6 +102,8 @@ dataclasses-json==0.6.7
     # via
     #   langchain-community
     #   unstructured
+debugpy==1.8.13
+    # via app (pyproject.toml)
 defusedxml==0.7.1
     # via langchain-anthropic
 deprecated==1.2.15
