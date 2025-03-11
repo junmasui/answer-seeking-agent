@@ -14,4 +14,4 @@ fi
 PYTHONPATH=./src \
 uv run --frozen --no-sync -- watchmedo auto-restart \
    --directory=.  --recursive --pattern='*.py;*.env' \
-   -- celery --app=core_worker worker -l INFO
+   -- python3 -m debugpy --listen 0.0.0.0:5678 -m celery --app=core_worker worker -l INFO
