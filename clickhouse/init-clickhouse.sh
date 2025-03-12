@@ -32,6 +32,7 @@ EOS
 
 }
 
+sleep 2
 
 call_clickhouse \
     "SELECT name, value FROM system.server_settings WHERE changed format Pretty" \
@@ -78,6 +79,8 @@ call_clickhouse \
     "GRANT ALL ON ${LANGFUSE_CLICKHOUSE_DATABASE}.* TO langfuse_role;" \
     admin \
     "${CLICKHOUSE_ADMIN_USER_PASSWORD}"
+
+sleep 1
 
 call_clickhouse \
     "SHOW TABLES format Pretty" \

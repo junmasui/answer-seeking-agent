@@ -32,6 +32,8 @@
 
     <!-- additional tuning -->
 
+    <max_server_memory_usage>85899345000</max_server_memory_usage>
+
     <!-- <max_thread_pool_size>1000</max_thread_pool_size> -->
     <!-- <max_server_memory_usage>2</max_server_memory_usage> -->
     <!-- <max_concurrent_queries>100</max_concurrent_queries> -->
