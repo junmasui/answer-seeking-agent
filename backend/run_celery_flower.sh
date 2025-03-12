@@ -11,8 +11,17 @@ else
     exit -1
 fi
 
+PYTHON_CMD_OPTIONS="-m celery --app=core_worker flower"
 
+# Run the celery flower node.
+PYTHON_CMD="python3 ${PYTHON_CMD_OPTIONS}"
+
+# Use watchmedo to restart on file changes.
+WATCHMEDO_OPTIONS="auto-restart --directory=.  --recursive --pattern='*.py;*.env'"
+PYTHON_CMD="watchmedo ${WATCHMEDO_OPTIONS} -- ${PYTHON_CMD}"
+
+echo "${PYTHON_CMD}"
+
+# Use 'uv run' to run the celery flower node.
 PYTHONPATH=./src \
-uv run --frozen --no-sync -- watchmedo auto-restart \
-   --directory=.  --recursive --pattern='*.py;*.env' \
-   -- celery --app=core_worker flower
+    uv run --frozen --no-sync -- ${PYTHON_CMD}
