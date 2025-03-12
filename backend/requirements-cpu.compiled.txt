@@ -137,6 +137,9 @@ dataclasses-json==0.6.7
     #   langchain-community
     #   unstructured
     # from https://pypi.org/simple
+debugpy==1.8.13
+    # via app (pyproject.toml)
+    # from https://pypi.org/simple
 defusedxml==0.7.1
     # via langchain-anthropic
     # from https://pypi.org/simple
