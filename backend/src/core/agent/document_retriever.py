@@ -7,6 +7,8 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 
 import logging
 
+from langchain_core.documents import Document
+
 from ..providers.retriever import get_retriever
 
 
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def retrieve_documents(state):
+def query_documents(state):
     """
     Retrieve documents
 
@@ -42,6 +44,17 @@ def retrieve_documents(state):
 
     # Retrieval
     documents = retriever.invoke(question, **kwargs)
+
+    # Remove irrelevant metadata. It's stuff that we don't need for processing
+    # or evaluation.
+    def _purge_metadata(x: Document):
+
+        if 'orig_elements' in x.metadata:
+            del x.metadata['orig_elements']
+
+        return x
+
+    documents = [_purge_metadata(x) for x in documents]
 
     # Update agent state with retrieved documents
     stateUpdates = { 'documents': documents }
