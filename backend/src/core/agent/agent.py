@@ -83,6 +83,7 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     guardrail_subgraph.add_node('redo_answer_generation', redo_answer_generation)  # redo answer generation
 
     guardrail_subgraph.set_entry_point('grade_hallucination')
+
     guardrail_subgraph.add_conditional_edges(
         'grade_hallucination',
         check_for_halluciation,
@@ -91,6 +92,8 @@ def _get_uncompiled_agent_graph() -> StateGraph:
             'not hallucinating': 'grade_answer',
         },
     )
+    guardrail_subgraph.set_finish_point('redo_answer_generation')
+
     guardrail_subgraph.add_conditional_edges(
         'grade_answer',
         check_for_answer_relevancy,
@@ -99,7 +102,8 @@ def _get_uncompiled_agent_graph() -> StateGraph:
             'not useful': 'redo_document_retrieval',
         },
     )
-    guardrail_subgraph.add_edge('accept_answer', END)
+    guardrail_subgraph.set_finish_point('accept_answer')
+    guardrail_subgraph.set_finish_point('redo_document_retrieval')
 
 
     # Build graph
@@ -150,15 +154,17 @@ def get_agent_graph() -> Pregel:
 def get_mermaid_graph():
     """
     Return a mermaid graph of the agent.
+
+    NOTE: When the `xray=True` is causing exceptions to be raised, then perform a
+    meticulous inspection of the agent graph and subgraphs. The exception might be
+    coming from a graph edge that is infrequently selected and leads to some deadends.
+    This would allow live testing to pass (because it's infrequent) but would
+    raise errors in visualization (because all paths are examined for rendering purposes).
     """
 
     graph = get_agent_graph()
-    drawable_graph = graph.get_graph()
+    drawable_graph = graph.get_graph(xray=True)
     mermaid_graph = drawable_graph.draw_mermaid()
-
-    for name, subgraph in graph.get_subgraphs():
-        drawable_graph = subgraph.get_graph()
-        mermaid_graph += subgraph.get_graph().draw_mermaid()
 
     return mermaid_graph
 
