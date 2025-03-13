@@ -10,3 +10,8 @@ from .config_logging import configure_logging
 configure_env(base_env='backend.env', overrides_env='backend.overrides.env',
               secrets_env='backend.secrets.env')
 configure_logging()
+
+
+import debugpy
+
+debugpy.listen(('0.0.0.0', 5678))

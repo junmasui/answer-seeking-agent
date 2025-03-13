@@ -14,7 +14,21 @@
                     "localRoot": "${workspaceFolder}",
                     "remoteRoot": "."
                 }
-            ]
+            ],
+            "autoReload": {
+                "enable": true,
+                "exclude": [
+                    "**/.git/**",
+                    "**/__pycache__/**",
+                    "**/node_modules/**",
+                    "**/.metadata/**",
+                    "**/site-packages/**"
+                ],
+                "include": [
+                    "**/*.py",
+                    "**/*.pyw"
+                ]
+            }
         }
     ]
 }
