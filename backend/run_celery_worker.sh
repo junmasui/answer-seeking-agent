@@ -11,19 +11,12 @@ else
     exit -1
 fi
 
-PYTHON_CMD_OPTIONS="-m celery --app=core_worker worker -l INFO"
+# Run the celery worker node.
 
-PYTHON_CMD_OPTIONS="-m debugpy --listen 0.0.0.0:5678 ${PYTHON_CMD_OPTIONS}"
-
-# Run the celery worker with debugpy.
-PYTHON_CMD="python3 ${PYTHON_CMD_OPTIONS}"
-
-# Use watchmedo to restart on file changes.
-WATCHMEDO_OPTIONS="auto-restart --directory=.  --recursive --pattern='*.py;*.env'"
-PYTHON_CMD="watchmedo ${WATCHMEDO_OPTIONS} -- ${PYTHON_CMD}"
-
-echo "${PYTHON_CMD}"
-
-# Use 'uv run' to run the celery worker.
 PYTHONPATH=./src \
-    uv run --frozen --no-sync -- ${PYTHON_CMD}
+uv run --frozen --no-sync \
+   -- \
+   watchmedo auto-restart \
+   --directory=.  --recursive --pattern='*.py;*.env' \
+   -- \
+   celery --app=core_worker worker -l INFO

@@ -16,21 +16,21 @@ def configure_logging():
     )
     rich_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
 
-    logger = logging.getLogger('demo-app')
+    logger = logging.getLogger('core')
     has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger.handlers])
     if not has_rich_handler:
         logger.addHandler(rich_handler)
         logger.propagate = False
     logger.setLevel(logging.INFO)
 
-    logger2 = logging.getLogger('app')
+    logger2 = logging.getLogger('core_app')
     has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger2.handlers])
     if not has_rich_handler:
         logger2.addHandler(rich_handler)
         logger2.propagate = False
     logger2.setLevel(logging.INFO)
 
-    logger2 = logging.getLogger('worker')
+    logger2 = logging.getLogger('core_worker')
     has_rich_handler = any([isinstance(handler, RichHandler) for handler in logger2.handlers])
     if not has_rich_handler:
         logger2.addHandler(rich_handler)

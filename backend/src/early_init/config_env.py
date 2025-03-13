@@ -1,6 +1,4 @@
-import os
 from dotenv import load_dotenv
-
 
 def configure_env(base_env, secrets_env, overrides_env):
     # NOTES:
