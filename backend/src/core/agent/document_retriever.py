@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def retrieve_documents(state):
+def query_documents(state):
     """
     Retrieve documents
 
