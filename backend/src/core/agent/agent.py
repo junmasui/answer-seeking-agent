@@ -18,7 +18,7 @@ from .answer_generator import generate_answer
 from .answer_grader import grade_answer
 from .checkpointer import get_checkpointer
 from .deciders import check_for_relevant_documents, check_for_halluciation, check_for_answer_relevancy
-from .document_retriever import query_documents
+from .document_retriever import retrieve_documents
 from .hallucination_grader import grade_hallucination
 from .postprocess import add_response_to_history
 from .preprocess import add_input_to_history
@@ -32,108 +32,57 @@ from ..doc_mgr import list_document_sets
 logger = logging.getLogger(__name__)
 
 
-def redo_document_retrieval(state):
-    return {
-        'answer_grade': 'redo document retrieval'
-    }
 
-def redo_answer_generation(state):
-    return {
-        'answer_grade': 'redo answer generation'
-    }
+def _get_uncompiled_agent_graph() -> Pregel:
 
-def accept_answer(state):
-    return {
-        'answer_grade': 'accept answer'
-    }
+    # Build graph
 
-def get_answer_grade(state):
-    return state['answer_grade']
+    graph_builder = StateGraph(GraphState)
 
+    # Define the nodes
+    graph_builder.add_node('add_query_to_history', add_input_to_history)  # capture
+    graph_builder.add_node('add_response_to_history', add_response_to_history)  # capture
 
-def _get_uncompiled_agent_graph() -> StateGraph:
+    graph_builder.add_node('retrieve_documents', retrieve_documents)  # retrieve
+    graph_builder.add_node('grade_documents', grade_documents)  # grade documents
+    graph_builder.add_node('generate_answer', generate_answer)  # generate answer from documents
+    graph_builder.add_node('rewrite_query', rewrite_question)  # rewrite_query
+    graph_builder.add_node('grade_hallucination', grade_hallucination)  # grade hallucination
+    graph_builder.add_node('grade_answer', grade_answer)  # grade answers
 
-    # Build subgraph for document retrieval.
-
-    retrieval_subgraph = StateGraph(GraphState)
-
-    retrieval_subgraph.add_node('query_documents', query_documents)  # retrieve
-    retrieval_subgraph.add_node('grade_documents', grade_documents)  # grade documents
-    retrieval_subgraph.add_node('rewrite_query', rewrite_question)  # rewrite_query
-
-    retrieval_subgraph.set_entry_point('query_documents')
-    retrieval_subgraph.add_edge('query_documents', 'grade_documents')
-    retrieval_subgraph.add_conditional_edges(
+    # Build graph
+    graph_builder.add_edge(START, 'add_query_to_history')
+    graph_builder.add_edge('add_query_to_history', 'retrieve_documents')
+    graph_builder.add_edge('retrieve_documents', 'grade_documents')
+    graph_builder.add_conditional_edges(
         'grade_documents',
         check_for_relevant_documents,
         {
             'no relevant docs': 'rewrite_query',
-            'relevant docs found': END,
+            'relevant docs found': 'generate_answer',
         },
     )
-    retrieval_subgraph.add_edge('rewrite_query', 'query_documents')
-    
-    # Build subgraph for answer guardrails.
-
-    guardrail_subgraph = StateGraph(GraphState)
-    guardrail_subgraph.add_node('grade_hallucination', grade_hallucination)  # grade hallucination
-    guardrail_subgraph.add_node('grade_answer', grade_answer)  # grade answers
-    guardrail_subgraph.add_node('accept_answer', accept_answer)  # accept answer
-    guardrail_subgraph.add_node('redo_document_retrieval', redo_document_retrieval)  # redo document retrieval
-    guardrail_subgraph.add_node('redo_answer_generation', redo_answer_generation)  # redo answer generation
-
-    guardrail_subgraph.set_entry_point('grade_hallucination')
-    guardrail_subgraph.add_conditional_edges(
+    graph_builder.add_edge('rewrite_query', 'retrieve_documents')
+    graph_builder.add_edge('generate_answer', 'grade_hallucination')
+    graph_builder.add_conditional_edges(
         'grade_hallucination',
         check_for_halluciation,
         {
-            'is hallucinating': 'redo_answer_generation',
+            'is hallucinating': 'generate_answer',
             'not hallucinating': 'grade_answer',
         },
     )
-    guardrail_subgraph.add_conditional_edges(
+    graph_builder.add_conditional_edges(
         'grade_answer',
         check_for_answer_relevancy,
         {
-            'useful': 'accept_answer',
-            'not useful': 'redo_document_retrieval',
+            'useful': 'add_response_to_history',
+            'not useful': 'rewrite_query',
         },
     )
-    guardrail_subgraph.add_edge('accept_answer', END)
+    graph_builder.add_edge('add_response_to_history', END)
 
-
-    # Build graph
-
-    graph = StateGraph(GraphState)
-
-    # Define the nodes
-    graph.add_node('add_query_to_history', add_input_to_history)  # capture
-    graph.add_node('add_response_to_history', add_response_to_history)  # capture
-
-    graph.add_node('retrieve_documents', retrieval_subgraph.compile())  # retrieve
-    graph.add_node('generate_answer', generate_answer)  # generate answer from documents
-    graph.add_node('apply_guardrails', guardrail_subgraph.compile())  # guard
-
-    # Build graph
-    graph.add_edge(START, 'add_query_to_history')
-    graph.add_edge('add_query_to_history', 'retrieve_documents')
-
-    graph.add_edge('retrieve_documents', 'generate_answer')
-
-    graph.add_edge('generate_answer', 'apply_guardrails')
-
-    graph.add_conditional_edges(
-        'apply_guardrails',
-        get_answer_grade,
-        {
-            'redo document retrieval': 'retrieve_documents',
-            'redo answer generation': 'generate_answer',
-            'accept answer': 'add_response_to_history'
-        })
-
-    graph.add_edge('add_response_to_history', END)
-
-    return graph
+    return graph_builder
 
 @cache
 def get_agent_graph() -> Pregel:
@@ -144,21 +93,19 @@ def get_agent_graph() -> Pregel:
     checkpointer = get_checkpointer()
 
     # Compile the graph with a checkpointer
-    compiled_graph = uncompiled_graph.compile(checkpointer=checkpointer)
-    return compiled_graph
+    graph = uncompiled_graph.compile(checkpointer=checkpointer)
+    return graph
 
 def get_mermaid_graph():
     """
     Return a mermaid graph of the agent.
     """
+    logger.info('-- MERMAID --')
 
     graph = get_agent_graph()
-    drawable_graph = graph.get_graph()
-    mermaid_graph = drawable_graph.draw_mermaid()
+    mermaid_graph = graph.get_graph().draw_mermaid()
 
-    for name, subgraph in graph.get_subgraphs():
-        drawable_graph = subgraph.get_graph()
-        mermaid_graph += subgraph.get_graph().draw_mermaid()
+    logger.info('-- MERMAID -- %s', mermaid_graph)
 
     return mermaid_graph
 

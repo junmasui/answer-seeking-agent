@@ -69,7 +69,7 @@ def check_for_answer_relevancy(state):
         str: Decision for next node to call
     """
 
-    grade = state['answer_addresses_question']
+    grade = state['answer_relevancy_grade']
 
     if grade == 'yes':
         logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
