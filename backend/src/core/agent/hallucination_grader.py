@@ -62,5 +62,5 @@ def grade_hallucination(state):
     grade = score.binary_score if score is not None else 'no'
 
     return {
-        'grounded_in_facts': grade
+        'hallucination_grade': grade
     }

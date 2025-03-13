@@ -30,6 +30,5 @@ class GraphState(TypedDict):
     answer: NotRequired[str]
     citations: NotRequired[list[dict[str, str]]]
 
-    answer_grade: NotRequired[str]
     grounded_in_facts: NotRequired[str]
     answer_addresses_question: NotRequired[str]
