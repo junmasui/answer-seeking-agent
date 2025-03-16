@@ -2,8 +2,9 @@
     <h2>Document Manager</h2>
 
     <v-tabs v-model="activeTabModel" bg-color="primary">
-        <v-tab value="upload" :to="{ name: 'upload' }">Upload Files</v-tab>
-        <v-tab value="ingest" :to="{ name: 'ingest' }">Ingest Files</v-tab>
+        <v-tab value="docSets" :to="{ name: 'doc-sets' }">Document Sets</v-tab>
+        <v-tab value="upload" :to="{ name: 'upload-files' }">Upload Files</v-tab>
+        <v-tab value="docs" :to="{ name: 'docs' }">Documents</v-tab>
     </v-tabs>
 
     <router-view></router-view>

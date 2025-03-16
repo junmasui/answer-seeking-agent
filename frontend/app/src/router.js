@@ -4,6 +4,7 @@ import HomeView from './core/HomeView.vue'
 // Reinsert when we have meaningful info: import AboutView from './core/AboutView.vue'
 import ConversationalView from './conversational/ConversationalView.vue'
 import DocManagerView from './doc-mgr/DocManagerView.vue'
+import DocManagerDocSetTab from './doc-mgr/DocManagerDocSetTab.vue'
 import DocManagerIngestTab from './doc-mgr/DocManagerIngestTab.vue'
 import DocManagerUploadTab from './doc-mgr/DocManagerUploadTab.vue'
 import StatusCheckView from './core/StatusCheckView.vue'
@@ -15,8 +16,9 @@ const routes = [
   { path: '/conversational', component: ConversationalView },
   { path: '/doc-mgr', component: DocManagerView,
     children: [
-      { name: 'upload', path: '', component: DocManagerUploadTab, alias: 'upload' },
-      { name: 'ingest', path: 'ingest', component: DocManagerIngestTab },
+      { name: 'doc-sets', path: '', component: DocManagerDocSetTab, alias: 'doc-sets' },
+      { name: 'upload-files', path: 'upload-files', component: DocManagerUploadTab },
+      { name: 'docs', path: 'docs', component: DocManagerIngestTab },
     ]
    },
   { path: '/status', component: StatusCheckView },

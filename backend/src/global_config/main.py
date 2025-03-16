@@ -5,10 +5,9 @@ provides a global configuration object.
 from typing import Union
 from typing_extensions import Annotated
 from functools import cache
-import string
-import urllib.parse
 
 from pydantic import (
+    BaseModel,
     Field,
     PostgresDsn,
     RedisDsn,
@@ -21,7 +20,7 @@ from pydantic import (
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
 
 # Regular expression should match between 32 to 160 hexdecimal characters ( [0-9a-f] )
 JwtSecretStr = Annotated[str, StringConstraints(pattern='[0-9a-f]{32,160}')]
@@ -30,10 +29,43 @@ MinimalStr = Annotated[str, StringConstraints(to_lower=True, min_length=3)]
 LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
+
+class DocManagerConfig(BaseModel):
+    chunk_root_dir: str = Field(default='upload_chunks')
+    doc_root_dir: str = Field(default='documents')
+
+
 class Settings(BaseSettings):
     # We assume that the .env files were loaded into the environment
-    # on an earlier step.
-    model_config = SettingsConfigDict(env_file=None)
+    # in an earlier initialization step.
+    model_config = SettingsConfigDict(env_file=None, toml_file=None,
+                                      nested_model_default_partial_update=True)
+
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        """
+        Define the sources and their order for loading the settings values.
+        """
+        # We assume that the .env files were loaded into the environment
+        # on an earlier step.
+
+        # init_settings: setting values provided as keyword arguments when initialization
+        #     an instance of this Settings class.
+        # env_settings: settings values loaded from environment variables.
+        # dotenv_settings: settings values loaded from env files, whose paths are specified in `env_file`
+        #     config value.
+        # file_secret_settings: settings values loaded from secret files, which are files in the
+        #     directories specified in the `secrets_dir` config value.
+
+        return init_settings, env_settings, file_secret_settings, TomlConfigSettingsSource(settings_cls)
 
     logging_config_path: Union[FilePath, NewPath] = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
 
@@ -60,6 +92,8 @@ class Settings(BaseSettings):
     minio_bucket_name: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_BUCKET')
     minio_user_name: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_USER_NAME')
     minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='BACKEND_MINIO_USER_PASSWORD')
+
+    doc_manager: DocManagerConfig = DocManagerConfig()
 
 @cache
 def get_global_config():

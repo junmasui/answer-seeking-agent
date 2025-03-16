@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql.functions import current_timestamp
 
-from ..public_models import DocumentStatus
+from ..public_models import DocumentStatus, DocumentSetStatus
 from ..providers.sql_database import get_engine
 
 logger = logging.getLogger(__name__)
@@ -29,10 +29,10 @@ class TrackedDocumentSet(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(800), nullable=False)
+    ## status: Mapped[DocumentSetStatus] = mapped_column(Enum(DocumentSetStatus), nullable=False)
+
     is_new_doc_default: Mapped[bool] = mapped_column(Boolean, nullable=False)
     is_public_viewable: Mapped[bool] = mapped_column(Boolean, nullable=False)
-
-    filedir: Mapped[str] = mapped_column(String(800), nullable=True)
 
     s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=True)
 

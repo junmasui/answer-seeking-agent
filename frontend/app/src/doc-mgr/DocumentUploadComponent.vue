@@ -1,6 +1,16 @@
 <template>
     <v-container>
-        <v-btn class="ma-2" size="large" :disabled="downloading" @click="onUpload">Upload Files</v-btn>
+        <v-btn class="ma-2" size="large" :disabled="disableUpload" @click="onUpload">Upload Files</v-btn>
+        <v-autocomplete
+            class="ma-2"
+            variant="outlined"
+            label="Document Set"
+            v-model="selectedDocSet"
+            :items="documentSets"
+            item-title="name"
+            item-id="id"
+            return-object
+        ></v-autocomplete>
 
         <v-container>
             <v-row class="flex-nowrap" no-gutters>
@@ -21,7 +31,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
@@ -31,9 +41,24 @@ const currentUserStore = useCurrentUserStore();
 const updateStore = useUploadStore()
 
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
-const { fileList } = storeToRefs(updateStore);
+const { fileList, selectedDocSet } = storeToRefs(updateStore);
 
 const downloading = ref(false)
+
+const disableUpload = computed(() => {
+    // The upload button is enabled only when all these conditions are met:
+    // 1. Document set is selected.
+    // 2. One or more files are selected.
+    // 3. Currently not uploading.
+    const enabled = selectedDocSet.value !== null && fileList.value.length > 0 && ! downloading.value;
+
+    return ! enabled;
+})
+
+const documentSets = ref([])
+const documentSetCount = ref(0);
+const documentSetsUpdatedAt = ref();
+const documentSetsOutdated = ref(false);
 
 async function onUpload() {
     downloading.value = true;
@@ -57,6 +82,7 @@ async function onUpload() {
                     formData.append('file', chunk, file.name);
                     formData.append('chunkIndex', chunkIndex);
                     formData.append('totalChunks', totalChunks);
+                    formData.append('documentSetId', selectedDocSet.value.id)
 
                     const headers = {
                         'Accept': 'application/json'
@@ -88,6 +114,89 @@ async function onUpload() {
 
     } finally {
         downloading.value = false;
+    }
+}
+
+
+//
+// Polling for server table updates.
+//
+
+var intervalId = null;
+
+onMounted(async () => {
+    await loadDocumentSets();
+
+    intervalId = setInterval(async () => {
+        await loadTableStats()
+    },
+        30000)
+})
+
+onBeforeUnmount(async () => {
+    clearInterval(intervalId);
+    intervalId = null;
+})
+
+async function loadTableStats() {
+    try {
+
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const response = await fetch(`/api/document-sets/stats`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error('Getting table stats failed');
+        }
+
+        const data = await response.json();
+
+        documentSetCount.value = data.documentSetCount;
+        if (documentSetsUpdatedAt.value !== data.tableUpdatedTime) {
+            documentSetsOutdated.value = true;
+            documentSetsUpdatedAt.value = data.tableUpdatedTime;
+        }
+    } catch (error) {
+        console.error('Error getting table stats:', error);
+    }
+}
+
+async function loadDocumentSets() {
+    try {
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const params = new URLSearchParams({
+        })
+
+        const response = await fetch(`/api/document-sets/?${params}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get document sets');
+        }
+
+        const data = await response.json();
+
+        documentSets.value = data.documentSets.map(item => toRaw(item));
+
+    } catch (error) {
+        documentSets.value = [];
+        console.error('Error getting document sets:', error);
     }
 }
 

@@ -2,8 +2,11 @@
     <v-dialog v-model="active" max-width="600px">
         <v-card>
             <v-card-title class="text-h5">
-                <slot></slot>
+                Edit Document
             </v-card-title>
+            <v-card-text>
+                <v-text-field clearable label="For Demo Purposes" variant="outlined"></v-text-field>
+            </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" variant="text" @click="onCancel">Cancel</v-btn>
@@ -18,6 +21,14 @@
 const active = defineModel('active', {
     type: Boolean,
     default: false
+});
+
+const modelValue = defineModel({
+  type: Object,
+  validator: (value) => {
+    const requiredKeys = ['key1', 'key2'];
+    return requiredKeys.every(key => key in value);
+  }
 });
 
 const emit = defineEmits(['canceled', 'confirmed', 'done'])

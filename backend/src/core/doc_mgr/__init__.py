@@ -1,3 +1,15 @@
-from .doc_uploader import upload_document, upload_chunk, merge_chunked_document
-from .doc_mgr import list_documents, list_document_sets, get_document_stats, update_document, update_document_status
-from .doc_deleter import delete_document
+from .doc import (
+    get_documents, list_documents,
+    get_document_statistics,
+    delete_document,
+    update_document, update_document_status, update_tracking_record,
+    upload_chunk, upload_document, merge_chunked_document
+)
+
+from .doc_set import (
+    get_document_sets, list_document_sets,
+    get_document_set_statistics,
+    add_document_set,
+    delete_document_set,
+    update_document_set
+)

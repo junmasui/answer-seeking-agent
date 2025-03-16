@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 
-export const useDocumentStore = defineStore('document', {
+export const useDocumentSetStore = defineStore('documentSet', {
     state: () => {
         return {
             page: 1,
