@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post('/resetDatabase')
+@router.post('/reset-database')
 def reset_database(current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None):
     """Reset database, vector store, and file store.
     """

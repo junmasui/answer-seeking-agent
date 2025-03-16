@@ -2,12 +2,12 @@
 
 from typing import Union, Optional, Annotated
 import logging
-import pprint
+import uuid
 
-from fastapi import UploadFile, Form, Depends, APIRouter
+from fastapi import UploadFile, Form, Depends, APIRouter, Path
 
 from core import (list_documents, upload_document, upload_chunk,
-                  merge_chunked_document, delete_document, get_document_stats, update_document, update_document_status)
+                  merge_chunked_document, delete_document, get_document_statistics, update_document, update_document_status)
 from core.public_models import DocumentList, DocumentStats, IngestRequestBody, DocumentStatus, DocumentUpdateRequest
 
 
@@ -37,13 +37,14 @@ async def handle_table_stats(current_user: Annotated[User, Depends(get_scoped_cu
     """Returns statistics about tracking table.
     """
 
-    return get_document_stats('documents')
+    return get_document_statistics()
 
 
 @router.post('/upload')
 async def handle_upload(file: UploadFile,
-                        totalChunks: int = Form(),
-                        chunkIndex: int = Form(),
+                        documentSetId: Annotated[uuid.UUID, Form()],
+                        totalChunks: Annotated[int, Form()],
+                        chunkIndex: Annotated[int, Form()],
                         current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
     """Upload a file. Chunked upload of large files is supported.
     """
@@ -54,20 +55,20 @@ async def handle_upload(file: UploadFile,
                  file.filename, chunkIndex, totalChunks)
 
     if totalChunks > 1:
-        upload_chunk('upload_chunks', file.filename, chunkIndex, file.file)
+        upload_chunk(file.filename, chunkIndex, file.file)
 
         if chunkIndex == totalChunks - 1:
-            merge_chunked_document(
-                'documents', 'upload_chunks', file.filename, totalChunks, user_id)
+            merge_chunked_document(documentSetId, file.filename, totalChunks, user_id)
         return
 
-    upload_document('documents', file.filename, file.file, user_id)
+    upload_document(documentSetId, file.filename, file.file, user_id)
 
-@router.post('/{doc_uuid}/update')
-async def handle_single_update(doc_uuid,
+
+@router.patch('/{doc_uuid}')
+async def handle_single_update(doc_uuid: uuid.UUID = Path(..., discription='Document UUID'),
                                body: Optional[DocumentUpdateRequest] = None,
                                current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
-    """Ingest the file specified by the document UUID.
+    """Update the file specified by the document UUID.
     """
 
     user_id = current_user.userid if current_user is not None else None
@@ -78,8 +79,22 @@ async def handle_single_update(doc_uuid,
     return {}
 
 
+@router.delete('/{doc_uuid}')
+async def handle_single_delete(doc_uuid: uuid.UUID = Path(..., discription='Document UUID'),
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+    """Delete the file and associated embeddings specified by the document UUID.
+    """
+
+    user_id = current_user.userid if current_user is not None else None
+
+    success = delete_document(doc_uuid)
+
+    return {}
+
+# NOTE: Declaration order matters for path patterns. 
+#
 @router.post('/{doc_uuid}/ingest')
-async def handle_single_ingest(doc_uuid,
+async def handle_single_ingest(doc_uuid: uuid.UUID = Path(..., discription='Document UUID'),
                                current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
     """Ingest the file specified by the document UUID.
     """
@@ -92,20 +107,6 @@ async def handle_single_ingest(doc_uuid,
     task = ingest_task.delay(doc_ids=[doc_uuid])
 
     return {'task_id': task.id}
-
-
-@router.delete('/{doc_uuid}')
-async def handle_single_delete(doc_uuid,
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
-    """Delete the file and associated embeddings specified by the document UUID.
-    """
-
-    user_id = current_user.userid if current_user is not None else None
-
-    success = delete_document(doc_uuid)
-
-    return {}
-
 
 @router.post('/ingest')
 async def handle_ingest(

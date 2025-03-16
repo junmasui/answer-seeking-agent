@@ -2,8 +2,13 @@
     <v-dialog v-model="active" max-width="600px">
         <v-card>
             <v-card-title class="text-h5">
-                <slot></slot>
+                New Document Set
             </v-card-title>
+            <v-card-text>
+                <v-text-field clearable label="Name" variant="outlined" v-model="modelValue.name"></v-text-field>
+                <v-checkbox label="Is Public" v-model="modelValue.isPublicViewable"></v-checkbox>
+                <v-checkbox label="Is Default" v-model="modelValue.isNewDocDefault"></v-checkbox>
+            </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" variant="text" @click="onCancel">Cancel</v-btn>
@@ -18,6 +23,21 @@
 const active = defineModel('active', {
     type: Boolean,
     default: false
+});
+
+const modelValue = defineModel({
+    type: Object,
+    default: () => {
+        return {
+            name: '',
+            isPublicViewable: true,
+            isNewDocDefault: false
+        };
+    },
+    validator: (value) => {
+        const requiredKeys = ['name', 'isPublicViewable', 'isNewDocDefault'];
+        return requiredKeys.every(key => key in value);
+    }
 });
 
 const emit = defineEmits(['canceled', 'confirmed', 'done'])

@@ -1,0 +1,57 @@
+import logging
+import uuid
+
+from sqlalchemy import select
+
+from global_config import get_global_config
+
+from ...providers.sql_database import get_sessionmaker
+
+from ..model import TrackedDocumentSet
+from ..model_ops import (generate_uuid_from_name)
+
+
+logger = logging.getLogger(__name__)
+
+
+def add_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
+
+    _add_or_update_document_set(name=name, is_default=is_default, is_pubic=is_pubic, user_id=user_id)
+
+
+def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
+    """Adds or updates the document set.
+    """
+
+    sessionmaker = get_sessionmaker()
+
+    with sessionmaker() as session:
+        with session.begin():
+            stmt = select(TrackedDocumentSet).where(
+                TrackedDocumentSet.name == name)
+            result = session.execute(stmt)
+            existing_obj = result.scalar_one_or_none()
+
+        with session.begin():
+            if existing_obj:
+                existing_obj.name = name
+                existing_obj.is_new_doc_default = is_default
+                existing_obj.is_public_viewable = is_pubic
+                existing_obj.last_user_id = user_id
+            else:
+                doc_set_uuid = generate_uuid_from_name()
+
+                doc_root_dir = get_global_config().doc_manager.doc_root_dir
+
+                rel_path = doc_root_dir + '/' + name
+
+
+                new_obj = TrackedDocumentSet(
+                    id=doc_set_uuid,
+                    name=name,
+                    s3_rel_path=rel_path,
+                    is_new_doc_default=is_default,
+                    is_public_viewable=is_pubic,
+                    last_user_id=user_id
+                )
+                session.add(new_obj)

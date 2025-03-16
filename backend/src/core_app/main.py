@@ -9,7 +9,6 @@ from celery.result import AsyncResult
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from core import (status_check)
-from core.public_models import CamelModel
 from core.signals import send_start_up, send_reset_data
 
 from core_worker import get_worker_logger_tree
@@ -60,11 +59,6 @@ async def handle_root():
 @app.get('/status')
 async def handle_status_check():
     return status_check()
-
-
-class GetUserResponse(CamelModel):
-    user_id: str
-
 
 
 

@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from ..doc_mgr.model import DocumentStatus
 
-from ..doc_mgr.model_ops import get_tracking_records, update_tracking_record
+from ..doc_mgr import get_documents, update_tracking_record
 from ..providers.file_store import get_s3_bucket
 from ..providers.doc_loader import get_doc_loader
 from ..providers.vector_store import get_vector_store
@@ -76,16 +76,16 @@ def ingest_documents(doc_ids):
             #    S3Path object might encounter troubles because it is not a subtype of pathlib.Path.
             #    (S3Path is a duck-type of Path). 
             rel_path = detached_record.s3_rel_path
-            source_path = bucket / rel_path
+            cloud_path = bucket / rel_path
             local_path = staging_dir / rel_path
 
-            if not source_path.exists():
+            if not cloud_path.exists():
                 # Something was unexpected. Maybe tracking is broken. Let's log it and move on.
-                logger.debug('cloud file no longer exists: %s', source_path)
+                logger.debug('cloud file no longer exists: %s', cloud_path)
 
-            local_path.parent.mkdir(exist_ok=True)
+            local_path.parent.mkdir(exist_ok=True, parents=True)
 
-            actual_local_path = source_path.download_to(local_path)
+            actual_local_path = cloud_path.download_to(local_path)
 
             if actual_local_path != local_path:
                 # Something was unexpected. Maybe a broken clean up. Let's log it and move on.
@@ -146,7 +146,7 @@ def ingest_documents(doc_ids):
                     # if this is the case.
                     logger.warning('could not delete staged file %s', str(local_path), exc_info=ex)
 
-    tracking_records = get_tracking_records(doc_uuid_list=doc_ids)
+    tracking_records = get_documents(doc_uuid_list=doc_ids)
 
     for record in tracking_records:
         _ingest_one_document(record)

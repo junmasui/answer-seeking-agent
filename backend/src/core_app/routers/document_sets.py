@@ -1,12 +1,14 @@
 
 
-from typing import Union, Annotated
+from typing import Optional, Union, Annotated
 import logging
+import uuid
 
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Path
 
 from core import (list_document_sets)
-from core.public_models import DocumentSetList
+from core.doc_mgr import add_document_set, get_document_set_statistics, delete_document_set, update_document_set
+from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
 
 
 from simple_auth import User, get_scoped_current_user, Scope
@@ -26,3 +28,49 @@ async def handle_list_doc_sets(page: Union[int, None] = 0,
     """
 
     return list_document_sets(start=page*itemsPerPage, length=itemsPerPage)
+
+@router.post('/')
+async def handle_single_insert(body: DocumentSetAddRequest,
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+    """Add document set.
+    """
+
+    user_id = current_user.userid if current_user is not None else None
+
+    add_document_set(name=body.name, is_default=body.is_new_doc_default, is_pubic=body.is_public_viewable, user_id=user_id)
+
+    return {}
+
+@router.get('/stats', response_model=DocumentSetStats)
+async def handle_table_stats(current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None
+                             ):
+    """Returns statistics about tracking table.
+    """
+
+    return get_document_set_statistics()
+
+
+@router.patch('/{doc_set_uuid}')
+async def handle_single_update(body: DocumentSetUpdateRequest,
+                               doc_set_uuid: uuid.UUID = Path(..., discription='Document set UUID'),
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+    """Delete the file and associated embeddings specified by the document UUID.
+    """
+
+    user_id = current_user.userid if current_user is not None else None
+
+    update_document_set(doc_set_uuid, is_new_doc_default=body.is_new_doc_default, is_public_viewable=body.is_public_viewable, last_user_id=user_id)
+
+    return {}
+
+@router.delete('/{doc_set_uuid}')
+async def handle_single_delete(doc_set_uuid: uuid.UUID = Path(..., discription='Document set UUID'),
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+    """Delete the file and associated embeddings specified by the document UUID.
+    """
+
+    user_id = current_user.userid if current_user is not None else None
+
+    delete_document_set(doc_set_uuid)
+
+    return {}
