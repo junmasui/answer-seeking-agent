@@ -8,7 +8,7 @@
             <v-btn variant="text" @click="loadItems">Refresh</v-btn>
         </template>
     </v-banner>
-    <v-data-table-server show-select return-object v-model="selectedItems" v-model:page="page"
+    <v-data-table-server show-select return-object v-model="selectedItems" v-model:sort-by="sortBy" multi-sort v-model:page="page"
         v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
         :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.actions="{ item, index }">
@@ -61,24 +61,27 @@ const tableOutdated = ref(false);
 const loading = ref(false);
 
 const headers = ref([
-    { title: 'File Name', value: 'name' },
-    { title: 'Size', key: 'sizeBytes' },
+    { title: 'File Name', value: 'name', sortable: true },
+    { title: 'Size', key: 'sizeBytes', sortable: true },
     {
         title: 'Last Modified Date',
-        key: 'modificationTime'
+        key: 'modificationTime', sortable: true
     },
     {
         title: 'Document Set',
         key: 'documentSetName',
-        width: '150px'
+        width: '150px', sortable: false
     },
-    { title: 'Status', key: 'status' },
+    { title: 'Status', key: 'status', sortable: true },
     {
         title: 'Ingestion Date',
-        key: 'ingestionTime'
+        key: 'ingestionTime', sortable: true
     },
     { title: 'Actions', key: 'actions', sortable: false },
 ])
+
+const sortBy = ref([])
+
 
 const itemsPerPageOptions = ([
     { value: 2, title: '2' },
@@ -413,6 +416,18 @@ async function loadItems() {
             page: page.value - 1,
             itemsPerPage: itemsPerPage.value
         })
+
+        if (sortBy.value.length > 0) {
+            const sortByParam = sortBy.value.map(item => {
+                var key = item['key']
+                if (item['order'] === 'desc') {
+                    key = '-' + key
+                }
+                return key
+            }).join(',')
+
+            params.append('sortBy', sortByParam)
+        }
 
         const headers = {
             'Accept': 'application/json'

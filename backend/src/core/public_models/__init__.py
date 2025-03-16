@@ -1,3 +1,5 @@
+import enum
+
 from .agent import (
     Answer,
     Citation,
@@ -25,3 +27,6 @@ from .ingest import (
     IngestRequestBody
 )
 
+class SortDirection(str, enum.Enum):
+    ASC = 'asc'
+    DESC = 'desc'

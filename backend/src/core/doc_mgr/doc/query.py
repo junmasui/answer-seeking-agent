@@ -8,7 +8,7 @@ from sqlalchemy import select, func, column
 from sqlalchemy.orm import aliased, subqueryload
 
 from ...providers.sql_database import get_sessionmaker
-from ...public_models import Document, DocumentList
+from ...public_models import Document, DocumentList, SortDirection
 
 from ..model import TrackedDocument
 
@@ -39,11 +39,11 @@ def get_documents(doc_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def list_documents(file_dir, start, length):
+def list_documents(file_dir, start, length, sort_by):
     """Return the list of files in cloud storage.
     """
 
-    existing_objs = _list_tracking_records(start, length)
+    existing_objs = _list_tracking_records(start, length, sort_by)
     table_stats = get_document_statistics()
 
     def _to_dict(_x: TrackedDocument):
@@ -67,7 +67,7 @@ def list_documents(file_dir, start, length):
     )
 
 
-def _list_tracking_records(start: Optional[int] = None, length: Optional[int] = None):
+def _list_tracking_records(start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return a page of tracking records.
     
     The implementation is an older known-performance technique. The technique
@@ -78,17 +78,40 @@ def _list_tracking_records(start: Optional[int] = None, length: Optional[int] = 
     """
     sessionmaker = get_sessionmaker()
 
+    def _to_col(x):
+        name, direction = x
+        expr = None
+        match name:
+            case 'name':
+                expr = TrackedDocument.filename
+            case 'size_bytes':
+                expr = TrackedDocument.size_bytes
+            case 'modification_time':
+                expr = TrackedDocument.file_modified_time
+            case 'ingestion_time':
+                expr = TrackedDocument.ingested_time
+            case 'status':
+                expr = TrackedDocument.status
+            case _:
+                raise ValueError('unknown field name', name)
+        expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
+        return expr
+    order_by = [ _to_col(x) for x in sort_by ]
+
     with sessionmaker() as session:
 
         paginate = start is not None and length is not None
 
         core_query = select(TrackedDocument)
 
+        # Apply sorting
+        core_query = core_query.order_by(*order_by)
+
         # Apply pagination if requested
         if paginate:
             # When paginating, we add a windowing function to the selected fields.
             cte_query = core_query.add_columns(
-                func.row_number().over(order_by=TrackedDocument.filename).label('row_num')
+                func.row_number().over(order_by=order_by).label('row_num')
             )
        
             # Create a CTE from the query.

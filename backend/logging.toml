@@ -20,6 +20,8 @@ level = "DEBUG"
 [loggers.sqlalchemy]
 level = "WARNING"
 
+[loggers.sqlalchemy.engine]
+level = "INFO"
 
 [loggers."langfuse"]
 level = "DEBUG"

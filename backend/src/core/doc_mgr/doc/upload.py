@@ -20,9 +20,9 @@ logger = logging.getLogger(__name__)
 
 def _get_doc_set(doc_set_uuid):
     if doc_set_uuid:
-        results = get_document_sets([doc_set_uuid])
-        if len(results.document_sets) > 0:
-            doc_set = results.document_sets[0]
+        document_sets = get_document_sets([doc_set_uuid])
+        if len(document_sets) > 0:
+            doc_set = document_sets[0]
 
     if not doc_set:
         results = list_document_sets(is_default=True)
@@ -57,9 +57,11 @@ def upload_document(doc_set_uuid, file_name, local_file, user_id):
     _add_or_update_tracking_record(doc_set.id, file_dir, file_name, cloud_path, bucket, user_id)
 
 
-def upload_chunk(chunk_dir, file_name, chunk_index, local_file):
+def upload_chunk(file_name, chunk_index, local_file):
     """Upload a document chunk to cloud storage."""
     logger.info('uploading chunk %s %d to cloud file store', file_name, chunk_index)
+
+    chunk_dir = get_global_config().doc_manager.chunk_root_dir
 
     chunk_file_name = _get_chunk_file_name(file_name, chunk_index)
     cloud_path = _store_file_in_cloud(chunk_dir, chunk_file_name, local_file)
@@ -95,7 +97,7 @@ def merge_chunked_document(doc_set_uuid, file_name, total_chunks, user_id):
         return
 
     bucket = get_s3_bucket()
-    doc_set = _get_doc_set()
+
     _add_or_update_tracking_record(doc_set.id, file_dir, file_name, cloud_path, bucket, user_id)
 
 
@@ -168,7 +170,7 @@ def _add_or_update_tracking_record(document_set_uuid, file_dir, file_name, cloud
     with sessionmaker() as session:
         with session.begin():
             stmt = select(TrackedDocument).where(
-                and_(TrackedDocument.file_name == file_name,
+                and_(TrackedDocument.filename == file_name,
                      TrackedDocument.document_set_id == document_set_uuid))
             result = session.execute(stmt)
             existing_obj = result.scalar_one_or_none()

@@ -4,15 +4,16 @@ from typing import Union, Optional, Annotated
 import logging
 import uuid
 
-from fastapi import UploadFile, Form, Depends, APIRouter, Path
+from fastapi import UploadFile, Form, Depends, APIRouter, Path, Query
 
 from core import (list_documents, upload_document, upload_chunk,
                   merge_chunked_document, delete_document, get_document_statistics, update_document, update_document_status)
-from core.public_models import DocumentList, DocumentStats, IngestRequestBody, DocumentStatus, DocumentUpdateRequest
-
+from core.public_models import DocumentList, DocumentStats, IngestRequestBody, DocumentStatus, DocumentUpdateRequest, SortDirection
 
 from core_worker import ingest_task
 from simple_auth import User, get_scoped_current_user, Scope
+
+from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +21,17 @@ router = APIRouter()
 
 
 @router.get('/', response_model=DocumentList)
-async def handle_list_files(page: Union[int, None] = 0,
-                            itemsPerPage: Union[int, None] = 10,
+async def handle_list_files(page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
+                            itemsPerPage: Annotated[int, Query(..., description='Item count per page', ge=1)] = 10,
+                            sortBy: Annotated[str, Query(..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending')]  = 'name',
                             current_user: Annotated[User, Depends(
                                 get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None
                             ):
     """Returns a list of documents.
     """
+    sort_by = parse_sort_by(sortBy)
 
-    return list_documents('documents', start=page*itemsPerPage, length=itemsPerPage)
+    return list_documents('documents', start=page*itemsPerPage, length=itemsPerPage, sort_by=sort_by)
 
 
 @router.get('/stats', response_model=DocumentStats)

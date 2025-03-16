@@ -8,7 +8,7 @@ from sqlalchemy.orm import aliased
 
 
 from ...providers.sql_database import get_sessionmaker
-from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus
+from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus, SortDirection
 
 from ..model import TrackedDocumentSet
 
@@ -40,11 +40,11 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
 
 
 def list_document_sets(*, is_default: Optional[bool] = None, is_public: Optional[bool] = None,
-                       start: Optional[int] =None, length: Optional[int] =None):
+                       start: Optional[int] =None, length: Optional[int] =None, sort_by: Optional[list] = None):
     """Return the list of document sets.
     """
 
-    existing_objs = _list_tracking_document_sets(is_default=is_default, is_public=is_public, start=start, length=length)
+    existing_objs = _list_tracking_document_sets(is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by)
     table_stats = get_document_set_statistics()
 
 
@@ -67,10 +67,26 @@ def list_document_sets(*, is_default: Optional[bool] = None, is_public: Optional
 
 
 def _list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public: Optional[bool] = None,
-                                 start: Optional[int] = None, length: Optional[int] = None):
+                                 start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return tracking set when matched to specified document UUID."""
 
     sessionmaker = get_sessionmaker()
+
+    def _to_col(x):
+        name, direction = x
+        expr = None
+        match name:
+            case 'name':
+                expr = TrackedDocumentSet.name
+            case 'is_new_doc_default':
+                expr = TrackedDocumentSet.is_new_doc_default
+            case 'is_public_viewable':
+                expr = TrackedDocumentSet.is_public_viewable
+            case _:
+                raise ValueError('unknown field name', name)
+        expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
+        return expr
+    order_by = [ _to_col(x) for x in sort_by ]
 
     with sessionmaker() as session:
 
@@ -86,11 +102,14 @@ def _list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public
         if is_public is not None:
             core_query = core_query.where(TrackedDocumentSet.is_public_viewable == is_public)
 
+        # Apply sorting
+        core_query = core_query.order_by(*order_by)
+
         # Apply pagination if requested
         if paginate:
             # When paginating, we add a windowing function to the selected fields.
             cte_query= core_query.add_columns(
-                func.row_number().over(order_by=TrackedDocumentSet.name).label('row_num')
+                func.row_number().over(order_by=order_by).label('row_num')
             )
 
             # Create a CTE from the core query.

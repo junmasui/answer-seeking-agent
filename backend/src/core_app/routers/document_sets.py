@@ -4,7 +4,7 @@ from typing import Optional, Union, Annotated
 import logging
 import uuid
 
-from fastapi import Depends, APIRouter, Path
+from fastapi import Depends, APIRouter, Path, Query
 
 from core import (list_document_sets)
 from core.doc_mgr import add_document_set, get_document_set_statistics, delete_document_set, update_document_set
@@ -13,21 +13,25 @@ from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentS
 
 from simple_auth import User, get_scoped_current_user, Scope
 
+from .util import parse_sort_by
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
 @router.get('/', response_model=DocumentSetList)
-async def handle_list_doc_sets(page: Union[int, None] = 0,
-                            itemsPerPage: Union[int, None] = 10,
+async def handle_list_doc_sets(page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
+                            itemsPerPage: Annotated[int, Query(..., description='Item count per page', ge=1)] = 10,
+                            sortBy: Annotated[str, Query(..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending')]  = 'name',
                             current_user: Annotated[User, Depends(
                                 get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None
                             ):
     """Returns a list of document sets.
     """
+    sort_by = parse_sort_by(sortBy)
 
-    return list_document_sets(start=page*itemsPerPage, length=itemsPerPage)
+    return list_document_sets(start=page*itemsPerPage, length=itemsPerPage, sort_by=sort_by)
 
 @router.post('/')
 async def handle_single_insert(body: DocumentSetAddRequest,

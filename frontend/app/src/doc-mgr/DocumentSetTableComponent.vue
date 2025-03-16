@@ -8,7 +8,7 @@
             <v-btn variant="text" @click="loadItems">Refresh</v-btn>
         </template>
     </v-banner>
-    <v-data-table-server show-select return-object v-model="selectedItems" v-model:page="page"
+    <v-data-table-server show-select return-object v-model="selectedItems" v-model:sort-by="sortBy" multi-sort v-model:page="page"
         v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
         :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.actions="{ item, index }">
@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
@@ -56,17 +56,24 @@ const headers = ref([
     {
         title: 'Document Set',
         key: 'name',
-        width: '150px'
+        width: '150px', sortable: true
     },
-    { title: 'Is Public', value: 'isPublicViewable' },
-    { title: 'Is Default', key: 'isNewDocDefault' },
+    { title: 'Is Public', value: 'isPublicViewable', sortable: true },
+    { title: 'Is Default', key: 'isNewDocDefault', sortable: true },
     {
         title: 'Last Modified Date',
-        key: 'modificationTime'
+        key: 'modificationTime', sortable: false
     },
-    { title: 'Status', key: 'status' },
+    { title: 'Status', key: 'status', sortable: true },
     { title: 'Actions', key: 'actions', sortable: false },
 ])
+
+const sortBy = ref([])
+
+watch(sortBy, async(newValue, oldValue)=>{
+    console.log('SORT-BY NEW ', newValue )
+    console.log('SORT-BY OLD ', oldValue )
+})
 
 const itemsPerPageOptions = ([
     { value: 2, title: '2' },
@@ -398,6 +405,19 @@ async function loadItems() {
             page: page.value - 1,
             itemsPerPage: itemsPerPage.value
         })
+
+        if (sortBy.value.length > 0) {
+            const sortByParam = sortBy.value.map(item => {
+                var key = item['key']
+                if (item['order'] === 'desc') {
+                    key = '-' + key
+                }
+                return key
+            }).join(',')
+
+            params.append('sortBy', sortByParam)
+        }
+
 
         const headers = {
             'Accept': 'application/json'
