@@ -12,15 +12,17 @@
         v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
         :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.actions="{ item, index }">
-            <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
-                mdi-database-import
-            </v-icon>
-            <v-icon class="me-2" size="small" @click="editItem(item, index)">
-                mdi-pencil
-            </v-icon>
-            <v-icon size="small" @click="deleteItem(item, index)">
-                mdi-delete
-            </v-icon>
+            <div class="action-icons">
+                <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
+                    mdi-database-import
+                </v-icon>
+                <v-icon class="me-2" size="small" @click="editItem(item, index)">
+                    mdi-pencil
+                </v-icon>
+                <v-icon size="small" @click="deleteItem(item, index)">
+                    mdi-delete
+                </v-icon>
+            </div>
         </template>
     </v-data-table-server>
     <v-btn class="ma-2" size="large" @click="ingestSelectedItems" :disabled="selectedItemCount === 0">Ingest
@@ -41,6 +43,7 @@
                 Are you sure you want to ingest {{ selectedItemCount }} selected items?
     </confirmation-dialog>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
@@ -234,67 +237,6 @@ async function closeDeleteItem() {
     })
 }
 
-// // //
-// // // Dialog for one-file document set change
-// // //
-
-// // const pickDocumentSet = ref(false)
-// // const selectedDocumentSet = ref({})
-
-// // function changeDocumentSet(item, index) {
-// //     pickDocumentSet.value = true
-// //     targetIndex.value = index
-// //     targetItem.value = Object.assign({}, item)
-
-// //     selectedDocumentSet.value = documentSets.value.find(x => x.id === item.documentSetId)
-// // }
-
-// // async function selectNewDocSet() {
-// //     await updateDocSet(targetItem.value.id, selectedDocumentSet.value.id)
-
-// //     await closePickDocSet()
-// // }
-
-// // async function updateDocSet(doc_uuid, doc_set_uuid) {
-// //     try {
-
-// //         const headers = {
-// //             'Accept': 'application/json',
-// //             'Content-Type': 'application/json'
-// //         }
-// //         if (signedIn.value) {
-// //             headers['Authorization'] = `Bearer ${accessToken.value}`
-// //         }
-
-// //         const body = {
-// //             documentSetId: doc_set_uuid
-// //         }
-
-// //         const response = await fetch(`/api/documents/${doc_uuid}`, {
-// //             method: 'PATCH',
-// //             headers: headers,
-// //             body: JSON.stringify(body, null, 2)
-// //         });
-
-// //         if (!response.ok) {
-// //             throw new Error('Update failed');
-// //         }
-
-// //         const data = await response.json();
-// //         console.log('Update successfully:', data);
-// //     } catch (error) {
-// //         console.error('Error updating document set:', error);
-// //     }
-// // }
-
-// // async function closePickDocSet() {
-// //     await loadItems()
-
-// //     nextTick(() => {
-// //         targetItem.value = {}
-// //         targetIndex.value = -1
-// //     })
-// // }
 
 //
 // Confirmation dialog for ingestion of selected files
@@ -466,4 +408,10 @@ async function loadItems() {
 
 </script>
 
-<style></style>
+<style>
+.action-icons {
+  display: flex;
+  gap: 4px; /* Adjust spacing as needed */
+  white-space: nowrap; /* Prevents wrapping */
+}
+</style>

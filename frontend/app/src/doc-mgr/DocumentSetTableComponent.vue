@@ -12,13 +12,14 @@
         v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
         :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
         <template v-slot:item.actions="{ item, index }">
-            <v-icon class="me-2" size="small" @click="editItem(item, index)">
-                mdi-pencil
-            </v-icon>
-            <v-icon size="small" @click="deleteItem(item, index)">
-                mdi-delete
-            </v-icon>
-
+            <div class="action-icons">
+                <v-icon class="me-2" size="small" @click="editItem(item, index)">
+                    mdi-pencil
+                </v-icon>
+                <v-icon size="small" @click="deleteItem(item, index)">
+                    mdi-delete
+                </v-icon>                
+            </div>
         </template>
     </v-data-table-server>
     <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
@@ -454,4 +455,10 @@ async function loadItems() {
 
 </script>
 
-<style></style>
+<style>
+.action-icons {
+  display: flex;
+  gap: 4px; /* Adjust spacing as needed */
+  white-space: nowrap; /* Prevents wrapping */
+}
+</style>
