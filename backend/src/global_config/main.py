@@ -73,8 +73,16 @@ class Settings(BaseSettings):
 
     redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
 
-    postgres_connection_url: PostgresDsn = Field(default='',
-                                validation_alias='POSTGRES_CONNECTION_URL')    
+    postgres_answers_connection_url: PostgresDsn = Field(default='',
+                                validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
+    postgres_vectors_connection_url: PostgresDsn = Field(default='',
+                                validation_alias='POSTGRES_VECTORS_CONNECTION_URL')
+
+    postgres_checkpoints_connection_url: PostgresDsn = Field(default='',
+                                validation_alias='POSTGRES_CHECKPOINTS_CONNECTION_URL')
+    postgres_migration_baseline_connection_url: PostgresDsn = Field(default='',
+                                validation_alias='POSTGRES_MIGRATION_BASELINE_CONNECTION_URL')
+
 
     application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 

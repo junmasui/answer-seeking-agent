@@ -7,7 +7,7 @@ from sqlalchemy import select, func, column
 from sqlalchemy.orm import aliased
 
 
-from ...providers.sql_database import get_sessionmaker
+from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus, SortDirection
 
 from ..model import TrackedDocumentSet
@@ -26,7 +26,7 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
 
     doc_set_uuid_list = [_ensure_uuid(item) for item in doc_set_uuid_list]
 
-    sessionmaker = get_sessionmaker()
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
 
@@ -70,7 +70,14 @@ def _list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public
                                  start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return tracking set when matched to specified document UUID."""
 
-    sessionmaker = get_sessionmaker()
+    if sort_by is None:
+        sort_by = [('name', SortDirection.ASC)]
+    elif not isinstance(sort_by, (list, tuple)):
+        raise TypeError('sort_by must be a list or tuple')
+    elif len(sort_by) == 0:
+        raise ValueError('sort_by cannot be empty')
+
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     def _to_col(x):
         name, direction = x
@@ -86,6 +93,7 @@ def _list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
         return expr
+    
     order_by = [ _to_col(x) for x in sort_by ]
 
     with sessionmaker() as session:

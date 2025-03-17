@@ -6,7 +6,7 @@ from sqlalchemy import and_, select
 
 from global_config import get_global_config
 
-from ...providers.sql_database import get_sessionmaker
+from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...providers.file_store import get_s3_directory, get_s3_bucket
 
 from ..doc_set.query import get_document_sets, list_document_sets
@@ -165,7 +165,7 @@ def _add_or_update_tracking_record(document_set_uuid, file_dir, file_name, cloud
     # need to move the bucket to another location.
     s3_rel_path = cloud_path.relative_to(bucket_path)
 
-    sessionmaker = get_sessionmaker()
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
         with session.begin():

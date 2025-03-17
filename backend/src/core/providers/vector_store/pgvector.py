@@ -10,7 +10,7 @@ from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import PGVector
 
 from ..embeddings import get_embeddings
-from ..sql_database import get_engine
+from ..sql_database import get_engine, DataDomain
 from ...signals import start_up_handler, reset_data_handler
 
 #
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @cache
 def get_vector_store():
 
-    engine = get_engine()
+    engine = get_engine(DataDomain.VECTORS)
 
     collection_name = 'searchable_docs'
 

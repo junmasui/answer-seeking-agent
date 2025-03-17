@@ -3,24 +3,21 @@ import datetime
 import uuid
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, MetaData, String, Uuid
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session, registry, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, registry, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql.functions import current_timestamp
 
-from ..public_models import DocumentStatus, DocumentSetStatus
-from ..providers.sql_database import get_engine
+from ..public_models import DocumentStatus
 
 logger = logging.getLogger(__name__)
 
-metadata_obj = MetaData()
-registry_obj = registry(metadata=metadata_obj)
+DECLARED_METADATA = MetaData()
+DECLARED_REGISTRY = registry(metadata=DECLARED_METADATA)
 
 class Base(DeclarativeBase):
-    metadata = metadata_obj
-    registry = registry_obj
-
-
+    metadata = DECLARED_METADATA
+    registry = DECLARED_REGISTRY
 
 
 class TrackedDocumentSet(Base):

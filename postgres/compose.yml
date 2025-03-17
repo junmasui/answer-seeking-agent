@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
 
     image: localhost/postgres:17.2-with-pgvector
-    profiles: [ postgres, infrastructure, all ]
+    profiles: [ postgres, infrastructure-core, infrastructure, all ]
 
     environment:
       # Only environment variables that are important to the Docker environment
@@ -43,7 +43,7 @@ services:
         condition: service_healthy
 
     image: localhost/postgres:17.2-with-pgvector
-    profiles: [ postgres, infrastructure, all ]
+    profiles: [ postgres, infrastructure-core, infrastructure, all ]
 
     environment:
       # Only environment variables that are important to the Docker environment

@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from global_config import get_global_config
 
-from ...providers.sql_database import get_sessionmaker
+from ...providers.sql_database import get_sessionmaker, DataDomain
 
 from ..model import TrackedDocumentSet
 from ..model_ops import (generate_uuid_from_name)
@@ -23,7 +23,7 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
     """Adds or updates the document set.
     """
 
-    sessionmaker = get_sessionmaker()
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
         with session.begin():

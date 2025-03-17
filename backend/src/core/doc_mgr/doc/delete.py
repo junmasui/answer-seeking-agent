@@ -3,7 +3,7 @@ import uuid
 
 from sqlalchemy import delete
 
-from ...providers.sql_database import get_sessionmaker
+from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...providers.file_store import get_s3_bucket
 from ...providers.vector_store import get_vector_store
 
@@ -56,7 +56,7 @@ def _delete_tracking_record(doc_uuid):
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_sessionmaker()
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
 
