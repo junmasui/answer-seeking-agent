@@ -5,7 +5,7 @@ services:
     restart: 'no'
 
     image: 'debian:bookworm-slim'
-    profiles: [ init-volumes, redis, infrastructure, all ]
+    profiles: [ init-volumes, redis, infrastructure-core, infrastructure, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -36,7 +36,7 @@ services:
         condition: service_completed_successfully
 
     image: redis:latest
-    profiles: [ redis, infrastructure, all ]
+    profiles: [ redis, infrastructure-core, infrastructure, all ]
 
     ports:
       - '26379:6379'
