@@ -31,7 +31,7 @@ do
     sudo find $RELPATH -type d \
         -not \( -path "${RELPATH}/docker" \) \
         -exec chown rootless-1000:rootless-1000 \{\} \; \
-        -exec chmod ug=srwx,o=rx \{\} \;
+        -exec chmod ug=rwx,g=srwx,o=rx \{\} \;
     sudo find $RELPATH -type f \
         -not \( -path "${RELPATH}/*.sh" -or -path "${RELPATH}/docker/*" \) \
         -exec chown rootless-1000:rootless-1000 \{\} \; \
@@ -48,6 +48,12 @@ do
     sudo find $RELPATH -iname '*.xml' -type f \
         -exec chown rootless-101:rootless-101 \{\} \; \
         -exec chmod ug=rw \{\}  \;
+    sudo find $RELPATH -iname '*.crt' -type f \
+        -exec chown rootless-101:rootless-101 \{\} \; \
+        -exec chmod ug=rw \{\}  \;
+    sudo find $RELPATH -iname '*.key' -type f \
+        -exec chown rootless-101:rootless-101 \{\} \; \
+        -exec chmod ug=rw \{\}  \;
 done
 
 for RELPATH in "postgres"
@@ -55,12 +61,12 @@ do
     sudo find $RELPATH -iname '*.sql.template' -type f \
         -not \( -path "${RELPATH}/docker/*" \) \
         -exec chown rootless-999:rootless-999 \{\} \; \
-        -exec chmod ug=rw,o=r \{\}  \;
+        -exec chmod ug=rw \{\}  \;
 
     sudo find $RELPATH -iname '*.sh' -type f \
         -not \( -path "${RELPATH}/docker/*" \) \
         -exec chown rootless-999:rootless-999 \{\} \; \
-        -exec chmod ug=rw,o=r \{\}  \;
+        -exec chmod ug=rw \{\}  \;
 done
 
 sudo find redis -iname '*.conf' -type f \
