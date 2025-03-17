@@ -47,11 +47,25 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
     echo -e "\n# POSTGRES_PASSWORD contains Postgres's root account's password  (auto-generated secret)" >> secrets.env
     echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> secrets.env
 fi
+
 if [ -z "$BACKEND_POSTGRES_USER_PASSWORD" ]; then
     export BACKEND_POSTGRES_USER_PASSWORD="backend_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
     echo -e "\n# backend's Postgres account's password.  (auto-generated secret)" >> secrets.env
     echo "BACKEND_POSTGRES_USER_PASSWORD=${BACKEND_POSTGRES_USER_PASSWORD}" >> secrets.env
 fi
+
+if [ -z "$BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD" ]; then
+    export BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD="backend_checkpoints_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
+    echo -e "\n# backend checkpointer's Postgres account's password.  (auto-generated secret)" >> secrets.env
+    echo "BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD=${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}" >> secrets.env
+fi
+
+if [ -z "$BACKEND_VECTORS_POSTGRES_USER_PASSWORD" ]; then
+    export BACKEND_VECTORS_POSTGRES_USER_PASSWORD="backend_vectors_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
+    echo -e "\n# backend vector stores's Postgres account's password.  (auto-generated secret)" >> secrets.env
+    echo "BACKEND_VECTORS_POSTGRES_USER_PASSWORD=${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}" >> secrets.env
+fi
+
 if [ -z "$LANGFUSE_POSTGRES_USER_PASSWORD" ]; then
     export LANGFUSE_POSTGRES_USER_PASSWORD="langfuse_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
     echo -e "\n# Langfuse's Postgres account's password.  (auto-generated secret)" >> secrets.env
