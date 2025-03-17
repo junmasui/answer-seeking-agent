@@ -1,3 +1,6 @@
+# Import the start-up event hander so that it does not miss this event.
+from . import event_handlers
+
 from .doc import (
     get_documents, list_documents,
     get_document_statistics,

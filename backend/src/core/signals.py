@@ -11,8 +11,12 @@ from already existing framework-specific signals. Both FastAPI and Celery
 also have signals, but those frameworks are not in every node.
 """
 from functools import cache
+import logging
+
 from blinker import signal
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 _START_UP = signal('start-up')
 _RESET_DATA = signal('reset-data')
@@ -46,6 +50,8 @@ def _get_sender(is_worker: bool):
 def send_start_up(is_worker: bool):
     """Send the start-up signal
     """
+    logger.info('Sending start-up signal')
+
     sender = _get_sender(is_worker)
     _START_UP.send(sender)
 
@@ -53,5 +59,7 @@ def send_start_up(is_worker: bool):
 def send_reset_data(is_worker: bool):
     """Send the reset-data signal
     """
+    logger.info('Sending reset-data signal')
+
     sender = _get_sender(is_worker)
     _RESET_DATA.send(sender)

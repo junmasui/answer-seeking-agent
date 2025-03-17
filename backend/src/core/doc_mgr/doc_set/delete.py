@@ -3,7 +3,7 @@ import uuid
 
 from sqlalchemy import delete
 
-from ...providers.sql_database import get_sessionmaker
+from ...providers.sql_database import get_sessionmaker, DataDomain
 
 from ..model import TrackedDocumentSet
 
@@ -37,7 +37,7 @@ def _delete_tracking_record(doc_set_uuid):
     if isinstance(doc_set_uuid, str):
         doc_set_uuid = uuid.UUID(hex=doc_set_uuid)
 
-    sessionmaker = get_sessionmaker()
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
 

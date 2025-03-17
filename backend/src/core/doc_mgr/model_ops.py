@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
-from ..providers.sql_database import get_engine
+from ..providers.sql_database import get_engine, DataDomain
 
 from .model import metadata_obj, TrackedDocumentSet
 
@@ -22,8 +22,14 @@ def create_tables_if_not_existing():
     """Creates tables for model objects defined with this module's `Base`.
     """
     logger.info('creating tables that are absent')
-    engine = get_engine()
 
+    engine = get_engine(DataDomain.ANSWERS)
+    _create_tables_if_not_existing(engine)
+
+    engine = get_engine(DataDomain.MIGRATION_BASELINE)
+    _create_tables_if_not_existing(engine)
+
+def _create_tables_if_not_existing(engine):
     metadata_obj.create_all(engine)
 
     with Session(engine) as session:
@@ -39,11 +45,12 @@ def create_tables_if_not_existing():
             session.add_all(doc_sets)
         session.commit()
 
+
 def drop_all_tables():
     """Drops all tables for model objects defined with this module's `Base`.
     """
     logger.info('dropping all registered tables')
-    engine = get_engine()
+    engine = get_engine(DataDomain.ANSWERS)
 
     metadata_obj.drop_all(engine)
 

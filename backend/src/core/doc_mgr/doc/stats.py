@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 from sqlalchemy import select, func
 
-from ...providers.sql_database import get_sessionmaker
+from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import DocumentStats
 
 from ..model import TrackedDocument
@@ -29,7 +29,7 @@ def _get_tracking_stats():
     in the tracking table.
     """
 
-    sessionmaker = get_sessionmaker()
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
         stmt = select(

@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 def documents_startup(sender):
     if sender.is_worker:
         return
+
     create_tables_if_not_existing()
 
 
