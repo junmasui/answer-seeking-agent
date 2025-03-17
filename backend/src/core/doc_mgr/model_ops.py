@@ -1,12 +1,12 @@
 import logging
 import uuid
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, MetaData
 from sqlalchemy.orm import Session
 
 from ..providers.sql_database import get_engine, DataDomain
 
-from .model import metadata_obj, TrackedDocumentSet
+from .model import DECLARED_METADATA, TrackedDocument, TrackedDocumentSet
 
 
 logger = logging.getLogger(__name__)
@@ -18,19 +18,34 @@ def generate_uuid_from_name():
 
 
 
-def create_tables_if_not_existing():
+def create_tables_if_not_exists():
     """Creates tables for model objects defined with this module's `Base`.
     """
     logger.info('creating tables that are absent')
 
     engine = get_engine(DataDomain.ANSWERS)
-    _create_tables_if_not_existing(engine)
+
+    _create_tables_if_not_exists(engine)
+
+def create_migration_baseline():
+    """Creates tables in the migration baseline for model objects defined with this module's `Base`.
+    """
 
     engine = get_engine(DataDomain.MIGRATION_BASELINE)
-    _create_tables_if_not_existing(engine)
 
-def _create_tables_if_not_existing(engine):
-    metadata_obj.create_all(engine)
+    reflected_metadata = MetaData(schema='answers')
+    reflected_metadata.reflect(bind=engine)
+
+    if reflected_metadata.tables is not None and len(reflected_metadata.tables) > 0:
+        logger.info('migration baseline database already has defined tables')
+        return 
+
+    logger.info('creating migration baseline database tables')
+    _create_tables_if_not_exists(engine)
+
+def _create_tables_if_not_exists(engine):
+
+    DECLARED_METADATA.create_all(engine)
 
     with Session(engine) as session:
         doc_set_count = session.scalar(select(func.count()).select_from(TrackedDocumentSet).limit(10))
@@ -52,6 +67,6 @@ def drop_all_tables():
     logger.info('dropping all registered tables')
     engine = get_engine(DataDomain.ANSWERS)
 
-    metadata_obj.drop_all(engine)
+    DECLARED_METADATA.drop_all(engine)
 
 

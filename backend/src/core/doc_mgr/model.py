@@ -12,12 +12,12 @@ from ..public_models import DocumentStatus
 
 logger = logging.getLogger(__name__)
 
-metadata_obj = MetaData()
-registry_obj = registry(metadata=metadata_obj)
+DECLARED_METADATA = MetaData()
+DECLARED_REGISTRY = registry(metadata=DECLARED_METADATA)
 
 class Base(DeclarativeBase):
-    metadata = metadata_obj
-    registry = registry_obj
+    metadata = DECLARED_METADATA
+    registry = DECLARED_REGISTRY
 
 
 class TrackedDocumentSet(Base):
