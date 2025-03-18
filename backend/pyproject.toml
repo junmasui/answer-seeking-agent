@@ -40,12 +40,6 @@ dependencies = [
   "transformers>=4.48.0",
   "unstructured[pdf]>=0.16.13",
   "watchdog[watchmedo]>=6.0.0",
-  #---
-  # Move these dependencies after groups are supported
-  # in "uv pip compile"
-  # See: https://github.com/astral-sh/uv/issues/8969
-  "pytest>=8.3.4",
-  "ruff>=0.9.2",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
@@ -53,6 +47,8 @@ license = { text = "Apache-2.0" }
 
 [dependency-groups]
 dev = [
+  "pytest>=8.3.4",
+  "ruff>=0.9.2",
 ]
 
 [project.optional-dependencies]
@@ -67,7 +63,30 @@ cuda12 = [
   "torchvision>=0.20.0"
 ]
 
+[tool.uv]
+# Explicit declaration that the "cpu" and "cuda12" extras are in conflict
+#
+# See: https://github.com/astral-sh/uv/blob/main/docs/reference/settings.md#conflicts--conflicts-
+#
+conflicts = [
+    [
+      { extra = "cpu" },
+      { extra = "cuda12" },
+    ],
+]
 
+# Search for every package name across all indexes, preferring the "best" version found. If a
+# package version is in multiple indexes, only look at the entry for the first index.
+#
+# See: https://docs.astral.sh/uv/reference/settings/#index-strategy
+#
+index-strategy = "unsafe-best-match"
+
+# Symbolically link packages from the wheel into the site-packages directory
+#
+# See: https://docs.astral.sh/uv/reference/settings/#link-mode
+#
+link-mode = "symlink"
 
 [tool.uv.sources]
 torch = [
@@ -90,5 +109,5 @@ explicit = true
 
 [[tool.uv.index]]
 name = "pytorch-cuda12"
-url = "https://pypi.org/simple"
+url = "https://download.pytorch.org/whl/cu124"
 explicit = true

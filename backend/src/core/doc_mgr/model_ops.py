@@ -17,7 +17,6 @@ def generate_uuid_from_name():
     return uuid.uuid4()
 
 
-
 def create_tables_if_not_exists():
     """Creates tables for model objects defined with this module's `Base`.
     """
