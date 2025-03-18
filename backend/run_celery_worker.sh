@@ -4,9 +4,9 @@ nvidia-smi
 # NOTE: Run compile_requirements.sh after changes to dependencies
 #
 if [ "$GPU_MODE" == "cuda12" ]; then
-    uv pip sync --index-strategy=unsafe-best-match requirements-cuda12.compiled.txt
+    uv sync  --extra cuda12  --dev
 elif [ "$GPU_MODE" == "cpu" ]; then
-    uv pip sync --index-strategy=unsafe-best-match requirements-cpu.compiled.txt
+    uv sync  --extra cpu  --dev
 else
     exit -1
 fi
