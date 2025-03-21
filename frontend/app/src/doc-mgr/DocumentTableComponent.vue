@@ -75,6 +75,16 @@ const headers = ref([
         key: 'documentSetName',
         width: '150px', sortable: false
     },
+    {
+        title: 'Source URL',
+        key: 'sourceUrl',
+        width: '150px', sortable: false
+    },
+    {
+        title: 'Content Type',
+        key: 'contentType',
+        width: '50px', sortable: false
+    },
     { title: 'Status', key: 'status', sortable: true },
     {
         title: 'Ingestion Date',

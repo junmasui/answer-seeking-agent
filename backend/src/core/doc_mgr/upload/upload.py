@@ -2,6 +2,7 @@ from contextlib import contextmanager
 import logging
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy import and_, select
 
@@ -42,8 +43,10 @@ def upload_document(doc_set_uuid, file_name, local_file, source_url, content_typ
 
     doc_set = _get_doc_set(doc_set_uuid)
 
-    # TODO - Use doc_set.s3_rel_path
-    file_dir = doc_root_dir + '/' + doc_set.name
+    joined = Path(doc_root_dir) / doc_set.name / file_name
+
+    file_dir = joined.parent
+    file_name = joined.name
 
     logger.info('uploading file %s to cloud file store', file_name)
 
@@ -57,7 +60,7 @@ def upload_document(doc_set_uuid, file_name, local_file, source_url, content_typ
     bucket = get_s3_bucket()
 
     add_document(document_set_uuid=doc_set.id,
-                 file_dir=file_dir, file_name=file_name,
+                 file_dir=str(file_dir), file_name=str(file_name),
                  cloud_path=cloud_path,
                  bucket_path=bucket,
                  source_url=source_url,
@@ -95,8 +98,10 @@ def merge_chunked_document(doc_set_uuid, file_name, total_chunks, source_url, co
 
     doc_set = _get_doc_set(doc_set_uuid)
 
-    # TODO - Use doc_set.s3_rel_path
-    file_dir = doc_root_dir + '/' + doc_set.name
+    joined = Path(doc_root_dir) / doc_set.name / file_name
+
+    file_dir = joined.parent
+    file_name = joined.name
 
     cloud_path = _merge_file_chunks(file_dir, chunk_dir, file_name, total_chunks)
 
@@ -108,8 +113,7 @@ def merge_chunked_document(doc_set_uuid, file_name, total_chunks, source_url, co
     bucket = get_s3_bucket()
 
     add_document(document_set_uuid=doc_set.id,
-                 file_dir=file_dir,
-                 file_name=file_name,
+                 file_dir=str(file_dir), file_name=str(file_name),
                  cloud_path=cloud_path,
                  bucket_path=bucket,
                  source_url=source_url,
