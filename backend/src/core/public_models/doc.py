@@ -38,6 +38,18 @@ class Document(CamelModel):
         default=None,
         description="Time when document was ingested.",
     )
+    source_url: Optional[str] = Field(
+        default=None,
+        description="Source URL of this document"
+    )
+    content_type: Optional[str] = Field(
+        default=None,
+        description="MIME content type of this document"
+    )
+    download_time_utc: Optional[datetime] = Field(
+        default=None,
+        description="Time when document was downloaded.",
+    )
     document_set_id: Optional[UUID] = Field(
         description="Document set UUID.",
     )

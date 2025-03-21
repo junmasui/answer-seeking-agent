@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import logging
 import uuid
 from datetime import datetime
@@ -10,6 +11,7 @@ from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...providers.file_store import get_s3_directory, get_s3_bucket
 
 from ..doc_set.query import get_document_sets, list_document_sets
+from ..doc.add import add_document
 
 from ..model_ops import generate_uuid_from_name
 from ..model import TrackedDocument, DocumentStatus
@@ -30,7 +32,7 @@ def _get_doc_set(doc_set_uuid):
 
     return doc_set
 
-def upload_document(doc_set_uuid, file_name, local_file, user_id):
+def upload_document(doc_set_uuid, file_name, local_file, source_url, content_type, download_time_utc, user_id):
     """Upload a complete document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
@@ -54,7 +56,14 @@ def upload_document(doc_set_uuid, file_name, local_file, user_id):
 
     bucket = get_s3_bucket()
 
-    _add_or_update_tracking_record(doc_set.id, file_dir, file_name, cloud_path, bucket, user_id)
+    add_document(document_set_uuid=doc_set.id,
+                 file_dir=file_dir, file_name=file_name,
+                 cloud_path=cloud_path,
+                 bucket_path=bucket,
+                 source_url=source_url,
+                 content_type=content_type,
+                 download_time_utc=download_time_utc,
+                 user_id=user_id)
 
 
 def upload_chunk(file_name, chunk_index, local_file):
@@ -73,7 +82,7 @@ def upload_chunk(file_name, chunk_index, local_file):
     return True
 
 
-def merge_chunked_document(doc_set_uuid, file_name, total_chunks, user_id):
+def merge_chunked_document(doc_set_uuid, file_name, total_chunks, source_url, content_type, download_time_utc, user_id):
     """Merge then upload a chunked document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
@@ -98,7 +107,15 @@ def merge_chunked_document(doc_set_uuid, file_name, total_chunks, user_id):
 
     bucket = get_s3_bucket()
 
-    _add_or_update_tracking_record(doc_set.id, file_dir, file_name, cloud_path, bucket, user_id)
+    add_document(document_set_uuid=doc_set.id,
+                 file_dir=file_dir,
+                 file_name=file_name,
+                 cloud_path=cloud_path,
+                 bucket_path=bucket,
+                 source_url=source_url,
+                 content_type=content_type,
+                 download_time_utc=download_time_utc,
+                 user_id=user_id)
 
 
 def _merge_file_chunks(file_dir, chunk_dir, file_name, total_chunks):
@@ -106,13 +123,10 @@ def _merge_file_chunks(file_dir, chunk_dir, file_name, total_chunks):
     """
     logger.info('merging chunks %s %d in cloud file store', file_name, total_chunks)
 
-    cloud_dir = get_s3_directory(file_dir)
-    cloud_path = cloud_dir.joinpath(file_name)
-
     chunk_cloud_dir = get_s3_directory(chunk_dir)
 
     chunk_list = []
-    with cloud_path.open(mode='wb') as dest_file:
+    with _cloud_store_file(file_dir, file_name) as (cloud_path, dest_file):
         for chunk_index in range(total_chunks):
             chunk_file_name = _get_chunk_file_name(file_name, chunk_index)
             src_path = chunk_cloud_dir.joinpath(chunk_file_name)
@@ -138,63 +152,21 @@ def _get_chunk_file_name(file_name, chunk_index):
 def _store_file_in_cloud(file_dir, file_name, local_file):
     """Upload a local file to cloud storage.
     """
-    cloud_dir = get_s3_directory(file_dir)
-
-    cloud_path = cloud_dir.joinpath(file_name)
-    with cloud_path.open(mode='wb') as cloud_file:
+    with _cloud_store_file(file_dir, file_name) as (cloud_path, dest_file):
         while True:
             chunk = local_file.read(1_000_000)
             if not chunk:
                 break
-            cloud_file.write(chunk)
+            dest_file.write(chunk)
     return cloud_path
 
-
-
-def _add_or_update_tracking_record(document_set_uuid, file_dir, file_name, cloud_path, bucket_path, user_id):
-    """Adds or updates the tracking record for the document.
+@contextmanager
+def _cloud_store_file(file_dir, file_name):
+    """Open a file in cloud storage.
     """
-    if not isinstance(document_set_uuid, uuid.UUID):
-        raise TypeError('document_set_uuid must be a UUID object')
+    cloud_dir = get_s3_directory(file_dir)
 
-    file_stat = cloud_path.stat()
-    size_bytes = file_stat.st_size
-    file_modification_time = datetime.fromtimestamp(file_stat.st_mtime)
+    cloud_path = cloud_dir / file_name
 
-    # We store the path relative to the bucket. This is useful when we
-    # need to move the bucket to another location.
-    s3_rel_path = cloud_path.relative_to(bucket_path)
-
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
-
-    with sessionmaker() as session:
-        with session.begin():
-            stmt = select(TrackedDocument).where(
-                and_(TrackedDocument.filename == file_name,
-                     TrackedDocument.document_set_id == document_set_uuid))
-            result = session.execute(stmt)
-            existing_obj = result.scalar_one_or_none()
-
-        with session.begin():
-            if existing_obj:
-                existing_obj.document_set_id = document_set_uuid
-                existing_obj.size_bytes = size_bytes
-                existing_obj.file_modified_time = file_modification_time
-                existing_obj.s3_rel_path = str(s3_rel_path)
-                existing_obj.last_user_id = user_id
-            else:
-                doc_uuid = generate_uuid_from_name()
-
-                new_obj = TrackedDocument(
-                    id=doc_uuid,
-                    document_set_id=document_set_uuid,
-                    status=DocumentStatus.UPLOADED,
-                    filedir=file_dir,
-                    filename=file_name,
-                    size_bytes=size_bytes,
-                    file_modified_time=file_modification_time,
-                    s3_rel_path=str(s3_rel_path),
-                    last_user_id=user_id
-                )
-                session.add(new_obj)
-
+    with cloud_path.open(mode='wb') as cloud_file:
+        yield cloud_path, cloud_file

@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 import uuid
 
-from sqlalchemy import func
+from sqlalchemy import and_, func
 
 from sqlalchemy import select, func, column
 from sqlalchemy.orm import aliased, subqueryload
@@ -39,11 +39,14 @@ def get_documents(doc_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def list_documents(file_dir, start, length, sort_by):
+def list_documents(*,
+                   doc_set_id: Optional[uuid.UUID] = None, file_name: Optional[str] = None,
+                   start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return the list of files in cloud storage.
     """
 
-    existing_objs = _list_tracking_records(start, length, sort_by)
+    existing_objs = _list_tracking_records(doc_set_id=doc_set_id, file_name=file_name,
+                                           start=start, length=length, sort_by=sort_by)
     table_stats = get_document_statistics()
 
     def _to_dict(_x: TrackedDocument):
@@ -54,6 +57,9 @@ def list_documents(file_dir, start, length, sort_by):
             size_bytes = _x.size_bytes,
             modification_time = _x.file_modified_time,
             ingestion_time = _x.ingested_time,
+            source_url = _x.source_url,
+            content_type = _x.content_type,
+            download_time_utc = _x.download_time_utc,
             document_set_id = _x.document_set.id,
             document_set_name = _x.document_set.name
         )
@@ -67,7 +73,9 @@ def list_documents(file_dir, start, length, sort_by):
     )
 
 
-def _list_tracking_records(start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
+def _list_tracking_records(*,
+                           doc_set_id: Optional[uuid.UUID] = None, file_name: Optional[str] = None,
+                           start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return a page of tracking records.
     
     The implementation is an older known-performance technique. The technique
@@ -112,6 +120,18 @@ def _list_tracking_records(start: Optional[int] = None, length: Optional[int] = 
         paginate = start is not None and length is not None
 
         core_query = select(TrackedDocument)
+
+        # Apply query filters
+        where = []
+        if doc_set_id is not None:
+            where.append(TrackedDocument.document_set_id == doc_set_id)
+        if file_name is not None:
+            where.append(TrackedDocument.filename.ilike(file_name))
+        
+        if len(where) > 1:
+            core_query = core_query.where(and_(*where))
+        elif len(where) == 1:
+            core_query = core_query.where(where[0])
 
         # Apply sorting
         core_query = core_query.order_by(*order_by)
