@@ -17,6 +17,7 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
         \s*  # whitespace
         <footnote>
         <docId>(?P<docId>[^<>]+)</docId>
+        (?:<sourceUrl>(?P<sourceUrl>[^<>]+)</sourceUrl>)
         (?:<fileName>(?P<fileName>[^<>]+)</fileName>)?
         (?:<pageNumber>(?P<pageNumber>[^<>]+)</pageNumber>)?
         </footnote>
@@ -78,6 +79,7 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
         logger.info('first text: %d "%s"', pos, text[pos: min(len(text), pos+30)])
         while (match := self.regex_footnote.search(text, pos)):
             doc_id = match.group('docId')
+            source_url = match.group('sourceUrl')
             file_name = match.group('fileName')
             page_number = match.group('pageNumber')
 
@@ -90,6 +92,7 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
             citations.append({
                 'doc_id': doc_id,
+                'source_url': source_url,
                 'text': page_content,
                 'file_name': file_name,
                 'page_number': page_number

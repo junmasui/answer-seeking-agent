@@ -13,6 +13,9 @@ class Citation(CamelModel):
     doc_uuid: UUID = Field(
         description="Document UUID.",
     )
+    source_url:str = Field(
+        description="URL of source document."
+    )
     text: str = Field(
         description="Citation text.",
     )

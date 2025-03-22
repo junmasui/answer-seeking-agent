@@ -3,7 +3,7 @@ from typing import Optional
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select, func, column
+from sqlalchemy import and_, select, func, column
 from sqlalchemy.orm import aliased
 
 
@@ -39,12 +39,15 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def list_document_sets(*, is_default: Optional[bool] = None, is_public: Optional[bool] = None,
+def list_document_sets(*,
+                       name: Optional[str] = None,
+                       is_default: Optional[bool] = None, is_public: Optional[bool] = None,
                        start: Optional[int] =None, length: Optional[int] =None, sort_by: Optional[list] = None):
     """Return the list of document sets.
     """
 
-    existing_objs = _list_tracking_document_sets(is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by)
+    existing_objs = _list_tracking_document_sets(name=name,
+                                                 is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by)
     table_stats = get_document_set_statistics()
 
 
@@ -66,7 +69,9 @@ def list_document_sets(*, is_default: Optional[bool] = None, is_public: Optional
     )
 
 
-def _list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public: Optional[bool] = None,
+def _list_tracking_document_sets(*,
+                                 name: Optional[str] = None,
+                                 is_default: Optional[bool] = None, is_public: Optional[bool] = None,
                                  start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return tracking set when matched to specified document UUID."""
 
@@ -104,11 +109,18 @@ def _list_tracking_document_sets(*, is_default: Optional[bool] = None, is_public
         core_query = select(TrackedDocumentSet)
 
         # Apply query filters
-
+        where = []
+        if name is not None:
+            where.append(TrackedDocumentSet.name.ilike(name))
         if is_default is not None:
-            core_query = core_query.where(TrackedDocumentSet.is_new_doc_default == is_default)
+            where.append(TrackedDocumentSet.is_new_doc_default == is_default)
         if is_public is not None:
-            core_query = core_query.where(TrackedDocumentSet.is_public_viewable == is_public)
+            where.append(TrackedDocumentSet.is_public_viewable == is_public)
+        
+        if len(where) > 1:
+            core_query = core_query.where(and_(*where))
+        elif len(where) == 1:
+            core_query = core_query.where(where[0])
 
         # Apply sorting
         core_query = core_query.order_by(*order_by)

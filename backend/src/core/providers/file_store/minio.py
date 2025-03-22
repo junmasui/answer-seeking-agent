@@ -13,7 +13,7 @@ from ...signals import start_up_handler, reset_data_handler
 logger = logging.getLogger(__name__)
 
 @cache
-def get_s3_client():
+def get_s3_client() -> S3Client:
     """Returns S3 client.
     """
     config = get_global_config()
@@ -24,7 +24,7 @@ def get_s3_client():
     )
 
 @cache
-def get_s3_bucket():
+def get_s3_bucket() -> S3Path:
     """Returns S3 bucket used by this application.
     """
     config = get_global_config()
@@ -32,7 +32,7 @@ def get_s3_bucket():
     return S3Path(f's3://{config.minio_bucket_name}/', client=client)
 
 @cache
-def get_s3_directory(dir_name):
+def get_s3_directory(dir_name: str) -> S3Path:
     """Returns S3 directory within the application S3 bucket. If the directory does not exist, it is created.
     """
     bucket = get_s3_bucket()

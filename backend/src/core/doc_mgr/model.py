@@ -64,6 +64,10 @@ class TrackedDocument(Base):
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     file_modified_time: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
 
+    source_url: Mapped[str] = mapped_column(String(800), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(800), nullable=False)
+    download_time_utc: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
+
     s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=False)
     # https://docs.sqlalchemy.org/en/20/orm/extensions/mutable.html
     # and https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#sqlalchemy.dialects.postgresql.ARRAY

@@ -1,12 +1,12 @@
-# Import the start-up event hander so that it does not miss this event.
+# Importing event_handlers will register its start-up event handler.
 from . import event_handlers
 
 from .doc import (
     get_documents, list_documents,
     get_document_statistics,
+    add_document,
     delete_document,
-    update_document, update_document_status, update_tracking_record,
-    upload_chunk, upload_document, merge_chunked_document
+    update_document, update_document_status, update_tracking_record
 )
 
 from .doc_set import (
@@ -16,3 +16,5 @@ from .doc_set import (
     delete_document_set,
     update_document_set
 )
+
+from .upload import (upload_chunk, upload_document, merge_chunked_document)

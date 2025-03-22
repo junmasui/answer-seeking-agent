@@ -21,7 +21,9 @@ router = APIRouter()
 
 
 @router.get('/', response_model=DocumentSetList)
-async def handle_list_doc_sets(page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
+async def handle_list_doc_sets(
+                            name: Annotated[str, Query(..., description='Document set name')] = None,
+                            page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
                             itemsPerPage: Annotated[int, Query(..., description='Item count per page', ge=1)] = 10,
                             sortBy: Annotated[str, Query(..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending')]  = 'name',
                             current_user: Annotated[User, Depends(
@@ -31,7 +33,7 @@ async def handle_list_doc_sets(page: Annotated[int, Query(..., description='Zero
     """
     sort_by = parse_sort_by(sortBy)
 
-    return list_document_sets(start=page*itemsPerPage, length=itemsPerPage, sort_by=sort_by)
+    return list_document_sets(name=name, start=page*itemsPerPage, length=itemsPerPage, sort_by=sort_by)
 
 @router.post('/')
 async def handle_single_insert(body: DocumentSetAddRequest,
@@ -56,7 +58,7 @@ async def handle_table_stats(current_user: Annotated[User, Depends(get_scoped_cu
 
 @router.patch('/{doc_set_uuid}')
 async def handle_single_update(body: DocumentSetUpdateRequest,
-                               doc_set_uuid: uuid.UUID = Path(..., discription='Document set UUID'),
+                               doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
                                current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
     """Delete the file and associated embeddings specified by the document UUID.
     """
@@ -68,7 +70,7 @@ async def handle_single_update(body: DocumentSetUpdateRequest,
     return {}
 
 @router.delete('/{doc_set_uuid}')
-async def handle_single_delete(doc_set_uuid: uuid.UUID = Path(..., discription='Document set UUID'),
+async def handle_single_delete(doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
                                current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
     """Delete the file and associated embeddings specified by the document UUID.
     """
