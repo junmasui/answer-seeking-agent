@@ -27,6 +27,8 @@
     </v-data-table-server>
     <v-btn class="ma-2" size="large" @click="ingestSelectedItems" :disabled="selectedItemCount === 0">Ingest
         Selected</v-btn>
+        <v-btn class="ma-2" size="large" @click="deleteSelectedItems" :disabled="selectedItemCount === 0">Delete
+            Selected</v-btn>        
     <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
 
     <confirmation-dialog v-model:active="activeConfirmIngestItem" @done="closeIngestItem" @confirmed="applyIngestItem">
@@ -41,6 +43,10 @@
     <confirmation-dialog v-model:active="activeConfirmIngestSelected" @canceled="closeIngestSelected"
                 @confirmed="applyIngestSelected">
                 Are you sure you want to ingest {{ selectedItemCount }} selected items?
+    </confirmation-dialog>
+    <confirmation-dialog v-model:active="activeConfirmDeleteSelected" @canceled="closeDeleteSelected"
+                @confirmed="applyDeleteSelected">
+                Are you sure you want to delete {{ selectedItemCount }} selected items?
     </confirmation-dialog>
 </template>
 
@@ -64,12 +70,11 @@ const tableOutdated = ref(false);
 const loading = ref(false);
 
 const headers = ref([
-    { title: 'File Name', value: 'name', sortable: true },
-    { title: 'Size', key: 'sizeBytes', sortable: true },
-    {
-        title: 'Last Modified Date',
-        key: 'modificationTime', sortable: true
+    { 
+        title: 'File Name', value: 'name',
+        width: '500px', sortable: true
     },
+    { title: 'Size', key: 'sizeBytes', sortable: true },
     {
         title: 'Document Set',
         key: 'documentSetName',
@@ -78,19 +83,27 @@ const headers = ref([
     {
         title: 'Source URL',
         key: 'sourceUrl',
-        width: '150px', sortable: false
+        width: '300px', sortable: false
     },
     {
         title: 'Content Type',
         key: 'contentType',
         width: '50px', sortable: false
     },
-    { title: 'Status', key: 'status', sortable: true },
+    { title: 'Status', key: 'status', width: '50px', sortable: true },
     {
         title: 'Ingestion Date',
-        key: 'ingestionTime', sortable: true
+        key: 'ingestionTime', width: '150px', sortable: true
     },
-    { title: 'Actions', key: 'actions', sortable: false },
+    {
+        title: 'Last Modified Date',
+        key: 'modificationTime', width: '150px', sortable: true
+    },
+    {
+        title: 'Download Date',
+        key: 'downloadTimeUtc', width: '150px', sortable: true
+    },
+    { title: 'Actions', key: 'actions', width: '50px', sortable: false },
 ])
 
 const sortBy = ref([])
@@ -101,7 +114,8 @@ const itemsPerPageOptions = ([
     { value: 5, title: '5' },
     { value: 10, title: '10' },
     { value: 25, title: '25' },
-    { value: 50, title: '50' }
+    { value: 50, title: '50' },
+    { value: 100, title: '100' }
 ]
 )
 
@@ -303,6 +317,61 @@ async function closeIngestSelected() {
     await loadItems()
 }
 
+
+//
+// Confirmation dialog for deletion of selected files
+//
+
+const activeConfirmDeleteSelected = ref(false)
+
+async function deleteSelectedItems() {
+    activeConfirmDeleteSelected.value = true
+
+}
+
+async function applyDeleteSelected() {
+    await deleteSelectedDocuments()
+}
+
+async function deleteSelectedDocuments() {
+    try {
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const body = {
+            docUuids: selectedItems.value.map(x => x.id)
+        }
+
+        const response = await fetch(`/api/documents/delete`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body, null, 2)
+        });
+
+        if (!response.ok) {
+            throw new Error('Delete failed');
+        }
+
+        // Clear the selections
+        selectedItems.value = []
+
+        const data = await response.json();
+        console.log('Deleted successfully:', data);
+    } catch (error) {
+        console.error('Error deleteing:', error);
+    }
+}
+
+
+async function closeDeleteSelected() {
+    await loadItems()
+}
 
 //
 // Polling for server table updates.

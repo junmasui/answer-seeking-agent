@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Sequence
 import uuid
 
 from sqlalchemy import and_, func
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def get_documents(doc_uuid_list: list[str | uuid.UUID]):
+def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[TrackedDocument]:
     """Return tracking records when matched to specified document UUID."""
 
     def _ensure_uuid(item):
@@ -55,11 +55,11 @@ def list_documents(*,
             status = _x.status,
             name = _x.filename,
             size_bytes = _x.size_bytes,
-            modification_time = _x.file_modified_time,
-            ingestion_time = _x.ingested_time,
+            modification_time = _x.file_modified_time.replace(microsecond=0) if _x.file_modified_time is not None else _x.file_modified_time,
+            ingestion_time = _x.ingested_time.replace(microsecond=0) if _x.ingested_time is not None else _x.ingested_time,
             source_url = _x.source_url,
             content_type = _x.content_type,
-            download_time_utc = _x.download_time_utc,
+            download_time_utc = _x.download_time_utc.replace(second=0, microsecond=0) if _x.download_time_utc is not None else _x.download_time_utc,
             document_set_id = _x.document_set.id,
             document_set_name = _x.document_set.name
         )

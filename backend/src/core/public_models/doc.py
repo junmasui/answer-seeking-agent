@@ -79,3 +79,6 @@ class DocumentUpdateRequest(CamelModel):
     document_set_id: Optional[UUID] = Field(
         description="Document set UUID.",
     )
+
+class BulkDeleteRequestBody(CamelModel):
+    doc_uuids: list[UUID]

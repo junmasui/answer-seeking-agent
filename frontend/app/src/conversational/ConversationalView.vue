@@ -129,7 +129,7 @@ async function submit(event) {
       message += '\n\n<p></p>'
 
       data.citations.forEach((citation, index) => {
-        var formatted = `${citation['fileName']}, page ${citation['pageNumber']}`
+        var formatted = `${citation['fileName']}, page ${citation['pageNumber']}, url: ${citation['sourceUrl']}`
         message += `\n\n[^${index + 1}]: ${formatted}`
       })
     }

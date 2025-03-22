@@ -31,7 +31,7 @@ def answer_generator():
         formatted as a footnote.
         The reference marks should be in the format [^1], [^2], [^3], etc.
         Each footnote should be formated as XML
-        with a schema <footnote><docId></docId><fileName></fileName><pageNumber></pageNumber></footnote>.
+        with a schema <footnote><docId></docId><sourceUrl></sourceUrl><fileName></fileName><pageNumber></pageNumber></footnote>.
 
         Question:
         

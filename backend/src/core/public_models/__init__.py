@@ -7,6 +7,7 @@ from .agent import (
 )
 
 from .doc import (
+    BulkDeleteRequestBody,
     Document,
     DocumentList,
     DocumentStats,

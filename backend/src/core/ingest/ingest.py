@@ -5,7 +5,7 @@ from pathlib import Path
 
 from sqlalchemy import func
 
-from ..doc_mgr.model import DocumentStatus
+from ..doc_mgr.model import DocumentStatus, TrackedDocument
 
 from ..doc_mgr import get_documents, update_tracking_record
 from ..providers.file_store import get_s3_bucket
@@ -35,7 +35,10 @@ def ingest_documents(doc_ids):
     staging_dir = config.staging_dir / 'ingest'
     staging_dir.mkdir(parents=True, exist_ok=True)
 
-    def _load_one_source(source_path, tracked_rel_path, tracked_doc_set_id):
+    def _load_one_source(source_path, tracked_rel_path, tracked_doc_set_id,
+                                              source_url: str,
+                                              content_type: str,
+                                              download_time_utc: datetime):
 
         loader = get_doc_loader(file_path=source_path)
 
@@ -60,9 +63,13 @@ def ingest_documents(doc_ids):
             # Add metadata useful for search-time pre-filtering, such as the document set ID.
             doc.metadata['document_set_id'] = str(tracked_doc_set_id)
 
+            doc.metadata['source_url'] = source_url
+            doc.metadata['content_type'] = content_type
+            doc.metadata['download_time_utc'] = download_time_utc.isoformat(timespec='minutes')
+
             yield doc
 
-    def _ingest_one_document(detached_record):
+    def _ingest_one_document(detached_record: TrackedDocument):
         with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
             updateable_record.status = DocumentStatus.INGESTING
 
@@ -78,6 +85,11 @@ def ingest_documents(doc_ids):
             rel_path = detached_record.s3_rel_path
             cloud_path = bucket / rel_path
             local_path = staging_dir / rel_path
+
+            # Get additional metadata
+            source_url = detached_record.source_url
+            content_type = detached_record.content_type
+            download_time_utc = detached_record.download_time_utc
 
             if not cloud_path.exists():
                 # Something was unexpected. Maybe tracking is broken. Let's log it and move on.
@@ -95,13 +107,18 @@ def ingest_documents(doc_ids):
             doc_set_id = detached_record.document_set_id
 
             # Process the file
-            documents = list(_load_one_source(actual_local_path, rel_path, doc_set_id))
+            document_chunks = list(_load_one_source(actual_local_path,
+                                              tracked_rel_path=rel_path,
+                                              tracked_doc_set_id=doc_set_id,
+                                              source_url=source_url,
+                                              content_type=content_type,
+                                              download_time_utc=download_time_utc))
 
             # Update the vector store. Since the file is fully processed, the vector store
             # will not represent a partially processed file.
-            new_pg_doc_ids = [doc.id for doc in documents]
+            new_pg_doc_ids = [doc.id for doc in document_chunks]
 
-            vector_store.add_documents(documents=documents)
+            vector_store.add_documents(documents=document_chunks)
 
             # Update the tracking store.
             # Also at this time, remove orphaned vectors from the vector store. We didn't

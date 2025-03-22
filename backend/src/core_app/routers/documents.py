@@ -9,7 +9,14 @@ from fastapi import UploadFile, Form, Depends, APIRouter, Path, Query
 
 from core import (list_documents, upload_document, upload_chunk,
                   merge_chunked_document, delete_document, get_document_statistics, update_document, update_document_status)
-from core.public_models import DocumentList, DocumentStats, IngestRequestBody, DocumentStatus, DocumentUpdateRequest, SortDirection
+from core.public_models import (
+    DocumentList,
+    DocumentStats,
+    IngestRequestBody,
+    DocumentStatus,
+    DocumentUpdateRequest,
+    BulkDeleteRequestBody
+)
 
 from core_worker import ingest_task
 from simple_auth import User, get_scoped_current_user, Scope
@@ -64,11 +71,14 @@ async def handle_upload(file: UploadFile,
                  file.filename, chunkIndex, totalChunks)
 
     if totalChunks > 1:
-        upload_chunk(file_name=file.filename, chunk_index=chunkIndex, local_file=file.file)
+        upload_chunk(doc_set_uuid=documentSetId,
+                     partial_doc_path=file.filename,
+                     chunk_index=chunkIndex,
+                     local_file=file.file)
 
         if chunkIndex == totalChunks - 1:
             merge_chunked_document(doc_set_uuid=documentSetId,
-                                   file_name=file.filename,
+                                   partial_doc_path=file.filename,
                                    total_chunks=totalChunks,
                                    source_url=sourceUrl,
                                    content_type=contentType,
@@ -77,7 +87,7 @@ async def handle_upload(file: UploadFile,
         return
 
     upload_document(doc_set_uuid=documentSetId,
-                    file_name=file.filename,
+                    partial_doc_path=file.filename,
                     local_file=file.file,
                     source_url=sourceUrl,
                     content_type=contentType,
@@ -132,7 +142,7 @@ async def handle_single_ingest(doc_uuid: Annotated[uuid.UUID, Path(..., discript
 @router.post('/ingest')
 async def handle_ingest(
         body: Optional[IngestRequestBody] = None,
-        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST_BULK))] = None):
+        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
     """Ingest the files specified in the list of document UUIDs
     """
     user_id = current_user.userid if current_user is not None else None
@@ -150,3 +160,20 @@ async def handle_ingest(
         task_ids.append({'doc_uuid': doc_uuid, 'task_id': task.id})
 
     return {'task_ids': task_ids}
+
+@router.post('/delete')
+async def handle_delete(
+        body: Optional[BulkDeleteRequestBody] = None,
+        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+    """Delete the files specified in the list of document UUIDs
+    """
+    user_id = current_user.userid if current_user is not None else None
+
+    doc_uuids = body.doc_uuids if body.doc_uuids else []
+
+    for doc_uuid in doc_uuids:
+
+        delete_document(doc_uuid)
+
+
+    return {}
