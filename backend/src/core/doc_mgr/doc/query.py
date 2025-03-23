@@ -7,6 +7,8 @@ from sqlalchemy import and_, func
 from sqlalchemy import select, func, column
 from sqlalchemy.orm import aliased, subqueryload
 
+from core.public_models.doc import DocumentStatus
+
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import Document, DocumentList, SortDirection
 
@@ -40,12 +42,18 @@ def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[TrackedDocum
 
 
 def list_documents(*,
-                   doc_set_id: Optional[uuid.UUID] = None, file_name: Optional[str] = None,
-                   start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
+                   doc_set_id: Optional[uuid.UUID | list[uuid.UUID]] = None,
+                   status: Optional[DocumentStatus | list[DocumentStatus]] = None,
+                   file_name: Optional[str] = None,
+                   start: Optional[int] = None,
+                   length: Optional[int] = None,
+                   sort_by: Optional[list] = None):
     """Return the list of files in cloud storage.
     """
 
-    existing_objs = _list_tracking_records(doc_set_id=doc_set_id, file_name=file_name,
+    existing_objs = _list_tracking_records(doc_set_id=doc_set_id,
+                                           status=status,
+                                           file_name=file_name,
                                            start=start, length=length, sort_by=sort_by)
     table_stats = get_document_statistics()
 
@@ -74,7 +82,9 @@ def list_documents(*,
 
 
 def _list_tracking_records(*,
-                           doc_set_id: Optional[uuid.UUID] = None, file_name: Optional[str] = None,
+                           doc_set_id: Optional[uuid.UUID | list[uuid.UUID]] = None,
+                           status: Optional[DocumentStatus | list[DocumentStatus]] = None,
+                           file_name: Optional[str] = None,
                            start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
     """Return a page of tracking records.
     
@@ -124,7 +134,17 @@ def _list_tracking_records(*,
         # Apply query filters
         where = []
         if doc_set_id is not None:
-            where.append(TrackedDocument.document_set_id == doc_set_id)
+            if isinstance(doc_set_id, list):
+                where.append(TrackedDocument.document_set_id.in_(doc_set_id))
+            elif isinstance(doc_set_id, uuid.UUID):
+                where.append(TrackedDocument.document_set_id == doc_set_id)
+        if status is not None:
+            if isinstance(status, list):
+                if len(status) > 0:
+                    where.append(TrackedDocument.status.in_(status))
+            elif isinstance(status, DocumentStatus):
+                where.append(TrackedDocument.status == status)
+
         if file_name is not None:
             where.append(TrackedDocument.filename.ilike(file_name))
         

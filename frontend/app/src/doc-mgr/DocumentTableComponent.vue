@@ -27,12 +27,17 @@
     </v-data-table-server>
     <v-btn class="ma-2" size="large" @click="ingestSelectedItems" :disabled="selectedItemCount === 0">Ingest
         Selected</v-btn>
-        <v-btn class="ma-2" size="large" @click="deleteSelectedItems" :disabled="selectedItemCount === 0">Delete
-            Selected</v-btn>        
+    <v-btn class="ma-2" size="large" @click="ingestAllUploaded" :disabled="totalItems === 0">Ingest
+        All Uploaded</v-btn>
+    <v-btn class="ma-2" size="large" @click="deleteSelectedItems" :disabled="selectedItemCount === 0">Delete
+        Selected</v-btn>        
     <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
 
     <confirmation-dialog v-model:active="activeConfirmIngestItem" @done="closeIngestItem" @confirmed="applyIngestItem">
         Are you sure you want to ingest this item?
+    </confirmation-dialog>
+    <confirmation-dialog v-model:active="activeConfirmIngestAllUploaded" @done="closeIngestAllUploaded" @confirmed="applyIngestAllUploaded">
+        Are you sure you want to ingest all uploaded items?
     </confirmation-dialog>
     <confirmation-dialog v-model:active="activeConfirmDeleteItem" @done="closeDeleteItem" @confirmed="applyDeleteItem">
         Are you sure you want to delete this item?
@@ -316,6 +321,58 @@ async function ingestSelectedDocuments() {
 async function closeIngestSelected() {
     await loadItems()
 }
+
+
+//
+// Confirmation dialog for ingestion of all uploaded files
+//
+
+const activeConfirmIngestAllUploaded = ref(false)
+
+async function ingestAllUploaded() {
+    activeConfirmIngestAllUploaded.value = true
+}
+
+async function applyIngestAllUploaded() {
+    await ingestAllUploadedDocuments()
+}
+
+async function ingestAllUploadedDocuments() {
+    try {
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        if (signedIn.value) {
+            headers['Authorization'] = `Bearer ${accessToken.value}`
+        }
+
+        const body = {
+            allUploaded: true
+        }
+
+        const response = await fetch(`/api/documents/ingest`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body, null, 2)
+        });
+
+        if (!response.ok) {
+            throw new Error('Ingest failed');
+        }
+
+        const data = await response.json();
+        console.log('Ingest queued successfully:', data);
+    } catch (error) {
+        console.error('Error ingesting:', error);
+    }
+}
+
+async function closeIngestAllUploaded() {
+    await loadItems()
+}
+
 
 
 //

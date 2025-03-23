@@ -147,7 +147,16 @@ async def handle_ingest(
     """
     user_id = current_user.userid if current_user is not None else None
 
-    doc_uuids = body.doc_uuids if body.doc_uuids else []
+    doc_uuids = set()
+
+    if body.doc_uuids:
+        doc_uuids = set(body.doc_uuids)
+
+    if body.all_uploaded:
+        result = list_documents(doc_set_id=body.doc_set_uuid, status=DocumentStatus.UPLOADED)
+        uningested_doc_ids = [ doc.id for doc in result.documents ]
+        doc_uuids = doc_uuids.union(uningested_doc_ids)
+        logger.info('queued %d items with uploaded status', len(uningested_doc_ids))
 
     task_ids = []
     for doc_uuid in doc_uuids:
