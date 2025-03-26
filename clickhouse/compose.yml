@@ -56,13 +56,17 @@ services:
       - clickhouse-data-2:/var/log/clickhouse-server
       - ./custom-config.xml:/etc/clickhouse-server/config.d/custom-config.xml
       - ./custom-default.xml:/etc/clickhouse-server/users.d/custom-default.xml
-      - ./admin-user.xml:/etc/clickhouse-server/users.d/admin-user.xml
-      - ./server.crt:/etc/clickhouse-server/server.crt
-      - ./server.key:/etc/clickhouse-server/server.key
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - clickhouse_env
+      - clickhouse_server_crt
+      - clickhouse_server_key
+      - clickhouse_admin_user_xml
 
-    # # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    # entrypoint: [ 'docker-entrypoint.sh' ]
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    # 
     # command: [ clickhouse ]
     # set shared memory limit when using docker-compose
     user: root
@@ -108,11 +112,13 @@ services:
       clickhouse_HOST: clickhouse
     env_file:
       - clickhouse-init.env
-      - clickhouse-init.secrets.env
     # Attach clickhouse-init directly to main container's network stack
     network_mode: service:clickhouse
     volumes:
       - ./init-clickhouse.sh:/init-clickhouse.sh
+    secrets:
+      - clickhouse_env
+      - langfuse_clickhouse_env
 
     entrypoint: [ '/bin/bash' ]
     command: [ /init-clickhouse.sh ]

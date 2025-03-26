@@ -12,7 +12,7 @@ set -eu
 
 docker buildx build \
   --file Dockerfile \
+  --no-cache \
   --build-context parent-dir=.. \
   --tag localhost/start-gate:1.0 \
-  . 2>&1 \
-| tee readiness-checker.log
+  . 2>&1

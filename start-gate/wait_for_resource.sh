@@ -7,7 +7,12 @@
 # Error on unbound variables
 set -u
 
-set -x
+# Set environment variables from mounted secrets files
+
+set +o history # temporarily turn off history
+SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
+export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
+set -o history # turn it back on
 
 #
 # Wait for DNS /etc/resolv.conf to be correctly populated by Docker
@@ -23,9 +28,18 @@ do
     sleep 2
 done
 
+# Define multiple functions for waiting.
+#
 
 function wait_for_nslookup {
-    declare LOOKUP_NAME="${1:-not.exist.invalid}"
+    declare LOOKUP_NAME="${1:-}"
+
+    if [ -z "$LOOKUP_NAME" ]
+    then
+        echo "LOOKUP_NAME is empty"
+        exit -1
+    fi
+
     while true
     do
         echo nslookup $LOOKUP_NAME 127.0.0.11
@@ -39,10 +53,15 @@ function wait_for_nslookup {
     done
 }
 
+function wait_for_minio {
+    declare MINIO_ENDPOINT_URL=${1:-}
 
-# Ensure that the case of unset MINIO_ENDPOINT_URL is handled.
-if [ ! -z "${MINIO_ENDPOINT_URL:-}" ]
-then
+    if [ -z "$MINIO_ENDPOINT_URL" ]
+    then
+        echo "MINIO_ENDPOINT_URL is empty"
+        exit -1
+    fi
+
     #
     # Wait for DNS resolution of minio
     #
@@ -62,11 +81,17 @@ then
         fi
         sleep 2
     done
-fi
+}
 
-# Ensure that the case of unset DATABASE_URL is handled.
-if [ ! -z "${DATABASE_URL:-}" ]
-then
+function wait_for_pgvector {
+    declare DATABASE_URL=${1:-}
+
+    if [ -z "$DATABASE_URL" ]
+    then
+        echo "DATABASE_URL is empty"
+        exit -1
+    fi
+
     #
     # Wait for DNS resolution of postgres
     #
@@ -86,11 +111,21 @@ then
         fi
         sleep 2
     done
-fi
+}
 
-# Ensure that the case of unset CLICKHOUSE_URL is handled.
-if [ ! -z "${CLICKHOUSE_URL:-}" ]
-then
+
+function wait_for_clickhouse {
+    declare CLICKHOUSE_URL=${1:-}
+    declare CLICKHOUSE_USER=${2:-}
+    declare CLICKHOUSE_PASSWORD=${3:-}
+    declare CLICKHOUSE_DB=${4:-}
+
+    if [ -z "$CLICKHOUSE_URL" ]
+    then
+        echo "CLICKHOUSE_URL is empty"
+        exit -1
+    fi
+
     #
     # Wait for DNS resolution of clickhouse
     #
@@ -102,7 +137,7 @@ then
     echo "Waiting for clickhouse to be ready"
     while true
     do
-        curl -f -H "X-Clickhouse-Database: ${CLICKHOUSE_DB}" -H "X-Clickhouse-User: ${CLICKHOUSE_USER}"  -H "X-Clickhouse-Key: ${CLICKHOUSE_PASSWORD}" ${CLICKHOUSE_URL}/?query=SHOW%20TABLES
+        curl -u "${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}" -f "${CLICKHOUSE_URL}/?database=${CLICKHOUSE_DB}&query=SHOW%20TABLES"
         if [ $? -eq 0 ]
         then
             echo "clickhouse is live"
@@ -110,14 +145,22 @@ then
         fi
         sleep 2
     done
-fi
+}
 
-#
-#
-#
-# Ensure that the case of unset REDIS_URL is handled.
-if [ ! -z "${REDIS_URL:-}" ]
-then
+
+function wait_for_redis {
+    declare REDIS_URL=${1:-}
+
+    echo redis
+    echo $*
+    echo redis
+
+    if [ -z "$REDIS_URL" ]
+    then
+        echo "REDIS_URL is empty"
+        exit -1
+    fi
+
     #
     # Wait for DNS resolution of redis
     #
@@ -137,4 +180,4 @@ then
         fi
         sleep 2
     done
-fi
+}

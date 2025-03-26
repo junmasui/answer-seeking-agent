@@ -1,6 +1,15 @@
 #!/bin/bash
 
-env | sort
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
+
+# Set environment variables from mounted secrets files
+
+set +o history # temporarily turn off history
+SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
+export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
+set -o history # turn it back on
 
 [ -z "$CLICKHOUSE_DEFAULT_USER_PASSWORD" ] && echo "missing CLICKHOUSE_DEFAULT_USER_PASSWORD" && exit -1
 [ -z "$CLICKHOUSE_ADMIN_USER" ] && echo "missing CLICKHOUSE_ADMIN_USER" && exit -1

@@ -39,14 +39,48 @@ services:
 
     env_file:
       - start-gate.env
-      - start-gate.secrets.env
     networks:
       - agent-poc
+    # volumes:
+    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    secrets:
+      - answers_minio_env
+      - answers_postgres_env
+      - checkpoints_postgres_env
+      - vectors_postgres_env
+      - redis_env
 
     mem_limit: 128m
     memswap_limit: 128m
     # set shared memory limit when using docker-compose
     shm_size: 128mb
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |-
+
+        set +e
+        set +x
+
+        source /wait_for_resource.sh
+
+        wait_for_redis "$${REDIS_URL}"
+        wait_for_minio "$${MINIO_ENDPOINT_URL}"
+
+        DATABASE_URL=postgres://answers:$${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers
+
+        wait_for_pgvector "$$DATABASE_URL"
+
+        DATABASE_URL=postgres://answers_vectors:$${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/vectors
+
+        wait_for_pgvector "$$DATABASE_URL"
+
+        DATABASE_URL=postgres://answers_checkpoints:$${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/checkpoints
+
+        wait_for_pgvector "$$DATABASE_URL"
 
 
   fastapi-dev-server:
@@ -81,12 +115,20 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       ##
       ## Override YML is responsible for mounting:
       ##   target: /home/python
       ##   target: /app/.venv
       ##
+    secrets:
+      - answers_env
+      - answers_jwt_env
+      - answers_minio_env
+      - answers_postgres_env
+      - checkpoints_postgres_env
+      - vectors_postgres_env
+      - redis_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -149,12 +191,20 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_worker.sh:/run_celery_worker.sh
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       ##
       ## Override YML is responsible for mounting:
       ##   target: /home/python
       ##   target: /app/.venv
       ##
+    secrets:
+      - answers_env
+      - answers_jwt_env
+      - answers_minio_env
+      - answers_postgres_env
+      - checkpoints_postgres_env
+      - vectors_postgres_env
+      - redis_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -216,9 +266,17 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_flower.sh:/run_celery_flower.sh
-      - ./docker/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - local-backend-home-3:/home/python
       - local-backend-venv-3:/app/.venv
+    secrets:
+      - answers_env
+      - answers_jwt_env
+      - answers_minio_env
+      - answers_postgres_env
+      - checkpoints_postgres_env
+      - vectors_postgres_env
+      - redis_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -252,12 +310,19 @@ services:
 
     env_file:
       - celery-exporter.env
-      - celery-exporter.secrets.env
     ports:
       - '29808:9808'
     networks:
       agent-poc: {}
+    volumes:
+      - ./custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh
+    secrets:
+      - celery_exporter_env
 
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.exporter.sh' ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    # command: null
 
     # healthcheck:
     #   test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']

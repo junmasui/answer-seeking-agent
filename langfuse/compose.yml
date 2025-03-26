@@ -8,14 +8,39 @@ services:
 
     env_file:
       - start-gate.env
-      - start-gate.secrets.env
     networks:
       - agent-poc
+    # volumes:
+    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    secrets:
+      - langfuse_clickhouse_env
+      - langfuse_minio_env
+      - langfuse_postgres_env
+      - redis_env
 
     mem_limit: 128m
     memswap_limit: 128m
     # set shared memory limit when using docker-compose
     shm_size: 128mb
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |-
+
+        set +e
+
+        source /wait_for_resource.sh
+
+        wait_for_redis "$${REDIS_URL}"
+        wait_for_minio "$${MINIO_ENDPOINT_URL}"
+        wait_for_clickhouse "$${CLICKHOUSE_URL}" "$${CLICKHOUSE_USER}" "$${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" "$${CLICKHOUSE_DB}"
+
+        DATABASE_URL=postgres://langfuse:$${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
+
+        wait_for_pgvector "$$DATABASE_URL"
 
   langfuse-web:
     restart: unless-stopped
@@ -33,14 +58,35 @@ services:
       HOSTNAME: 0.0.0.0
     env_file:
       - langfuse.env
-      - langfuse.secrets.env
       - langfuse-web.env
-      - langfuse-web.secrets.env
     ports:
       - '23003:3000'
     networks:
       - agent-poc
+    volumes:
+      - ./custom-docker-entrypoint.web.sh:/custom-docker-entrypoint.web.sh
+    secrets:
+      - langfuse_env
+      - langfuse_clickhouse_env
+      - langfuse_minio_env
+      - langfuse_postgres_env
+      - langfuse_web_env
+      - redis_env
 
+    entrypoint: [
+      "dumb-init",
+      "--",
+      "/custom-docker-entrypoint.web.sh"
+    ]
+    # When entrypoint is specified in the compose file, the CMD in the Dockerfile is
+    # will be ignored. Hence, extract its value and add it here in the compose file:
+    #   docker inspect langfuse/langfuse:3.24 | jq '.[0].Config.Cmd'
+    command: [
+      "node",
+      "./web/server.js",
+      "--keepAliveTimeout",
+      "110000"
+    ]
     # set shared memory limit when using docker-compose
     shm_size: 128mb
 
@@ -82,11 +128,30 @@ services:
       HOSTNAME: 0.0.0.0
     env_file:
       - langfuse.env
-      - langfuse.secrets.env
     ports:
       - '24030:3030'
     networks:
       - agent-poc
+    volumes:
+      - ./custom-docker-entrypoint.worker.sh:/custom-docker-entrypoint.worker.sh
+    secrets:
+      - langfuse_env
+      - langfuse_clickhouse_env
+      - langfuse_minio_env
+      - langfuse_postgres_env
+      - redis_env
 
+    entrypoint: [
+      "dumb-init",
+      "--",
+      "/custom-docker-entrypoint.worker.sh"
+    ]
+    # When entrypoint is specified in the compose file, the CMD in the Dockerfile is
+    # will be ignored. Hence, extract its value and add it here in the compose file:
+    #   docker inspect langfuse/langfuse:3.24 | jq '.[0].Config.Cmd'
+    command: [
+        "node",
+        "worker/dist/index.js"
+    ]
     # set shared memory limit when using docker-compose
     shm_size: 128mb

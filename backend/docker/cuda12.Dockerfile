@@ -44,7 +44,7 @@ RUN pip install uv
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 
-COPY ./custom-docker-entrypoint.sh /
+COPY --from=parent-dir ./custom-docker-entrypoint.sh /
 COPY --from=parent-dir ./run_celery_worker.sh /
 COPY --from=parent-dir ./run_celery_flower.sh /
 COPY --from=parent-dir ./run_fastapi_dev_server.sh /

@@ -20,3 +20,56 @@ networks:
       config:
         - subnet: 172.31.1.0/24
           gateway: 172.31.1.1
+
+
+secrets:
+  clickhouse_env:
+    file: ./secrets/clickhouse.secrets.env
+  minio_env:
+    file: ./secrets/minio.secrets.env
+  postgres_env:
+    file: ./secrets/postgres.secrets.env
+  redis_env:
+    file: ./secrets/redis.secrets.env
+
+  redis_conf:
+    file: ./secrets/redis.conf
+
+  clickhouse_server_crt:
+    file: ./secrets/clickhouse.server.crt
+  clickhouse_server_key:
+    file: ./secrets/clickhouse.server.key
+  clickhouse_admin_user_xml:
+    file: ./secrets/clickhouse.admin-user.xml
+
+  grafana_env:
+    file: ./secrets/grafana.secrets.env
+
+  answers_env:
+    file: ./secrets.env
+  answers_jwt_env:
+    file: ./secrets/answers.jwt.secrets.env
+  answers_minio_env:
+    file: ./secrets/answers.minio.secrets.env
+  answers_postgres_env:
+    file: ./secrets/answers.postgres.secrets.env
+  checkpoints_postgres_env:
+    file: ./secrets/checkpoints.postgres.secrets.env
+  vectors_postgres_env:
+    file: ./secrets/vectors.postgres.secrets.env
+
+  celery_exporter_env:
+    file: ./secrets/celery-exporter.secrets.env
+
+
+  langfuse_clickhouse_env:
+    file: ./secrets/langfuse.clickhouse.secrets.env
+  langfuse_minio_env:
+    file: ./secrets/langfuse.minio.secrets.env
+  langfuse_postgres_env:
+    file: ./secrets/langfuse.postgres.secrets.env
+
+  langfuse_env:
+    file: ./secrets/langfuse.secrets.env
+  langfuse_web_env:
+    file: ./secrets/langfuse-web.secrets.env

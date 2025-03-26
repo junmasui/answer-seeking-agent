@@ -1,3 +1,7 @@
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
+
 docker pull python:3.12.8-slim-bookworm
 
 docker tag clickhouse:24.12.3

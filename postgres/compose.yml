@@ -14,15 +14,20 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     env_file:
       - pgvector.env
-      - pgvector.secrets.env
     ports:
       - '25432:5432'
     networks:
       - agent-poc
     volumes:
       - pgvector-data-1:/var/lib/postgresql/data
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - postgres_env
 
-    entrypoint: [ 'docker-entrypoint.sh' ]
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # When entrypoint is specified in the compose file, the CMD in the Dockerfile is
+    # will be ignored. Hence, extract its value and add it here in the compose file:
+    #   docker inspect localhost/postgres:17.2-with-pgvector | jq '.[0].Config.Cmd'
     command: [ postgres ]
     mem_limit: 512m
     memswap_limit: 1g
@@ -52,16 +57,21 @@ services:
       POSTGRES_HOST: pgvector
     env_file:
       - pgvector-init.env
-      - pgvector-init.secrets.env
     # Attach postgres-init directly to main container's network stack
     network_mode: service:pgvector
     volumes:
       - ./init-db.sql.template:/init-db.sql.template
       - ./init-postgres.sh:/init-postgres.sh
+    secrets:
+      - postgres_env
+      - answers_postgres_env
+      - checkpoints_postgres_env
+      - vectors_postgres_env
+      - langfuse_postgres_env
 
+    entrypoint: [ '/bin/sh' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ '/bin/sh' ]
     command: [ /init-postgres.sh ]
 
 volumes:
