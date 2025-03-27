@@ -11,8 +11,11 @@ SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
 export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
 set -o history # turn it back on
 
-# Install dependencies
-npm install
+cp ${SECRETS_MOUNT}/redis_conf redis.conf
 
-# Start the Vite (Vue.js) development server
-npm run dev -- --host 0.0.0.0 --logLevel info
+cat redis.conf
+
+# Process with original entrypoint, which can be discovered
+# from the host command-line with:
+#   docker inspect redis:latest | jq '.[0].Config.Entrypoint'
+exec docker-entrypoint.sh $@

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 #
 # Build a general image that is based on the official Python 3.12 on Debian 12 (Bookworm)
@@ -10,6 +12,7 @@ set -eu
 #       control the progress output.
 # NOTE: Use `docker builder prune` to clean up the build cache.
 #
+
 
 docker buildx build \
   --file python_bookworm_cuda12.Dockerfile \

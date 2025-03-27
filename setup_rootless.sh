@@ -1,4 +1,8 @@
 
+##set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
+
 grep ^$(whoami): /etc/subuid
 if [ $? -ne 0 ]
 then
@@ -66,7 +70,7 @@ do
     sudo find $RELPATH -iname '*.sh' -type f \
         -not \( -path "${RELPATH}/docker/*" \) \
         -exec chown rootless-999:rootless-999 \{\} \; \
-        -exec chmod ug=rw \{\}  \;
+        -exec chmod ug=rwx \{\}  \;
 done
 
 sudo find redis -iname '*.conf' -type f \

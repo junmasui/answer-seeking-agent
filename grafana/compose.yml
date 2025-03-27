@@ -7,14 +7,23 @@ services:
 
     env_file:
       - grafana.env
-      - grafana.secrets.env
     volumes:
       - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
       - grafana-data-1:/var/lib/grafana
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
     ports:
       - 23000:3000
     networks:
       - agent-poc
+    secrets:
+      - grafana_env
+
+    entrypoint: /custom-docker-entrypoint.sh
+    # When entrypoint is specified in the compose file, the CMD in the Dockerfile is
+    # will be ignored. Hence, extract its value and add it here in the compose file:
+    #   docker inspect grafana/grafana | jq '.[0].Config.Cmd'
+    ##command:
+
 
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']

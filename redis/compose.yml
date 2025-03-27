@@ -44,10 +44,16 @@ services:
       - agent-poc
     volumes:
       - redis-data-1:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - redis_env
+      - redis_conf
 
     user: "redis:redis"
-    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+    entrypoint: ['/custom-docker-entrypoint.sh']
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: ['redis-server', 'redis.conf']
     mem_limit: 1g
     memswap_limit: 2g
 

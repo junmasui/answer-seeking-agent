@@ -50,21 +50,7 @@ services:
 
         set +e
 
-        function wait_for_nslookup {
-            declare TARGET_NAME=$${1}
-            echo $$TARGET_NAME
-            while true
-            do
-                nslookup $$TARGET_NAME 127.0.0.11
-                echo nslookup $$TARGET_NAME 127.0.0.11
-                if [ $$? -eq 0 ]
-                then
-                    echo "DNS name $$TARGET_NAME resolves"
-                    break
-                fi
-                sleep 2
-            done
-        }
+        source /wait_for_resource.sh
 
         wait_for_nslookup "vite-dev-server"
         wait_for_nslookup "fastapi-dev-server"

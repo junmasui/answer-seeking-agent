@@ -1,3 +1,4 @@
+
 # Logs
 logs
 *.log
@@ -10,6 +11,7 @@ logs
 *.overrides.env
 
 # secrets, should never be committed
+secrets/
 secrets.env
 *.secrets.env
 

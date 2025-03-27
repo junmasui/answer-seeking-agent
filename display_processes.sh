@@ -61,5 +61,7 @@ echo "Examine suspicious or failed processes"
 SUSPICIOUS=$( ( jq --compact-output "$JQ_2" <<< "$PROCESSES" ) | wc -l )
 if [ $SUSPICIOUS -ne 0 ]
 then
-  exit 2
+  exit 1 # Generic Error 
+else
+  exit 0 # Success
 fi

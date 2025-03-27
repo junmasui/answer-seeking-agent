@@ -9,7 +9,6 @@ services:
 
     env_file:
       - minio.env
-      - minio.secrets.env
     ports:
       - '29000:9000'
       - '29001:9001'
@@ -17,7 +16,13 @@ services:
       - agent-poc
     volumes:
       - minio-data-2:/data
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - minio_env
 
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: server /data --console-address ':9001'
     mem_limit: 512m
     memswap_limit: 1g
@@ -45,15 +50,18 @@ services:
       MINIO_ENDPOINT_URL: http://minio:9000
     env_file:
       - minio-init.env
-      - minio-init.secrets.env
     # Attach minio-init directly to main container's network stack
     network_mode: service:minio
     volumes:
       - ./init-minio.sh:/init-minio.sh
+    secrets:
+      - minio_env
+      - answers_minio_env
+      - langfuse_minio_env
 
+    entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ /bin/sh ]
     command: /init-minio.sh
 
 volumes:
