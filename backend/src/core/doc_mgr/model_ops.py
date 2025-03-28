@@ -44,6 +44,14 @@ def create_migration_baseline():
 
 def _create_tables_if_not_exists(engine):
 
+    reflected_metadata = MetaData(schema='answers')
+    reflected_metadata.reflect(bind=engine)
+
+    if reflected_metadata.tables is not None and len(reflected_metadata.tables) > 0:
+        logger.info('database is not empty. use formal migration tools.')
+        return 
+
+
     DECLARED_METADATA.create_all(engine)
 
     with Session(engine) as session:

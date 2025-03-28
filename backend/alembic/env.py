@@ -5,6 +5,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy import inspect
 
+# Autogeneration support for Postgres functions, views, etc
+from alembic_utils.replaceable_entity import register_entities
+
 # Autogeneration support for Posgres enums
 import alembic_postgresql_enum
 
