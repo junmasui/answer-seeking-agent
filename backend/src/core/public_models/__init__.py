@@ -28,6 +28,13 @@ from .ingest import (
     IngestRequestBody
 )
 
+from .prompt import (
+    AgentPrompt,
+    AgentPromptList,
+    AgentPromptStats,
+    AgentPromptStatus
+)
+
 class SortDirection(str, enum.Enum):
     ASC = 'asc'
     DESC = 'desc'

@@ -2,22 +2,16 @@ import logging
 import datetime
 import uuid
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, MetaData, String, Uuid
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, registry, relationship
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Uuid
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql.functions import current_timestamp
 
 from ..public_models import DocumentStatus
+from .base import Base
 
 logger = logging.getLogger(__name__)
-
-DECLARED_METADATA = MetaData()
-DECLARED_REGISTRY = registry(metadata=DECLARED_METADATA)
-
-class Base(DeclarativeBase):
-    metadata = DECLARED_METADATA
-    registry = DECLARED_REGISTRY
 
 
 class TrackedDocumentSet(Base):

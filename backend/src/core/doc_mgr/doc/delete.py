@@ -7,7 +7,7 @@ from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...providers.file_store import get_s3_bucket
 from ...providers.vector_store import get_vector_store
 
-from ..model import TrackedDocument
+from ...db_models import TrackedDocument
 
 from .query import get_documents
 

@@ -1,5 +1,5 @@
-import os
-from logging.config import fileConfig
+import early_init
+
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -13,27 +13,21 @@ import alembic_postgresql_enum
 
 from alembic import context
 
+# Access to our configuration .. which includes the Postgres connection string
+from global_config import get_global_config
+
+# This import will load our declared schema
+import core.db_models
+
+db_url = get_global_config().postgres_answers_connection_url
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
-
-
-from global_config import get_global_config
-db_url = get_global_config().postgres_answers_connection_url
-
 config.set_main_option("sqlalchemy.url", str(db_url))
 
-# Model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-import core.doc_mgr.model
-target_metadata = core.doc_mgr.model.DECLARED_METADATA
+target_metadata = core.db_models.DECLARED_METADATA
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

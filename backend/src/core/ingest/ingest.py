@@ -5,7 +5,8 @@ from pathlib import Path
 
 from sqlalchemy import func
 
-from ..doc_mgr.model import DocumentStatus, TrackedDocument
+from ..db_models import TrackedDocument
+from ..public_models import DocumentStatus
 
 from ..doc_mgr import get_documents, update_tracking_record
 from ..providers.file_store import get_s3_bucket

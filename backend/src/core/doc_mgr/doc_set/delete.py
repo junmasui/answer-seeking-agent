@@ -5,7 +5,7 @@ from sqlalchemy import delete
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ..model import TrackedDocumentSet
+from ...db_models import TrackedDocumentSet
 
 from .query import get_document_sets
 

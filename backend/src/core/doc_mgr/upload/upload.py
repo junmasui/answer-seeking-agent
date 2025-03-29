@@ -1,21 +1,14 @@
-from contextlib import contextmanager
 import logging
-import uuid
-from datetime import datetime
 from pathlib import Path
 
-from sqlalchemy import and_, select
 
 from global_config import get_global_config
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...providers.file_store import get_s3_directory, get_s3_bucket
 
 from ..doc_set.query import get_document_sets, list_document_sets
 from ..doc.add import add_document
 
-from ..model_ops import generate_uuid_from_name
-from ..model import TrackedDocument, DocumentStatus
 
 
 logger = logging.getLogger(__name__)
