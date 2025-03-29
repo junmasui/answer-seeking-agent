@@ -4,13 +4,15 @@ This module provides the node that evaluates whether an generated answer address
 See: Answer Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
 from functools import cache
-import textwrap
 import logging
 
 from .internal_models import GradeAnswer
 from .grader_util import build_grader
+from .prompt_util import get_prompt
 
 logger = logging.getLogger(__name__)
+
+PROMPT_NAME = 'Grade Answer'
 
 @cache
 def get_answer_grader():
@@ -30,10 +32,9 @@ def get_answer_grader():
         
         {generation}'''
     
-    system = textwrap.dedent(system)
-    human = textwrap.dedent(human)
+    prompt = get_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
 
-    answer_grader = build_grader(system, human, GradeAnswer, 'answer_grader')
+    answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
 
     return answer_grader
 

@@ -12,8 +12,11 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
 
+from .prompt_util import get_prompt
 
 logger = logging.getLogger(__name__)
+
+PROMPT_NAME = 'Rewrite Query'
 
 ### Question Re-writer
 
@@ -36,15 +39,7 @@ def get_question_rewriter():
         Formulate an improved question.
         '''
 
-    system = textwrap.dedent(system)
-    human = textwrap.dedent(human)
-
-    rewrite_prompt = ChatPromptTemplate.from_messages(
-        [
-            ('system', system),
-            ('human', human ),
-        ]
-    )
+    rewrite_prompt = get_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
 
     chain = rewrite_prompt | llm | StrOutputParser()
 

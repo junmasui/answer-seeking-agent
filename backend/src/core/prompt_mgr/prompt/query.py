@@ -65,7 +65,8 @@ def list_prompts(*,
             name = _x.name,
             status = _x.status,
             system_prompt = _x.system_prompt,
-            human_prompt = _x.human_prompt
+            human_prompt = _x.human_prompt,
+            version = _x.version
         )
 
     prompt_list = [_to_dict(x) for x in existing_objs]

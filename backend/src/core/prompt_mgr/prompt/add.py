@@ -14,9 +14,9 @@ from ...db_models import AgentPrompt
 logger = logging.getLogger(__name__)
 
 
-def add_agent_prompt(name: str, system_prompt: str, human_prompt:str, user_id: uuid.UUID):
+def add_prompt(name: str, status: AgentPromptStatus, system_prompt: str, human_prompt:str, user_id: uuid.UUID=None):
 
-    _add_or_update_agent_prompt(name=name, system_prompt=system_prompt, human_prompt=human_prompt, user_id=user_id)
+    _add_or_update_agent_prompt(name=name, status=status, system_prompt=system_prompt, human_prompt=human_prompt, user_id=user_id)
 
 
 def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_prompt: str, human_prompt:str, user_id: uuid.UUID):
@@ -38,7 +38,8 @@ def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_pro
                 existing_obj.status = status
                 existing_obj.system_prompt = system_prompt
                 existing_obj.human_prompt = human_prompt
-                existing_obj.last_user_id = user_id
+                if user_id is not None:
+                    existing_obj.last_user_id = user_id
             else:
                 prompt_uuid = uuid.uuid4()
 

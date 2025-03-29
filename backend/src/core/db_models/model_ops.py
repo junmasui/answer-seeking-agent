@@ -81,6 +81,8 @@ def get_schema_differences(engine):
         connection,
         opts={
             'compare_type': True,
+            # If true, server default comparison is enabled.
+            # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.compare_server_default
             'compare_server_default': True,
             # If True, autogenerate will scan across all schemas located by the SQLAlchemy
             # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.include_schemas

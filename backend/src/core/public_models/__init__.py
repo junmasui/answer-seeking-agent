@@ -32,7 +32,9 @@ from .prompt import (
     AgentPrompt,
     AgentPromptList,
     AgentPromptStats,
-    AgentPromptStatus
+    AgentPromptStatus,
+    AgentPromptAddRequest,
+    AgentPromptUpdateRequest
 )
 
 class SortDirection(str, enum.Enum):
