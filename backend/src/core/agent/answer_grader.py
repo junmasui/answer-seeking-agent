@@ -8,7 +8,7 @@ import logging
 
 from .internal_models import GradeAnswer
 from .grader_util import build_grader
-from .prompt_util import get_prompt
+from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def get_answer_grader():
         
         {generation}'''
     
-    prompt = get_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
 
     answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
 

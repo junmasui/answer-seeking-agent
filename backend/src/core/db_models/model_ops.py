@@ -35,7 +35,9 @@ def create_tables_if_not_exists():
         if differences:
             logger.info('CHECK THAT MIGRATION STEPS HAVE BEEN DEFINED')
             for diff in differences:
-                logger.info('DB difference: %s %s', diff[0], getattr(diff[1], 'name'))
+                op = diff[0]
+                obj_name = getattr(diff[1], 'name') if diff[1] is not None else ''
+                logger.info('DB difference: %s %s', op, obj_name)
 
     _create_tables_if_new(engine)
     _run_migrations(engine)

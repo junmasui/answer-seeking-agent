@@ -94,6 +94,7 @@ services:
     profiles: [ backend, all ]
 
     environment:
+      DEBUGGER_LISTEN: true
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
@@ -170,6 +171,7 @@ services:
     profiles: [ backend, all ]
 
     environment:
+      DEBUGGER_LISTEN: true
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:

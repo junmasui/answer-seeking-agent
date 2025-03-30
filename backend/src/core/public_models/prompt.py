@@ -19,10 +19,10 @@ class AgentPrompt(CamelModel):
     status: AgentPromptStatus = Field(
         description="Status.",
     )
-    system_prompt: str = Field(
+    system_message: Optional[str] = Field(
         description='Prompt'
     )
-    human_prompt: str = Field(
+    human_message: Optional[str] = Field(
         description='Prompt'
     )
     version: int = Field(
@@ -51,10 +51,10 @@ class AgentPromptAddRequest(CamelModel):
     name: str = Field(
         description="Name of prompt.",
     )
-    system_prompt: str = Field(
+    system_message: str = Field(
         description='Prompt'
     )
-    human_prompt: str = Field(
+    human_message: str = Field(
         description='Prompt'
     )
 
@@ -63,9 +63,9 @@ class AgentPromptUpdateRequest(CamelModel):
         description="Name of prompt.",
         default = None
     )
-    system_prompt: str = Field(
+    system_message: str = Field(
         description='Prompt'
     )
-    human_prompt: str = Field(
+    human_message: str = Field(
         description='Prompt'
     )

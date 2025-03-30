@@ -9,7 +9,7 @@ from functools import cache
 import textwrap
 
 from .grader_util import build_grader
-from .prompt_util import get_prompt
+from .prompt_util import get_chat_prompt
 
 from .internal_models import GradeDocuments
 
@@ -37,7 +37,7 @@ def get_retrieval_grader():
         User question:
         
         {question}'''
-    prompt = get_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
 
     retrieval_grader = build_grader(prompt, GradeDocuments, 'retrieval_grader')
 

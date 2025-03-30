@@ -11,10 +11,10 @@ from ..prompt_mgr import list_prompts, add_prompt
 
 logger = logging.getLogger(__name__)
 
-def get_prompt(*,
-               prompt_name: str,
-               default_system_message: str,
-               default_human_message: str):
+def get_chat_prompt(*,
+                    prompt_name: str,
+                    default_system_message: str = None,
+                    default_human_message: str = None):
 
     result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
     if not result.prompts:
@@ -24,13 +24,13 @@ def get_prompt(*,
         if default_human_message:
             default_human_message = textwrap.dedent(default_human_message)
 
-        add_prompt(prompt_name, status=AgentPromptStatus.ACTIVE, human_prompt=default_human_message, system_prompt=default_system_message)
+        add_prompt(prompt_name, status=AgentPromptStatus.ACTIVE, human_message=default_human_message, system_message=default_system_message)
 
         result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
 
     prompt = result.prompts[0]
-    system_message = prompt.system_prompt
-    human_message = prompt.human_prompt
+    system_message = prompt.system_message
+    human_message = prompt.human_message
 
     messages = []
     if system_message:

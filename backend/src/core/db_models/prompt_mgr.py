@@ -18,8 +18,8 @@ class AgentPrompt(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[AgentPromptStatus] = mapped_column(Enum(AgentPromptStatus), nullable=False)
-    system_prompt: Mapped[str] = mapped_column(String(9000), nullable=False)
-    human_prompt: Mapped[str] = mapped_column(String(9000), nullable=False)
+    system_message: Mapped[str] = mapped_column(String(9000), nullable=True)
+    human_message: Mapped[str] = mapped_column(String(9000), nullable=True)
 
     # Version number
     version: Mapped[int] = mapped_column(Integer, nullable=False)

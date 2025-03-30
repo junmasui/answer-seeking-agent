@@ -1,8 +1,8 @@
 """add prompt table
 
-Revision ID: 12f75b868c56
+Revision ID: 8137477f7563
 Revises: efd59824ec9f
-Create Date: 2025-03-29 20:24:04.246483
+Create Date: 2025-03-30 01:39:13.173766
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '12f75b868c56'
+revision: str = '8137477f7563'
 down_revision: Union[str, None] = 'efd59824ec9f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -39,8 +39,8 @@ def schema_upgrade():
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('name', sa.String(length=200), nullable=False),
     sa.Column('status', postgresql.ENUM('ACTIVE', 'DEACTIVATED', name='agentpromptstatus', create_type=False), nullable=False),
-    sa.Column('system_prompt', sa.String(length=9000), nullable=False),
-    sa.Column('human_prompt', sa.String(length=9000), nullable=False),
+    sa.Column('system_message', sa.String(length=9000), nullable=True),
+    sa.Column('human_message', sa.String(length=9000), nullable=True),
     sa.Column('version', sa.Integer(), nullable=False),
     sa.Column('last_user_id', sa.Uuid(), nullable=True),
     sa.Column('create_time', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),

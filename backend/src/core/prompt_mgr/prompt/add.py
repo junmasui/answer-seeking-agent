@@ -14,12 +14,12 @@ from ...db_models import AgentPrompt
 logger = logging.getLogger(__name__)
 
 
-def add_prompt(name: str, status: AgentPromptStatus, system_prompt: str, human_prompt:str, user_id: uuid.UUID=None):
+def add_prompt(name: str, status: AgentPromptStatus, system_message: str, human_message:str, user_id: uuid.UUID=None):
 
-    _add_or_update_agent_prompt(name=name, status=status, system_prompt=system_prompt, human_prompt=human_prompt, user_id=user_id)
+    _add_or_update_agent_prompt(name=name, status=status, system_message=system_message, human_message=human_message, user_id=user_id)
 
 
-def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_prompt: str, human_prompt:str, user_id: uuid.UUID):
+def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_message: str, human_message:str, user_id: uuid.UUID):
     """Adds or updates the prompt.
     """
 
@@ -36,8 +36,8 @@ def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_pro
             if existing_obj:
                 existing_obj.name = name
                 existing_obj.status = status
-                existing_obj.system_prompt = system_prompt
-                existing_obj.human_prompt = human_prompt
+                existing_obj.system_message = system_message
+                existing_obj.human_message = human_message
                 if user_id is not None:
                     existing_obj.last_user_id = user_id
             else:
@@ -47,8 +47,8 @@ def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_pro
                     id=prompt_uuid,
                     name=name,
                     status=status,
-                    system_prompt=system_prompt,
-                    human_prompt=human_prompt,
+                    system_message=system_message,
+                    human_message=human_message,
                     version=1, # First version!
                     last_user_id=user_id
                 )

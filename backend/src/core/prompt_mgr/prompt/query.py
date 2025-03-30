@@ -64,8 +64,8 @@ def list_prompts(*,
             id = _x.id,
             name = _x.name,
             status = _x.status,
-            system_prompt = _x.system_prompt,
-            human_prompt = _x.human_prompt,
+            system_message = _x.system_message,
+            human_message = _x.human_message,
             version = _x.version
         )
 

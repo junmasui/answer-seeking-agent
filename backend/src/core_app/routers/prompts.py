@@ -64,7 +64,7 @@ async def handle_single_update(body: AgentPromptUpdateRequest,
 
     user_id = current_user.userid if current_user is not None else None
 
-    update_prompt(prompt_uuid, system_prompt=body.system_prompt, human_prompt=body.human_prompt, last_user_id=user_id)
+    update_prompt(prompt_uuid, system_message=body.system_message, human_message=body.human_message, last_user_id=user_id)
 
     return {}
 

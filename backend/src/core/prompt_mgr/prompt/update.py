@@ -13,7 +13,7 @@ from ...db_models import AgentPrompt
 
 logger = logging.getLogger(__name__)
 
-def update_prompt(prompt_uuid, status: AgentPromptStatus, system_prompt: str = None, human_prompt:str = None, last_user_id=None):
+def update_prompt(prompt_uuid, status: AgentPromptStatus, system_message: str = None, human_message:str = None, last_user_id=None):
     """Updates status field with option to update 
     """
     with update_prompt_record(prompt_uuid=prompt_uuid) as record:
@@ -21,11 +21,11 @@ def update_prompt(prompt_uuid, status: AgentPromptStatus, system_prompt: str = N
         if status is not None:
             record.status = status
 
-        if system_prompt is not None:
-            record.system_prompt = system_prompt
+        if system_message is not None:
+            record.system_message = system_message
 
-        if human_prompt is not None:
-            record.human_prompt = human_prompt
+        if human_message is not None:
+            record.human_message = human_message
 
         if last_user_id:
             record.last_user_id = last_user_id
