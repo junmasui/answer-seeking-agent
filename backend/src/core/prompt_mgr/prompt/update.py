@@ -2,7 +2,7 @@ import logging
 import uuid
 from contextlib import contextmanager
 
-from sqlalchemy import select
+from sqlalchemy import and_, func, select, update
 
 from core.public_models.prompt import AgentPromptStatus
 
@@ -52,3 +52,23 @@ def update_prompt_record(prompt_uuid):
         with session.begin():
             yield existing_obj
 
+        status = existing_obj.status
+        name = existing_obj.name
+        version = existing_obj.version
+
+        # Count versions. The count will be the number of records with this prompt's name.
+        with session.begin():
+            stmt = select(func.count()).select_from(AgentPrompt).where(
+                AgentPrompt.name == name)
+            result = session.execute(stmt)
+            version_count = result.scalar()
+        
+        # Only one version can be active
+        if status == AgentPromptStatus.ACTIVE and version_count > 1:
+            with session.begin():
+                stmt = update(AgentPrompt).where(
+                        and_(AgentPrompt.name == name, AgentPrompt.version != version)
+                    ).value(
+                        status = AgentPromptStatus.INACTIVE
+                    )
+                result = session.execute(stmt)
