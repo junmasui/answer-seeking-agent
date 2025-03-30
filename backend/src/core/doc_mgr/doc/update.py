@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ..model import TrackedDocument
+from ...db_models import TrackedDocument
 
 
 logger = logging.getLogger(__name__)

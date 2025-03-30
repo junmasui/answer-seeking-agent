@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import DocumentStats
 
-from ..model import TrackedDocument
+from ...db_models import TrackedDocument
 
 
 

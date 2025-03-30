@@ -12,9 +12,11 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser
+from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
 
+PROMPT_NAME='Generate Answer'
 
 def answer_generator():
     # Prompt
@@ -47,14 +49,7 @@ def answer_generator():
 
         Answer:
         '''
-    # We maintain multiline strings that are indented in the codebase but not indented when calling the LLM API.
-    human = textwrap.dedent(human)
-    prompt =  ChatPromptTemplate.from_messages(
-        [
-            ('human', human),
-        ]
-    )
-    ### prompt = hub.pull('rlm/rag-prompt')
+    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_human_message=human)
 
     # LLM
     llm = get_chat_llm()

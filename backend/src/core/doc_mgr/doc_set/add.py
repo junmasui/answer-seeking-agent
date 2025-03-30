@@ -7,8 +7,7 @@ from global_config import get_global_config
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ..model import TrackedDocumentSet
-from ..model_ops import (generate_uuid_from_name)
+from ...db_models import TrackedDocumentSet
 
 
 logger = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
                 existing_obj.is_public_viewable = is_pubic
                 existing_obj.last_user_id = user_id
             else:
-                doc_set_uuid = generate_uuid_from_name()
+                doc_set_uuid = uuid.uuid4()
 
                 doc_root_dir = get_global_config().doc_manager.doc_root_dir
 

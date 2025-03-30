@@ -12,7 +12,7 @@ from core.public_models.doc import DocumentStatus
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import Document, DocumentList, SortDirection
 
-from ..model import TrackedDocument
+from ...db_models import TrackedDocument
 
 from .stats import get_document_statistics
 

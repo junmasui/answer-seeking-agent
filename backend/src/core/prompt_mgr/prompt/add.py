@@ -1,0 +1,62 @@
+import logging
+import uuid
+
+from sqlalchemy import and_, select, update
+
+from core.public_models.prompt import AgentPromptStatus
+from global_config import get_global_config
+
+from ...providers.sql_database import get_sessionmaker, DataDomain
+
+from ...db_models import AgentPrompt
+
+
+logger = logging.getLogger(__name__)
+
+
+def add_prompt(name: str, status: AgentPromptStatus, system_message: str, human_message:str, user_id: uuid.UUID=None):
+
+    _add_or_update_agent_prompt(name=name, status=status, system_message=system_message, human_message=human_message, user_id=user_id)
+
+
+def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_message: str, human_message:str, user_id: uuid.UUID):
+    """Adds or updates the prompt.
+    """
+
+    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+
+    with sessionmaker() as session:
+
+        # We want to know auto-increment the version number.
+        # So this query will return the highest version numbered first.
+        with session.begin():
+            stmt = select(AgentPrompt).where(
+                AgentPrompt.name == name).limit(1).order_by(AgentPrompt.version.desc())
+            result = session.execute(stmt)
+            existing_obj = result.scalar_one_or_none()
+
+        version = 1 if existing_obj is None else ( existing_obj.version + 1 )
+
+        with session.begin():
+            prompt_uuid = uuid.uuid4()
+
+            new_obj = AgentPrompt(
+                id=prompt_uuid,
+                name=name,
+                status=status,
+                system_message=system_message,
+                human_message=human_message,
+                version=version,
+                last_user_id=user_id
+            )
+            session.add(new_obj)
+
+        # Only one version can be active
+        if status == AgentPromptStatus.ACTIVE and version > 1:
+            with session.begin():
+                stmt = update(AgentPrompt).where(
+                        and_(AgentPrompt.name == name, AgentPrompt.version != version)
+                    ).value(
+                        status = AgentPromptStatus.INACTIVE
+                    )
+                result = session.execute(stmt)

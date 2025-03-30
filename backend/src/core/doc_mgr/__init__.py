@@ -1,6 +1,3 @@
-# Importing event_handlers will register its start-up event handler.
-from . import event_handlers
-
 from .doc import (
     get_documents, list_documents,
     get_document_statistics,

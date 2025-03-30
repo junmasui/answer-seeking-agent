@@ -105,6 +105,19 @@ wheels = [
 ]
 
 [[package]]
+name = "alembic-utils"
+version = "0.8.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alembic" },
+    { name = "flupy" },
+    { name = "parse" },
+    { name = "sqlalchemy" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/25/6b/e9cd5a576fdc7cbf6580f011a6025de4dae84020a17440be06efb984b649/alembic_utils-0.8.6.tar.gz", hash = "sha256:c6991c364c0a9fad13712124f07440a9cc719037b171d5190cf4beaed2ac026c", size = 22034 }
+
+[[package]]
 name = "amqp"
 version = "5.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -170,6 +183,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
     { name = "alembic-postgresql-enum" },
+    { name = "alembic-utils" },
     { name = "blinker" },
     { name = "celery", extra = ["redis"] },
     { name = "cloudpathlib", extra = ["s3"] },
@@ -230,6 +244,7 @@ dev = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.15.1" },
     { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
+    { name = "alembic-utils", specifier = ">=0.8.6" },
     { name = "blinker", specifier = ">=1.9.0" },
     { name = "celery", extras = ["redis"], specifier = ">=5.4.0" },
     { name = "cloudpathlib", extras = ["s3"], specifier = ">=0.20.0" },
@@ -812,6 +827,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/09/a1/357f1b5d8946deafd
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a6/ff/ee2f67c0ff146ec98b5df1df637b2bc2d17beeb05df9f427a67bd7a7d79c/flower-2.0.1-py2.py3-none-any.whl", hash = "sha256:9db2c621eeefbc844c8dd88be64aef61e84e2deb29b271e02ab2b5b9f01068e2", size = 383553 },
 ]
+
+[[package]]
+name = "flupy"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/ce/18f6d9969416d8c9e0728f042091717606f2cd46d570aff6533ce587e71f/flupy-1.2.1.tar.gz", hash = "sha256:42aab3b4b3eb1984a4616c40d8f049ecdee546eaad9467470731d456dbff7fa4", size = 12346 }
 
 [[package]]
 name = "fonttools"
@@ -2054,6 +2078,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/20/e8/45a05d9c39d2cea61ab175dbe6a2de1d05b679e8de2011da4ee190d7e748/pandas-2.2.3-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:6dfcb5ee8d4d50c06a51c2fffa6cff6272098ad6540aed1a76d15fb9318194d8", size = 16359235 },
     { url = "https://files.pythonhosted.org/packages/1d/99/617d07a6a5e429ff90c90da64d428516605a1ec7d7bea494235e1c3882de/pandas-2.2.3-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:062309c1b9ea12a50e8ce661145c6aab431b1e99530d3cd60640e255778bd43a", size = 14056756 },
     { url = "https://files.pythonhosted.org/packages/29/d4/1244ab8edf173a10fd601f7e13b9566c1b525c4f365d6bee918e68381889/pandas-2.2.3-cp312-cp312-win_amd64.whl", hash = "sha256:59ef3764d0fe818125a5097d2ae867ca3fa64df032331b7e0917cf5d7bf66b13", size = 11504248 },
+]
+
+[[package]]
+name = "parse"
+version = "1.20.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/78/d9b09ba24bb36ef8b83b71be547e118d46214735b6dfb39e4bfde0e9b9dd/parse-1.20.2.tar.gz", hash = "sha256:b41d604d16503c79d81af5165155c0b20f6c8d6c559efa66b4b695c3e5a0a0ce", size = 29391 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d0/31/ba45bf0b2aa7898d81cbbfac0e88c267befb59ad91a19e36e1bc5578ddb1/parse-1.20.2-py2.py3-none-any.whl", hash = "sha256:967095588cb802add9177d0c0b6133b5ba33b1ea9007ca800e526f42a85af558", size = 20126 },
 ]
 
 [[package]]

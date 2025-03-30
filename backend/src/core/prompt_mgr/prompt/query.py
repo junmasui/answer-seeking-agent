@@ -8,30 +8,37 @@ from sqlalchemy.orm import aliased
 
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
-from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus, SortDirection
+from ...public_models import AgentPrompt, AgentPromptList, AgentPromptStatus, SortDirection
 
-from ...db_models import TrackedDocumentSet
+from ...db_models import AgentPrompt
 
-from .stats import get_document_set_statistics
+from .stats import get_prompt_statistics
 
 logger = logging.getLogger(__name__)
 
 
 
-def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
-    """Return tracking records when matched to specified document UUID."""
+def get_prompt(prompt_uuid_list: list[str | uuid.UUID],
+               status: Optional[AgentPromptStatus] = AgentPromptStatus.ACTIVE):
+    """Return tracking records when matched to specified prommpt UUID."""
 
     def _ensure_uuid(item):
         return uuid.UUID(hex=item) if isinstance(item, str) else item
 
-    doc_set_uuid_list = [_ensure_uuid(item) for item in doc_set_uuid_list]
+    prompt_uuid_list = [_ensure_uuid(item) for item in prompt_uuid_list]
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
 
-        stmt = select(TrackedDocumentSet).where(
-            TrackedDocumentSet.id.in_(doc_set_uuid_list))
+        where = [AgentPrompt.id.in_(prompt_uuid_list)]
+        if status is not None:
+            where.append(AgentPrompt.status == status)
+
+        if len(where) > 1:
+            stmt = select(AgentPrompt).where(and_(*where))
+        elif len(where) == 1:
+            stmt = select(AgentPrompt).where(where[0])
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
@@ -39,41 +46,43 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def list_document_sets(*,
-                       name: Optional[str] = None,
-                       is_default: Optional[bool] = None, is_public: Optional[bool] = None,
-                       start: Optional[int] =None, length: Optional[int] =None, sort_by: Optional[list] = None):
-    """Return the list of document sets.
+def list_prompts(*,
+                 name: Optional[str] = None,
+                 status: Optional[AgentPromptStatus] = None,
+                 start: Optional[int] =None, length: Optional[int] =None, sort_by: Optional[list] = None):
+    """Return the list of prompts.
     """
 
-    existing_objs = _list_tracking_document_sets(name=name,
-                                                 is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by)
-    table_stats = get_document_set_statistics()
+    existing_objs = _list_agent_prompts(name=name,
+                                        status=status,
+                                        start=start, length=length, sort_by=sort_by)
+    table_stats = get_prompt_statistics()
 
 
-    def _to_dict(_x: TrackedDocumentSet):
-        return DocumentSet(
+    def _to_dict(_x: AgentPrompt):
+        return AgentPrompt(
             id = _x.id,
             name = _x.name,
-            status = DocumentSetStatus.ACTIVE, # TODO - Replace hardcode with database column
-            is_new_doc_default = _x.is_new_doc_default,
-            is_public_viewable = _x.is_public_viewable
+            status = _x.status,
+            system_message = _x.system_message,
+            human_message = _x.human_message,
+            version = _x.version
         )
 
-    doc_set_list = [_to_dict(x) for x in existing_objs]
+    prompt_list = [_to_dict(x) for x in existing_objs]
 
-    return DocumentSetList(
-        document_sets = doc_set_list,
-        document_set_count = table_stats.document_set_count,
+    return AgentPromptList(
+        prompts = prompt_list,
+        prompt_count = table_stats.prompt_count,
         table_updated_time =  table_stats.table_updated_time
     )
 
 
-def _list_tracking_document_sets(*,
-                                 name: Optional[str] = None,
-                                 is_default: Optional[bool] = None, is_public: Optional[bool] = None,
-                                 start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
-    """Return tracking set when matched to specified document UUID."""
+def _list_agent_prompts(*,
+                        name: Optional[str] = None,
+                        status: Optional[AgentPromptStatus] = None,
+                        start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
+    """Return prompts when matched to specified propmt UUID."""
 
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]
@@ -89,11 +98,9 @@ def _list_tracking_document_sets(*,
         expr = None
         match name:
             case 'name':
-                expr = TrackedDocumentSet.name
-            case 'is_new_doc_default':
-                expr = TrackedDocumentSet.is_new_doc_default
-            case 'is_public_viewable':
-                expr = TrackedDocumentSet.is_public_viewable
+                expr = AgentPrompt.name
+            case 'status':
+                expr = AgentPrompt.status
             case _:
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
@@ -106,16 +113,14 @@ def _list_tracking_document_sets(*,
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
-        core_query = select(TrackedDocumentSet)
+        core_query = select(AgentPrompt)
 
         # Apply query filters
         where = []
         if name is not None:
-            where.append(TrackedDocumentSet.name.ilike(name))
-        if is_default is not None:
-            where.append(TrackedDocumentSet.is_new_doc_default == is_default)
-        if is_public is not None:
-            where.append(TrackedDocumentSet.is_public_viewable == is_public)
+            where.append(AgentPrompt.name.ilike(name))
+        if status is not None:
+            where.append(AgentPrompt.status == status)
         
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -136,10 +141,10 @@ def _list_tracking_document_sets(*,
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedTrackedDocumentSet = aliased(element=TrackedDocumentSet, alias=cte)
+            WindowedAgentPrompt = aliased(element=AgentPrompt, alias=cte)
 
             # Query the CTE
-            query = select(WindowedTrackedDocumentSet).where(
+            query = select(WindowedAgentPrompt).where(
                 # NOTE: Use the `column` function to directly reference the CTE column
                 #   labeled 'row_num'. The reason is that 'row_num' is not a part of
                 #   the model.

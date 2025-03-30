@@ -4,15 +4,10 @@ from datetime import datetime
 
 from sqlalchemy import and_, select
 
-from global_config import get_global_config
-
 from ...providers.sql_database import get_sessionmaker, DataDomain
-from ...providers.file_store import get_s3_directory, get_s3_bucket
 
-from ..doc_set.query import get_document_sets, list_document_sets
-
-from ..model_ops import generate_uuid_from_name
-from ..model import TrackedDocument, DocumentStatus
+from ...db_models import TrackedDocument
+from ...public_models import DocumentStatus
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +61,7 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
                 existing_obj.s3_rel_path = str(s3_rel_path)
                 existing_obj.last_user_id = user_id
             else:
-                doc_uuid = generate_uuid_from_name()
+                doc_uuid = uuid.uuid4()
 
                 new_obj = TrackedDocument(
                     id=doc_uuid,

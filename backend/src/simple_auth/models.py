@@ -16,6 +16,9 @@ class Scope(StrEnum):
     DOC_WRITE = 'doc:write'
     DOC_INGEST = 'doc:ingest'
 
+    PROMPT_READ = 'prompt:read'
+    PROMPT_WRITE = 'prompt:write'
+
     QUERY = 'query'
 
     ADMIN = 'admin'

@@ -3,7 +3,6 @@
 logs
 *.log
 
-
 # Editor directories and files
 .vscode/*
 

@@ -71,6 +71,8 @@ class Settings(BaseSettings):
 
     staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
+    alembic_ini_path: Union[FilePath] = Field(default='./alembic.ini', validation_alias='ALEMBIC_INI_PATH')
+
     redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
 
     postgres_answers_connection_url: PostgresDsn = Field(default='',

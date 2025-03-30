@@ -9,8 +9,11 @@ import logging
 
 from .internal_models import GradeHallucinations
 from .grader_util import build_grader
+from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
+
+PROMPT_NAME='Grade Hallucination'
 
 @cache
 def get_hallucination_grader():
@@ -31,10 +34,9 @@ def get_hallucination_grader():
         
         {generation}
         '''
-    system = textwrap.dedent(system)
-    human = textwrap.dedent(human)
+    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
 
-    hallucination_grader = build_grader(system, human, GradeHallucinations, 'hallucination_grader')
+    hallucination_grader = build_grader(prompt, GradeHallucinations, 'hallucination_grader')
 
     return hallucination_grader
 
