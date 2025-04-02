@@ -1,5 +1,5 @@
 services:
-  init-backend-volumes:
+  init-backend-test-volumes:
     restart: 'no'
 
     image: 'python:3.12.8-slim-bookworm'
@@ -8,20 +8,12 @@ services:
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - local-backend-home-1:/home/python/home-1
-      - local-backend-venv-1:/home/python/venv-1
-      - local-backend-staging-1:/home/python/staging-1
       - local-backend-test-home-1:/home/python/test-home-1
       - local-backend-test-venv-1:/home/python/test-venv-1
       - local-backend-test-staging-1:/home/python/test-staging-1
-      - local-backend-home-2:/home/python/home-2
-      - local-backend-venv-2:/home/python/venv-2
-      - local-backend-staging-2:/home/python/staging-2
       - local-backend-test-home-2:/home/python/test-home-2
       - local-backend-test-venv-2:/home/python/test-venv-2
       - local-backend-test-staging-2:/home/python/test-staging-2
-      - local-backend-home-3:/home/python/home-3
-      - local-backend-venv-3:/home/python/venv-3
       - local-backend-test-home-4:/home/python/test-home-4
       - local-backend-test-venv-4:/home/python/test-venv-4
 
@@ -37,9 +29,9 @@ services:
         ls -ld /home/python/
 
         for VOL in \
-          'home-1' 'venv-1' 'staging-1' \
-          'home-2' 'venv-2' 'staging-2' \
-          'home-3' 'venv-3'
+          'test-home-1' 'test-venv-1' 'test-staging-1' \
+          'test-home-2' 'test-venv-2' 'test-staging-2' \
+          'test-venv-4' 'test-home-4'
         do
           touch /home/python/$$VOL/.initialized
           chown -R 1000:1000 /home/python/$$VOL
@@ -47,7 +39,7 @@ services:
           ls -ld /home/python/$$VOL
         done
 
-  backend-start-gate:
+  backend-test-start-gate:
     restart: 'no'
 
     image: localhost/start-gate:1.0
@@ -99,15 +91,15 @@ services:
         wait_for_pgvector "$$DATABASE_URL"
 
 
-  fastapi-dev-server:
+  fastapi-integration-server:
     depends_on:
-      init-backend-volumes:
+      init-backend-test-volumes:
         condition: service_completed_successfully
-      backend-start-gate:
+      backend-test-start-gate:
         condition: service_completed_successfully
 
     image: 'localhost/answers-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
+    profiles: [ backend-test, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -123,9 +115,9 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
     env_file:
-      - backend.env
+      - integration-test.env
     ports: # use if it is necessary to expose the container to the host machine
-      - '8100:8100'
+      - '8102:8100'
     networks:
       - agent-poc
     volumes:
@@ -133,25 +125,25 @@ services:
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      - ./run_fastapi_integration_server.sh:/run_fastapi_integration_server.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - local-backend-home-1:/home/python
-      - local-backend-venv-1:/app/.venv
-      - local-backend-staging-1:/staging
+      - local-backend-test-home-1:/home/python
+      - local-backend-test-venv-1:/app/.venv
+      - local-backend-test-staging-1:/staging
     secrets:
-      - answers_env
-      - answers_jwt_env
-      - answers_minio_env
-      - answers_postgres_env
-      - checkpoints_postgres_env
-      - vectors_postgres_env
+      - answers_test_env
+      - answers_test_jwt_env
+      - answers_test_minio_env
+      - answers_test_postgres_env
+      - checkpoints_test_postgres_env
+      - vectors_test_postgres_env
       - redis_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_fastapi_dev_server.sh' ]
+    command: [ '/run_fastapi_integration_server.sh' ]
     deploy:
       resources:
         limits:
@@ -177,15 +169,15 @@ services:
       start_period: 5s
 
 
-  celery-worker:
+  celery-integration-worker:
     depends_on:
-      init-backend-volumes:
+      init-backend-test-volumes:
         condition: service_completed_successfully
-      backend-start-gate:
+      backend-test-start-gate:
         condition: service_completed_successfully
 
     image: 'localhost/answers-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
+    profiles: [ backend-test, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -201,9 +193,9 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
     env_file:
-      - backend.env
+      - integration-test.env
     ports: # use if it is necessary to expose the container to the host machine
-      - '28989:8989'
+      - '28991:8989'
     networks:
       - agent-poc
     volumes:
@@ -211,25 +203,25 @@ services:
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_celery_worker.sh:/run_celery_worker.sh
+      - ./run_celery_integration_worker.sh:/run_celery_integration_worker.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - local-backend-home-2:/home/python
-      - local-backend-venv-2:/app/.venv
-      - local-backend-staging-2:/staging
+      - local-backend-test-home-2:/home/python
+      - local-backend-test-venv-2:/app/.venv
+      - local-backend-test-staging-2:/staging
     secrets:
-      - answers_env
-      - answers_jwt_env
-      - answers_minio_env
-      - answers_postgres_env
-      - checkpoints_postgres_env
-      - vectors_postgres_env
+      - answers_test_env
+      - answers_test_jwt_env
+      - answers_test_minio_env
+      - answers_test_postgres_env
+      - checkpoints_test_postgres_env
+      - vectors_test_postgres_env
       - redis_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_celery_worker.sh' ]
+    command: [ '/run_celery_integration_worker.sh' ]
     deploy:
       resources:
         limits:
@@ -254,18 +246,19 @@ services:
       retries: 5
       start_period: 5s
 
-          
-  celery-flower:
+
+  integration-test:
     depends_on:
-      init-backend-volumes:
+      init-backend-test-volumes:
         condition: service_completed_successfully
-      backend-start-gate:
+      backend-test-start-gate:
         condition: service_completed_successfully
 
     image: 'localhost/answers-backend:python-3.12-cpu'
-    profiles: [ backend, all ]
+    profiles: [ backend-test, all ]
 
     environment:
+      DEBUGGER_LISTEN: true
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
@@ -274,104 +267,56 @@ services:
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
       PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
-      GPU_MODE: cpu
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
     env_file:
-      - backend.env
-    ports: # use if it is necessary to expose the container to the host machine
-      - '25555:5555'
+      - integration-test.env
     networks:
-      agent-poc: {}
+      - agent-poc
     volumes:
       # Mount the project directory to /app in the container
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_celery_flower.sh:/run_celery_flower.sh
+      - ./run_integration_test.sh:/run_integration_test.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - local-backend-home-3:/home/python
-      - local-backend-venv-3:/app/.venv
+      - local-backend-test-home-4:/home/python
+      - local-backend-test-venv-4:/app/.venv
     secrets:
       - answers_env
-      - answers_jwt_env
-      - answers_minio_env
-      - answers_postgres_env
-      - checkpoints_postgres_env
-      - vectors_postgres_env
+      - answers_test_jwt_env
+      - answers_test_minio_env
+      - answers_test_postgres_env
+      - checkpoints_test_postgres_env
+      - vectors_test_postgres_env
       - redis_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_celery_flower.sh' ]
+    command: [ '/run_integration_test.sh' ]
 
-    healthcheck:
-      # When this service start for the first time, there is multiple minutes while the
-      # python environment is sync'ed to the requirements file then when the celery flower node
-      # is starting up. A health-check based on API pinging will fail during the sync and the
-      # start up.
-      #
-      # For now, we just check if python3 can run. Later, we will  try to come up  
-      ## test: ['CMD', 'curl', '-f', 'http://localhost']
-      test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-
-
-
-  celery-exporter:
-    depends_on:
-      backend-start-gate:
-        condition: service_completed_successfully
-
-    image: 'danihodovic/celery-exporter'
-    profiles: [ backend, all ]
-
-    env_file:
-      - backend.env
-      - celery-exporter.env
-    ports:
-      - '29808:9808'
-    networks:
-      agent-poc: {}
-    volumes:
-      - ./custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh
-    secrets:
-      - celery_exporter_env
-
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.exporter.sh' ]
-    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    # command: null
-
-    # healthcheck:
-    #   test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 5
-    #   start_period: 5s
-      
 
 #
 # Named volumes are not created until the dependent service
 # is started.
 #
 volumes:
-  local-backend-home-1:
+  local-backend-test-home-1:
     driver: local
-  local-backend-venv-1:
+  local-backend-test-venv-1:
     driver: local
-  local-backend-staging-1:
+  local-backend-test-staging-1:
     driver: local
-  local-backend-home-2:
+  local-backend-test-home-2:
     driver: local
-  local-backend-venv-2:
+  local-backend-test-venv-2:
     driver: local
-  local-backend-staging-2:
+  local-backend-test-staging-2:
     driver: local
-  local-backend-home-3:
+  local-backend-test-home-4:
     driver: local
-  local-backend-venv-3:
+  local-backend-test-venv-4:
     driver: local

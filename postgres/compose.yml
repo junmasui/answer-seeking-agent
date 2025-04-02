@@ -61,12 +61,16 @@ services:
     network_mode: service:pgvector
     volumes:
       - ./init-db.sql.template:/init-db.sql.template
+      - ./init-langfuse-db.sql.template:/init-langfuse-db.sql.template
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
       - postgres_env
       - answers_postgres_env
+      - answers_test_postgres_env
       - checkpoints_postgres_env
+      - checkpoints_test_postgres_env
       - vectors_postgres_env
+      - vectors_test_postgres_env
       - langfuse_postgres_env
 
     entrypoint: [ '/bin/sh' ]

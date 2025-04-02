@@ -39,12 +39,25 @@ if [ $ELAPSED -ge $WAIT_LIMIT ]; then
   exit 1
 fi
 
+#
+#
+#
 
 mc mb local_server/${BACKEND_MINIO_BUCKET}
 
 mc admin user add local_server ${BACKEND_MINIO_USER_NAME} ${BACKEND_MINIO_USER_PASSWORD}
 
 mc admin policy attach local_server readwrite --user ${BACKEND_MINIO_USER_NAME}
+
+#
+#
+#
+
+mc mb local_server/${BACKEND_TEST_MINIO_BUCKET}
+
+mc admin user add local_server ${BACKEND_TEST_MINIO_USER_NAME} ${ANSWERS_TEST_MINIO_USER_PASSWORD}
+
+mc admin policy attach local_server readwrite --user ${BACKEND_TEST_MINIO_USER_NAME}
 
 #
 #

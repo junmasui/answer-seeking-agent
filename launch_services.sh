@@ -4,13 +4,13 @@
 set -u  # Unbound variables are errors.
 set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
-if [ -z "$COMPOSE_FILE" ]
+if [ -z "${COMPOSE_FILE:-}" ]
 then
     echo "set environment variable COMPOSE_FILE"
     exit 1
 fi
 
-if [ -z "$COMPOSE_PROFILES" ]
+if [ -z "${COMPOSE_PROFILES:-}" ]
 then
     echo "set environment variable COMPOSE_PROFILES to all"
     exit 1

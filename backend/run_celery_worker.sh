@@ -30,7 +30,6 @@ set +o history # temporarily turn off history
 export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers:${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
 export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_vectors:${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
 export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_checkpoints:${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_MIGRATION_BASELINE_CONNECTION_URL="postgresql+psycopg://answers:${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_baseline"
 set -o history # turn it back on
 
 PYTHONPATH=./src \

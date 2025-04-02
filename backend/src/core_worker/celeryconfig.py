@@ -27,6 +27,27 @@ result_backend = str(_get_global_config().redis_dsn)
 broker_url = str(_get_global_config().redis_dsn)
 
 #
+# Message routing
+#
+# See: https://docs.celeryq.dev/en/stable/userguide/configuration.html#message-routing
+#
+
+# The name of the default queue used by .apply_async if the message has no route or no custom queue has been specified.
+# See https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-default-queue
+task_default_queue = _get_global_config().celery_task_queue
+
+#
+# Task results backend settings
+#
+# See: https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-result-backend-settings
+#
+
+result_backend_transport_options = {
+    # See https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html#global-keyprefix
+    'global_keyprefix': _get_global_config().celery_result_key_prefix
+}
+
+#
 # Worker settings
 #
 # See https://docs.celeryq.dev/en/stable/userguide/configuration.html#worker

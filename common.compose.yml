@@ -47,16 +47,28 @@ secrets:
 
   answers_env:
     file: ./secrets.env
+  answers_test_env:
+    file: ./secrets-test.env
   answers_jwt_env:
     file: ./secrets/answers.jwt.secrets.env
+  answers_test_jwt_env:
+    file: ./secrets/answers-test.jwt.secrets.env
   answers_minio_env:
     file: ./secrets/answers.minio.secrets.env
+  answers_test_minio_env:
+    file: ./secrets/answers-test.minio.secrets.env
   answers_postgres_env:
     file: ./secrets/answers.postgres.secrets.env
+  answers_test_postgres_env:
+    file: ./secrets/answers-test.postgres.secrets.env
   checkpoints_postgres_env:
     file: ./secrets/checkpoints.postgres.secrets.env
+  checkpoints_test_postgres_env:
+    file: ./secrets/checkpoints-test.postgres.secrets.env
   vectors_postgres_env:
     file: ./secrets/vectors.postgres.secrets.env
+  vectors_test_postgres_env:
+    file: ./secrets/vectors-test.postgres.secrets.env
 
   celery_exporter_env:
     file: ./secrets/celery-exporter.secrets.env

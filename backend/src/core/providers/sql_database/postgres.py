@@ -27,8 +27,6 @@ def get_connection_str(db_schema: DataDomain):
             connection_url = config.postgres_vectors_connection_url
         case DataDomain.CHECKPOINTS:
             connection_url = config.postgres_checkpoints_connection_url
-        case DataDomain.MIGRATION_BASELINE:
-            connection_url = config.postgres_migration_baseline_connection_url
         case _:
             raise ValueError('unknown AppDbSchema value', db_schema)
 

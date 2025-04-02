@@ -11,11 +11,11 @@ SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
 export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
 set -o history # turn it back on
 
-[ -z "$CLICKHOUSE_DEFAULT_USER_PASSWORD" ] && echo "missing CLICKHOUSE_DEFAULT_USER_PASSWORD" && exit -1
-[ -z "$CLICKHOUSE_ADMIN_USER" ] && echo "missing CLICKHOUSE_ADMIN_USER" && exit -1
-[ -z "$LANGFUSE_CLICKHOUSE_USER_NAME" ] && echo "missing LANGFUSE_CLICKHOUSE_USER_NAME" && exit -1
-[ -z "$LANGFUSE_CLICKHOUSE_USER_PASSWORD" ] && echo "missing LANGFUSE_CLICKHOUSE_USER_PASSWORD" && exit -1
-[ -z "$LANGFUSE_CLICKHOUSE_DATABASE" ] && echo "missing LANGFUSE_CLICKHOUSE_DATABASE" && exit -1
+[ -z "${CLICKHOUSE_DEFAULT_USER_PASSWORD:-}" ] && echo "missing CLICKHOUSE_DEFAULT_USER_PASSWORD" && exit 1
+[ -z "${CLICKHOUSE_ADMIN_USER:-}" ] && echo "missing CLICKHOUSE_ADMIN_USER" && exit 1
+[ -z "${LANGFUSE_CLICKHOUSE_USER_NAME:-}" ] && echo "missing LANGFUSE_CLICKHOUSE_USER_NAME" && exit 1
+[ -z "${LANGFUSE_CLICKHOUSE_USER_PASSWORD:-}" ] && echo "missing LANGFUSE_CLICKHOUSE_USER_PASSWORD" && exit 1
+[ -z "${LANGFUSE_CLICKHOUSE_DATABASE:-}" ] && echo "missing LANGFUSE_CLICKHOUSE_DATABASE" && exit 1
 
 
 call_clickhouse () {

@@ -25,18 +25,22 @@ else
     exit -1
 fi
 
-# Run the FastAPI server.
+# Run the integration tests.
 
 set +o history # temporarily turn off history
-export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers:${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_vectors:${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_checkpoints:${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
+export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers_test:${ANSWERS_TEST_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_test"
+export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_test_vectors:${ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_test"
+export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_test_checkpoints:${ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_test"
+
+export APPLICATION_JWT_SECRET=$TEST_APPLICATION_JWT_SECRET
+export BACKEND_MINIO_USER_PASSWORD=$ANSWERS_TEST_MINIO_USER_PASSWORD
 set -o history # turn it back on
 
+##   uvicorn core_app:app --host 0.0.0.0 --port 8100
 PYTHONPATH=./src \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
-   --directory=.  --recursive --pattern='*.py;*.env' \
+   --no-restart-on-command-exit --directory=.  --recursive --pattern='*.py;*.env' \
    -- \
-   uvicorn core_app:app --host 0.0.0.0 --port 8100
+   pytest -v -v --capture=tee-sys tests

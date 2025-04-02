@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def add_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
 
-    _add_or_update_document_set(name=name, is_default=is_default, is_pubic=is_pubic, user_id=user_id)
+    return _add_or_update_document_set(name=name, is_default=is_default, is_pubic=is_pubic, user_id=user_id)
 
 
 def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
@@ -33,6 +33,7 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
 
         with session.begin():
             if existing_obj:
+                doc_set_uuid = existing_obj.id
                 existing_obj.name = name
                 existing_obj.is_new_doc_default = is_default
                 existing_obj.is_public_viewable = is_pubic
@@ -54,3 +55,5 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
                     last_user_id=user_id
                 )
                 session.add(new_obj)
+
+    return doc_set_uuid

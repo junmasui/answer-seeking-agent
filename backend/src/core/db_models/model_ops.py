@@ -7,6 +7,7 @@ from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import MetaData, text
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import sessionmaker
 
 from global_config import get_global_config
 
@@ -26,7 +27,7 @@ def create_tables_if_not_exists():
 
     engine = get_engine(DataDomain.ANSWERS)
 
-    if get_current_version() != get_head_revision():
+    if get_current_version(engine) != get_head_revision():
         logger.info('CHECK THAT MIGRATIONS HAVE BEEN APPLIED')
     else:
         differences = get_schema_differences(engine)
@@ -43,10 +44,18 @@ def create_tables_if_not_exists():
     _run_migrations(engine)
 
 
-def get_current_version():
+def get_current_version(engine):
     """Return the current Alembic version applied to the database.
     """
-    session_maker = get_sessionmaker(DataDomain.ANSWERS)
+
+    reflected_metadata = MetaData(schema='answers')
+    reflected_metadata.reflect(bind=engine)
+
+    if reflected_metadata.tables is None or len(reflected_metadata.tables) == 0:
+        logger.info('database is empty.')
+        return  None
+
+    session_maker = sessionmaker(bind=engine)
     with session_maker() as session:
         try:
             # There is not a lot of good official documentation at https://alembic.sqlalchemy.org/
