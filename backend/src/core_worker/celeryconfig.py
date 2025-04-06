@@ -2,8 +2,10 @@
 # NOTE: Use underscore to mark variables as private to this module. Non-private
 # variables will show up in Flower's Config tab for the worker process.
 
+import logging as _logging
 from global_config import get_global_config as _get_global_config
 
+_logger = _logging.getLogger(__name__)
 
 # For complete list of customizable settings, see:
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html
@@ -15,7 +17,7 @@ from global_config import get_global_config as _get_global_config
 #
 
 ## The backend used to store task results (tombstones)
-result_backend = str(_get_global_config().redis_dsn)
+backend = str(_get_global_config().redis_dsn)
 
 #
 # Broker settings

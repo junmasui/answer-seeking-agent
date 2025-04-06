@@ -28,19 +28,33 @@ fi
 # Run the integration tests.
 
 set +o history # temporarily turn off history
-export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers_test:${ANSWERS_TEST_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_test"
-export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_test_vectors:${ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_test"
-export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_test_checkpoints:${ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_test"
+export REDIS_URL="redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
 
-export APPLICATION_JWT_SECRET=$TEST_APPLICATION_JWT_SECRET
-export BACKEND_MINIO_USER_PASSWORD=$ANSWERS_TEST_MINIO_USER_PASSWORD
+export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://${ANSWERS_POSTGRES_USER_NAME}:${ANSWERS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
+export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://${VECTORS_POSTGRES_USER_NAME}:${VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
+export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://${CHECKPOINTS_POSTGRES_USER_NAME}:${CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
 set -o history # turn it back on
 
-##   uvicorn core_app:app --host 0.0.0.0 --port 8100
-PYTHONPATH=./src \
+# watchmedo 
+# fs.inotify.max_user_instances = 512
+# fs.inotify.max_user_watches = 524288
+#
+
+# There are two approaches to launching run-and-done executables
+# from watchmedo:
+#  * shell-command
+#  * auto-restart with --no-restart-on-command-exit
+# The first approach is better suited for quick commands. shell-command does
+# not attempt to kill the prior launchs. For longer-running pytest commands,
+# the prior launch should be killed since it is only consuming resources
+# for an obsolete trigger. Hence the second approach is choosen.
+#
+PYTHONPATH=./src:./tests \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
-   --no-restart-on-command-exit --directory=.  --recursive --pattern='*.py;*.env' \
+   --no-restart-on-command-exit \
+   --directory=./src --directory=./tests  --recursive --pattern='*.py' \
    -- \
    pytest -v -v --capture=tee-sys tests
+

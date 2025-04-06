@@ -42,3 +42,5 @@ def configure_logging():
     if not has_rich_handler:
         logger.addHandler(rich_handler)
     logger.setLevel(logging.INFO)
+
+configure_logging()

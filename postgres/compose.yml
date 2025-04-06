@@ -42,13 +42,51 @@ services:
       retries: 10
       start_period: 5s
 
+
+  pgvector-init-start-gate:
+    restart: 'no'
+
+    image: localhost/start-gate:1.0
+    profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
+
+    env_file:
+      - pgvector.env
+    networks:
+      - agent-poc
+    # volumes:
+    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    secrets:
+      - postgres_env
+
+    mem_limit: 128m
+    memswap_limit: 128m
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |-
+
+        set +e
+        set +x
+
+        source /wait_for_resource.sh
+
+        DATABASE_URL=postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@pgvector:5432/postgres
+
+        wait_for_pgvector "$$DATABASE_URL"
+
+
   pgvector-init:
     depends_on:
-      pgvector:
-        condition: service_healthy
+      pgvector-init-start-gate:
+        condition: service_completed_successfully
 
     image: localhost/postgres:17.2-with-pgvector
-    profiles: [ postgres, infrastructure-core, infrastructure, all ]
+    profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
       # Only environment variables that are important to the Docker environment
@@ -61,22 +99,78 @@ services:
     network_mode: service:pgvector
     volumes:
       - ./init-db.sql.template:/init-db.sql.template
-      - ./init-langfuse-db.sql.template:/init-langfuse-db.sql.template
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
       - postgres_env
-      - answers_postgres_env
-      - answers_test_postgres_env
-      - checkpoints_postgres_env
-      - checkpoints_test_postgres_env
-      - vectors_postgres_env
-      - vectors_test_postgres_env
-      - langfuse_postgres_env
+      - answers_postgres_dev_env
+      - checkpoints_postgres_dev_env
+      - vectors_postgres_dev_env
 
     entrypoint: [ '/bin/sh' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: [ /init-postgres.sh ]
+
+
+  pgvector-test-init:
+    depends_on:
+      pgvector-init-start-gate:
+        condition: service_completed_successfully
+
+    image: localhost/postgres:17.2-with-pgvector
+    profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      POSTGRES_HOST: pgvector
+    env_file:
+      - pgvector-test-init.env
+    # Attach postgres-init directly to main container's network stack
+    network_mode: service:pgvector
+    volumes:
+      - ./init-db.sql.template:/init-db.sql.template
+      - ./init-postgres.sh:/init-postgres.sh
+    secrets:
+      - postgres_env
+      - answers_postgres_test_env
+      - checkpoints_postgres_test_env
+      - vectors_postgres_test_env
+
+    entrypoint: [ '/bin/sh' ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: [ /init-postgres.sh ]
+
+  pgvector-langfuse-init:
+    depends_on:
+      pgvector-init-start-gate:
+        condition: service_completed_successfully
+
+    image: localhost/postgres:17.2-with-pgvector
+    profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      POSTGRES_HOST: pgvector
+    env_file:
+      - pgvector-init.env
+    # Attach postgres-init directly to main container's network stack
+    network_mode: service:pgvector
+    volumes:
+      - ./init-langfuse-db.sql.template:/init-langfuse-db.sql.template
+      - ./init-langfuse-db.sh:/init-langfuse-db.sh
+    secrets:
+      - postgres_env
+      - langfuse_postgres_env
+
+    entrypoint: [ '/bin/sh' ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: [ /init-langfuse-db.sh ]
 
 volumes:
   pgvector-data-1:

@@ -35,7 +35,13 @@ def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_mes
             result = session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
-        version = 1 if existing_obj is None else ( existing_obj.version + 1 )
+            # IMPORTANT!!
+            # We should always access SQLAlchemy object properties inside a transaction. Its ORM
+            # has subtle lazy-loading behaviors, including when expire_on_commit=True (which is important
+            # for data consistency checking). Doing this will prevent auto-transactions from
+            # interferring with the next transaction.
+            version = 1 if existing_obj is None else ( existing_obj.version + 1 )
+
 
         with session.begin():
             prompt_uuid = uuid.uuid4()
@@ -56,7 +62,7 @@ def _add_or_update_agent_prompt(name: str, status: AgentPromptStatus, system_mes
             with session.begin():
                 stmt = update(AgentPrompt).where(
                         and_(AgentPrompt.name == name, AgentPrompt.version != version)
-                    ).value(
-                        status = AgentPromptStatus.INACTIVE
+                    ).values(
+                        status = AgentPromptStatus.DEACTIVATED
                     )
                 result = session.execute(stmt)

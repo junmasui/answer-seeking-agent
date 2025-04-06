@@ -7,19 +7,11 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 [ ! -d ./secrets ] && mkdir ./secrets
 
 # Generate the manually managed secrets file.
-if [ ! -e secrets.env ]
+if [ ! -e secrets-dev.env ]
 then
     HF_TOKEN=${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN} \
        HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN} \
-       envsubst < ./secrets.env.template > ./secrets.env
-fi
-
-# Generate the manually managed secrets file.
-if [ ! -e secrets.env ]
-then
-    HF_TOKEN=${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN} \
-       HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN} \
-       envsubst < ./secrets.env.template > ./secrets.env
+       envsubst < ./secrets.env.template > ./secrets-dev.env
 fi
 
 # Generate the manually managed secrets file.
@@ -30,8 +22,6 @@ then
        envsubst < ./secrets.env.template > ./secrets-test.env
 fi
 
-# Read from .secrets.env files in the secrets directory.
-export $(grep -h -v '^#' secrets/*.secrets.env | xargs -d '\n')
 
 # Generate TLS keys for clickhouse
 #
@@ -40,314 +30,260 @@ if [[ ! -e ./secrets/clickhouse.server.crt \
     || ! -e ./secrets/clickhouse.server.key ]]
 then
     openssl req -subj "/CN=localhost" -new -newkey rsa:2048 -days 365 -nodes -x509 \
-        -keyout ./secrets/clickhouse.server.key -out ./secrets/clickhouse/server.crt
+        -keyout ./secrets/clickhouse.server.key -out ./secrets/clickhouse.server.crt
+
+    chmod ug=rw secrets/clickhouse.server.crt
+    chmod ug=rw secrets/clickhouse.server.key
+
+    sudo chown rootless-101:rootless-101  secrets/clickhouse.server.crt
+    sudo chown rootless-101:rootless-101  secrets/clickhouse.server.key
 fi
 
 
 
 # Auto-generate passwords that will never leave the local Docker environment.
 
+function generate_secret ()  {
+    SECRETS_FILE=$1
+    VAR_NAME=$2
+    ALGO=$3
+    PREFIX=$4
+    DESCR=$5
+    if [[ ! -e $SECRETS_FILE \
+        || ! $( grep $VAR_NAME $SECRETS_FILE ) ]]
+    then
+        if [ -z "${!VAR_NAME:-}" ]
+        then
+            case "$ALGO" in
+                "gpg-16-safe" )
+                    SECRET=$( gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=' ) ;;
+                "gpg-32-safe" )
+                    SECRET=$( gpg --gen-random --armour 1 32 | tr '+/' '-_' | tr -d '=' ) ;;
+                "openssl-8" )
+                    SECRET=$( openssl rand -hex 8 ) ;;
+                "openssl-32" )
+                    SECRET=$( openssl rand -hex 32 ) ;;
+                "openssl-32-safe" )
+                    SECRET=$( openssl rand -hex 32 | tr '+/' '-_' | tr -d '='  ) ;;
+                "uuidgen" )
+                    SECRET=$( uuidgen ) ;;
+                * )
+                    echo "Unknown algorithm $ALGO for $VAR_NAME in $SECRETS_FILE"
+                    exit 1 ;;
+            esac
+            declare "${VAR_NAME}=${PREFIX}${SECRET}"
+        fi
+        echo -e "\n# ${DESCR}  (auto-generated secret)" >> $SECRETS_FILE
+        echo "$VAR_NAME=${!VAR_NAME}" >> $SECRETS_FILE
+    fi
+}
+
 
 # Answers JWT
 
-SECRETS_FILE=./secrets/answers.jwt.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep APPLICATION_JWT_SECRET $SECRETS_FILE ) ]]
-then
-    if [ -z "${APPLICATION_JWT_SECRET:-}" ]
-    then
-        export APPLICATION_JWT_SECRET="$(openssl rand -hex 32)"
-    fi
-    echo -e "\n# APPLICATION_JWT_SECRET is created thru openssl rand -hex 32.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "APPLICATION_JWT_SECRET=${APPLICATION_JWT_SECRET}" >> $SECRETS_FILE
-fi
+SECRETS_FILE=./secrets/answers-dev.jwt.secrets.env
+VAR_NAME=APPLICATION_JWT_SECRET
+DESCR="$VAR_NAME is created thru openssl rand -hex 32."
 
+generate_secret $SECRETS_FILE $VAR_NAME openssl-32 "" "$DESCR"
 
 SECRETS_FILE=./secrets/answers-test.jwt.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep TEST_APPLICATION_JWT_SECRET $SECRETS_FILE ) ]]
-then
-    if [ -z "${TEST_APPLICATION_JWT_SECRET:-}" ]
-    then
-        export TEST_APPLICATION_JWT_SECRET="$(openssl rand -hex 32)"
-    fi
-    echo -e "\n# TEST_APPLICATION_JWT_SECRET is created thru openssl rand -hex 32.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "TEST_APPLICATION_JWT_SECRET=${TEST_APPLICATION_JWT_SECRET}" >> $SECRETS_FILE
-fi
+
+generate_secret $SECRETS_FILE $VAR_NAME openssl-32 "" "$DESCR"
 
 
 # Clickhouse
 
 SECRETS_FILE=./secrets/clickhouse.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep CLICKHOUSE_DEFAULT_USER_PASSWORD $SECRETS_FILE ) \
-      || ! $( grep CLICKHOUSE_ADMIN_USER_PASSWORD $SECRETS_FILE )  ]]
-then
-    if [ -z "${CLICKHOUSE_DEFAULT_USER_PASSWORD:-}" ]
-    then
-        export CLICKHOUSE_DEFAULT_USER_PASSWORD=clickhouse_default_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# Clickhouse's default account's password  (auto-generated secret)" >> $SECRETS_FILE
-    echo "CLICKHOUSE_DEFAULT_USER_PASSWORD=${CLICKHOUSE_DEFAULT_USER_PASSWORD}" >> $SECRETS_FILE
+VAR_NAME=CLICKHOUSE_DEFAULT_USER_PASSWORD
+VALUE_PREFIX=clickhouse_default_
+DESCR="Clickhouse's default account's password."
 
-    if [ -z "${CLICKHOUSE_ADMIN_USER_PASSWORD:-}" ]
-    then
-        export CLICKHOUSE_ADMIN_USER_PASSWORD=clickhouse_admin_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# Clickhouse's admin account's password  (auto-generated secret)" >> $SECRETS_FILE
-    echo "CLICKHOUSE_ADMIN_USER_PASSWORD=${CLICKHOUSE_ADMIN_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" $VALUE_PREFIX "$DESCR"
+
+VAR_NAME=CLICKHOUSE_ADMIN_USER_PASSWORD
+VALUE_PREFIX=clickhouse_admin_
+DESCR="Clickhouse's admin account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
 
 SECRETS_FILE=./secrets/langfuse.clickhouse.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep LANGFUSE_CLICKHOUSE_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${LANGFUSE_CLICKHOUSE_USER_PASSWORD:-}" ]; then
-        export LANGFUSE_CLICKHOUSE_USER_PASSWORD=langfuse_clickhouse_$(gpg --gen-random --armour 1 16| tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# backend's Clickhouse account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_CLICKHOUSE_USER_PASSWORD=${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+VAR_NAME=LANGFUSE_CLICKHOUSE_USER_PASSWORD
+VALUE_PREFIX=langfuse_clickhouse_
+DESCR="Langfuse's Clickhouse account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
 
 
 # Grafana
 
 SECRETS_FILE=./secrets/grafana.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep GRAFANA_ADMIN_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${GRAFANA_ADMIN_PASSWORD:-}" ]; then
-        export GRAFANA_ADMIN_PASSWORD=grafana_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# Grafrana's admin account's password  (auto-generated secret)" >> $SECRETS_FILE
-    echo "GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}" >> $SECRETS_FILE
-    echo "GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}" >> $SECRETS_FILE
-fi
+VAR_NAME=GRAFANA_ADMIN_PASSWORD
+VALUE_PREFIX=grafana_
+DESCR="Grafrana's admin account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
 
 # Langfuse
 
 SECRETS_FILE=./secrets/langfuse.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep LANGFUSE_SALT $SECRETS_FILE ) \
-      || ! $( grep LANGFUSE_ENCRYPTION_KEY $SECRETS_FILE ) ]]
-then
-    if [ -z "${LANGFUSE_SALT:-}" ]; then
-        export LANGFUSE_SALT=$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# LANGFUSE_SALT contains langfuse's salt.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_SALT=${LANGFUSE_SALT}" >> $SECRETS_FILE
+VAR_NAME=LANGFUSE_SALT
+DESCR="LANGFUSE_SALT contains langfuse's salt."
 
-    if [ -z "${LANGFUSE_ENCRYPTION_KEY:-}" ]; then
-        export LANGFUSE_ENCRYPTION_KEY=$(openssl rand -hex 32)
-    fi
-    echo -e "\n# LANGFUSE_ENCRYPTION_KEY contains langfuse's encryption key.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_ENCRYPTION_KEY=${LANGFUSE_ENCRYPTION_KEY}" >> $SECRETS_FILE
-fi
+generate_secret $SECRETS_FILE $VAR_NAME "openssl-32-safe" "" "$DESCR"
+
+VAR_NAME=LANGFUSE_ENCRYPTION_KEY
+DESCR="LANGFUSE_ENCRYPTION_KEY contains langfuse's encryption key."
+
+generate_secret $SECRETS_FILE $VAR_NAME "openssl-32-safe" "" "$DESCR"
+
 
 # Langfuse-web
 
 SECRETS_FILE=./secrets/langfuse-web.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep LANGFUSE_INIT_USER_PASSWORD $SECRETS_FILE ) \
-      || ! $( grep LANGFUSE_INIT_PROJECT_SECRET_KEY $SECRETS_FILE ) \
-      || ! $( grep LANGFUSE_INIT_PROJECT_PUBLIC_KEY $SECRETS_FILE ) ]]
-then
-    if [ -z "${LANGFUSE_INIT_USER_PASSWORD:-}" ]; then
-        export LANGFUSE_INIT_USER_PASSWORD=lf_pw_$(openssl rand -hex 8)
-    fi
-    echo -e "\n# langfuse's initial users's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_INIT_USER_PASSWORD=${LANGFUSE_INIT_USER_PASSWORD}" >> $SECRETS_FILE
+VAR_NAME=LANGFUSE_INIT_USER_PASSWORD
+VALUE_PREFIX=lf_pw_
+DESCR="langfuse's initial users's password."
 
-    if [ -z "${LANGFUSE_INIT_PROJECT_SECRET_KEY:-}" ]; then
-        export LANGFUSE_INIT_PROJECT_SECRET_KEY=sk-lf-$( uuidgen )
-    fi
-    echo -e "\n# langfuse's initial project's secret key.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_INIT_PROJECT_SECRET_KEY=${LANGFUSE_INIT_PROJECT_SECRET_KEY}" >> $SECRETS_FILE
+generate_secret $SECRETS_FILE $VAR_NAME "openssl-8" "$VALUE_PREFIX" "$DESCR"
 
-    if [ -z "${LANGFUSE_INIT_PROJECT_PUBLIC_KEY:-}" ]; then
-        export LANGFUSE_INIT_PROJECT_PUBLIC_KEY=pk-lf-$( uuidgen )
-    fi
-    echo -e "\n# # langfuse's initial project's public key.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_INIT_PROJECT_PUBLIC_KEY=${LANGFUSE_INIT_PROJECT_PUBLIC_KEY}" >> $SECRETS_FILE
-fi
+VAR_NAME=LANGFUSE_INIT_PROJECT_SECRET_KEY
+VALUE_PREFIX=sk-lf-
+DESCR="langfuse's initial users's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "uuidgen" "$VALUE_PREFIX" "$DESCR"
+
+VAR_NAME=LANGFUSE_INIT_PROJECT_PUBLIC_KEY
+VALUE_PREFIX=pk-lf-
+DESCR="langfuse's initial users's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "uuidgen" "$VALUE_PREFIX" "$DESCR"
+
 
 # Minio
 
 SECRETS_FILE=./secrets/minio.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep MINIO_ROOT_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${MINIO_ROOT_PASSWORD:-}" ]; then
-        export MINIO_ROOT_PASSWORD=minio_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# Minio's root account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}" >> $SECRETS_FILE
-fi
+VAR_NAME=MINIO_ROOT_PASSWORD
+VALUE_PREFIX=minio_
+DESCR="Minio's root account's password."
 
-SECRETS_FILE=./secrets/answers.minio.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep BACKEND_MINIO_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${BACKEND_MINIO_USER_PASSWORD:-}" ]; then
-        export BACKEND_MINIO_USER_PASSWORD=backend_minio_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# backend's Minio\n# account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "BACKEND_MINIO_USER_PASSWORD=${BACKEND_MINIO_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
+SECRETS_FILE=./secrets/answers-dev.minio.secrets.env
+VAR_NAME=ANSWERS_MINIO_USER_PASSWORD
+VALUE_PREFIX=backend_minio_
+DESCR="Backend's Minio account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 SECRETS_FILE=./secrets/answers-test.minio.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep ANSWERS_TEST_MINIO_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${ANSWERS_TEST_MINIO_USER_PASSWORD:-}" ]; then
-        export ANSWERS_TEST_MINIO_USER_PASSWORD=answers_test_minio_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# backend's Minio\n# account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "ANSWERS_TEST_MINIO_USER_PASSWORD=${ANSWERS_TEST_MINIO_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+VALUE_PREFIX=backend_test_minio_
+DESCR="Backend Test's Minio account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
 
 SECRETS_FILE=./secrets/langfuse.minio.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep LANGFUSE_MINIO_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${LANGFUSE_MINIO_USER_PASSWORD:-}" ]; then
-        export LANGFUSE_MINIO_USER_PASSWORD=langfuse_minio_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')
-    fi
-    echo -e "\n# Langfuse's Minio account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_MINIO_USER_PASSWORD=${LANGFUSE_MINIO_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+VAR_NAME=LANGFUSE_MINIO_USER_PASSWORD
+VALUE_PREFIX=langfuse_minio_
+DESCR="Langfuse's Minio account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
 
 # Postgres
 
+
 SECRETS_FILE=./secrets/postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep POSTGRES_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${POSTGRES_PASSWORD:-}" ]; then
-        export POSTGRES_PASSWORD="postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# POSTGRES_PASSWORD contains Postgres's root account's password  (auto-generated secret)" >> $SECRETS_FILE
-    echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> $SECRETS_FILE
-fi
+VAR_NAME=POSTGRES_PASSWORD
+VALUE_PREFIX=postgres_
+DESCR="Postgres's root account's password."
 
-SECRETS_FILE=./secrets/answers.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep BACKEND_POSTGRES_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${BACKEND_POSTGRES_USER_PASSWORD:-}" ]; then
-        export BACKEND_POSTGRES_USER_PASSWORD="backend_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# backend's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "BACKEND_POSTGRES_USER_PASSWORD=${BACKEND_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/checkpoints.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ]; then
-        export BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD="backend_checkpoints_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# backend checkpointer's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD=${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
-fi
 
-SECRETS_FILE=./secrets/vectors.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep BACKEND_VECTORS_POSTGRES_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${BACKEND_VECTORS_POSTGRES_USER_PASSWORD:-}" ]; then
-        export BACKEND_VECTORS_POSTGRES_USER_PASSWORD="backend_vectors_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# backend vector stores's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "BACKEND_VECTORS_POSTGRES_USER_PASSWORD=${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+SECRETS_FILE=./secrets/answers-dev.postgres.secrets.env
+VAR_NAME=BACKEND_ANSWERS_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=answers_postgres_
+DESCR="backend's Answers Postgres account's password."
 
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 SECRETS_FILE=./secrets/answers-test.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep ANSWERS_TEST_POSTGRES_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${ANSWERS_TEST_POSTGRES_USER_PASSWORD:-}" ]; then
-        export ANSWERS_TEST_POSTGRES_USER_PASSWORD="answers_test_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# backend's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "ANSWERS_TEST_POSTGRES_USER_PASSWORD=${ANSWERS_TEST_TEST_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+VALUE_PREFIX=answers_test_postgres_
+DESCR="backend test's Answers Postgres account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
+SECRETS_FILE=./secrets/checkpoints-dev.postgres.secrets.env
+VAR_NAME=BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=checkpoints_postgres_
+DESCR="backend's checkpoints Postgres account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 SECRETS_FILE=./secrets/checkpoints-test.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ]; then
-        export ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD="answers_test_checkpoints_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# backend checkpointer's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD=${ANSWERS_TEST_CHECKPOINTS_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+VALUE_PREFIX=checkpoints_test_postgres_
+DESCR="backend test's checkpoints Postgres account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
+SECRETS_FILE=./secrets/vectors-dev.postgres.secrets.env
+VAR_NAME=BACKEND_VECTORS_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=vectors_postgres_
+DESCR="backend's vectors Postgres account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 SECRETS_FILE=./secrets/vectors-test.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD:-}" ]; then
-        export ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD="answers_test_vectors_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# backend vector stores's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD=${ANSWERS_TEST_VECTORS_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
-fi
+VALUE_PREFIX=vectors_test_postgres_
+DESCR="backend test's vectors Postgres account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
 
 
 SECRETS_FILE=./secrets/langfuse.postgres.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep LANGFUSE_POSTGRES_USER_PASSWORD $SECRETS_FILE ) \
-      || ! $( grep LANGFUSE_POSTGRES_DATABASE_URL $SECRETS_FILE ) ]]
-then
-    if [ -z "${LANGFUSE_POSTGRES_USER_PASSWORD:-}" ]; then
-        export LANGFUSE_POSTGRES_USER_PASSWORD="langfuse_postgres_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# Langfuse's Postgres account's password.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_POSTGRES_USER_PASSWORD=${LANGFUSE_POSTGRES_USER_PASSWORD}" >> $SECRETS_FILE
+VAR_NAME=LANGFUSE_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=langfuse_postgres_
+DESCR="Langfuse's Postgres account's password."
 
-    echo -e "\n# Langfuse's Database URL.  (auto-generated secret)" >> $SECRETS_FILE
-    echo "LANGFUSE_POSTGRES_DATABASE_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse" >> $SECRETS_FILE
-fi
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
 # Redis
 
 SECRETS_FILE=./secrets/redis.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep REDIS_DEFAULT_PASSWORD $SECRETS_FILE ) ]]
-then
-    if [ -z "${REDIS_DEFAULT_PASSWORD:-}" ]
-    then
-        export REDIS_DEFAULT_PASSWORD="redis_$(gpg --gen-random --armour 1 16 | tr '+/' '-_' | tr -d '=')"
-    fi
-    echo -e "\n# REDIS_DEFAULT_PASSWORD contains Redis's default account's password  (auto-generated secret)" >> $SECRETS_FILE
-    echo "REDIS_DEFAULT_PASSWORD=${REDIS_DEFAULT_PASSWORD}" >> $SECRETS_FILE
+VAR_NAME=REDIS_DEFAULT_PASSWORD
+VALUE_PREFIX=redis_
+DESCR="Redis's default account's password."
 
-    echo -e "\n# REDIS_URL contains the URL with Redis's default account and password  (auto-generated secret)" >> $SECRETS_FILE
-    echo "REDIS_URL=redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0" >> $SECRETS_FILE
-fi
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
 
 #=======
 
-# Celery-exporter depends on Redis password
-
-SECRETS_FILE=./secrets/celery-exporter.secrets.env
-if [[ ! -e $SECRETS_FILE \
-      || ! $( grep CE_BROKER_URL $SECRETS_FILE ) ]]
-then
-    echo "CE_BROKER_URL=redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0" >> $SECRETS_FILE
-fi
-
 #
+set +o history # temporarily turn off history
+export $( grep -h -v "^#" ./secrets/clickhouse.secrets.env | xargs -n1 )
+set -o history # turn it back on
+
 RELPATH=clickhouse/admin-user.xml
 envsubst < ${RELPATH}.template > secrets/clickhouse.admin-user.xml
 
 #
+set +o history # temporarily turn off history
+export $( grep -h -v "^#" ./secrets/redis.secrets.env | xargs -n1 )
+set -o history # turn it back on
+
 RELPATH=redis/redis.conf
 envsubst < ${RELPATH}.template > secrets/redis.conf

@@ -28,15 +28,22 @@ fi
 # Run the FastAPI server.
 
 set +o history # temporarily turn off history
-export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers:${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_vectors:${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_checkpoints:${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
+export REDIS_URL="redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
+
+export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://${ANSWERS_POSTGRES_USER_NAME}:${ANSWERS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
+export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://${VECTORS_POSTGRES_USER_NAME}:${VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
+export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://${CHECKPOINTS_POSTGRES_USER_NAME}:${CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
 set -o history # turn it back on
 
+# A deep dive regarding pattern option in watchmedo:
+#   You will need to start at
+#   AutoRestartTrick (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/tricks/__init__.py#L147)
+#   arriving at PatternMatchingEventHandler (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/events.py#L292)
+#   then arriving at _match_path (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/utils/patterns.py#L24)
 PYTHONPATH=./src \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
-   --directory=.  --recursive --pattern='*.py;*.env' \
+   --directory=./src  --recursive --pattern='*.py' \
    -- \
    uvicorn core_app:app --host 0.0.0.0 --port 8100

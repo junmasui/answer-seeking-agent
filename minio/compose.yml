@@ -34,14 +34,54 @@ services:
       retries: 5
       start_period: 5s
 
+  minio-init-start-gate:
+    restart: 'no'
+
+    image: localhost/start-gate:1.0
+    profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      MINIO_ENDPOINT_URL: http://minio:9000
+    env_file:
+      - minio.env
+    networks:
+      - agent-poc
+    # volumes:
+    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    secrets:
+      - postgres_env
+
+    mem_limit: 128m
+    memswap_limit: 128m
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |-
+
+        set +e
+        set +x
+
+        source /wait_for_resource.sh
+
+        wait_for_minio "$${MINIO_ENDPOINT_URL}"
+
+
   minio-init:
     restart: 'no'
     depends_on:
-      minio:
-        condition: service_healthy
+      minio-init-start-gate:
+        condition: service_completed_successfully
 
     image: minio/minio:RELEASE.2024-12-13T22-19-12Z
-    profiles: [ minio, infrastructure-core, infrastructure, all ]
+    profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
       # Only environment variables that are important to the Docker environment
@@ -56,13 +96,70 @@ services:
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_env
-      - answers_minio_env
-      - langfuse_minio_env
+      - answers_minio_dev_env
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: /init-minio.sh
+
+  minio-test-init:
+    restart: 'no'
+    depends_on:
+      minio-init-start-gate:
+        condition: service_completed_successfully
+
+    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      MINIO_ENDPOINT_URL: http://minio:9000
+    env_file:
+      - minio-test-init.env
+    # Attach minio-init directly to main container's network stack
+    network_mode: service:minio
+    volumes:
+      - ./init-minio.sh:/init-minio.sh
+    secrets:
+      - minio_env
+      - answers_minio_test_env
+
+    entrypoint: [ /bin/sh ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: /init-minio.sh
+
+  minio-langfuse-init:
+    restart: 'no'
+    depends_on:
+      minio-init-start-gate:
+        condition: service_completed_successfully
+
+    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      MINIO_ENDPOINT_URL: http://minio:9000
+    env_file:
+      - minio-init.env
+    # Attach minio-init directly to main container's network stack
+    network_mode: service:minio
+    volumes:
+      - ./init-langfuse-minio.sh:/init-langfuse-minio.sh
+    secrets:
+      - minio_env
+      - langfuse_minio_env
+
+    entrypoint: [ /bin/sh ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: /init-langfuse-minio.sh
 
 volumes:
   minio-data-2:

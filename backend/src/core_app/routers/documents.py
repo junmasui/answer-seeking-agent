@@ -17,6 +17,7 @@ from core.public_models import (
     DocumentUpdateRequest,
     BulkDeleteRequestBody
 )
+from global_config import get_global_config
 
 from core_worker import ingest_task
 from simple_auth import User, get_scoped_current_user, Scope
@@ -26,6 +27,8 @@ from .util import parse_sort_by
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+jwt_write_claim_missing_ok = get_global_config().jwt_write_claim_missing_ok
 
 
 @router.get('/', response_model=DocumentList)
@@ -60,7 +63,7 @@ async def handle_upload(file: UploadFile,
                         sourceUrl: Annotated[str, Form()],
                         contentType: Annotated[str, Form()],
                         downloadTimeUtc: Annotated[str, Form()],
-                        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=True))] = None):
+                        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Upload a file. Chunked upload of large files is supported.
     """
 
@@ -98,7 +101,7 @@ async def handle_upload(file: UploadFile,
 @router.patch('/{doc_uuid}')
 async def handle_single_update(doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
                                body: Optional[DocumentUpdateRequest] = None,
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Update the file specified by the document UUID.
     """
 
@@ -112,7 +115,7 @@ async def handle_single_update(doc_uuid: Annotated[uuid.UUID, Path(..., discript
 
 @router.delete('/{doc_uuid}')
 async def handle_single_delete(doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Delete the file and associated embeddings specified by the document UUID.
     """
 
@@ -126,7 +129,7 @@ async def handle_single_delete(doc_uuid: Annotated[uuid.UUID, Path(..., discript
 #
 @router.post('/{doc_uuid}/ingest')
 async def handle_single_ingest(doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Ingest the file specified by the document UUID.
     """
 
@@ -142,7 +145,7 @@ async def handle_single_ingest(doc_uuid: Annotated[uuid.UUID, Path(..., discript
 @router.post('/ingest')
 async def handle_ingest(
         body: Optional[IngestRequestBody] = None,
-        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None):
+        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Ingest the files specified in the list of document UUIDs
     """
     user_id = current_user.userid if current_user is not None else None
@@ -173,7 +176,7 @@ async def handle_ingest(
 @router.post('/delete')
 async def handle_delete(
         body: Optional[BulkDeleteRequestBody] = None,
-        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+        current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Delete the files specified in the list of document UUIDs
     """
     user_id = current_user.userid if current_user is not None else None

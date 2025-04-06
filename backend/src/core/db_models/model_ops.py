@@ -28,16 +28,19 @@ def create_tables_if_not_exists():
     engine = get_engine(DataDomain.ANSWERS)
 
     if get_current_version(engine) != get_head_revision():
-        logger.info('CHECK THAT MIGRATIONS HAVE BEEN APPLIED')
+        logger.info('Migration revisions differ')
     else:
         differences = get_schema_differences(engine)
 
         # Analyze the differences
         if differences:
-            logger.info('CHECK THAT MIGRATION STEPS HAVE BEEN DEFINED')
+            logger.info('Actual and declared scheams differ')
             for diff in differences:
                 op = diff[0]
-                obj_name = getattr(diff[1], 'name') if diff[1] is not None else ''
+                try:
+                    obj_name = getattr(diff[1], 'name')
+                except AttributeError:
+                    obj_name = ''
                 logger.info('DB difference: %s %s', op, obj_name)
 
     _create_tables_if_new(engine)
@@ -113,7 +116,19 @@ def _create_tables_if_new(engine):
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
 
-    if reflected_metadata.tables is not None and len(reflected_metadata.tables) > 0:
+    reflected_tables = reflected_metadata.tables
+
+    # Remove the alembic migration table from the reflected tables list.
+    # Although not in the declared schema, this will show up in the actual schema,
+    # and its appearance will cause the migrations to be short-circuited.
+    if reflected_tables is not None:
+        reflected_tables = [
+            table
+            for table in reflected_tables
+            if table not in ['answers.alembic_version']
+        ]
+
+    if reflected_tables is not None and len(reflected_tables) > 0:
         logger.info('database is not empty. use formal migration tools.')
         return 
 
@@ -156,4 +171,9 @@ def drop_all_tables():
 
     DECLARED_METADATA.drop_all(engine)
 
+    # Reset the Alembic migration table. If this table remains populated, our migration detection
+    # logic will prevent the recreation of the registered tables.
+    with engine.connect() as conn:
+        conn.execute(text(f'TRUNCATE TABLE "alembic_version" RESTART IDENTITY CASCADE'))
+        conn.commit()
 

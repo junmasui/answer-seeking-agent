@@ -66,6 +66,8 @@ class Settings(BaseSettings):
         #     directories specified in the `secrets_dir` config value.
 
         return init_settings, env_settings, file_secret_settings, TomlConfigSettingsSource(settings_cls)
+    
+    jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
 
     logging_config_path: Union[FilePath, NewPath] = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
 
@@ -100,9 +102,9 @@ class Settings(BaseSettings):
 
 
     minio_endpoint_url: AnyHttpUrl =Field(default='', validation_alias='MINIO_ENDPOINT_URL')
-    minio_bucket_name: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_BUCKET')
-    minio_user_name: MinimalStr = Field(default='', validation_alias='BACKEND_MINIO_USER_NAME')
-    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='BACKEND_MINIO_USER_PASSWORD')
+    minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
+    minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
+    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
 
     doc_manager: DocManagerConfig = DocManagerConfig()
 

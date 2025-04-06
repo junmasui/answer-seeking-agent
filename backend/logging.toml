@@ -10,34 +10,6 @@
 [loggers."alembic"]
 level = "DEBUG"
 
-[loggers.log_config_watch]
-level = "DEBUG"
-
-[loggers."celery.task"]
-level = "DEBUG"
-
-[loggers."celery.worker"]
-level = "DEBUG"
-
-[loggers.sqlalchemy]
-level = "WARNING"
-
-[loggers.sqlalchemy.engine]
-level = "INFO"
-
-[loggers."langfuse"]
-level = "DEBUG"
-
-[loggers."langfuse._task_manager.media_manager"]
-level = "INFO"
-
-
-[loggers.unstructured]
-level = "DEBUG"
-
-[loggers.pypdf]
-level = "INFO"
-
 [loggers."botocore"]
 level = "INFO"
 
@@ -47,3 +19,39 @@ level = "INFO"
 # logging level.
 # https://github.com/minio/minio/issues/18608
 level = "WARNING"
+
+[loggers."celery.task"]
+level = "DEBUG"
+
+[loggers."celery.worker"]
+level = "DEBUG"
+
+[loggers.fastapi]
+level = "DEBUG"
+
+[loggers.fsevents]
+level = "DEBUG"
+
+[loggers.httpcore]
+level = "INFO"
+
+[loggers."langfuse"]
+level = "DEBUG"
+
+[loggers."langfuse._task_manager.media_manager"]
+level = "INFO"
+
+[loggers.log_config_watch]
+level = "DEBUG"
+
+[loggers.pypdf]
+level = "INFO"
+
+[loggers.sqlalchemy]
+level = "WARNING"
+
+[loggers.sqlalchemy.engine]
+level = "INFO"
+
+[loggers.unstructured]
+level = "DEBUG"

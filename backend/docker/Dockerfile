@@ -64,6 +64,13 @@ USER ${USER_ID}:${GROUP_ID}
 # Set the working directory inside the container
 WORKDIR /app
 
+COPY --from=parent-dir ./pyproject.toml /app/pyproject.toml
+
+COPY --from=parent-dir ./alembic.ini /app/alembic.ini
+COPY --from=parent-dir ./logging.toml /app/logging.toml
+COPY --from=parent-dir ./uv.lock /app/uv.lock
+COPY --from=parent-dir ./src/ /app/src/
+
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the FastAPI development server
