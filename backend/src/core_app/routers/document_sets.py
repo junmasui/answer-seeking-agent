@@ -9,7 +9,7 @@ from fastapi import Depends, APIRouter, Path, Query
 from core import (list_document_sets)
 from core.doc_mgr import add_document_set, get_document_set_statistics, delete_document_set, update_document_set
 from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
-
+from global_config import get_global_config
 
 from simple_auth import User, get_scoped_current_user, Scope
 
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+jwt_write_claim_missing_ok = get_global_config().jwt_write_claim_missing_ok
 
 @router.get('/', response_model=DocumentSetList)
 async def handle_list_doc_sets(
@@ -37,7 +38,7 @@ async def handle_list_doc_sets(
 
 @router.post('/')
 async def handle_single_insert(body: DocumentSetAddRequest,
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Add document set.
     """
 
@@ -59,7 +60,7 @@ async def handle_table_stats(current_user: Annotated[User, Depends(get_scoped_cu
 @router.patch('/{doc_set_uuid}')
 async def handle_single_update(body: DocumentSetUpdateRequest,
                                doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Delete the file and associated embeddings specified by the document UUID.
     """
 
@@ -71,7 +72,7 @@ async def handle_single_update(body: DocumentSetUpdateRequest,
 
 @router.delete('/{doc_set_uuid}')
 async def handle_single_delete(doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
-                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None):
+                               current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))] = None):
     """Delete the file and associated embeddings specified by the document UUID.
     """
 

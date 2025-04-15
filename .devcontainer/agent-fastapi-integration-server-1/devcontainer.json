@@ -1,0 +1,26 @@
+{
+    // Sets the default path that VS Code should open when connecting to the container
+    "workspaceFolder": "/app",
+  
+    // Adds *default* settings.json values into a container/machine specific settings file.
+    "settings": {
+      "terminal.integrated.defaultProfile.linux": "bash"
+    },
+  
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "tamasfe.even-better-toml"
+    ],
+  
+    // An array port numbers to forward
+    "forwardPorts": [],
+  
+    // Container user VS Code should use when connecting
+    "remoteUser": "python",
+  
+    // Set environment variables for VS Code and sub-processes
+    "remoteEnv": { }
+  }

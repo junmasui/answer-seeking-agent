@@ -24,6 +24,7 @@ docker buildx build \
 # Build a backend image with Python 3.12 on Debian 12
 #
 docker buildx build \
+  --no-cache \
   --file Dockerfile \
   --build-context parent-dir=.. \
   --tag localhost/answers-backend:python-3.12-cpu \
@@ -34,6 +35,7 @@ docker buildx build \
 # Build a backend image with Python 3.12 on Debian 12 with CUDA 12
 #
 docker buildx build \
+  --no-cache \
   --file cuda12.Dockerfile \
   --build-context parent-dir=.. \
   --tag localhost/answers-backend:python-3.12-cuda12 \

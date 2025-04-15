@@ -1,55 +1,26 @@
 services:
 
-  init-backend-volumes:
-    volumes:
-      - local-backend-cpuonly-home-1:/home/python/home-1
-      - local-backend-cpuonly-home-2:/home/python/home-2
-      - local-backend-cpuonly-venv-1:/home/python/venv-1
-      - local-backend-cpuonly-venv-2:/home/python/venv-2
-      - local-backend-cpuonly-staging-1:/home/python/staging-1
-      - local-backend-cpuonly-staging-2:/home/python/staging-2
-
-
   fastapi-dev-server:
     image: 'localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
-    volumes:
-      # Mounting a local area to use container-installed dependencies
-      - local-backend-cpuonly-home-1:/home/python
-      - local-backend-cpuonly-venv-1:/app/.venv
-      - local-backend-cpuonly-staging-1:/staging
+
+  fastapi-integration-server:
+    image: 'localhost/answers-backend:python-3.12-cpu'
+
+    environment:
+      GPU_MODE: cpu
 
   celery-worker:
     image: 'localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
-    volumes:
-      # Mounting a local area to use container-installed dependencies
-      - local-backend-cpuonly-home-2:/home/python
-      - local-backend-cpuonly-venv-2:/app/.venv
-      - local-backend-cpuonly-staging-2:/staging
 
-#
-# Named volumes are not created until the dependent service
-# is started.
-#
-volumes:
-  #
-  # CPU only
-  #
-  local-backend-cpuonly-home-1:
-    driver: local
-  local-backend-cpuonly-venv-1:
-    driver: local
-  local-backend-cpuonly-staging-1:
-    driver: local
-  local-backend-cpuonly-home-2:
-    driver: local
-  local-backend-cpuonly-venv-2:
-    driver: local
-  local-backend-cpuonly-staging-2:
-    driver: local
+  celery-integration-worker:
+    image: 'localhost/answers-backend:python-3.12-cpu'
+
+    environment:
+      GPU_MODE: cpu
 

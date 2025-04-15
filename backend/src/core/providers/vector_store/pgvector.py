@@ -45,6 +45,7 @@ def startup(sender):
 
     vector_store.create_vector_extension()
     vector_store.create_tables_if_not_exists()
+    vector_store.create_collection()
 
 @reset_data_handler
 def reset(sender):
@@ -54,4 +55,7 @@ def reset(sender):
     vector_store = get_vector_store()
 
     vector_store.drop_tables()
+
+    vector_store.create_vector_extension()
     vector_store.create_tables_if_not_exists()
+    vector_store.create_collection()

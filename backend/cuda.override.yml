@@ -1,24 +1,23 @@
 services:
-  init-backend-volumes:
-    volumes:
-      - local-backend-cuda-home-1:/home/python/home-1
-      - local-backend-cuda-home-2:/home/python/home-2
-      - local-backend-cuda-venv-1:/home/python/venv-1
-      - local-backend-cuda-venv-2:/home/python/venv-2
-      - local-backend-cuda-staging-1:/home/python/staging-1
-      - local-backend-cuda-staging-2:/home/python/staging-2
-
   fastapi-dev-server:
     image: 'localhost/answers-backend:python-3.12-cuda12'
 
     environment:
       GPU_MODE: cuda12
-    volumes:
-      # Mounting a local area to use container-installed dependencies
-      - local-backend-cuda-home-1:/home/python
-      - local-backend-cuda-venv-1:/app/.venv
-      - local-backend-cuda-staging-1:/staging
 
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  fastapi-integration-server:
+    image: 'localhost/answers-backend:python-3.12-cuda12'
+
+    environment:
+      GPU_MODE: cuda12
 
     deploy:
       resources:
@@ -33,11 +32,6 @@ services:
 
     environment:
       GPU_MODE: cuda12
-    volumes:
-      # Mounting a local area to use container-installed dependencies
-      - local-backend-cuda-home-2:/home/python
-      - local-backend-cuda-venv-2:/app/.venv
-      - local-backend-cuda-staging-2:/staging
 
     deploy:
       resources:
@@ -47,20 +41,17 @@ services:
               count: 1
               capabilities: [gpu]
 
-#
-# Named volumes are not created until the dependent service
-# is started.
-#
-volumes:
-  local-backend-cuda-home-1:
-    driver: local
-  local-backend-cuda-venv-1:
-    driver: local
-  local-backend-cuda-staging-1:
-    driver: local
-  local-backend-cuda-home-2:
-    driver: local
-  local-backend-cuda-venv-2:
-    driver: local
-  local-backend-cuda-staging-2:
-    driver: local
+  celery-integration-worker:
+    image: 'localhost/answers-backend:python-3.12-cuda12'
+
+    environment:
+      GPU_MODE: cuda12
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+

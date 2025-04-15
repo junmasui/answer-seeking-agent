@@ -1,0 +1,100 @@
+import pprint as pp
+import pytest
+from sqlalchemy import select, func
+
+def _get_table_count(auto_mapped_table, sql_sessionmaker):
+
+    with sql_sessionmaker() as session:
+        stmt = select(func.count()).select_from(auto_mapped_table)
+        result = session.execute(stmt).first()
+
+        count = result[0]
+
+    return count
+
+
+@pytest.mark.asyncio
+async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
+
+    path = '/prompts/'
+    data = {
+        'name': 'prompt',
+        'humanMessage': 'placeholder human message',
+        'systemMessage': 'placeholder system message',
+    }
+    resp = await api_server.post(path=path, content_type='json', data=data)
+
+    count = _get_table_count(empty_prompt_table, sql_sessionmaker)
+
+    assert count == 1
+
+
+
+@pytest.mark.asyncio
+async def test_find(api_server, populated_prompt_table, sql_sessionmaker):
+
+    path = '/prompts/'
+    content_type, resp = await api_server.get(path=path)
+
+    assert content_type == 'json'
+
+    assert resp.get('promptCount') == 3
+
+    prompts = resp.get('prompts')
+
+    assert isinstance(prompts, list)
+    assert len(prompts) == 3
+
+    for i in range(3):
+        assert prompts[i].get('name') == f'prompt {i}'
+
+
+@pytest.mark.asyncio
+async def test_get(api_server, populated_prompt_table, sql_sessionmaker):
+    with sql_sessionmaker() as session:
+        stmt = select(populated_prompt_table)
+        result = session.execute(stmt).first()
+
+        prompt_id = result[0].id
+
+    pass
+
+@pytest.mark.asyncio
+async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
+
+    with sql_sessionmaker() as session:
+        stmt = select(populated_prompt_table)
+        result = session.execute(stmt).first()
+
+        prompt_id = result[0].id
+
+    path = f'/prompts/{prompt_id}'
+    body = {
+        'humanMessage': 'updated human message',
+        'systemMessage': 'updated system message'
+    }
+    content_type, resp = await api_server.patch(path=path, content_type='json', data=body)
+
+    assert content_type == 'json'
+
+    count = _get_table_count(populated_prompt_table, sql_sessionmaker)
+
+    assert count == 3
+
+@pytest.mark.asyncio
+async def test_delete(api_server, populated_prompt_table, sql_sessionmaker):
+
+    with sql_sessionmaker() as session:
+        stmt = select(populated_prompt_table)
+        result = session.execute(stmt).first()
+
+        prompt_id = result[0].id
+
+    path = f'/prompts/{prompt_id}'
+    content_type, resp = await api_server.delete(path=path)
+
+    assert content_type == 'json'
+
+    count = _get_table_count(populated_prompt_table, sql_sessionmaker)
+
+    assert count == 2

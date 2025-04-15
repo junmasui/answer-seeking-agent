@@ -21,7 +21,6 @@ networks:
         - subnet: 172.31.1.0/24
           gateway: 172.31.1.1
 
-
 secrets:
   clickhouse_env:
     file: ./secrets/clickhouse.secrets.env
@@ -45,22 +44,31 @@ secrets:
   grafana_env:
     file: ./secrets/grafana.secrets.env
 
-  answers_env:
-    file: ./secrets.env
-  answers_jwt_env:
-    file: ./secrets/answers.jwt.secrets.env
-  answers_minio_env:
-    file: ./secrets/answers.minio.secrets.env
-  answers_postgres_env:
-    file: ./secrets/answers.postgres.secrets.env
-  checkpoints_postgres_env:
-    file: ./secrets/checkpoints.postgres.secrets.env
-  vectors_postgres_env:
-    file: ./secrets/vectors.postgres.secrets.env
+  answers_dev_env:
+    file: ./secrets-dev.env
+  answers_jwt_dev_env:
+    file: ./secrets/answers-dev.jwt.secrets.env
+  answers_minio_dev_env:
+    file: ./secrets/answers-dev.minio.secrets.env
+  answers_postgres_dev_env:
+    file: ./secrets/answers-dev.postgres.secrets.env
+  checkpoints_postgres_dev_env:
+    file: ./secrets/checkpoints-dev.postgres.secrets.env
+  vectors_postgres_dev_env:
+    file: ./secrets/vectors-dev.postgres.secrets.env
 
-  celery_exporter_env:
-    file: ./secrets/celery-exporter.secrets.env
-
+  answers_test_env:
+    file: ./secrets-test.env
+  answers_jwt_test_env:
+    file: ./secrets/answers-test.jwt.secrets.env
+  answers_minio_test_env:
+    file: ./secrets/answers-test.minio.secrets.env
+  answers_postgres_test_env:
+    file: ./secrets/answers-test.postgres.secrets.env
+  checkpoints_postgres_test_env:
+    file: ./secrets/checkpoints-test.postgres.secrets.env
+  vectors_postgres_test_env:
+    file: ./secrets/vectors-test.postgres.secrets.env
 
   langfuse_clickhouse_env:
     file: ./secrets/langfuse.clickhouse.secrets.env

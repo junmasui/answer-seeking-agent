@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def add_document(*, document_set_uuid, file_dir, file_name, source_url, content_type, download_time_utc, cloud_path, bucket_path, user_id):
     """Adds or updates the tracking record for the document.
     """
-    _add_or_update_document(document_set_uuid=document_set_uuid,
+    return _add_or_update_document(document_set_uuid=document_set_uuid,
                             file_dir=file_dir,
                             file_name=file_name,
                             cloud_path=cloud_path,
@@ -52,6 +52,8 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
 
         with session.begin():
             if existing_obj:
+                doc_uuid = existing_obj.id
+
                 existing_obj.document_set_id = document_set_uuid
                 existing_obj.size_bytes = size_bytes
                 existing_obj.file_modified_time = file_modification_time
@@ -79,3 +81,4 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
                 )
                 session.add(new_obj)
 
+        return doc_uuid

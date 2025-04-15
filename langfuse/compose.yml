@@ -34,7 +34,10 @@ services:
 
         source /wait_for_resource.sh
 
+        REDIS_URL="redis://:$${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
+
         wait_for_redis "$${REDIS_URL}"
+
         wait_for_minio "$${MINIO_ENDPOINT_URL}"
         wait_for_clickhouse "$${CLICKHOUSE_URL}" "$${CLICKHOUSE_USER}" "$${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" "$${CLICKHOUSE_DB}"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e  # Exit immediately on error.
-set -u  # Unbound variables are errors.
+#set -u  # Unbound variables are errors.
 ## set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 # Set environment variables from mounted secrets files
@@ -12,20 +12,17 @@ export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
 ## set -o history # turn it back on
 
 # Check for necessary environment variables
-[ -z "$POSTGRES_HOST" ] && echo "missing POSTGRES_HOST" && exit -1
-[ -z "$POSTGRES_USER" ] && echo "missing POSTGRES_USER" && exit -1
-[ -z "$POSTGRES_PASSWORD" ] && echo "missing POSTGRES_PASSWORD" && exit -1
-[ -z "$BACKEND_POSTGRES_USER_NAME" ] && echo "missing BACKEND_POSTGRES_USER_NAME" && exit -1
-[ -z "$BACKEND_POSTGRES_USER_PASSWORD" ] && echo "missing BACKEND_POSTGRES_USER_PASSWORD" && exit -1
-[ -z "$BACKEND_POSTGRES_DATABASE" ] && echo "missing BACKEND_POSTGRES_DATABASE" && exit -1
-[ -z "$BACKEND_VECTORS_POSTGRES_USER_NAME" ] && echo "missing BACKEND_VECTORS_POSTGRES_USER_NAME" && exit -1
-[ -z "$BACKEND_VECTORS_POSTGRES_USER_PASSWORD" ] && echo "missing BACKEND_VECTORS_POSTGRES_USER_PASSWORD" && exit -1
-[ -z "$BACKEND_CHECKPOINTS_POSTGRES_USER_NAME" ] && echo "missing BACKEND_CHECKPOINTS_POSTGRES_USER_NAME" && exit -1
-[ -z "$BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD" ] && echo "missing BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit -1
-[ -z "$MIGRATION_BASELINE_POSTGRES_DATABASE" ] && echo "missing MIGRATION_BASELINE_POSTGRES_DATABASE" && exit -1
-[ -z "$LANGFUSE_POSTGRES_USER_NAME" ] && echo "missing LANGFUSE_POSTGRES_USER_NAME" && exit -1
-[ -z "$LANGFUSE_POSTGRES_USER_PASSWORD" ] && echo "missing LANGFUSE_POSTGRES_USER_PASSWORD" && exit -1
-[ -z "$LANGFUSE_POSTGRES_DATABASE" ] && echo "missing LANGFUSE_POSTGRES_DATABASE" && exit -1
+[ -z "${POSTGRES_HOST:-}" ] && echo "missing POSTGRES_HOST" && exit 1
+[ -z "${POSTGRES_USER:-}" ] && echo "missing POSTGRES_USER" && exit 1
+[ -z "${POSTGRES_PASSWORD:-}" ] && echo "missing POSTGRES_PASSWORD" && exit 1
+
+[ -z "${ANSWERS_POSTGRES_DATABASE:-}" ] && echo "missing ANSWERS_POSTGRES_DATABASE" && exit 1
+[ -z "${ANSWERS_POSTGRES_USER_NAME:-}" ] && echo "missing ANSWERS_POSTGRES_USER_NAME" && exit 1
+[ -z "${ANSWERS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing ANSWERS_POSTGRES_USER_PASSWORD" && exit 1
+[ -z "${VECTORS_POSTGRES_USER_NAME:-}" ] && echo "missing VECTORS_POSTGRES_USER_NAME" && exit 1
+[ -z "${VECTORS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing VECTORS_POSTGRES_USER_PASSWORD" && exit 1
+[ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
+[ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
 
 
 export PGPASSWORD=$POSTGRES_PASSWORD
@@ -33,3 +30,4 @@ export PGPASSWORD=$POSTGRES_PASSWORD
 envsubst < /init-db.sql.template > /init-db.sql
 sleep 10
 psql -h pgvector -U $POSTGRES_USER -f /init-db.sql
+

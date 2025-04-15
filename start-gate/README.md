@@ -9,7 +9,7 @@ runs and exits when specified infrastructure resources
 are ready.
 
 The implementation is
-a run-and-exit bash script
+a run-and-done bash script
 and
 some installed utilities (`curl`, `pg_isready`, `redis-cli`, etc).
 

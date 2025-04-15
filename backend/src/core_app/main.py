@@ -15,7 +15,7 @@ from core_worker import get_worker_logger_tree
 import sim_auth_app
 from log_config_monitor import get_logging_conf_monitor, dump_logger_tree
 
-
+from .middlewares import ErrorLoggingMiddleware
 from .routers import admin, answer, document_sets, documents, prompts
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(ErrorLoggingMiddleware)
 
 instrumentator = Instrumentator().instrument(app)
 

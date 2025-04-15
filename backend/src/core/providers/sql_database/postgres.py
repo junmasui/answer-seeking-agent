@@ -27,8 +27,6 @@ def get_connection_str(db_schema: DataDomain):
             connection_url = config.postgres_vectors_connection_url
         case DataDomain.CHECKPOINTS:
             connection_url = config.postgres_checkpoints_connection_url
-        case DataDomain.MIGRATION_BASELINE:
-            connection_url = config.postgres_migration_baseline_connection_url
         case _:
             raise ValueError('unknown AppDbSchema value', db_schema)
 
@@ -41,7 +39,7 @@ def get_connection_str(db_schema: DataDomain):
 
 @cache
 def get_engine(db_schema: DataDomain):
-    """Returns the SQLAlchemy engine for the database.
+    """Returns a SQLAlchemy engine for the database.
 
     The engine is a global object created just once for a particular database server.
     It creates and holds connections to the database server
@@ -53,7 +51,7 @@ def get_engine(db_schema: DataDomain):
 
 @cache
 def get_sessionmaker(db_schema: DataDomain):
-    """Returns a sessionmaker object for the database.
+    """Returns a SQLAlchemy sessionmaker object for the database.
 
     A sessionmaker is a factory for creating new Session objects.
     A Session object is like a connection with enhanced functionality for using

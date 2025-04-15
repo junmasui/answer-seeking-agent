@@ -7,6 +7,7 @@ from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import MetaData, text
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import sessionmaker
 
 from global_config import get_global_config
 
@@ -26,27 +27,38 @@ def create_tables_if_not_exists():
 
     engine = get_engine(DataDomain.ANSWERS)
 
-    if get_current_version() != get_head_revision():
-        logger.info('CHECK THAT MIGRATIONS HAVE BEEN APPLIED')
+    if get_current_version(engine) != get_head_revision():
+        logger.info('Migration revisions differ')
     else:
         differences = get_schema_differences(engine)
 
         # Analyze the differences
         if differences:
-            logger.info('CHECK THAT MIGRATION STEPS HAVE BEEN DEFINED')
+            logger.info('Actual and declared scheams differ')
             for diff in differences:
                 op = diff[0]
-                obj_name = getattr(diff[1], 'name') if diff[1] is not None else ''
+                try:
+                    obj_name = getattr(diff[1], 'name')
+                except AttributeError:
+                    obj_name = ''
                 logger.info('DB difference: %s %s', op, obj_name)
 
     _create_tables_if_new(engine)
     _run_migrations(engine)
 
 
-def get_current_version():
+def get_current_version(engine):
     """Return the current Alembic version applied to the database.
     """
-    session_maker = get_sessionmaker(DataDomain.ANSWERS)
+
+    reflected_metadata = MetaData(schema='answers')
+    reflected_metadata.reflect(bind=engine)
+
+    if reflected_metadata.tables is None or len(reflected_metadata.tables) == 0:
+        logger.info('database is empty.')
+        return  None
+
+    session_maker = sessionmaker(bind=engine)
     with session_maker() as session:
         try:
             # There is not a lot of good official documentation at https://alembic.sqlalchemy.org/
@@ -104,7 +116,19 @@ def _create_tables_if_new(engine):
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
 
-    if reflected_metadata.tables is not None and len(reflected_metadata.tables) > 0:
+    reflected_tables = reflected_metadata.tables
+
+    # Remove the alembic migration table from the reflected tables list.
+    # Although not in the declared schema, this will show up in the actual schema,
+    # and its appearance will cause the migrations to be short-circuited.
+    if reflected_tables is not None:
+        reflected_tables = [
+            table
+            for table in reflected_tables
+            if table not in ['answers.alembic_version']
+        ]
+
+    if reflected_tables is not None and len(reflected_tables) > 0:
         logger.info('database is not empty. use formal migration tools.')
         return 
 
@@ -147,4 +171,9 @@ def drop_all_tables():
 
     DECLARED_METADATA.drop_all(engine)
 
+    # Reset the Alembic migration table. If this table remains populated, our migration detection
+    # logic will prevent the recreation of the registered tables.
+    with engine.connect() as conn:
+        conn.execute(text(f'TRUNCATE TABLE "alembic_version" RESTART IDENTITY CASCADE'))
+        conn.commit()
 

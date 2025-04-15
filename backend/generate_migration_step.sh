@@ -1,10 +1,10 @@
 
 MESSAGE=$1
 
-if [ -z "$MESSAGE" ]
+if [ -z "${MESSAGE:-}" ]
 then
     echo "alembic revision MESSAGE missing"
-    exit -1
+    exit 1
 fi
 
 # Set environment variables from mounted secrets files.
@@ -17,10 +17,9 @@ export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
 set -o history # turn it back on
 
 set +o history # temporarily turn off history
-export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers:${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_vectors:${BACKEND_VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_checkpoints:${BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
-export POSTGRES_MIGRATION_BASELINE_CONNECTION_URL="postgresql+psycopg://answers:${BACKEND_POSTGRES_USER_PASSWORD}@pgvector:5432/answers_baseline"
+export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://answers:${ANSWERS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
+export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://answers_vectors:${VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
+export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://answers_checkpoints:${CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/answers"
 set -o history # turn it back on
 
 

@@ -9,6 +9,8 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 set +o history # temporarily turn off history
 SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
 export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
+
+export GF_SECURITY_ADMIN_PASSWORD=$GRAFANA_ADMIN_PASSWORD
 set -o history # turn it back on
 
 # Process with original entrypoint, which can be discovered

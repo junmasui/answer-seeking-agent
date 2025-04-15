@@ -34,7 +34,7 @@ done
 function wait_for_nslookup {
     declare LOOKUP_NAME="${1:-}"
 
-    if [ -z "$LOOKUP_NAME" ]
+    if [ -z "${LOOKUP_NAME:-}" ]
     then
         echo "LOOKUP_NAME is empty"
         exit -1
@@ -56,7 +56,7 @@ function wait_for_nslookup {
 function wait_for_minio {
     declare MINIO_ENDPOINT_URL=${1:-}
 
-    if [ -z "$MINIO_ENDPOINT_URL" ]
+    if [ -z "${MINIO_ENDPOINT_URL:-}" ]
     then
         echo "MINIO_ENDPOINT_URL is empty"
         exit -1
@@ -86,7 +86,7 @@ function wait_for_minio {
 function wait_for_pgvector {
     declare DATABASE_URL=${1:-}
 
-    if [ -z "$DATABASE_URL" ]
+    if [ -z "${DATABASE_URL:-}" ]
     then
         echo "DATABASE_URL is empty"
         exit -1
@@ -120,7 +120,7 @@ function wait_for_clickhouse {
     declare CLICKHOUSE_PASSWORD=${3:-}
     declare CLICKHOUSE_DB=${4:-}
 
-    if [ -z "$CLICKHOUSE_URL" ]
+    if [ -z "${CLICKHOUSE_URL:-}" ]
     then
         echo "CLICKHOUSE_URL is empty"
         exit -1
@@ -155,7 +155,7 @@ function wait_for_redis {
     echo $*
     echo redis
 
-    if [ -z "$REDIS_URL" ]
+    if [ -z "${REDIS_URL:-}" ]
     then
         echo "REDIS_URL is empty"
         exit -1
