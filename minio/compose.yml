@@ -4,7 +4,7 @@ services:
   minio:
     restart: unless-stopped
 
-    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    image: docker.io/minio/minio:RELEASE.2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure-core, infrastructure, all ]
 
     env_file:
@@ -34,10 +34,10 @@ services:
       retries: 5
       start_period: 5s
 
-  minio-init-start-gate:
+  minio-init-dependency-gate:
     restart: 'no'
 
-    image: localhost/start-gate:1.0
+    image: localhost/localhost/debian-slim-util:1.0
     profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
@@ -49,8 +49,11 @@ services:
       - minio.env
     networks:
       - agent-poc
-    # volumes:
-    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    volumes:
+      - minio-init-signal-1:/init-signal
+      - ./run_dependency_gate.sh:/run_dependency_gate.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - postgres_env
 
@@ -59,28 +62,13 @@ services:
     # set shared memory limit when using docker-compose
     shm_size: 128mb
     entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |-
-
-        set +e
-        set +x
-
-        source /wait_for_resource.sh
-
-        wait_for_minio "$${MINIO_ENDPOINT_URL}"
+    command: [ /run_dependency_gate.sh ]
 
 
   minio-init:
     restart: 'no'
-    depends_on:
-      minio-init-start-gate:
-        condition: service_completed_successfully
 
-    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    image: docker.io/minio/minio:RELEASE.2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
@@ -90,9 +78,10 @@ services:
       MINIO_ENDPOINT_URL: http://minio:9000
     env_file:
       - minio-init.env
-    # Attach minio-init directly to main container's network stack
-    network_mode: service:minio
+    networks:
+      - agent-poc
     volumes:
+      - minio-init-signal-1:/init-signal
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_env
@@ -105,11 +94,8 @@ services:
 
   minio-test-init:
     restart: 'no'
-    depends_on:
-      minio-init-start-gate:
-        condition: service_completed_successfully
 
-    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    image: docker.io/minio/minio:RELEASE.2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
@@ -119,9 +105,10 @@ services:
       MINIO_ENDPOINT_URL: http://minio:9000
     env_file:
       - minio-test-init.env
-    # Attach minio-init directly to main container's network stack
-    network_mode: service:minio
+    networks:
+      - agent-poc
     volumes:
+      - minio-init-signal-1:/init-signal
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_env
@@ -134,11 +121,8 @@ services:
 
   minio-langfuse-init:
     restart: 'no'
-    depends_on:
-      minio-init-start-gate:
-        condition: service_completed_successfully
 
-    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    image: docker.io/minio/minio:RELEASE.2024-12-13T22-19-12Z
     profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
@@ -148,9 +132,11 @@ services:
       MINIO_ENDPOINT_URL: http://minio:9000
     env_file:
       - minio-init.env
-    # Attach minio-init directly to main container's network stack
-    network_mode: service:minio
+    networks:
+      - agent-poc
     volumes:
+      - minio-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./init-langfuse-minio.sh:/init-langfuse-minio.sh
     secrets:
       - minio_env
@@ -163,4 +149,6 @@ services:
 
 volumes:
   minio-data-2:
+    driver: local
+  minio-init-signal-1:
     driver: local

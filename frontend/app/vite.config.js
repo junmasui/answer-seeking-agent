@@ -7,7 +7,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   server: {
     allowedHosts: [
-      'vite-dev-server'
+      'vite-dev-server',
+      'vite-integration-server'
     ],
   },
   plugins: [

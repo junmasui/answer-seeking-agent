@@ -28,6 +28,13 @@ do
 done
 ## set -o history # turn it back on
 
+# Wait for dependency-gate to open.
+#
+. /wait_for_gate.sh
+
+wait_for_dependency_gate /init-signal/langfuse-gate
+
+
 export DATABASE_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
 export DIRECT_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
 

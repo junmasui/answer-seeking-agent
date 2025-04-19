@@ -10,6 +10,11 @@ SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
 export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
 set -o history # turn it back on
 
+# Wait for dependency-gate to open.
+#
+source /wait_for_gate.sh
+
+wait_for_dependency_gate /init-signal/backend-test-gate
 
 if [ "$GPU_MODE" == "cuda12" ]; then
     nvidia-smi

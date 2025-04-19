@@ -1,4 +1,4 @@
-FROM localhost/python:3.12.8-bookworm-cuda12-cudnn9
+FROM localhost/localhost/python:3.12.8-bookworm-cuda12-cudnn9
 
 
 ARG USER_ID=1000
@@ -74,8 +74,6 @@ COPY --from=parent-dir ./uv.lock /app/uv.lock
 COPY --from=parent-dir ./src/ /app/src/
 
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
-
-RUN 
 
 # Build the app then start the Vue.js development server
 CMD ["run_fastapi_dev_server.sh"]

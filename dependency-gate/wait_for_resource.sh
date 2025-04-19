@@ -1,32 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-
-# See the original entrypoint that we are replacing:
-# https://github.com/langfuse/langfuse/blob/main/web/Dockerfile#L142
 
 # Error on unbound variables
 set -u
 
-# Set environment variables from mounted secrets files
-
-set +o history # temporarily turn off history
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
-export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
-set -o history # turn it back on
-
 #
 # Wait for DNS /etc/resolv.conf to be correctly populated by Docker
 #
-while true
-do
-    grep -qE "nameserver[ \t]+127\.0\.0\.11" /etc/resolv.conf
-    if [ $? -eq 0 ]
-    then
-        echo "/etc/resolv.conf is populated"
-        break
-    fi
-    sleep 2
-done
+function wait_for_resolv_conf {
+    while true
+    do
+        grep -qE "nameserver[ \t]+(127\.0\.0\.11|172\.31\.1\.1)" /etc/resolv.conf
+        if [ $? -eq 0 ]
+        then
+            echo "/etc/resolv.conf is populated"
+            break
+        fi
+        sleep 2
+    done
+}
 
 # Define multiple functions for waiting.
 #
@@ -37,13 +29,23 @@ function wait_for_nslookup {
     if [ -z "${LOOKUP_NAME:-}" ]
     then
         echo "LOOKUP_NAME is empty"
-        exit -1
+        exit 1
     fi
 
     while true
     do
-        echo nslookup $LOOKUP_NAME 127.0.0.11
+        echo "waiting until DNS name ${LOOKUP_NAME} resolves"
+
+        # Try with Docker's internal DNS
         nslookup $LOOKUP_NAME 127.0.0.11
+        if [ $? -eq 0 ]
+        then
+            echo "DNS name ${LOOKUP_NAME} resolves"
+            break
+        fi
+
+        # Try with Podman's DNS setup
+        nslookup $LOOKUP_NAME 172.31.1.1
         if [ $? -eq 0 ]
         then
             echo "DNS name ${LOOKUP_NAME} resolves"
@@ -59,7 +61,7 @@ function wait_for_minio {
     if [ -z "${MINIO_ENDPOINT_URL:-}" ]
     then
         echo "MINIO_ENDPOINT_URL is empty"
-        exit -1
+        exit 1
     fi
 
     #
@@ -70,7 +72,7 @@ function wait_for_minio {
     #
     # Wait for minio to be ready
     #
-    echo "Waiting for minio to be ready"
+    echo "waiting for minio to be ready"
     while true
     do
         curl -f ${MINIO_ENDPOINT_URL}/minio/health/live
@@ -81,6 +83,9 @@ function wait_for_minio {
         fi
         sleep 2
     done
+
+    ### TODO - Wait for user and bucket
+
 }
 
 function wait_for_pgvector {
@@ -89,7 +94,7 @@ function wait_for_pgvector {
     if [ -z "${DATABASE_URL:-}" ]
     then
         echo "DATABASE_URL is empty"
-        exit -1
+        exit 1
     fi
 
     #
@@ -100,7 +105,7 @@ function wait_for_pgvector {
     #
     # Wait for postgres to be ready
     #
-    echo "Waiting for postgres to be ready"
+    echo "waiting for postgres to be ready"
     while true
     do
         pg_isready -d "${DATABASE_URL}"
@@ -111,8 +116,9 @@ function wait_for_pgvector {
         fi
         sleep 2
     done
-}
 
+    ### TODO - Wait for user and schema
+}
 
 function wait_for_clickhouse {
     declare CLICKHOUSE_URL=${1:-}
@@ -123,7 +129,7 @@ function wait_for_clickhouse {
     if [ -z "${CLICKHOUSE_URL:-}" ]
     then
         echo "CLICKHOUSE_URL is empty"
-        exit -1
+        exit 1
     fi
 
     #
@@ -134,7 +140,7 @@ function wait_for_clickhouse {
     #
     # Wait for clickhouse to be ready
     #
-    echo "Waiting for clickhouse to be ready"
+    echo "waiting for clickhouse to be ready"
     while true
     do
         curl -u "${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}" -f "${CLICKHOUSE_URL}/?database=${CLICKHOUSE_DB}&query=SHOW%20TABLES"
@@ -158,7 +164,7 @@ function wait_for_redis {
     if [ -z "${REDIS_URL:-}" ]
     then
         echo "REDIS_URL is empty"
-        exit -1
+        exit 1
     fi
 
     #

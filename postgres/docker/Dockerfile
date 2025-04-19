@@ -1,4 +1,4 @@
-FROM postgres:17.2-bookworm
+FROM docker.io/postgres:17.2-bookworm
 
 RUN apt-get update \
   && apt-get install -y gettext-base curl ca-certificates

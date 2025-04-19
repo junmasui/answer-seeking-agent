@@ -1,9 +1,6 @@
 services:
 
   prometheus:
-    depends_on:
-      alertmanager:
-        condition: service_started
     restart: unless-stopped
 
     image: prom/prometheus
@@ -17,7 +14,11 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
       - prometheus-data-1:/prometheus
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
 
+    entrypoint: [ '/bin/sh',  '/custom-docker-entrypoint.sh' ]
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'

@@ -1,4 +1,4 @@
-FROM python:3.12.8-slim-bookworm
+FROM docker.io/python:3.12.8-slim-bookworm
 
 
 ARG USER_ID=1000

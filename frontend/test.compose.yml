@@ -1,0 +1,124 @@
+
+services:
+  init-frontend-test-volumes:
+    restart: 'no'
+
+    image: 'docker.io/node:22-bookworm-slim'
+    profiles: [ init-volumes, frontend-test, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - frontend-test-home-1:/home/node/home-1
+      - frontend-test-node-modules-1:/home/node/node-modules-1
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        ls -ld /home/node/
+
+        for VOL in 'home-1' 'node-modules-1'
+        do
+          touch /home/node/$$VOL/.initialized
+          chown -R 1000:1000 /home/node/$$VOL
+          chmod -R 755 /home/node/$$VOL
+          ls -ld /home/node/$$VOL
+        done
+
+  frontend-test-dependency-gate:
+    restart: 'no'
+
+    image: localhost/localhost/debian-slim-util:1.0
+    profiles: [ init-volumes, frontend-test, all ]
+
+    environment:
+      VITE_SERVER_HOST: vite-dev-server
+      FASTAPI_HOST: fastapi-dev-server
+    volumes:
+      - frontend-test-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ./run_dependency_gate.sh:/run_dependency_gate.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+    networks:
+      - agent-poc
+
+    entrypoint: 'bash'
+    command: [ /run_dependency_gate.sh ]
+
+
+
+  vite-integration-server:
+    depends_on:
+      init-frontend-test-volumes:
+        condition: service_completed_successfully
+
+    image: 'localhost/localhost/answers-frontend:node-22-bookworm'
+    profiles: [ frontend-test, all ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      CHOKIDAR_USEPOLLING: 'true'
+    #   - NODE_ENV=production
+    ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
+    ## traffic to go thru the reserve-proxy server at 15173.
+    # ports:
+    #   - '5173:5173'
+    networks:
+      - agent-poc
+    volumes:
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      # Mount the project directory to /app in the container
+      - ./app:/app
+      # Mount important script into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - ./run_dev_server.sh:/run_dev_server.sh
+      # Mounting a local area to use container-installed dependencies
+      - frontend-test-home-1:/home/node
+      - frontend-test-node-modules-1:/app/node_modules
+
+    command: [ '/run_dev_server.sh' ]
+    user: '1000:1000'
+
+  integration-proxy:
+    depends_on:
+      frontend-test-dependency-gate:
+        condition: service_completed_successfully
+
+    image: 'docker.io/nginx:1.27.3-bookworm'
+    profiles: [ frontend-test, all ]
+
+    ports:
+      # Expose the vite server to the host machine
+      - '15175:15173'
+    networks:
+      - agent-poc
+    volumes:
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - frontend-test-init-signal-1:/init-signal/
+      - ./custom-docker-entrypoint.nginx.sh:/custom-docker-entrypoint.nginx.sh
+      # Mount the Nginx configuration file.
+      - ./nginx_default.test.conf:/etc/nginx/conf.d/default.conf
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:15173']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  frontend-test-home-1:
+    driver: local
+  frontend-test-node-modules-1:
+    driver: local
+  frontend-test-init-signal-1:
+    driver: local

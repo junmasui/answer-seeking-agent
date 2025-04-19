@@ -4,7 +4,7 @@ services:
   init-redis-volumes:
     restart: 'no'
 
-    image: 'debian:bookworm-slim'
+    image: 'docker.io/debian:bookworm-slim'
     profiles: [ init-volumes, redis, infrastructure-core, infrastructure, all ]
 
     # No network is needed to initialize named volumes
