@@ -42,6 +42,7 @@ fi
 #
 #
 #
+echo "initializing Minio server bucket ${ANSWERS_MINIO_BUCKET}."
 
 mc mb local_server/${ANSWERS_MINIO_BUCKET}
 

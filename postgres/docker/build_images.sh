@@ -10,8 +10,11 @@ set -eu
 # NOTE: Use `docker builder prune` to clean up the build cache.
 #
 
-docker buildx build \
+# DOCKER=podman
+DOCKER="docker buildx"
+
+$DOCKER build \
   --build-context parent-dir=.. \
   --file Dockerfile \
-  --tag localhost/postgres:17.2-with-pgvector \
+  --tag localhost/localhost/postgres:17.2-with-pgvector \
   .

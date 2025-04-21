@@ -1,4 +1,4 @@
-FROM debian:12.9-slim
+FROM docker.io/debian:12.9-slim
 
 #
 # Locally required Debian packages
@@ -6,15 +6,14 @@ FROM debian:12.9-slim
 
 RUN apt-get update \
     && apt-get install -y \
-        curl \
         bind9-dnsutils \
-        redis-tools \
+        curl \
+        gettext-base \
         postgresql-client-common \
         postgresql-client-15 \
+        procps \
+        redis-tools \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=parent-dir wait_for_resource.sh /wait_for_resource.sh
-
 ENTRYPOINT [ "bash" ]
-CMD [ "/wait_for_resource.sh" ]

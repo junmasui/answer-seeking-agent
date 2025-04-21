@@ -2,20 +2,20 @@ services:
   init-backend-test-volumes:
     restart: 'no'
 
-    image: 'python:3.12.8-slim-bookworm'
+    image: 'docker.io/python:3.12.8-slim-bookworm'
     profiles: [ init-volumes, backend-test, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - local-backend-test-home-1:/home/python/test-home-1
-      - local-backend-test-venv-1:/home/python/test-venv-1
-      - local-backend-test-staging-1:/home/python/test-staging-1
-      - local-backend-test-home-2:/home/python/test-home-2
-      - local-backend-test-venv-2:/home/python/test-venv-2
-      - local-backend-test-staging-2:/home/python/test-staging-2
-      - local-backend-test-home-4:/home/python/test-home-4
-      - local-backend-test-venv-4:/home/python/test-venv-4
+      - backend-test-home-1:/home/python/test-home-1
+      - backend-test-venv-1:/home/python/test-venv-1
+      - backend-test-staging-1:/home/python/test-staging-1
+      - backend-test-home-2:/home/python/test-home-2
+      - backend-test-venv-2:/home/python/test-venv-2
+      - backend-test-staging-2:/home/python/test-staging-2
+      - backend-test-home-4:/home/python/test-home-4
+      - backend-test-venv-4:/home/python/test-venv-4
 
     entrypoint: 'bash'
     command:
@@ -39,19 +39,22 @@ services:
           ls -ld /home/python/$$VOL
         done
 
-  backend-test-start-gate:
+  backend-test-dependency-gate:
     restart: 'no'
 
-    image: localhost/start-gate:1.0
+    image: localhost/localhost/debian-slim-util:1.0
     profiles: [ backend-test, infrastructure, all ]
 
     env_file:
-      - start-gate.env
+      - dependency-gate.env
       - integration-test.env
     networks:
       - agent-poc
-    # volumes:
-    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    volumes:
+      - backend-test-init-signal-1:/init-signal
+      - ./run_test_dependency_gate.sh:/run_test_dependency_gate.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - answers_minio_test_env
       - answers_postgres_test_env
@@ -64,44 +67,15 @@ services:
     # set shared memory limit when using docker-compose
     shm_size: 128mb
     entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |-
-
-        set +e
-        set +x
-
-        source /wait_for_resource.sh
-
-        REDIS_URL="redis://:$${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
-
-        wait_for_redis "$${REDIS_URL}"
-        wait_for_minio "$${MINIO_ENDPOINT_URL}"
-
-        DATABASE_URL=postgres://$${ANSWERS_POSTGRES_USER_NAME}:$${ANSWERS_POSTGRES_USER_PASSWORD}@pgvector:5432/$${ANSWERS_POSTGRES_DATABASE}
-
-        wait_for_pgvector "$$DATABASE_URL"
-
-        DATABASE_URL=postgres://$${VECTORS_POSTGRES_USER_NAME}:$${VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/$${ANSWERS_POSTGRES_DATABASE}
-
-        wait_for_pgvector "$$DATABASE_URL"
-
-        DATABASE_URL=postgres://$${CHECKPOINTS_POSTGRES_USER_NAME}:$${CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/$${ANSWERS_POSTGRES_DATABASE}
-
-        wait_for_pgvector "$$DATABASE_URL"
+    command: [ /run_test_dependency_gate.sh ]
 
 
   fastapi-integration-server:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
-      backend-test-start-gate:
-        condition: service_completed_successfully
 
-    image: 'localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend-test, all ]
 
     environment:
@@ -130,10 +104,12 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      - backend-test-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - local-backend-test-home-1:/home/python
-      - local-backend-test-venv-1:/app/.venv
-      - local-backend-test-staging-1:/staging
+      - backend-test-home-1:/home/python
+      - backend-test-venv-1:/app/.venv
+      - backend-test-staging-1:/staging
     secrets:
       - answers_test_env
       - answers_jwt_test_env
@@ -152,11 +128,11 @@ services:
       resources:
         limits:
           memory: 4G # Give enough to run local model
-        # # reservations:
-        # #   devices:
-        # #     - driver: nvidia
-        # #       count: 1
-        # #       capabilities: [gpu]
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
     healthcheck:
       # When this service start for the first time, there is multiple minutes while the
@@ -177,10 +153,8 @@ services:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
-      backend-test-start-gate:
-        condition: service_completed_successfully
 
-    image: 'localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
     profiles: [ backend-test, all ]
 
     environment:
@@ -208,10 +182,12 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_worker.sh:/run_celery_worker.sh
+      - backend-test-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - local-backend-test-home-2:/home/python
-      - local-backend-test-venv-2:/app/.venv
-      - local-backend-test-staging-2:/staging
+      - backend-test-home-2:/home/python
+      - backend-test-venv-2:/app/.venv
+      - backend-test-staging-2:/staging
     secrets:
       - answers_test_env
       - answers_jwt_test_env
@@ -230,11 +206,11 @@ services:
       resources:
         limits:
           memory: 8G # Give enough to run Tesseract and local model
-        # # reservations:
-        # #   devices:
-        # #     - driver: nvidia
-        # #       count: 1
-        # #       capabilities: [gpu]
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
     healthcheck:
       # When this service start for the first time, there is multiple minutes while the
@@ -255,10 +231,8 @@ services:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
-      backend-test-start-gate:
-        condition: service_completed_successfully
 
-    image: 'localhost/answers-backend:python-3.12-cpu'
+    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
     profiles: [ backend-test, all ]
 
     environment:
@@ -288,9 +262,11 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_integration_test.sh:/run_integration_test.sh
+      - backend-test-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - local-backend-test-home-4:/home/python
-      - local-backend-test-venv-4:/app/.venv
+      - backend-test-home-4:/home/python
+      - backend-test-venv-4:/app/.venv
     secrets:
       - answers_test_env
       - answers_jwt_test_env
@@ -312,19 +288,21 @@ services:
 # is started.
 #
 volumes:
-  local-backend-test-home-1:
+  backend-test-init-signal-1:
     driver: local
-  local-backend-test-venv-1:
+  backend-test-home-1:
     driver: local
-  local-backend-test-staging-1:
+  backend-test-venv-1:
     driver: local
-  local-backend-test-home-2:
+  backend-test-staging-1:
     driver: local
-  local-backend-test-venv-2:
+  backend-test-home-2:
     driver: local
-  local-backend-test-staging-2:
+  backend-test-venv-2:
     driver: local
-  local-backend-test-home-4:
+  backend-test-staging-2:
     driver: local
-  local-backend-test-venv-4:
+  backend-test-home-4:
+    driver: local
+  backend-test-venv-4:
     driver: local

@@ -6,10 +6,15 @@ set -u  # Unbound variables are errors.
 
 # Set environment variables from mounted secrets files
 
-## set +o history # temporarily turn off history
+set +o history # temporarily turn off history
 SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
 export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
-## set -o history # turn it back on
+set -o history # turn it back on
+
+#
+
+source /wait_for_gate.sh
+
 
 # Check for necessary environment variables
 [ -z "${POSTGRES_HOST:-}" ] && echo "missing POSTGRES_HOST" && exit 1
@@ -20,6 +25,10 @@ export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
 [ -z "${LANGFUSE_POSTGRES_USER_PASSWORD:-}" ] && echo "missing LANGFUSE_POSTGRES_USER_PASSWORD" && exit 1
 [ -z "${LANGFUSE_POSTGRES_DATABASE:-}" ] && echo "missing LANGFUSE_POSTGRES_DATABASE" && exit 1
 
+# Wait for dependency-gate to open.
+#
+
+wait_for_dependency_gate /init-signal/pgvector-gate
 
 export PGPASSWORD=$POSTGRES_PASSWORD
 

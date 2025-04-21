@@ -13,16 +13,16 @@ EOS
 jq --compact-output "$JQ_1" <<< "$PROCESSES"
 
 echo "Completed processes (exit code 0 only):"
-JQ_1=$(cat << EOS
+JQ_2=$(cat << EOS
 . 
   | select( .Health == "" and .State == "exited" and .ExitCode == 0 )
   |  {Name: .Name, Health: .Health, State: .State, ExitCode: .ExitCode, Status: .Status}
 EOS
 )
-jq --compact-output "$JQ_1" <<< "$PROCESSES"
+jq --compact-output "$JQ_2" <<< "$PROCESSES"
 
 echo "Running processes known to be without health checks:"
-JQ_1=$(cat << EOS
+JQ_3=$(cat << EOS
 . 
   | select( .State == "running"
             and
@@ -35,9 +35,19 @@ JQ_1=$(cat << EOS
   |  {Name: .Name, Health: .Health, State: .State, ExitCode: .ExitCode, Status: .Status}
 EOS
 )
-jq --compact-output "$JQ_1" <<< "$PROCESSES"
+jq --compact-output "$JQ_3" <<< "$PROCESSES"
 
-echo "Suspicious or failed processes:"
+echo "Failed processes:"
+JQ_4=$(cat << EOS
+. 
+  | select( .State == "exited" and .ExitCode != 0 )
+  |  {Name: .Name, Health: .Health, State: .State, ExitCode: .ExitCode, Status: .Status}
+EOS
+)
+jq --compact-output "$JQ_4" <<< "$PROCESSES"
+
+
+echo "Suspicious processes:"
 JQ_2=$(cat << EOS
 . 
   | select( ( .Health == "healthy" ) | not )
@@ -50,6 +60,7 @@ JQ_2=$(cat << EOS
                     "agent-langfuse-worker-1" ]
                 | index(\$name)
               ) ) | not )
+  | select( ( .State == "exited" and .ExitCode != 0 ) | not )
   |  {Name: .Name, Health: .Health, State: .State, ExitCode: .ExitCode, Status: .Status}
 EOS
 )

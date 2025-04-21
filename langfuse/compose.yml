@@ -1,17 +1,24 @@
+volumes:
+  langfuse-init-signal-1:
+    driver: local
+
 services:
 
-  langfuse-start-gate:
+  langfuse-dependency-gate:
     restart: 'no'
 
-    image: localhost/start-gate:1.0
+    image: localhost/localhost/debian-slim-util:1.0
     profiles: [ langfuse, infrastructure, all ]
 
     env_file:
-      - start-gate.env
+      - dependency-gate.env
     networks:
       - agent-poc
-    # volumes:
-    #   - ../start-gate/wait_for_resource.sh:/wait_for_resource.sh
+    volumes:
+      - langfuse-init-signal-1:/init-signal
+      - ./run_dependency_gate.sh:/run_dependency_gate.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - langfuse_clickhouse_env
       - langfuse_minio_env
@@ -23,35 +30,12 @@ services:
     # set shared memory limit when using docker-compose
     shm_size: 128mb
     entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |-
-
-        set +e
-
-        source /wait_for_resource.sh
-
-        REDIS_URL="redis://:$${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
-
-        wait_for_redis "$${REDIS_URL}"
-
-        wait_for_minio "$${MINIO_ENDPOINT_URL}"
-        wait_for_clickhouse "$${CLICKHOUSE_URL}" "$${CLICKHOUSE_USER}" "$${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" "$${CLICKHOUSE_DB}"
-
-        DATABASE_URL=postgres://langfuse:$${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
-
-        wait_for_pgvector "$$DATABASE_URL"
+    command: [ /run_dependency_gate.sh ]
 
   langfuse-web:
     restart: unless-stopped
-    depends_on:
-      langfuse-start-gate:
-        condition: service_completed_successfully
 
-    image: langfuse/langfuse:3.24
+    image: docker.io/langfuse/langfuse:3.24
     profiles: [ langfuse, infrastructure, all ]
 
     environment:
@@ -67,6 +51,8 @@ services:
     networks:
       - agent-poc
     volumes:
+      - langfuse-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.web.sh:/custom-docker-entrypoint.web.sh
     secrets:
       - langfuse_env
@@ -115,13 +101,8 @@ services:
 
   langfuse-worker:
     restart: unless-stopped
-    depends_on:
-      langfuse-web:
-        condition: service_healthy
-      langfuse-start-gate:
-        condition: service_completed_successfully
 
-    image: langfuse/langfuse-worker:3.24
+    image: docker.io/langfuse/langfuse-worker:3.24
     profiles: [ langfuse, infrastructure, all ]
 
     environment:
@@ -136,6 +117,8 @@ services:
     networks:
       - agent-poc
     volumes:
+      - langfuse-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.worker.sh:/custom-docker-entrypoint.worker.sh
     secrets:
       - langfuse_env

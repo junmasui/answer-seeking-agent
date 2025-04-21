@@ -13,31 +13,33 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # NOTE: Use `docker builder prune` to clean up the build cache.
 #
 
+# DOCKER=podman
+DOCKER="docker buildx"
 
-docker buildx build \
+$DOCKER build \
   --file python_bookworm_cuda12.Dockerfile \
-  --tag localhost/python:3.12.8-bookworm-cuda12-cudnn9 \
+  --tag localhost/localhost/python:3.12.8-bookworm-cuda12-cudnn9 \
   . 2>&1 \
 | tee build-python-bookworm-cuda12-cudnn9.log
 
 #
 # Build a backend image with Python 3.12 on Debian 12
 #
-docker buildx build \
+$DOCKER build \
   --no-cache \
   --file Dockerfile \
   --build-context parent-dir=.. \
-  --tag localhost/answers-backend:python-3.12-cpu \
+  --tag localhost/localhost/answers-backend:python-3.12-cpu \
   . 2>&1 \
 | tee build-backend-python-cpu.log
 
 #
 # Build a backend image with Python 3.12 on Debian 12 with CUDA 12
 #
-docker buildx build \
+$DOCKER build \
   --no-cache \
   --file cuda12.Dockerfile \
   --build-context parent-dir=.. \
-  --tag localhost/answers-backend:python-3.12-cuda12 \
+  --tag localhost/localhost/answers-backend:python-3.12-cuda12 \
   . 2>&1 \
 | tee build-backend-python-cuda12.log

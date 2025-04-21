@@ -4,7 +4,7 @@ services:
   init-clickhouse-volumes:
     restart: 'no'
 
-    image: 'debian:bookworm-slim'
+    image: 'docker.io/debian:bookworm-slim'
     profiles: [ init-volumes, clickhouse, infrastructure-core,  infrastructure, all ]
 
     # No network is needed to initialize named volumes
@@ -98,11 +98,8 @@ services:
       start_period: 5s
 
   clickhouse-init:
-    depends_on:
-      clickhouse:
-        condition: service_healthy
 
-    image: localhost/start-gate:1.0
+    image: localhost/localhost/debian-slim-util:1.0
     profiles: [ clickhouse, infrastructure-core, infrastructure, all ]
 
     environment:
@@ -112,9 +109,11 @@ services:
       clickhouse_HOST: clickhouse
     env_file:
       - clickhouse-init.env
-    # Attach clickhouse-init directly to main container's network stack
-    network_mode: service:clickhouse
+    networks:
+      - agent-poc
     volumes:
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
       - ./init-clickhouse.sh:/init-clickhouse.sh
     secrets:
       - clickhouse_env

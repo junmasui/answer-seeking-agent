@@ -1,5 +1,8 @@
+source /wait_for_gate.sh
+
 
 # Set environment variables from .secrets.env files
+
 SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
 # The minio/minio image does not include the Debian findutil and grep packages.
 # Hence we need to use a pure-shell alternative to our more frequent technique
@@ -20,6 +23,12 @@ do
     exec 3<&- # Close file descriptor 3.
 done
 
+# Wait for dependency-gate to open.
+#
+
+wait_for_dependency_gate /init-signal/minio-gate
+
+#
 
 WAIT_LIMIT=300
 WAIT_INTERVAL=5
@@ -42,6 +51,7 @@ fi
 #
 #
 #
+echo "initializing Minio server bucket ${LANGFUSE_MINIO_BUCKET}."
 
 mc mb local_server/${LANGFUSE_MINIO_BUCKET}
 

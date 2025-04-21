@@ -10,9 +10,12 @@ set -eu
 # NOTE: Use `docker builder prune` to clean up the build cache.
 #
 
-docker buildx build \
+# DOCKER=podman
+DOCKER="docker buildx"
+
+$DOCKER build \
   --file Dockerfile \
   --no-cache \
   --build-context parent-dir=.. \
-  --tag localhost/start-gate:1.0 \
+  --tag localhost/localhost/debian-slim-util:1.0 \
   . 2>&1

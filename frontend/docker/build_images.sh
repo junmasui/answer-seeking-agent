@@ -11,8 +11,11 @@ set -eu
 # NOTE: Use `docker builder prune` to clean up the build cache.
 #
 
-docker buildx build \
+# DOCKER=podman
+DOCKER="docker buildx"
+
+$DOCKER build \
   --build-context parent-dir=.. \
-  --tag localhost/answers-frontend:node-22-bookworm \
+  --tag localhost/localhost/answers-frontend:node-22-bookworm \
   .
 

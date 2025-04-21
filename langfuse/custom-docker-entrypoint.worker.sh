@@ -28,6 +28,42 @@ do
 done
 ## set -o history # turn it back on
 
+# Wait for dependency-gate to open.
+#
+
+. /wait_for_gate.sh
+
+wait_for_dependency_gate /init-signal/langfuse-gate
+
+
+# Wait for web server to be ready
+#
+WAIT_LIMIT=300
+WAIT_INTERVAL=5
+ELAPSED=0
+
+echo "Waiting for Langfuse web server to be ready..."
+until [ $ELAPSED -ge $WAIT_LIMIT ]
+do
+    sleep $WAIT_INTERVAL
+    # The $((...)) syntax is for shell arithematic operations.
+    ELAPSED=$(( ELAPSED + WAIT_INTERVAL ))
+    ( wget -qS -O - http://langfuse-web:3000/api/public/ready 2>&1 ) \
+            | grep -q 'HTTP/1.1 200 OK'
+    if [ $? == 0 ]
+    then
+        echo "Langfuse web server started."
+        break
+    fi
+done
+
+if [ $ELAPSED -ge $WAIT_LIMIT ]; then
+  echo "Langfuse web server did not start within ${WAIT_LIMIT} seconds."
+  exit 1
+fi
+
+
+
 export DATABASE_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
 export DIRECT_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
 

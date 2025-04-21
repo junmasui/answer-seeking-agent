@@ -1,6 +1,4 @@
-# FROM python:3.12.8-bookworm
-# FROM ubuntu/python:3.12-24.04
-FROM ubuntu:24.04
+FROM docker.io/ubuntu:24.04
 
 #
 # https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/base/Dockerfile

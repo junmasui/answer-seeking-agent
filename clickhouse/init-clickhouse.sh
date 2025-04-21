@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -e  # Exit immediately on error.
+## set -e  # Exit immediately on error.
 set -u  # Unbound variables are errors.
-set -o pipefail  # Use right-most non-zero exit code from a pipe.
+## set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 # Set environment variables from mounted secrets files
 
@@ -13,10 +13,17 @@ set -o history # turn it back on
 
 [ -z "${CLICKHOUSE_DEFAULT_USER_PASSWORD:-}" ] && echo "missing CLICKHOUSE_DEFAULT_USER_PASSWORD" && exit 1
 [ -z "${CLICKHOUSE_ADMIN_USER:-}" ] && echo "missing CLICKHOUSE_ADMIN_USER" && exit 1
+[ -z "${CLICKHOUSE_ADMIN_USER_PASSWORD:-}" ] && echo "missing CLICKHOUSE_ADMIN_USER_PASSWORD" && exit 1
 [ -z "${LANGFUSE_CLICKHOUSE_USER_NAME:-}" ] && echo "missing LANGFUSE_CLICKHOUSE_USER_NAME" && exit 1
 [ -z "${LANGFUSE_CLICKHOUSE_USER_PASSWORD:-}" ] && echo "missing LANGFUSE_CLICKHOUSE_USER_PASSWORD" && exit 1
 [ -z "${LANGFUSE_CLICKHOUSE_DATABASE:-}" ] && echo "missing LANGFUSE_CLICKHOUSE_DATABASE" && exit 1
 
+source /wait_for_resource.sh
+
+wait_for_nslookup "clickhouse"
+
+CLICKHOUSE_URL=http://clickhouse:8123
+wait_for_clickhouse "${CLICKHOUSE_URL}" "${CLICKHOUSE_ADMIN_USER}" "${CLICKHOUSE_ADMIN_USER_PASSWORD}" "default"
 
 call_clickhouse () {
     local command=$1
@@ -37,7 +44,7 @@ call_clickhouse () {
         cat <<-EOS
         $command
 EOS
-    ) | curl -sS "${headers[@]}" 'http://localhost:8123/' --data-binary @-
+    ) | curl -sS "${headers[@]}" 'http://clickhouse:8123/' --data-binary @-
 
 }
 

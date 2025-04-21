@@ -1,5 +1,5 @@
 # Use an official Node.js image as the base image
-FROM node:22-bookworm-slim
+FROM docker.io/node:22-bookworm-slim
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
