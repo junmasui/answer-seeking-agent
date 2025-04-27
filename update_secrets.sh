@@ -92,6 +92,24 @@ SECRETS_FILE=./secrets/answers-test.jwt.secrets.env
 generate_secret $SECRETS_FILE $VAR_NAME openssl-32 "" "$DESCR"
 
 
+# Celery Flower
+
+SECRETS_FILE=./secrets/celery-flower-dev.secrets.env
+VAR_NAME=CELERY_FLOWER_USER_PASSWORD
+VALUE_PREFIX=celery_flower_dev_
+DESCR="Celery Flower basic auth account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
+SECRETS_FILE=./secrets/celery-flower-test.secrets.env
+VAR_NAME=CELERY_FLOWER_USER_PASSWORD
+VALUE_PREFIX=celery_flower_test_
+DESCR="Celery Flower basic auth account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
 # Clickhouse
 
 SECRETS_FILE=./secrets/clickhouse.secrets.env

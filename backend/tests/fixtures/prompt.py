@@ -4,7 +4,7 @@ from sqlalchemy import select, func, text
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
-    """Return count of recods in 'tracked_document_sets'
+    """Return count of recods in 'agent_prompt'
     """
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
@@ -15,7 +15,7 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
 
 def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker):
-    """Truncate 'tracked_document_sets'.
+    """Truncate 'agent_prompt'.
     """
     with sql_engine.connect() as conn:
         conn.execute(text(f'TRUNCATE TABLE "{auto_mapped_table.__table__.name}" RESTART IDENTITY CASCADE'))
@@ -28,10 +28,10 @@ def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker):
 
 
 @pytest.fixture(scope="module")
-def doc_set_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
-    """Return the SQLAlchemy reflected table 'tracked_document_sets'.
+def prompt_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
+    """Return the SQLAlchemy reflected table 'agent_prompt'.
     """
-    full_name = 'tracked_document_sets'
+    full_name = 'agent_prompt'
     auto_mapped_table = auto_mapped_classes.get(full_name, None)
 
     if auto_mapped_table is None:
@@ -51,53 +51,50 @@ def doc_set_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 
 
 @pytest.fixture(scope="function")
-def empty_doc_set_table(doc_set_table, sql_engine, sql_sessionmaker):
-    """Return the SQLAlchemy reflected table 'tracked_document_sets'.
+def empty_prompt_table(prompt_table, sql_engine, sql_sessionmaker):
+    """Return the SQLAlchemy reflected table 'agent_prompt'.
     """
 
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
-    _truncate_table(doc_set_table, sql_engine, sql_sessionmaker)
+    _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
 
     try:
 
-        yield doc_set_table
+        yield prompt_table
 
     finally:
         # Clean up table after we are done.
-        _truncate_table(doc_set_table, sql_engine, sql_sessionmaker)
+        _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
 
 
-@pytest_asyncio.fixture(scope="function")
-async def populated_doc_set_table(doc_set_table, api_server, sql_engine, sql_sessionmaker):
-    """Return the SQLAlchemy reflected table 'tracked_document_sets'.
+@pytest_asyncio.fixture(scope="function", loop_scope="function")
+async def populated_prompt_table(prompt_table, api_server, sql_engine, sql_sessionmaker):
+    """Return the SQLAlchemy reflected table 'agent_prompt'.
     """
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
-    _truncate_table(doc_set_table, sql_engine, sql_sessionmaker)
+    _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
 
     try:
 
-        path = '/document-sets/'
-        is_default = True
+        path = '/prompts/'
         for index in range(3):
             data = {
-                'name': f'doc set {index}',
-                'status': 'active',
-                'isNewDocDefault': is_default,
-                'isPublicViewable': True,
+                'name': f'prompt {index}',
+                'humanMessage': f'placeholder human message {index}',
+                'systemMessage': f'placeholder system message {index}',
             }
-            is_default = False
             resp = await api_server.post(path=path, content_type='json', data=data)
 
-        count = _get_table_count(doc_set_table, sql_sessionmaker)
+        count = _get_table_count(prompt_table, sql_sessionmaker)
         if count != 3:
-            raise ValueError(f'Something went wrong with {doc_set_table.__table__.name}')
+            raise ValueError(f'Something went wrong with {prompt_table.__table__.name}')
 
-        yield doc_set_table
+        yield prompt_table
 
     finally:
         # Clean up table after we are done.
-        _truncate_table(doc_set_table, sql_engine, sql_sessionmaker)
+        _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
 
 

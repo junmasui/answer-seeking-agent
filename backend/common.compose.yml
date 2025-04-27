@@ -267,6 +267,7 @@ services:
       - answers_jwt_dev_env
       - answers_minio_dev_env
       - answers_postgres_dev_env
+      - celery_flower_dev_env
       - checkpoints_postgres_dev_env
       - vectors_postgres_dev_env
       - redis_env

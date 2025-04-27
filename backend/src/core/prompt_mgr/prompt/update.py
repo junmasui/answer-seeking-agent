@@ -3,6 +3,7 @@ import uuid
 from contextlib import contextmanager
 
 from sqlalchemy import and_, func, select, update
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from core.public_models.prompt import AgentPromptStatus
 
@@ -43,11 +44,20 @@ def update_prompt_record(prompt_uuid):
 
     with sessionmaker() as session:
 
-        with session.begin():
-            stmt = select(AgentPrompt).where(
-                AgentPrompt.id == prompt_uuid)
-            result = session.execute(stmt)
-            existing_obj = result.scalar_one()
+        try:
+            with session.begin():
+                stmt = select(AgentPrompt).where(
+                    AgentPrompt.id == prompt_uuid)
+                result = session.execute(stmt)
+
+                existing_obj = result.scalar_one()
+
+        except NoResultFound as ex:
+            logger.warning('No tracking doc record found for %s', doc_uuid, exc_info=ex)
+            return
+        except MultipleResultsFound as ex:
+            logger.warning('Multiple tracking doc records found for %s', doc_uuid, exc_info=ex)
+            return
 
         with session.begin():
             yield existing_obj

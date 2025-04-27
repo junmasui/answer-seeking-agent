@@ -18,7 +18,7 @@ class ApiClient:
 
     async def _send(self, *, path: str, action, **kwargs):
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=60.0) as client:
                 url = self.base_url
                 if path:
                     url = urljoin(self.base_url, path)
@@ -69,11 +69,13 @@ class ApiClient:
         
         return await self._send(path=path, action=_patch)
 
-    async def post(self, *, path:str, content_type:str, data: dict|list|str=None, files: dict = None):
+    async def post(self, *, path:str, content_type:str, timeout=None, data: dict|list|str=None, files: dict = None):
         """Send HTTP POST request.
         """
         async def _post(client, url):
             kwargs = {}
+            if timeout is not None:
+                kwargs['timeout'] = timeout
             match content_type:
                 case 'json':
                     kwargs['json'] = data

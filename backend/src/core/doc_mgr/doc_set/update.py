@@ -3,6 +3,7 @@ import uuid
 from contextlib import contextmanager
 
 from sqlalchemy import select
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
@@ -38,11 +39,20 @@ def update_doc_set_record(doc_set_uuid):
 
     with sessionmaker() as session:
 
-        with session.begin():
-            stmt = select(TrackedDocumentSet).where(
-                TrackedDocumentSet.id == doc_set_uuid)
-            result = session.execute(stmt)
-            existing_obj = result.scalar_one()
+        try:
+            with session.begin():
+                stmt = select(TrackedDocumentSet).where(
+                    TrackedDocumentSet.id == doc_set_uuid)
+                result = session.execute(stmt)
+
+                existing_obj = result.scalar_one()
+
+        except NoResultFound as ex:
+            logger.warning('No tracking doc record found for %s', doc_uuid, exc_info=ex)
+            return
+        except MultipleResultsFound as ex:
+            logger.warning('Multiple tracking doc records found for %s', doc_uuid, exc_info=ex)
+            return
 
         with session.begin():
             yield existing_obj
