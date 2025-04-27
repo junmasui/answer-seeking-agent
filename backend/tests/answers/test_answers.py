@@ -52,9 +52,9 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
         assert 'docUuid' in citation
         assert isinstance(citation['docUuid'], str)
         try:
-            doc_id = uuid.UUID(resp['docUuid'])
+            doc_id = uuid.UUID(citation['docUuid'])
         except ValueError:
-            assert False, f"docUuid '{resp['docUuid']}' is not a valid UUID"
+            assert False, f"docUuid '{citation['docUuid']}' is not a valid UUID"
         assert isinstance(doc_id, uuid.UUID)
 
         assert 'fileName' in citation
