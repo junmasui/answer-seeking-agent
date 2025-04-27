@@ -39,20 +39,22 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
                     media_type=response.media_type
                 )
 
-                logger.warning('\nHTTP %s %s\nRequest Body: %s\nResponse Status: %s\nResponse Body: %s\n',
-                               request.method, request.url,
-                               request_body_text,
-                               response.status_code,
-                               response_body.decode('utf-8', errors='replace'))
+                logger.warning(
+                    '\nHTTP %s %s\nRequest Body: %s\nResponse Status: %s\nResponse Body: %s\n',
+                    request.method, request.url,
+                    request_body_text,
+                    response.status_code,
+                    response_body.decode('utf-8', errors='replace')
+                )
 
                 return new_response
             return response
 
         except Exception as ex:
-            logger.warning('\nHTTP %s %s\nRequest Body: %s\nException: %s\n',
-                            request.method, request.url,
-                            request_body_text,
-                            str(ex),
-                            exc_info=ex
-                            )
+            logger.warning(
+                '\nHTTP %s %s\nRequest Body: %s\nException: %s\n',
+                request.method, request.url,
+                request_body_text,
+                str(ex)
+            )
             raise  # re-raise so FastAPI returns default 500 response

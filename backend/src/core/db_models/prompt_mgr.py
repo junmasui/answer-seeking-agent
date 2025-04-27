@@ -3,6 +3,7 @@ import datetime
 import uuid
 
 from sqlalchemy import DateTime, Enum, Integer, String, Uuid
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import current_timestamp
 
@@ -11,13 +12,15 @@ from .base import Base
 
 logger = logging.getLogger(__name__)
 
+DbPromptStatus = ENUM(AgentPromptStatus)
+
 class AgentPrompt(Base):
 
     __tablename__ = "agent_prompt"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    status: Mapped[AgentPromptStatus] = mapped_column(Enum(AgentPromptStatus), nullable=False)
+    status: Mapped[AgentPromptStatus] = mapped_column(DbPromptStatus, nullable=False)
     system_message: Mapped[str] = mapped_column(String(9000), nullable=True)
     human_message: Mapped[str] = mapped_column(String(9000), nullable=True)
 

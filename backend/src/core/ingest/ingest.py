@@ -72,6 +72,9 @@ def ingest_documents(doc_ids):
 
     def _ingest_one_document(detached_record: TrackedDocument):
         with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
+            if record is None:
+                return
+
             updateable_record.status = DocumentStatus.INGESTING
 
         actual_local_path = None
@@ -127,6 +130,9 @@ def ingest_documents(doc_ids):
             # vectors to the prior processing. 
 
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
+                if record is None:
+                    return
+
                 updateable_record.status = DocumentStatus.INGESTED
                 updateable_record.ingested_time = func.current_timestamp()
 
@@ -151,7 +157,8 @@ def ingest_documents(doc_ids):
             
         except Exception as ex:
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
-                updateable_record.status = DocumentStatus.ERROR
+                if record is not None:
+                    updateable_record.status = DocumentStatus.ERROR
 
             raise
         finally:

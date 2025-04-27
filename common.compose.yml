@@ -44,6 +44,11 @@ secrets:
   grafana_env:
     file: ./secrets/grafana.secrets.env
 
+  celery_flower_dev_env:
+    file: ./secrets/celery-flower-dev.secrets.env
+  celery_flower_test_env:
+    file: ./secrets/celery-flower-test.secrets.env
+
   answers_dev_env:
     file: ./secrets-dev.env
   answers_jwt_dev_env:

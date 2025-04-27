@@ -79,7 +79,12 @@ async function onUpload() {
                     const chunk = file.slice(start, end);
 
                     const formData = new FormData();
+                    const isoString = new Date().toISOString().split('.')[0] + 'Z';
+                    var contentType = 'application/pdf';
                     formData.append('file', chunk, file.name);
+                    formData.append('sourceUrl', 'https://localhost/files/'+file.name);
+                    formData.append('contentType', contentType);
+                    formData.append('downloadTimeUtc', isoString);
                     formData.append('chunkIndex', chunkIndex);
                     formData.append('totalChunks', totalChunks);
                     formData.append('documentSetId', selectedDocSet.value.id)

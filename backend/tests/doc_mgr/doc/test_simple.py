@@ -16,9 +16,9 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
     return count
 
-def _get_doc_set_id(populated_doc_set_table, sql_sessionmaker):
+def _get_doc_set_id(readonly_doc_set_table, sql_sessionmaker):
     with sql_sessionmaker() as session:
-        stmt = select(populated_doc_set_table.id, populated_doc_set_table.name).select_from(populated_doc_set_table)
+        stmt = select(readonly_doc_set_table.id, readonly_doc_set_table.name).select_from(readonly_doc_set_table)
         result = session.execute(stmt).first()
 
         doc_set_id = result[0]
@@ -27,13 +27,13 @@ def _get_doc_set_id(populated_doc_set_table, sql_sessionmaker):
 
 
 @pytest.mark.asyncio
-async def test_insert(api_server, populated_doc_set_table, empty_doc_table, sql_sessionmaker):
+async def test_insert(api_server, readonly_doc_set_table, empty_doc_table, sql_sessionmaker):
 
-    count = _get_table_count(populated_doc_set_table, sql_sessionmaker)
+    count = _get_table_count(readonly_doc_set_table, sql_sessionmaker)
 
     assert count == 3
 
-    doc_set_id = _get_doc_set_id(populated_doc_set_table, sql_sessionmaker)
+    doc_set_id = _get_doc_set_id(readonly_doc_set_table, sql_sessionmaker)
 
 
     path = '/documents/upload'
@@ -70,8 +70,14 @@ async def test_find(api_server, populated_doc_table, sql_sessionmaker):
     assert isinstance(doc_sets, list)
     assert len(doc_sets) == 3
 
+    books = [
+        'A_History_of_Artificial_Intelligence_1950-2025.pdf',
+        'A_History_of_Artificial_Intelligence.pdf',
+        'The_History_of_Artificial_Intelligence.pdf'
+    ]
+
     for i in range(3):
-        assert doc_sets[i].get('name') == f'test-file-{i}.pdf'
+        assert doc_sets[i].get('name') == books[i]
 
 
 @pytest.mark.asyncio

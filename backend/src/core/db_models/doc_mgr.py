@@ -3,8 +3,8 @@ import datetime
 import uuid
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Uuid
+from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql.functions import current_timestamp
 
@@ -46,13 +46,15 @@ class TrackedDocumentSet(Base):
     # Define the relationship to TrackedDocument
     documents: Mapped[list['TrackedDocument']] = relationship(order_by='TrackedDocument.id', back_populates='document_set')
 
+DbDocumentStatus = ENUM(DocumentStatus)
+
 class TrackedDocument(Base):
 
     __tablename__ = "tracked_documents"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     document_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{TrackedDocumentSet.__tablename__}.id'))
-    status: Mapped[DocumentStatus] = mapped_column(Enum(DocumentStatus), nullable=False)
+    status: Mapped[DocumentStatus] = mapped_column(DbDocumentStatus, nullable=False)
     filedir: Mapped[str] = mapped_column(String(800), nullable=False)
     filename: Mapped[str] = mapped_column(String(800), nullable=False)
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)

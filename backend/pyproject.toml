@@ -77,8 +77,26 @@ cuda12 = [
 
 [tool.pytest.ini_options]
 log_cli = true
-log_cli_level = "DEBUG"
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
 asyncio_default_fixture_loop_scope = "module"
+
+# Ignore these directories when discovering tests.
+## norecursedirs = ["tests/doc_mgr", "tests/prompt_mgr"]
+
+
+[tool.ruff]
+select = ["E", "F", "W", "C"]
+ignore = []
+line-length = 120
+
+[tool.ruff.rules]
+E501 = { line-length = 120 }
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.uv]
 # Explicit declaration that the "cpu" and "cuda12" extras are in conflict

@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timezone
 import logging
 import uuid
+import pprint
 
 import pytest
 from sqlalchemy import select, func
@@ -9,6 +10,7 @@ from sqlalchemy import select, func
 from core.public_models.doc import DocumentStatus
 
 logger  = logging.getLogger(__name__)
+pp = pprint.PrettyPrinter(indent=2, width=120)
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
@@ -62,10 +64,8 @@ async def test_ingest(api_server, populated_doc_table, sql_sessionmaker):
 
     await asyncio.sleep(5)
 
-    logger.info('LOOP FOR INGEST')
-
     loop = 0
-    while loop < 30:
+    while loop < 1800: # Allow ingestion to take up to 30 minutes
         loop = loop + 1
         await asyncio.sleep(1)
 
@@ -75,18 +75,16 @@ async def test_ingest(api_server, populated_doc_table, sql_sessionmaker):
 
             status = result[0].status
 
+            # The status column's datatype is a custom Postgres enum. The SQLAlchemy
+            # framework cannot convert a custom Postgres datatype into an custom
+            # Python type. We must do that conversion.
+            #
+            # Convert the str value to our custom Python enum type whenever possible.
+            if status in DocumentStatus.__members__:
+                status = DocumentStatus[status]
+
         if status in [DocumentStatus.INGESTED, DocumentStatus.ERROR]:
             break
 
-        # # TODO - Loop instead on direct database call.
-        # path = f'/tasks/{task_id}'
-        # content_type, resp = await api_server.get(path=path)
+    assert status == DocumentStatus.INGESTED
 
-        # logger.info('RESPONSE %s\n%s', content_type, resp)
-
-        # if content_type == 'json':
-        #     status = resp.get('taskStatus')
-        #     if status in ['SUCCESS', 'FAILURE']:
-        #         break
-
-    logger.info('DONE INGEST')

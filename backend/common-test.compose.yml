@@ -14,6 +14,8 @@ services:
       - backend-test-home-2:/home/python/test-home-2
       - backend-test-venv-2:/home/python/test-venv-2
       - backend-test-staging-2:/home/python/test-staging-2
+      - backend-test-home-3:/home/python/test-home-3
+      - backend-test-venv-3:/home/python/test-venv-3
       - backend-test-home-4:/home/python/test-home-4
       - backend-test-venv-4:/home/python/test-venv-4
 
@@ -31,6 +33,7 @@ services:
         for VOL in \
           'test-home-1' 'test-venv-1' 'test-staging-1' \
           'test-home-2' 'test-venv-2' 'test-staging-2' \
+          'test-venv-3' 'test-home-3' \
           'test-venv-4' 'test-home-4'
         do
           touch /home/python/$$VOL/.initialized
@@ -226,6 +229,72 @@ services:
       retries: 5
       start_period: 5s
 
+          
+  celery-integration-flower:
+    depends_on:
+      init-backend-test-volumes:
+        condition: service_completed_successfully
+
+    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    profiles: [ backend-test, all ]
+
+    environment:
+      # Only environment variables that are important to a Docker environment
+      # will be configured here. The reason is that changes to environment variables
+      # configured here do require a restart before they take effect:
+      # application-centric ones should be designed to avoiid a Docker container restart.
+      #
+      # The Python bytecode cache should be moved away from the bind-mount because
+      # there is no need for it shared with the host.
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      GPU_MODE: cpu
+    env_file:
+      - backend.env
+    ports: # use if it is necessary to expose the container to the host machine
+      - '25557:5555'
+    networks:
+      agent-poc: {}
+    volumes:
+      ### Mount the project directory to /app in the container
+      ##- .:/app
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - ./run_celery_flower.sh:/run_celery_flower.sh
+      - backend-test-init-signal-1:/init-signal
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - backend-test-home-3:/home/python
+      - backend-test-venv-3:/app/.venv
+    secrets:
+      - answers_test_env
+      - answers_jwt_test_env
+      - answers_minio_test_env
+      - answers_postgres_test_env
+      - celery_flower_test_env
+      - checkpoints_postgres_test_env
+      - vectors_postgres_test_env
+      - redis_env
+
+    user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_celery_flower.sh' ]
+
+    healthcheck:
+      # When this service start for the first time, there is multiple minutes while the
+      # python environment is sync'ed to the requirements file then when the celery flower node
+      # is starting up. A health-check based on API pinging will fail during the sync and the
+      # start up.
+      #
+      # For now, we just check if python3 can run. Later, we will  try to come up  
+      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      test: ['CMD', 'python3', '--version']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
 
   integration-test:
     depends_on:
@@ -272,6 +341,7 @@ services:
       - answers_jwt_test_env
       - answers_minio_test_env
       - answers_postgres_test_env
+      - celery_flower_test_env
       - checkpoints_postgres_test_env
       - vectors_postgres_test_env
       - redis_env
@@ -301,6 +371,10 @@ volumes:
   backend-test-venv-2:
     driver: local
   backend-test-staging-2:
+    driver: local
+  backend-test-home-3:
+    driver: local
+  backend-test-venv-3:
     driver: local
   backend-test-home-4:
     driver: local

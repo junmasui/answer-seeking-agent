@@ -1,12 +1,18 @@
 import logging
 from typing import Generator
+import pprint
 
 import pytest
 
-from sqlalchemy import Engine, create_engine, MetaData
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.automap import automap_base
+from sqlalchemy import Column, Engine, Enum, cast, create_engine, MetaData, Table
+from sqlalchemy.orm import column_property, sessionmaker
+from sqlalchemy.ext.automap import automap_base, AutomapBase
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import ENUM
 
+from core.public_models.doc import DocumentStatus
+from core.db_models.doc_mgr import DbDocumentStatus
+from core.db_models.prompt_mgr import DbPromptStatus
 from global_config import get_global_config
 
 
@@ -15,6 +21,7 @@ from global_config import get_global_config
 __all__ = ['get_connection_str', 'sql_engine', 'reflected_metadata', 'auto_mapped_classes', 'get_sessionmaker']
 
 logger = logging.getLogger(__name__)
+pp = pprint.PrettyPrinter(indent=2, width=120)
 
 def get_connection_str():
     config = get_global_config()
@@ -59,14 +66,38 @@ def sql_sessionmaker(sql_engine) -> Generator[sessionmaker, None, None]:
 
 @pytest.fixture(scope="module")
 def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
-    """Returns a Metadata object for the database.
-
-    """
+    """Returns a Metadata object for the database."""
     metadata = MetaData(schema='answers')
 
     metadata.reflect(bind=sql_engine)
 
-    # Use yield so that we do clean up during the test tear-down.
+    # # Convert the tables attribute to a plain dict. The original reflected
+    # # attribute is of type FacadeDict and is read-only
+    # metadata.tables = dict(metadata.tables)
+
+
+    # # Explicitly override column metadata known to be a custom datatype.
+    # # The normal reflection mechanism does not know our custom datatypes.
+    # if 'answers.tracked_documents' in metadata.tables:
+    #     reflected_table = Table(
+    #         'tracked_documents',
+    #         metadata,
+    #         Column('status', type_=DbDocumentStatus),
+    #         autoload_with=sql_engine,
+    #         extend_existing=True
+    #     )
+    #     metadata.tables['answers.tracked_documents'] = reflected_table
+
+    # if 'answers.agent_prompt' in metadata.tables:
+    #     reflected_table = Table(
+    #         'agent_prompt',
+    #         metadata,
+    #         Column('status', type_=DbPromptStatus),
+    #         autoload_with=sql_engine,
+    #         extend_existing=True
+    #     )
+    #     metadata.tables['answers.agent_prompt'] = reflected_table
+
     yield metadata
 
 
