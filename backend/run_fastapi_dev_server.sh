@@ -49,6 +49,7 @@ PYTHONPATH=./src \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
+   --debounce-interval=5.0 \
    --directory=./src  --recursive --pattern='*.py' \
    -- \
    uvicorn core_app:app --host 0.0.0.0 --port 8100

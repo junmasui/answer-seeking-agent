@@ -46,6 +46,7 @@ PYTHONPATH=./src \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
+   --debounce-interval=5.0 \
    --directory=.  --recursive --pattern='*.py;*.env' \
    -- \
    celery --app=core_worker flower

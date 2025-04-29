@@ -59,6 +59,7 @@ uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
    --no-restart-on-command-exit \
+   --debounce-interval=5.0 \
    --directory=./src --directory=./tests  --recursive --pattern='*.py' \
    -- \
    pytest -v -v --capture=tee-sys tests
