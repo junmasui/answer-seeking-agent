@@ -19,20 +19,7 @@ def get_answer_grader():
     """
     """
 
-    # Instructions
-    system = '''\
-        You are a grader assessing whether an answer addresses / resolves a question
-        Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question.'''
-    human = '''\
-        User question:
-
-        {question}
-
-        LLM generation:
-        
-        {generation}'''
-    
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=PROMPT_NAME)
 
     answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
 

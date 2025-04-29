@@ -24,6 +24,8 @@ class AgentPrompt(Base):
     system_message: Mapped[str] = mapped_column(String(9000), nullable=True)
     human_message: Mapped[str] = mapped_column(String(9000), nullable=True)
 
+
+
     # Version number
     version: Mapped[int] = mapped_column(Integer, nullable=False)
 

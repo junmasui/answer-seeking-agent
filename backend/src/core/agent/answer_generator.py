@@ -19,37 +19,8 @@ logger = logging.getLogger(__name__)
 PROMPT_NAME='Generate Answer'
 
 def answer_generator():
-    # Prompt
-    human = '''\
-        You are an assistant for question-answering tasks.
-        Use the following chat history and pieces of retrieved source documents
-        to answer the question. If you don't know the answer, just say
-        that you don't know. Use three sentences maximum and keep
-        the answer concise.
 
-        Make your response as informative as possible and make sure every sentence is
-        supported by the gathered information.
-        Each sentence must be backed up by a citation from a retrieved source document,
-        formatted as a footnote.
-        The reference marks should be in the format [^1], [^2], [^3], etc.
-        Each footnote should be formated as XML
-        with a schema <footnote><docId></docId><sourceUrl></sourceUrl><fileName></fileName><pageNumber></pageNumber></footnote>.
-
-        Question:
-        
-        {question}
-
-        History:
-        
-        {chat_history}
-
-        Source Documents:
-        
-        {documents}
-
-        Answer:
-        '''
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=PROMPT_NAME)
 
     # LLM
     llm = get_chat_llm()
