@@ -46,14 +46,17 @@ def get_chat_prompt(prompt_name: str):
     chat_prompt = ChatPromptTemplate.from_messages(messages)
     return chat_prompt
 
-def add_change_prompt(*, prompt_name: str, default_system_message: str = None, default_human_message: str = None):
+def add_chat_prompt(*, prompt_name: str, default_system_message: str = None, default_human_message: str = None):
     """
-    Add or update a prompt in the database if it does not exist, using the provided defaults.
+    Add a prompt in the database if it does not exist, using the provided defaults.
     """
     result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
-    if not result.prompts:
-        if default_system_message:
-            default_system_message = textwrap.dedent(default_system_message)
-        if default_human_message:
-            default_human_message = textwrap.dedent(default_human_message)
-        add_prompt(prompt_name, status=AgentPromptStatus.ACTIVE, human_message=default_human_message, system_message=default_system_message)
+
+    if result.prompts:
+        return
+
+    if default_system_message:
+        default_system_message = textwrap.dedent(default_system_message)
+    if default_human_message:
+        default_human_message = textwrap.dedent(default_human_message)
+    add_prompt(prompt_name, status=AgentPromptStatus.ACTIVE, human_message=default_human_message, system_message=default_system_message)

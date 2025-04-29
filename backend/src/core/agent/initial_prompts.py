@@ -1,9 +1,9 @@
-from .prompt_util import add_change_prompt
+from .prompt_util import add_chat_prompt
 
 # Register the original prompts at startup
 
 def register_initial_prompts():
-    add_change_prompt(
+    add_chat_prompt(
         prompt_name='Generate Answer',
         default_human_message='''\
             You are an assistant for question-answering tasks.
@@ -35,7 +35,7 @@ def register_initial_prompts():
             Answer:
         '''
     )
-    add_change_prompt(
+    add_chat_prompt(
         prompt_name='Rewrite Query',
         default_system_message='''\
             You a question re-writer that converts an input question to a better version that is optimized
@@ -48,7 +48,7 @@ def register_initial_prompts():
             Formulate an improved question.
         '''
     )
-    add_change_prompt(
+    add_chat_prompt(
         prompt_name='Grade Retrieved Documents',
         default_system_message='''\
             You are a grader assessing relevance of a retrieved document to a user question.
@@ -64,7 +64,7 @@ def register_initial_prompts():
             
             {question}'''
     )
-    add_change_prompt(
+    add_chat_prompt(
         prompt_name='Grade Answer',
         default_system_message='''\
             You are a grader assessing whether an answer addresses / resolves a question
@@ -78,7 +78,7 @@ def register_initial_prompts():
             
             {generation}'''
     )
-    add_change_prompt(
+    add_chat_prompt(
         prompt_name='Grade Hallucination',
         default_system_message='''\
             You are a grader assessing whether an LLM generation is grounded in / supported by a set of retrieved facts.
