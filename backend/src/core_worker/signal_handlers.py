@@ -7,7 +7,7 @@ from celery.app.log import TaskFormatter
 
 from log_config_monitor import get_logging_conf_monitor
 
-from core.signals import send_start_up
+from core.signals import send_start_up, configure_sender
 from .metrics import start_metrics, child_exit
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,9 @@ def handle_worker_init(**kwargs):
 
     start_metrics(is_main_worker=True)
 
-    send_start_up(is_worker=True)
+    configure_sender(is_worker=True)
+
+    send_start_up()
 
 
 @worker_ready.connect

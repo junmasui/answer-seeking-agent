@@ -12,7 +12,7 @@ from core.public_models.doc import DocumentStatus
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import Document, DocumentList, SortDirection
 
-from ...db_models import TrackedDocument
+from ...db_models import DbTrackedDocument
 
 from .stats import get_document_statistics
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[TrackedDocument]:
+def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[DbTrackedDocument]:
     """Return tracking records when matched to specified document UUID."""
 
     def _ensure_uuid(item):
@@ -32,8 +32,8 @@ def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[TrackedDocum
 
     with sessionmaker() as session:
 
-        stmt = select(TrackedDocument).where(
-            TrackedDocument.id.in_(doc_uuid_list))
+        stmt = select(DbTrackedDocument).where(
+            DbTrackedDocument.id.in_(doc_uuid_list))
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
@@ -57,7 +57,7 @@ def list_documents(*,
                                            start=start, length=length, sort_by=sort_by)
     table_stats = get_document_statistics()
 
-    def _to_dict(_x: TrackedDocument):
+    def _to_dict(_x: DbTrackedDocument):
         return Document(
             id = _x.id,
             status = _x.status,
@@ -109,15 +109,15 @@ def _list_tracking_records(*,
         expr = None
         match name:
             case 'name':
-                expr = TrackedDocument.filename
+                expr = DbTrackedDocument.filename
             case 'size_bytes':
-                expr = TrackedDocument.size_bytes
+                expr = DbTrackedDocument.size_bytes
             case 'modification_time':
-                expr = TrackedDocument.file_modified_time
+                expr = DbTrackedDocument.file_modified_time
             case 'ingestion_time':
-                expr = TrackedDocument.ingested_time
+                expr = DbTrackedDocument.ingested_time
             case 'status':
-                expr = TrackedDocument.status
+                expr = DbTrackedDocument.status
             case _:
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
@@ -129,24 +129,24 @@ def _list_tracking_records(*,
 
         paginate = start is not None and length is not None
 
-        core_query = select(TrackedDocument)
+        core_query = select(DbTrackedDocument)
 
         # Apply query filters
         where = []
         if doc_set_id is not None:
             if isinstance(doc_set_id, list):
-                where.append(TrackedDocument.document_set_id.in_(doc_set_id))
+                where.append(DbTrackedDocument.document_set_id.in_(doc_set_id))
             elif isinstance(doc_set_id, uuid.UUID):
-                where.append(TrackedDocument.document_set_id == doc_set_id)
+                where.append(DbTrackedDocument.document_set_id == doc_set_id)
         if status is not None:
             if isinstance(status, list):
                 if len(status) > 0:
-                    where.append(TrackedDocument.status.in_(status))
+                    where.append(DbTrackedDocument.status.in_(status))
             elif isinstance(status, DocumentStatus):
-                where.append(TrackedDocument.status == status)
+                where.append(DbTrackedDocument.status == status)
 
         if file_name is not None:
-            where.append(TrackedDocument.filename.ilike(file_name))
+            where.append(DbTrackedDocument.filename.ilike(file_name))
         
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -167,7 +167,7 @@ def _list_tracking_records(*,
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedTrackedDocument = aliased(element=TrackedDocument, alias=cte)
+            WindowedTrackedDocument = aliased(element=DbTrackedDocument, alias=cte)
 
             # Query the CTE
             query = select(WindowedTrackedDocument).options(subqueryload(WindowedTrackedDocument.document_set)).where(
@@ -178,7 +178,7 @@ def _list_tracking_records(*,
                 column('row_num').between(start + 1, start + length)
             )
         else:
-            query = core_query.options(subqueryload(TrackedDocument.document_set))
+            query = core_query.options(subqueryload(DbTrackedDocument.document_set))
 
         result = session.execute(query)
         existing_objs = result.scalars().all()

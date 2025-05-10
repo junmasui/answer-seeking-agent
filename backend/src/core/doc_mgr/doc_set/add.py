@@ -7,7 +7,7 @@ from global_config import get_global_config
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ...db_models import TrackedDocumentSet
+from ...db_models import DbTrackedDocumentSet
 
 
 logger = logging.getLogger(__name__)
@@ -26,8 +26,8 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
 
     with sessionmaker() as session:
         with session.begin():
-            stmt = select(TrackedDocumentSet).where(
-                TrackedDocumentSet.name == name)
+            stmt = select(DbTrackedDocumentSet).where(
+                DbTrackedDocumentSet.name == name)
             result = session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
@@ -46,7 +46,7 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
                 rel_path = doc_root_dir + '/' + name
 
 
-                new_obj = TrackedDocumentSet(
+                new_obj = DbTrackedDocumentSet(
                     id=doc_set_uuid,
                     name=name,
                     s3_rel_path=rel_path,

@@ -5,7 +5,7 @@ from sqlalchemy import delete
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ...db_models import AgentPrompt
+from ...db_models import DbAgentPrompt
 
 from .query import get_prompt
 
@@ -42,6 +42,6 @@ def _delete_agent_prompt(prompt_uuid):
     with sessionmaker() as session:
 
         with session.begin():
-            stmt = delete(AgentPrompt).where(
-                AgentPrompt.id == prompt_uuid)
+            stmt = delete(DbAgentPrompt).where(
+                DbAgentPrompt.id == prompt_uuid)
             result = session.execute(stmt)

@@ -9,7 +9,7 @@ from celery.result import AsyncResult
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from core import (status_check)
-from core.signals import send_start_up, send_reset_data
+from core.signals import send_start_up, send_reset_data, configure_sender
 
 from core_worker import get_worker_logger_tree
 import sim_auth_app
@@ -29,7 +29,8 @@ async def lifespan(app: FastAPI):
     instrumentator.expose(app, include_in_schema=False, should_gzip=False)
 
     logger.info('Application is starting up...')
-    send_start_up(is_worker=False)
+    configure_sender(is_worker=False)
+    send_start_up()
 
     yield
 

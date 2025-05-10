@@ -2,7 +2,6 @@ import logging
 
 from core import update_document_status
 from core.public_models import DocumentStatus
-from core.signals import send_start_up
 
 logger = logging.getLogger(__name__)
 

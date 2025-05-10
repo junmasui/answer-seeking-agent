@@ -27,24 +27,38 @@ def create_tables_if_not_exists():
 
     engine = get_engine(DataDomain.ANSWERS)
 
-    if get_current_version(engine) != get_head_revision():
+    actual_schema_version = get_current_version(engine)
+    expected_schema_version = get_head_revision()
+
+    initialize = False
+    migrate = False
+    if actual_schema_version is None:
+        logger.info('Database not yet initialized')
+        initialize = True
+    elif actual_schema_version != expected_schema_version:
         logger.info('Migration revisions differ')
+        migrate = True
     else:
         differences = get_schema_differences(engine)
 
         # Analyze the differences
         if differences:
-            logger.info('Actual and declared scheams differ')
+            logger.info('Actual and declared schemas differ')
             for diff in differences:
                 op = diff[0]
-                try:
-                    obj_name = getattr(diff[1], 'name')
-                except AttributeError:
-                    obj_name = ''
+                if isinstance(diff[1], str):
+                    obj_name = diff[1]
+                else:
+                    try:
+                        obj_name = getattr(diff[1], 'name')
+                    except AttributeError:
+                        obj_name = ''
                 logger.info('DB difference: %s %s', op, obj_name)
 
-    _create_tables_if_new(engine)
-    _run_migrations(engine)
+    if initialize:
+        _create_tables_if_new(engine)
+    if migrate:
+        _run_migrations(engine)
 
 
 def get_current_version(engine):
@@ -138,7 +152,7 @@ def _create_tables_if_new(engine):
 
     logger.info('initializing database tables.')
 
-    # Create database tables, indexes, etc.
+    # Create database tables.
     DECLARED_METADATA.create_all(engine)
 
     # Prepare this database for future upgrades by writing the alembic metadata.

@@ -13,14 +13,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser
 from .prompt_util import get_chat_prompt
+from .internal_models import AgentPrompt
 
 logger = logging.getLogger(__name__)
 
-PROMPT_NAME='Generate Answer'
-
 def answer_generator():
 
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME)
+    prompt = get_chat_prompt(prompt_name=AgentPrompt.GENERATE_ANSWER)
 
     # LLM
     llm = get_chat_llm()

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from sqlalchemy import func
 
-from ..db_models import TrackedDocument
+from ..db_models import DbTrackedDocument
 from ..public_models import DocumentStatus
 
 from ..doc_mgr import get_documents, update_tracking_record
@@ -70,7 +70,7 @@ def ingest_documents(doc_ids):
 
             yield doc
 
-    def _ingest_one_document(detached_record: TrackedDocument):
+    def _ingest_one_document(detached_record: DbTrackedDocument):
         with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
             if record is None:
                 return

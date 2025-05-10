@@ -11,19 +11,17 @@ import textwrap
 from .grader_util import build_grader
 from .prompt_util import get_chat_prompt
 
-from .internal_models import GradeDocuments
+from .internal_models import GradeDocuments, AgentPrompt
 
 
 logger = logging.getLogger(__name__)
-
-PROMPT_NAME='Grade Retrieved Documents'
 
 @cache
 def get_retrieval_grader():
     """
     """
 
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME)
+    prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_RETRIEVED_DOCUMENTS)
 
     retrieval_grader = build_grader(prompt, GradeDocuments, 'retrieval_grader')
 

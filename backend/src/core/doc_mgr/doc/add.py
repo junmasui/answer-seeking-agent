@@ -6,7 +6,7 @@ from sqlalchemy import and_, select
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ...db_models import TrackedDocument
+from ...db_models import DbTrackedDocument
 from ...public_models import DocumentStatus
 
 
@@ -44,9 +44,9 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
 
     with sessionmaker() as session:
         with session.begin():
-            stmt = select(TrackedDocument).where(
-                and_(TrackedDocument.filename == file_name,
-                     TrackedDocument.document_set_id == document_set_uuid))
+            stmt = select(DbTrackedDocument).where(
+                and_(DbTrackedDocument.filename == file_name,
+                     DbTrackedDocument.document_set_id == document_set_uuid))
             result = session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
@@ -65,7 +65,7 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
             else:
                 doc_uuid = uuid.uuid4()
 
-                new_obj = TrackedDocument(
+                new_obj = DbTrackedDocument(
                     id=doc_uuid,
                     document_set_id=document_set_uuid,
                     status=DocumentStatus.UPLOADED,

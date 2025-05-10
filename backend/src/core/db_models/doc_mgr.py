@@ -14,7 +14,7 @@ from .base import Base
 logger = logging.getLogger(__name__)
 
 
-class TrackedDocumentSet(Base):
+class DbTrackedDocumentSet(Base):
 
     __tablename__ = "tracked_document_sets"
 
@@ -43,17 +43,17 @@ class TrackedDocumentSet(Base):
         server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )
 
-    # Define the relationship to TrackedDocument
-    documents: Mapped[list['TrackedDocument']] = relationship(order_by='TrackedDocument.id', back_populates='document_set')
+    # Define the relationship to DbTrackedDocument
+    documents: Mapped[list['DbTrackedDocument']] = relationship(order_by='DbTrackedDocument.id', back_populates='document_set')
 
 DbDocumentStatus = ENUM(DocumentStatus)
 
-class TrackedDocument(Base):
+class DbTrackedDocument(Base):
 
     __tablename__ = "tracked_documents"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
-    document_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{TrackedDocumentSet.__tablename__}.id'))
+    document_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{DbTrackedDocumentSet.__tablename__}.id'))
     status: Mapped[DocumentStatus] = mapped_column(DbDocumentStatus, nullable=False)
     filedir: Mapped[str] = mapped_column(String(800), nullable=False)
     filename: Mapped[str] = mapped_column(String(800), nullable=False)
@@ -87,4 +87,4 @@ class TrackedDocument(Base):
     )
 
     # Define the relationship to TrackedDocumentSet
-    document_set: Mapped['TrackedDocumentSet'] = relationship(back_populates='documents')
+    document_set: Mapped['DbTrackedDocumentSet'] = relationship(back_populates='documents')

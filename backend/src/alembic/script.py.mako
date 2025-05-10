@@ -41,11 +41,11 @@ def schema_downgrade():
     ${downgrades if downgrades else "pass"}
 
 def data_upgrade():
-    """Migrate data upward.
+    """Migrate existing data upward.
     """
     pass
 
 def data_downgrade():
-    """Migrate data downward.
+    """Migrate existing data downward.
     """
     pass

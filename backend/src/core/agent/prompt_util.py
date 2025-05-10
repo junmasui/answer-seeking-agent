@@ -1,5 +1,4 @@
 from functools import cache
-import textwrap
 import logging
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -7,17 +6,22 @@ from langchain_core.prompts import ChatPromptTemplate
 from global_config import get_global_config
 
 from ..public_models import AgentPromptStatus
-from ..prompt_mgr import list_prompts, add_prompt
+from ..prompt_mgr import list_prompts
+
+from .internal_models import AgentPrompt
 
 logger = logging.getLogger(__name__)
 
-def get_chat_prompt(prompt_name: str):
+def get_chat_prompt(prompt_name: AgentPrompt):
     """
     Retrieve a chat prompt from the database and return a ChatPromptTemplate.
     """
-    result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
+    if not isinstance(prompt_name, AgentPrompt):
+        raise TypeError(f"prompt_name must be an instance of AgentPrompt enum, got {type(prompt_name)}")
+
+    result = list_prompts(name=prompt_name.value, status=AgentPromptStatus.ACTIVE)
     if not result.prompts:
-        raise ValueError(f"Prompt '{prompt_name}' not found in database.")
+        raise ValueError(f"Prompt '{prompt_name.value}' not found in database.")
 
     prompt = result.prompts[0]
     system_message = prompt.system_message
@@ -46,17 +50,3 @@ def get_chat_prompt(prompt_name: str):
     chat_prompt = ChatPromptTemplate.from_messages(messages)
     return chat_prompt
 
-def add_chat_prompt(*, prompt_name: str, default_system_message: str = None, default_human_message: str = None):
-    """
-    Add a prompt in the database if it does not exist, using the provided defaults.
-    """
-    result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
-
-    if result.prompts:
-        return
-
-    if default_system_message:
-        default_system_message = textwrap.dedent(default_system_message)
-    if default_human_message:
-        default_human_message = textwrap.dedent(default_human_message)
-    add_prompt(prompt_name, status=AgentPromptStatus.ACTIVE, human_message=default_human_message, system_message=default_system_message)

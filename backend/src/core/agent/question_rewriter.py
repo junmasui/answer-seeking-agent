@@ -13,10 +13,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from ..providers.chat_llm import get_chat_llm
 
 from .prompt_util import get_chat_prompt
+from .internal_models import AgentPrompt
 
 logger = logging.getLogger(__name__)
-
-PROMPT_NAME = 'Rewrite Query'
 
 ### Question Re-writer
 
@@ -27,7 +26,7 @@ def get_question_rewriter():
     # LLM
     llm = get_chat_llm()
 
-    rewrite_prompt = get_chat_prompt(prompt_name=PROMPT_NAME)
+    rewrite_prompt = get_chat_prompt(prompt_name=AgentPrompt.REWRITE_QUERY)
 
     chain = rewrite_prompt | llm | StrOutputParser()
 
