@@ -4,10 +4,10 @@ from . import event_handlers
 from .base import DECLARED_METADATA
 
 from .doc_mgr import (
-    TrackedDocument,
-    TrackedDocumentSet
+    DbTrackedDocument,
+    DbTrackedDocumentSet
 )
 
 from .prompt_mgr import (
-    AgentPrompt
+    DbAgentPrompt
 )

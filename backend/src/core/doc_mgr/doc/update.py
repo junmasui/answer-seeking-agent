@@ -7,7 +7,7 @@ from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ...db_models import TrackedDocument
+from ...db_models import DbTrackedDocument
 
 
 logger = logging.getLogger(__name__)
@@ -56,8 +56,8 @@ def update_tracking_record(doc_uuid):
 
         try:
             with session.begin():
-                stmt = select(TrackedDocument).where(
-                    TrackedDocument.id == doc_uuid)
+                stmt = select(DbTrackedDocument).where(
+                    DbTrackedDocument.id == doc_uuid)
                 result = session.execute(stmt)
 
                 existing_obj = result.scalar_one()

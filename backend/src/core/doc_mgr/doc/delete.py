@@ -7,7 +7,7 @@ from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...providers.file_store import get_s3_bucket
 from ...providers.vector_store import get_vector_store
 
-from ...db_models import TrackedDocument
+from ...db_models import DbTrackedDocument
 
 from .query import get_documents
 
@@ -61,6 +61,6 @@ def _delete_tracking_record(doc_uuid):
     with sessionmaker() as session:
 
         with session.begin():
-            stmt = delete(TrackedDocument).where(
-                TrackedDocument.id == doc_uuid)
+            stmt = delete(DbTrackedDocument).where(
+                DbTrackedDocument.id == doc_uuid)
             result = session.execute(stmt)

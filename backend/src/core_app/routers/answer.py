@@ -10,7 +10,6 @@ from celery.result import AsyncResult
 
 from core import (seek_answer, get_mermaid_graph)
 from core.public_models import Answer, AnswerRequestBody
-from core.signals import send_start_up, send_reset_data
 
 
 from simple_auth import User, get_scoped_current_user, get_current_user, Scope

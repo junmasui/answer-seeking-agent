@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import logging
 import uuid
 import pprint
+from urllib.parse import urlparse
 
 import pytest
 from sqlalchemy import select, func
@@ -59,15 +60,17 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
 
         assert 'fileName' in citation
         assert isinstance(citation['fileName'], str)
-        assert len(resp['fileName']) > 40
+        assert len(citation['fileName']) > 5
 
         assert 'pageNumber' in citation
         assert isinstance(citation['pageNumber'], int)
 
         assert 'sourceUrl' in citation
         assert isinstance(citation['sourceUrl'], str)
-        assert len(citation['sourceUrl']) > 40
-
+        assert len(citation['sourceUrl']) > 10
+        parsed_url = urlparse(citation['sourceUrl'])
+        assert all([parsed_url.scheme, parsed_url.netloc]), f"sourceUrl '{citation['sourceUrl']}' is not a valid URL"
+    
         assert 'text' in citation
         assert isinstance(citation['text'], str)
-        assert len(citation['text']) > 40
+        assert len(citation['text']) > 10

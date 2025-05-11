@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import AgentPromptStats
 
-from ...db_models import AgentPrompt
+from ...db_models import DbAgentPrompt
 
 
 
@@ -34,7 +34,7 @@ def _get_agent_prompt_stats():
     with sessionmaker() as session:
         stmt = select(
             func.count().label('prompt_count'),
-            func.max(AgentPrompt.update_time).label('max_update_time')
+            func.max(DbAgentPrompt.update_time).label('max_update_time')
         )
         result = session.execute(stmt).first()
     return {

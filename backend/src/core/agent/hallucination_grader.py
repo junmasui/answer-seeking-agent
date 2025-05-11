@@ -7,34 +7,18 @@ from functools import cache
 import textwrap
 import logging
 
-from .internal_models import GradeHallucinations
+from .internal_models import GradeHallucinations, AgentPrompt
 from .grader_util import build_grader
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
-
-PROMPT_NAME='Grade Hallucination'
 
 @cache
 def get_hallucination_grader():
     """
     """
 
-    # Instructions
-    system = '''\
-        You are a grader assessing whether an LLM generation is grounded in / supported by a set of retrieved facts.
-
-        Give a binary score 'yes' or 'no'. 'Yes' means that the answer is grounded in / supported by the set of facts.'''
-    human = '''\
-        Set of facts:
-
-        {documents}
-        
-        LLM generation:
-        
-        {generation}
-        '''
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_HALLUCINATION)
 
     hallucination_grader = build_grader(prompt, GradeHallucinations, 'hallucination_grader')
 
