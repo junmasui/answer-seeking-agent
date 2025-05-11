@@ -45,21 +45,28 @@ def create_tables_if_not_exists():
         if differences:
             logger.info('Actual and declared schemas differ')
             for diff in differences:
-                op = diff[0]
-                if isinstance(diff[1], str):
-                    obj_name = diff[1]
+                diff_op = diff[0]
+                diff_obj = diff[-1]
+                if isinstance(diff_obj, str):
+                    obj_name = diff_obj
                 else:
-                    try:
-                        obj_name = getattr(diff[1], 'name')
-                    except AttributeError:
-                        obj_name = ''
-                logger.info('DB difference: %s %s', op, obj_name)
+                    obj_name = getattr(diff_obj, 'name', '')
+
+                diff_table = getattr(diff_obj, 'table', None)
+                table_name = getattr(diff_table, 'name', None)
+                schema_name = getattr(diff_table, 'schema', None)
+
+                if len(diff) >= 3:
+                    schema_name = diff[1] if schema_name is None else schema_name
+                    table_name = diff[2] if table_name is None else table_name
+
+                logger.info('DB difference: %s %s %s %s', diff_op, obj_name, table_name, schema_name)
+
 
     if initialize:
         _create_tables_if_new(engine)
     if migrate:
         _run_migrations(engine)
-
 
 def get_current_version(engine):
     """Return the current Alembic version applied to the database.
@@ -174,7 +181,6 @@ def _run_migrations(engine):
     except Exception as ex:
         logger.warning('Error in migration', exc_info=ex)
     logger.info('upgraded database.')
-
 
 
 def drop_all_tables():

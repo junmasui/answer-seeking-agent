@@ -21,7 +21,8 @@ class DbAgentPrompt(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[AgentPromptStatus] = mapped_column(DbPromptStatus, nullable=False)
-    ##prepend_history: Mapped[bool] = mapped_column(Boolean, nullable=True)
+
+    include_history: Mapped[bool] = mapped_column(Boolean, nullable=True)
     system_message: Mapped[str] = mapped_column(String(9000), nullable=True)
     human_message: Mapped[str] = mapped_column(String(9000), nullable=True)
 
