@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import DocumentSetStats
 
-from ...db_models import TrackedDocumentSet
+from ...db_models import DbTrackedDocumentSet
 
 
 
@@ -34,7 +34,7 @@ def _get_document_set_stats():
     with sessionmaker() as session:
         stmt = select(
             func.count().label('doc_set_count'),
-            func.max(TrackedDocumentSet.update_time).label('max_update_time')
+            func.max(DbTrackedDocumentSet.update_time).label('max_update_time')
         )
         result = session.execute(stmt).first()
     return {

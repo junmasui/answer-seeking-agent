@@ -11,33 +11,17 @@ import textwrap
 from .grader_util import build_grader
 from .prompt_util import get_chat_prompt
 
-from .internal_models import GradeDocuments
+from .internal_models import GradeDocuments, AgentPrompt
 
 
 logger = logging.getLogger(__name__)
-
-PROMPT_NAME='Grade Retrieved Documents'
 
 @cache
 def get_retrieval_grader():
     """
     """
 
-    # Instructions
-    system = '''\
-        You are a grader assessing relevance of a retrieved document to a user question.
-        It does not need to be a stringent test. The goal is to filter out erroneous retrievals.
-        If the document contains keyword(s) or semantic meaning related to the user question, grade it as relevant.
-        Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question.'''
-    human = '''\
-        Retrieved document:
-        
-        {document}
-        
-        User question:
-        
-        {question}'''
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_RETRIEVED_DOCUMENTS)
 
     retrieval_grader = build_grader(prompt, GradeDocuments, 'retrieval_grader')
 
@@ -63,14 +47,14 @@ def grade_documents(state):
 
     # Score each doc
     filtered_docs = []
-    for d in documents:
+    for doc in documents:
         score = retrieval_grader.invoke(
-            {'question': question, 'document': d.page_content}
+            {'question': question, 'document': doc.page_content}
         )
         grade = score.binary_score if score is not None else 'no'
         if grade == 'yes':
             logger.info('---GRADE: DOCUMENT RELEVANT---')
-            filtered_docs.append(d)
+            filtered_docs.append(doc)
         else:
             logger.info('---GRADE: DOCUMENT NOT RELEVANT---')
             continue

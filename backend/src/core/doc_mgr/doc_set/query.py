@@ -10,7 +10,7 @@ from sqlalchemy.orm import aliased
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus, SortDirection
 
-from ...db_models import TrackedDocumentSet
+from ...db_models import DbTrackedDocumentSet
 
 from .stats import get_document_set_statistics
 
@@ -30,8 +30,8 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
 
     with sessionmaker() as session:
 
-        stmt = select(TrackedDocumentSet).where(
-            TrackedDocumentSet.id.in_(doc_set_uuid_list))
+        stmt = select(DbTrackedDocumentSet).where(
+            DbTrackedDocumentSet.id.in_(doc_set_uuid_list))
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
@@ -51,7 +51,7 @@ def list_document_sets(*,
     table_stats = get_document_set_statistics()
 
 
-    def _to_dict(_x: TrackedDocumentSet):
+    def _to_dict(_x: DbTrackedDocumentSet):
         return DocumentSet(
             id = _x.id,
             name = _x.name,
@@ -89,11 +89,11 @@ def _list_tracking_document_sets(*,
         expr = None
         match name:
             case 'name':
-                expr = TrackedDocumentSet.name
+                expr = DbTrackedDocumentSet.name
             case 'is_new_doc_default':
-                expr = TrackedDocumentSet.is_new_doc_default
+                expr = DbTrackedDocumentSet.is_new_doc_default
             case 'is_public_viewable':
-                expr = TrackedDocumentSet.is_public_viewable
+                expr = DbTrackedDocumentSet.is_public_viewable
             case _:
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
@@ -106,16 +106,16 @@ def _list_tracking_document_sets(*,
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
-        core_query = select(TrackedDocumentSet)
+        core_query = select(DbTrackedDocumentSet)
 
         # Apply query filters
         where = []
         if name is not None:
-            where.append(TrackedDocumentSet.name.ilike(name))
+            where.append(DbTrackedDocumentSet.name.ilike(name))
         if is_default is not None:
-            where.append(TrackedDocumentSet.is_new_doc_default == is_default)
+            where.append(DbTrackedDocumentSet.is_new_doc_default == is_default)
         if is_public is not None:
-            where.append(TrackedDocumentSet.is_public_viewable == is_public)
+            where.append(DbTrackedDocumentSet.is_public_viewable == is_public)
         
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -136,7 +136,7 @@ def _list_tracking_document_sets(*,
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedTrackedDocumentSet = aliased(element=TrackedDocumentSet, alias=cte)
+            WindowedTrackedDocumentSet = aliased(element=DbTrackedDocumentSet, alias=cte)
 
             # Query the CTE
             query = select(WindowedTrackedDocumentSet).where(

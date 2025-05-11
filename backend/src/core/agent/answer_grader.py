@@ -6,33 +6,18 @@ See: Answer Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/lan
 from functools import cache
 import logging
 
-from .internal_models import GradeAnswer
+from .internal_models import GradeAnswer, AgentPrompt
 from .grader_util import build_grader
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
-
-PROMPT_NAME = 'Grade Answer'
 
 @cache
 def get_answer_grader():
     """
     """
 
-    # Instructions
-    system = '''\
-        You are a grader assessing whether an answer addresses / resolves a question
-        Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question.'''
-    human = '''\
-        User question:
-
-        {question}
-
-        LLM generation:
-        
-        {generation}'''
-    
-    prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_ANSWER)
 
     answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
 

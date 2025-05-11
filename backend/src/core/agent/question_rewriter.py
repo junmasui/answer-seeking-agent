@@ -13,10 +13,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from ..providers.chat_llm import get_chat_llm
 
 from .prompt_util import get_chat_prompt
+from .internal_models import AgentPrompt
 
 logger = logging.getLogger(__name__)
-
-PROMPT_NAME = 'Rewrite Query'
 
 ### Question Re-writer
 
@@ -27,19 +26,7 @@ def get_question_rewriter():
     # LLM
     llm = get_chat_llm()
 
-    # Prompt
-    system = '''\
-        You a question re-writer that converts an input question to a better version that is optimized
-        for vectorstore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning.'''
-    human = '''\
-        Here is the initial question:
-        
-        {question}
-        
-        Formulate an improved question.
-        '''
-
-    rewrite_prompt = get_chat_prompt(prompt_name=PROMPT_NAME, default_system_message=system, default_human_message=human)
+    rewrite_prompt = get_chat_prompt(prompt_name=AgentPrompt.REWRITE_QUERY)
 
     chain = rewrite_prompt | llm | StrOutputParser()
 

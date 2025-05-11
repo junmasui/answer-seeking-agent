@@ -5,7 +5,7 @@ from sqlalchemy import delete
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ...db_models import TrackedDocumentSet
+from ...db_models import DbTrackedDocumentSet
 
 from .query import get_document_sets
 
@@ -42,6 +42,6 @@ def _delete_tracking_record(doc_set_uuid):
     with sessionmaker() as session:
 
         with session.begin():
-            stmt = delete(TrackedDocumentSet).where(
-                TrackedDocumentSet.id == doc_set_uuid)
+            stmt = delete(DbTrackedDocumentSet).where(
+                DbTrackedDocumentSet.id == doc_set_uuid)
             result = session.execute(stmt)

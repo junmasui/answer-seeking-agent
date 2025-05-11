@@ -10,7 +10,7 @@ from sqlalchemy.orm import aliased
 from ...providers.sql_database import get_sessionmaker, DataDomain
 from ...public_models import AgentPrompt, AgentPromptList, AgentPromptStatus, SortDirection
 
-from ...db_models import AgentPrompt
+from ...db_models import DbAgentPrompt
 
 from .stats import get_prompt_statistics
 
@@ -31,14 +31,14 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID],
 
     with sessionmaker() as session:
 
-        where = [AgentPrompt.id.in_(prompt_uuid_list)]
+        where = [DbAgentPrompt.id.in_(prompt_uuid_list)]
         if status is not None:
-            where.append(AgentPrompt.status == status)
+            where.append(DbAgentPrompt.status == status)
 
         if len(where) > 1:
-            stmt = select(AgentPrompt).where(and_(*where))
+            stmt = select(DbAgentPrompt).where(and_(*where))
         elif len(where) == 1:
-            stmt = select(AgentPrompt).where(where[0])
+            stmt = select(DbAgentPrompt).where(where[0])
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
@@ -59,7 +59,7 @@ def list_prompts(*,
     table_stats = get_prompt_statistics()
 
 
-    def _to_dict(_x: AgentPrompt):
+    def _to_dict(_x: DbAgentPrompt):
         return AgentPrompt(
             id = _x.id,
             name = _x.name,
@@ -98,9 +98,9 @@ def _list_agent_prompts(*,
         expr = None
         match name:
             case 'name':
-                expr = AgentPrompt.name
+                expr = DbAgentPrompt.name
             case 'status':
-                expr = AgentPrompt.status
+                expr = DbAgentPrompt.status
             case _:
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
@@ -113,14 +113,14 @@ def _list_agent_prompts(*,
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
-        core_query = select(AgentPrompt)
+        core_query = select(DbAgentPrompt)
 
         # Apply query filters
         where = []
         if name is not None:
-            where.append(AgentPrompt.name.ilike(name))
+            where.append(DbAgentPrompt.name.ilike(name))
         if status is not None:
-            where.append(AgentPrompt.status == status)
+            where.append(DbAgentPrompt.status == status)
         
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -141,7 +141,7 @@ def _list_agent_prompts(*,
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedAgentPrompt = aliased(element=AgentPrompt, alias=cte)
+            WindowedAgentPrompt = aliased(element=DbAgentPrompt, alias=cte)
 
             # Query the CTE
             query = select(WindowedAgentPrompt).where(

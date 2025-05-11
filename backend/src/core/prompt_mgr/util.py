@@ -1,17 +1,9 @@
 import textwrap
 
-from core.agent.internal_models import AgentPrompt
-from core.public_models import AgentPromptStatus
-from .prompt import (get_prompt, list_prompts,
- get_prompt_statistics,
- add_prompt,
- delete_prompt,
- update_prompt
-)
-
-from . import initial_prompts
-from .util import add_chat_prompt
-
+from ..agent.internal_models import AgentPrompt
+from ..public_models import AgentPromptStatus
+from .prompt.query import list_prompts
+from .prompt.add import add_prompt
 
 def add_chat_prompt(*, prompt_name: AgentPrompt, system_message: str = None, human_message: str = None):
     """

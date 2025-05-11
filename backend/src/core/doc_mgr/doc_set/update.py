@@ -7,7 +7,7 @@ from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ...providers.sql_database import get_sessionmaker, DataDomain
 
-from ...db_models import TrackedDocumentSet
+from ...db_models import DbTrackedDocumentSet
 
 
 logger = logging.getLogger(__name__)
@@ -41,8 +41,8 @@ def update_doc_set_record(doc_set_uuid):
 
         try:
             with session.begin():
-                stmt = select(TrackedDocumentSet).where(
-                    TrackedDocumentSet.id == doc_set_uuid)
+                stmt = select(DbTrackedDocumentSet).where(
+                    DbTrackedDocumentSet.id == doc_set_uuid)
                 result = session.execute(stmt)
 
                 existing_obj = result.scalar_one()

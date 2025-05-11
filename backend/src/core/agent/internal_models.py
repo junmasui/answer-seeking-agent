@@ -1,9 +1,15 @@
-
 from pydantic import BaseModel, Field
-
-
+from enum import Enum
 
 # Data model
+
+class AgentPrompt(str, Enum):
+    GENERATE_ANSWER = 'Generate Answer'
+    REWRITE_QUERY = 'Rewrite Query'
+    GRADE_RETRIEVED_DOCUMENTS = 'Grade Retrieved Documents'
+    GRADE_ANSWER = 'Grade Answer'
+    GRADE_HALLUCINATION = 'Grade Hallucination'
+
 class GradeDocuments(BaseModel):
     """Binary score for relevance check on retrieved documents."""
 
@@ -24,4 +30,3 @@ class GradeAnswer(BaseModel):
     binary_score: str = Field(
         description='Answer addresses the question, "yes" or "no"'
     )
-    
