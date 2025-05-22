@@ -8,6 +8,7 @@ from ...providers.file_store import get_s3_bucket
 from ...providers.vector_store import get_vector_store
 
 from ...db_models import DbTrackedDocument
+from ...public_models.doc import DocumentStatus
 
 from .query import get_documents
 
@@ -30,8 +31,14 @@ def delete_document(document_id):
 
     pg_doc_ids = tracking_record.pg_doc_ids
 
-    vector_store = get_vector_store()
-    vector_store.delete(ids=pg_doc_ids)
+    if pg_doc_ids:
+        vector_store = get_vector_store()
+        vector_store.delete(ids=pg_doc_ids)
+    else:
+        if tracking_record.status == DocumentStatus.INGESTED:
+            logger.info('deleting tracking record without deleting vectors: %s', tracking_record.source_url)
+        else:
+            logger.debug('deleting tracking record without deleting vectors: %s', tracking_record.source_url)
 
     # Delete file from cloud storage.
 

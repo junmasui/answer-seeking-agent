@@ -122,7 +122,7 @@ def ingest_documents(doc_ids):
             # will not represent a partially processed file.
             new_pg_doc_ids = [doc.id for doc in document_chunks]
 
-            vector_store.add_documents(documents=document_chunks)
+            new_vector_ids = vector_store.add_documents(documents=document_chunks)
 
             # Update the tracking store.
             # Also at this time, remove orphaned vectors from the vector store. We didn't
@@ -140,11 +140,11 @@ def ingest_documents(doc_ids):
                     updateable_record.pg_doc_ids = []
                 prior_pg_doc_ids =  list(updateable_record.pg_doc_ids)
 
-                updateable_record.pg_doc_ids.extend(new_pg_doc_ids)
+                updateable_record.pg_doc_ids.extend(new_vector_ids)
 
-            logger.info('stored %d vectors regarding %s', len(new_pg_doc_ids), rel_path)
+            logger.info('stored %d vectors regarding %s', len(new_vector_ids), rel_path)
 
-            new_pg_doc_id_coll = set(new_pg_doc_ids)
+            new_pg_doc_id_coll = set(new_vector_ids)
             prior_pg_doc_id_coll = set(prior_pg_doc_ids)
             # Subtract the set of new IDs from the set of prior IDs. The result
             # will be the set of orphans to delete from the vector store.

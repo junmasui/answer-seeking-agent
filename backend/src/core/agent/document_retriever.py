@@ -6,14 +6,20 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 """
 
 import logging
+import pprint
 
 from langchain_core.documents import Document
+from weaviate.classes.query import Filter
+
+from global_config import get_global_config
 
 from ..providers.retriever import get_retriever
 
 
+
 logger = logging.getLogger(__name__)
 
+pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
 def query_documents(state):
@@ -32,13 +38,30 @@ def query_documents(state):
     kwargs = {}
 
     doc_set_ids = state['document_set_ids']
-    doc_set_ids = [str(x) for x in doc_set_ids]
-    if doc_set_ids and len(doc_set_ids) > 0:
-        kwargs['filter'] = {
-            'document_set_id': {
-                '$in': doc_set_ids
-            }
-        }
+    vector_store_type = get_global_config().vector_store_type
+
+    match vector_store_type:
+        case 'pgvector':
+            if doc_set_ids and len(doc_set_ids) > 0:
+                doc_set_ids = [str(x) for x in doc_set_ids]
+                kwargs['filter'] = {
+                    'document_set_id': {
+                        '$in': doc_set_ids
+                    }
+                }
+        case 'weaviate':
+            if doc_set_ids and len(doc_set_ids) > 0:
+                # Create a weaviate-specific Filter object. This will be passed into
+                # the weaviate API thru the key-word arguments of the call stack.
+                # A code review shows that no conversion is made from a generic dict to
+                # a weaviate-specific Filter object. 
+                where_filter = Filter.by_property("document_set_id").contains_any(doc_set_ids)
+                kwargs['filters'] = where_filter
+
+                # Return the chunk ID's.
+                kwargs['return_uuids'] = True
+        case _:
+            raise ValueError(f'Unknown vector store type: {vector_store_type}')
 
     retriever = get_retriever()
 
@@ -47,14 +70,22 @@ def query_documents(state):
 
     # Remove irrelevant metadata. It's stuff that we don't need for processing
     # or evaluation.
-    def _purge_metadata(x: Document):
+    def _clean_up_retrieved(x: Document):
 
         if 'orig_elements' in x.metadata:
             del x.metadata['orig_elements']
 
+        if 'id' not in x:
+            # The weaviate retrieve will include the object's id in the
+            # `metdata` dictionary under the `uuid` key.
+            if 'uuid' in x.metadata:
+                x.id = x.metadata['uuid']
+            elif 'id' in x.metadata:
+                x.id = x.metadata['id']
+
         return x
 
-    documents = [_purge_metadata(x) for x in documents]
+    documents = [_clean_up_retrieved(x) for x in documents]
 
     # Update agent state with retrieved documents
     stateUpdates = { 'documents': documents }

@@ -1,4 +1,5 @@
 import logging
+import pprint
 
 import re
 from typing import Union, Optional, Any
@@ -9,6 +10,8 @@ from langchain_core.output_parsers import BaseGenerationOutputParser
 from langchain_core.runnables import RunnableConfig
 
 logger = logging.getLogger(__name__)
+
+pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
     """Parse the output of an LLM call into a Dictionary using a regex."""
@@ -71,7 +74,6 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
         text = result[0].text
 
-
         answer = ""
         citations = []
         pos = 0
@@ -87,16 +89,15 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
             answer += text[pos:match.start()]
 
-            import pprint
-            logger.info('---CITATION---\n%s', pprint.pformat(dict(match.groupdict()), indent=4, width=200))
-
-            citations.append({
+            citation = {
                 'doc_id': doc_id,
                 'source_url': source_url,
                 'text': page_content,
                 'file_name': file_name,
                 'page_number': page_number
-            })
+            }
+
+            citations.append(citation)
 
             pos = match.end()
 

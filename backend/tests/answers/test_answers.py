@@ -25,8 +25,6 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
 
     content_type, resp = await api_server.post(path=path, content_type='json', timeout=60.0, data=data)
 
-    logger.info('ANSWER %s', pp.pformat(resp))
-
     assert content_type == 'json'
 
     assert 'threadId' in resp
