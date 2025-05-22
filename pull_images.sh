@@ -21,3 +21,5 @@ docker pull postgres:17.2-bookworm
 docker pull prom/prometheus
 docker pull prom/alertmanager
 docker pull redis
+
+docker pull cr.weaviate.io/semitechnologies/weaviate:1.30.3

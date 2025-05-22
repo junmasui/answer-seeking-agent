@@ -1,0 +1,73 @@
+services:
+  init-weaviate-volumes:
+    restart: 'no'
+
+    image: 'docker.io/debian:bookworm-slim'
+    profiles: [ init-volumes, weaviate, infrastructure-core, infrastructure, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - weaviate-data-1:/data-1
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        for VOL in 'data-1'
+        do
+          touch /$$VOL/.initialized
+          chown -R 999:999 /$$VOL
+          chmod -R 777 /$$VOL
+          ls -ld /$$VOL
+        done
+
+  weaviate:
+    restart: unless-stopped
+    depends_on:
+      init-weaviate-volumes:
+        condition: service_completed_successfully
+
+    image: cr.weaviate.io/semitechnologies/weaviate:1.30.3
+    profiles: [ weaviate, infrastructure-core, infrastructure, all ]
+
+    ports:
+    - 25080:25080
+    - 25051:25051
+    networks:
+      - agent-poc
+    volumes:
+      - weaviate-data-1:/var/lib/weaviate
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - weaviate_env
+
+    #user: 'redis:redis'
+    entrypoint: [ '/custom-docker-entrypoint.sh']
+
+    command: [
+        '--host',
+        '0.0.0.0',
+        '--port',
+        '25080',
+        '--scheme',
+        'http'
+    ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      GRPC_PORT: 25051
+    env_file:
+      - weaviate.env
+
+volumes:
+  weaviate-data-1:
+    driver: local

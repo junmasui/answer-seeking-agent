@@ -6,6 +6,7 @@ from typing import Optional
 from functools import cache
 import logging
 import uuid
+import pprint
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.pregel import Pregel
@@ -30,6 +31,8 @@ from ..public_models import Answer, Citation
 from ..doc_mgr import list_document_sets
 
 logger = logging.getLogger(__name__)
+
+pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
 def redo_document_retrieval(state):
