@@ -2,7 +2,6 @@
 This is a small stand-alone module that
 provides a global configuration object.
 """
-
 from functools import cache
 from typing import Union
 
@@ -34,6 +33,9 @@ class DocManagerConfig(BaseModel):
     chunk_root_dir: str = Field(default='upload_chunks')
     doc_root_dir: str = Field(default='documents')
 
+class CeleryWorkerConfig(BaseModel):
+    prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
+
 
 class Settings(BaseSettings):
     # We assume that the .env files were loaded into the environment
@@ -55,6 +57,8 @@ class Settings(BaseSettings):
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
 
+        toml_file_path = Path('./config_data/app_data.toml')
+
         # init_settings: setting values provided as keyword arguments when initialization
         #     an instance of this Settings class.
         # env_settings: settings values loaded from environment variables.
@@ -63,8 +67,8 @@ class Settings(BaseSettings):
         # file_secret_settings: settings values loaded from secret files, which are files in the
         #     directories specified in the `secrets_dir` config value.
 
-        return init_settings, env_settings, file_secret_settings, TomlConfigSettingsSource(settings_cls)
-
+        return init_settings, env_settings, file_secret_settings, TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path)
+    
     jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
 
     logging_config_path: Union[FilePath, NewPath] = Field(
@@ -110,6 +114,7 @@ class Settings(BaseSettings):
 
     doc_manager: DocManagerConfig = DocManagerConfig()
 
+    celery_worker: CeleryWorkerConfig = CeleryWorkerConfig()
 
 @cache
 def get_global_config():

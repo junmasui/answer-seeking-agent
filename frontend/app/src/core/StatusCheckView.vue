@@ -43,7 +43,7 @@ async function checkStatus() {
         }
 
         const data = await response.json();
-        console.log('Status check success:', data);
+        console.log('Status check success');
 
         if (data['status']) {
             systemStatus.value = data['status']
