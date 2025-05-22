@@ -96,10 +96,15 @@ class Settings(BaseSettings):
 
     unstructured_api_key: str = Field(default='', validation_alias='UNSTRUCTURED_API_KEY')
 
+    vector_store_type: str = Field(default='weaviate', validation_alias='VECTOR_STORE_TYPE')
 
     chat_llm_type: LowerCaseStr = Field(default='', validation_alias='CHAT_LLM_TYPE')
     llm_has_structured_output: bool = Field(default=False, validation_alias='LLM_HAS_STRUCTURED_OUTPUT')
 
+    weaviate_api_key: str = Field(default='', validation_alias='WEAVIATE_USER_API_KEY')
+    weaviate_host: str = Field(default='', validation_alias='WEAVIATE_HOST')
+    weaviate_http_port: int = Field(default=0, validation_alias='WEAVIATE_HTTP_PORT')
+    weaviate_grpc_port: int = Field(default=0, validation_alias='WEAVIATE_GRPC_PORT')
 
     minio_endpoint_url: AnyHttpUrl =Field(default='', validation_alias='MINIO_ENDPOINT_URL')
     minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')

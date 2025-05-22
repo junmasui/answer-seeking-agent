@@ -9,6 +9,7 @@ include:
   - postgres/compose.yml
   - prometheus/compose.yml
   - redis/compose.yml
+  - weaviate/compose.yml
 
 networks:
   agent-poc:
@@ -30,6 +31,8 @@ secrets:
     file: ./secrets/postgres.secrets.env
   redis_env:
     file: ./secrets/redis.secrets.env
+  weaviate_env:
+    file: ./secrets/weaviate.secrets.env
 
   redis_conf:
     file: ./secrets/redis.conf

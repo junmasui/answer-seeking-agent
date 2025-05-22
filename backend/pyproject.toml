@@ -25,6 +25,7 @@ dependencies = [
   "langchain-openai>=0.3.0",
   "langchain-postgres>=0.0.12",
   "langchain-unstructured>=0.1.6",
+  "langchain-weaviate>=0.0.4",
   "langfuse>=2.58.2",
   "langgraph>=0.2.64",
   "langgraph-checkpoint-postgres>=2.0.9",

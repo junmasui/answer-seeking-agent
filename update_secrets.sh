@@ -286,6 +286,14 @@ DESCR="Redis's default account's password."
 
 generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
+# Weaviate
+
+SECRETS_FILE=./secrets/weaviate.secrets.env
+VAR_NAME=WEAVIATE_USER_API_KEY
+VALUE_PREFIX=weaviate_
+DESCR="Weaviate's default account's password."
+
+generate_secret $SECRETS_FILE $VAR_NAME "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
 #=======

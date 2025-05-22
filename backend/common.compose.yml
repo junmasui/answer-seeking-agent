@@ -61,6 +61,7 @@ services:
       - checkpoints_postgres_dev_env
       - vectors_postgres_dev_env
       - redis_env
+      - weaviate_env
 
     mem_limit: 128m
     memswap_limit: 128m
@@ -118,6 +119,7 @@ services:
       - checkpoints_postgres_dev_env
       - vectors_postgres_dev_env
       - redis_env
+      - weaviate_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -196,6 +198,7 @@ services:
       - checkpoints_postgres_dev_env
       - vectors_postgres_dev_env
       - redis_env
+      - weaviate_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -271,6 +274,7 @@ services:
       - checkpoints_postgres_dev_env
       - vectors_postgres_dev_env
       - redis_env
+      - weaviate_env
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
