@@ -2,7 +2,6 @@ import logging
 import logging.handlers
 import pprint
 
-
 pp = pprint.PrettyPrinter(indent=2, width=120, compact=False, underscore_numbers=True, sort_dicts=False)
 
 

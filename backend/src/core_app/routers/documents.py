@@ -1,32 +1,31 @@
-from typing import Union, Optional, Annotated
-from datetime import datetime
 import logging
 import uuid
+from datetime import datetime
+from typing import Annotated, Optional, Union
 
-from fastapi import UploadFile, Form, Depends, APIRouter, Path, Query
+from fastapi import APIRouter, Depends, Form, Path, Query, UploadFile
 
 from core import (
-    list_documents,
-    upload_document,
-    upload_chunk,
-    merge_chunked_document,
     delete_document,
     get_document_statistics,
+    list_documents,
+    merge_chunked_document,
     update_document,
     update_document_status,
+    upload_chunk,
+    upload_document,
 )
 from core.public_models import (
+    BulkDeleteRequestBody,
     DocumentList,
     DocumentStats,
-    IngestRequestBody,
     DocumentStatus,
     DocumentUpdateRequest,
-    BulkDeleteRequestBody,
+    IngestRequestBody,
 )
-from global_config import get_global_config
-
 from core_worker import ingest_task
-from simple_auth import User, get_scoped_current_user, Scope
+from global_config import get_global_config
+from simple_auth import Scope, User, get_scoped_current_user
 
 from .util import parse_sort_by
 

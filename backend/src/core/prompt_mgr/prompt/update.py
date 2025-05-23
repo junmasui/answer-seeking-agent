@@ -7,10 +7,8 @@ from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from core.public_models.prompt import AgentPromptStatus
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
-
 from ...db_models import DbAgentPrompt
-
+from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)
 

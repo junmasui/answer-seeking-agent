@@ -15,7 +15,6 @@ from global_config import get_global_config
 
 from ..providers.retriever import get_retriever
 
-
 logger = logging.getLogger(__name__)
 
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)

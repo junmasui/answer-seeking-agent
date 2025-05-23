@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware

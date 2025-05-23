@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
 
 import pytest
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 logger = logging.getLogger(__name__)
 

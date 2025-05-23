@@ -5,10 +5,8 @@ from sqlalchemy import select
 
 from global_config import get_global_config
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
-
 from ...db_models import DbTrackedDocumentSet
-
+from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)
 

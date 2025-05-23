@@ -3,12 +3,9 @@ import uuid
 
 from sqlalchemy import delete
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
-
 from ...db_models import DbAgentPrompt
-
+from ...providers.sql_database import DataDomain, get_sessionmaker
 from .query import get_prompt
-
 
 logger = logging.getLogger(__name__)
 

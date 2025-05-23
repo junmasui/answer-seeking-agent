@@ -2,17 +2,17 @@
 This provides the vector store used by this application.
 """
 
+import logging
 import os
 from functools import cache
-import logging
 
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import PGVector
 
+from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
-from ..sql_database import get_engine, DataDomain
-from ...signals import start_up_handler, reset_data_handler
+from ..sql_database import DataDomain, get_engine
 
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/

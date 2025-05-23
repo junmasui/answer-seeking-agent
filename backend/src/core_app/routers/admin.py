@@ -1,13 +1,12 @@
-from typing import Annotated
 import logging
+from typing import Annotated
 
-from fastapi import Depends, APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
 from core.signals import send_reset_data
-from global_config import get_global_config
-
 from core_worker import reset_data_task
-from simple_auth import User, get_scoped_current_user, get_current_user, Scope
+from global_config import get_global_config
+from simple_auth import Scope, User, get_current_user, get_scoped_current_user
 
 logger = logging.getLogger(__name__)
 

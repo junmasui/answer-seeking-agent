@@ -2,11 +2,9 @@ import logging
 from typing import Generator
 
 import pytest
-
 from cloudpathlib.s3 import S3Client, S3Path
 
 from global_config import get_global_config
-
 
 logger = logging.getLogger(__name__)
 

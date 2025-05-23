@@ -1,12 +1,11 @@
 import logging
 import pprint
-
 import re
-from typing import Union, Optional, Any
+from typing import Any, Optional, Union
 
 from langchain_core.messages import BaseMessage
-from langchain_core.outputs import Generation, ChatGeneration
 from langchain_core.output_parsers import BaseGenerationOutputParser
+from langchain_core.outputs import ChatGeneration, Generation
 from langchain_core.runnables import RunnableConfig
 
 logger = logging.getLogger(__name__)

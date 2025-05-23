@@ -1,10 +1,11 @@
 import logging
-import yaml
 from pathlib import Path
 
-from .util import add_chat_prompt
+import yaml
+
 from ..agent.internal_models import AgentPrompt
 from ..signals import db_predefined_data_handler
+from .util import add_chat_prompt
 
 logger = logging.getLogger(__name__)
 

@@ -6,14 +6,12 @@ See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/
 """
 
 import logging
-from functools import cache
 import textwrap
+from functools import cache
 
 from .grader_util import build_grader
+from .internal_models import AgentPrompt, GradeDocuments
 from .prompt_util import get_chat_prompt
-
-from .internal_models import GradeDocuments, AgentPrompt
-
 
 logger = logging.getLogger(__name__)
 

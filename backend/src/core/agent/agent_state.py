@@ -1,10 +1,9 @@
 from typing import Annotated, NotRequired
-from typing_extensions import TypedDict
 from uuid import UUID
 
+from langchain_core.messages import AnyMessage, MessageLikeRepresentation
 from langgraph.graph.message import add_messages
-
-from langchain_core.messages import MessageLikeRepresentation, AnyMessage
+from typing_extensions import TypedDict
 
 
 class GraphState(TypedDict):

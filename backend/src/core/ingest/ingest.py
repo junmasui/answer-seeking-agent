@@ -1,20 +1,18 @@
-import os
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import func
 
-from ..db_models import DbTrackedDocument
-from ..public_models import DocumentStatus
-
-from ..doc_mgr import get_documents, update_tracking_record
-from ..providers.file_store import get_s3_bucket
-from ..providers.doc_loader import get_doc_loader
-from ..providers.vector_store import get_vector_store
-
 from global_config import get_global_config
 
+from ..db_models import DbTrackedDocument
+from ..doc_mgr import get_documents, update_tracking_record
+from ..providers.doc_loader import get_doc_loader
+from ..providers.file_store import get_s3_bucket
+from ..providers.vector_store import get_vector_store
+from ..public_models import DocumentStatus
 
 logger = logging.getLogger(__name__)
 

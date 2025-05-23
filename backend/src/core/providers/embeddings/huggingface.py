@@ -4,7 +4,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 from ...signals import start_up_handler
 
-
 #
 # See https://python.langchain.com/docs/integrations/text_embedding/huggingfacehub/
 #

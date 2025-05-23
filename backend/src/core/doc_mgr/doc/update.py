@@ -5,10 +5,8 @@ from contextlib import contextmanager
 from sqlalchemy import select
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
-
 from ...db_models import DbTrackedDocument
-
+from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)
 

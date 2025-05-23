@@ -1,15 +1,14 @@
-from typing import Optional, Union, Annotated
 import logging
 import uuid
+from typing import Annotated, Optional, Union
 
-from fastapi import Depends, APIRouter, Path, Query
+from fastapi import APIRouter, Depends, Path, Query
 
 from core import list_document_sets
-from core.doc_mgr import add_document_set, get_document_set_statistics, delete_document_set, update_document_set
+from core.doc_mgr import add_document_set, delete_document_set, get_document_set_statistics, update_document_set
 from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
 from global_config import get_global_config
-
-from simple_auth import User, get_scoped_current_user, Scope
+from simple_auth import Scope, User, get_scoped_current_user
 
 from .util import parse_sort_by
 

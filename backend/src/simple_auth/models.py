@@ -3,9 +3,9 @@ See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
 
-from typing import Optional
 import uuid
 from enum import StrEnum
+from typing import Optional
 
 from pydantic import BaseModel, Field
 

@@ -1,17 +1,14 @@
 import logging
-from typing import Optional
 import uuid
 from datetime import datetime
+from typing import Optional
 
-from sqlalchemy import and_, select, func, column
+from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased
 
-
-from ...providers.sql_database import get_sessionmaker, DataDomain
-from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus, SortDirection
-
 from ...db_models import DbTrackedDocumentSet
-
+from ...providers.sql_database import DataDomain, get_sessionmaker
+from ...public_models import DocumentSet, DocumentSetList, DocumentSetStatus, SortDirection
 from .stats import get_document_set_statistics
 
 logger = logging.getLogger(__name__)

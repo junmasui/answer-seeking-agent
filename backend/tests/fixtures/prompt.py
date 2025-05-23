@@ -1,6 +1,6 @@
-import pytest, pytest_asyncio
-
-from sqlalchemy import select, func, text
+import pytest
+import pytest_asyncio
+from sqlalchemy import func, select, text
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):

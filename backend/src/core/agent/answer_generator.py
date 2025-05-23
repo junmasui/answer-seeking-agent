@@ -12,8 +12,8 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser
-from .prompt_util import get_chat_prompt
 from .internal_models import AgentPrompt
+from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
 

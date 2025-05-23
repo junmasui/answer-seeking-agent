@@ -1,14 +1,10 @@
 import logging
 from functools import cache
 
-
 from langgraph.checkpoint.postgres import PostgresSaver
 
-
-from ..providers.sql_database import get_connection_pool, DataDomain
-
+from ..providers.sql_database import DataDomain, get_connection_pool
 from ..signals import start_up_handler
-
 
 logger = logging.getLogger(__name__)
 

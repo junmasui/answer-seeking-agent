@@ -3,13 +3,13 @@ See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
 
-from typing import Annotated
 import logging
+from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
-from simple_auth import create_token_from_login, User, Token, get_current_user
+from simple_auth import Token, User, create_token_from_login, get_current_user
 
 logger = logging.getLogger(__name__)
 

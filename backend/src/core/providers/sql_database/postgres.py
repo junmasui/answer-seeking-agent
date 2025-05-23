@@ -4,9 +4,9 @@ This provides the vector store used by this application.
 
 from functools import cache
 
+from psycopg_pool import ConnectionPool
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from psycopg_pool import ConnectionPool
 
 from global_config import get_global_config
 

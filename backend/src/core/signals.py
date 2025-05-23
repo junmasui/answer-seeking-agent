@@ -11,8 +11,8 @@ from already existing framework-specific signals. Both FastAPI and Celery
 also have signals, but those frameworks are not in every node.
 """
 
-from functools import cache
 import logging
+from functools import cache
 
 from blinker import signal
 from pydantic import BaseModel

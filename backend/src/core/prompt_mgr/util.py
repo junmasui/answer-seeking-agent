@@ -2,8 +2,8 @@ import textwrap
 
 from ..agent.internal_models import AgentPrompt
 from ..public_models import AgentPromptStatus
-from .prompt.query import list_prompts
 from .prompt.add import add_prompt
+from .prompt.query import list_prompts
 
 
 def add_chat_prompt(*, prompt_name: AgentPrompt, system_message: str = None, human_message: str = None):

@@ -3,8 +3,8 @@ See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
 
-from typing import Annotated
 import logging
+from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -15,7 +15,6 @@ from global_config import get_global_config
 
 from .models import TokenData, User
 from .users import retrieve_user
-
 
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

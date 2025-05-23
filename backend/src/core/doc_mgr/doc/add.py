@@ -4,11 +4,9 @@ from datetime import datetime
 
 from sqlalchemy import and_, select
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
-
 from ...db_models import DbTrackedDocument
+from ...providers.sql_database import DataDomain, get_sessionmaker
 from ...public_models import DocumentStatus
-
 
 logger = logging.getLogger(__name__)
 

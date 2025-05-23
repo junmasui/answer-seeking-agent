@@ -1,6 +1,5 @@
 import logging
 
-
 from langchain_core.messages import AIMessage
 
 logger = logging.getLogger(__name__)

@@ -1,4 +1,5 @@
 from functools import cache
+
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingFacePipeline
 
@@ -25,10 +26,10 @@ def get_chat_llm() -> BaseChatModel:
         repetition_penalty=1.03,
     )
 
-    from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline as hf_pipeline
-
-    from langchain_core.globals import set_llm_cache
     from langchain_core.caches import InMemoryCache
+    from langchain_core.globals import set_llm_cache
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import pipeline as hf_pipeline
 
     set_llm_cache(InMemoryCache())
 

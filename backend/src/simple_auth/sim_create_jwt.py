@@ -3,11 +3,11 @@ See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
 
+import logging
+import math
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional
-import uuid
-import math
-import logging
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -15,9 +15,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from global_config import get_global_config
 
-from .models import Token, Scope
+from .models import Scope, Token
 from .users import authenticate_user
-
 
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

@@ -5,10 +5,9 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from urllib.parse import urljoin
 
+import httpx
 import pytest
 import pytest_asyncio
-import httpx
-
 
 logger = logging.getLogger(__name__)
 

@@ -1,18 +1,17 @@
-from typing import Union
+import asyncio
 import logging
 from contextlib import asynccontextmanager
-import asyncio
+from typing import Union
 
-from fastapi import FastAPI
 from celery.result import AsyncResult
+from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from core import status_check
-from core.signals import send_start_up, send_reset_data, configure_sender
-
-from core_worker import get_worker_logger_tree
 import sim_auth_app
-from log_config_monitor import get_logging_conf_monitor, dump_logger_tree
+from core import status_check
+from core.signals import configure_sender, send_reset_data, send_start_up
+from core_worker import get_worker_logger_tree
+from log_config_monitor import dump_logger_tree, get_logging_conf_monitor
 
 from .middlewares import ErrorLoggingMiddleware
 from .routers import admin, answer, document_sets, documents, prompts

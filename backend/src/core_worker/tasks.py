@@ -1,11 +1,12 @@
-import logging
 import importlib
+import logging
 
 from celery import Celery
 
-from . import celeryconfig
 from core import ingest_documents, reset_worker_data
 from log_config_monitor import dump_logger_tree
+
+from . import celeryconfig
 
 logger = logging.getLogger(__name__)
 celery_app = Celery(main=__name__)

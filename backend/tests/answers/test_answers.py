@@ -1,12 +1,12 @@
 import asyncio
-from datetime import datetime, timezone
 import logging
-import uuid
 import pprint
+import uuid
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import pytest
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from core.public_models.doc import DocumentStatus
 

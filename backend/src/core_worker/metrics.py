@@ -1,15 +1,15 @@
 from pathlib import Path
 
 from prometheus_client import (
-    multiprocess,
-    start_wsgi_server,
-    generate_latest,
-    CollectorRegistry,
     CONTENT_TYPE_LATEST,
+    CollectorRegistry,
     Counter,
     GCCollector,
-    ProcessCollector,
     PlatformCollector,
+    ProcessCollector,
+    generate_latest,
+    multiprocess,
+    start_wsgi_server,
 )
 
 

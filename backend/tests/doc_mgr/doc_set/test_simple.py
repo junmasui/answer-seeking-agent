@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):

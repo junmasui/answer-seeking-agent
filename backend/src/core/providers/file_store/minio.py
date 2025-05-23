@@ -1,14 +1,13 @@
-from functools import cache
-import os
-from urllib.parse import unquote
 import logging
+import os
+from functools import cache
+from urllib.parse import unquote
 
 from cloudpathlib.s3 import S3Client, S3Path
 
 from global_config import get_global_config
 
-from ...signals import start_up_handler, reset_data_handler
-
+from ...signals import reset_data_handler, start_up_handler
 
 logger = logging.getLogger(__name__)
 

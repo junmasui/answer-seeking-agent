@@ -1,6 +1,6 @@
 import uuid
 
-from .models import User, TokenData
+from .models import TokenData, User
 
 
 def generate_uuid_from_username(name):

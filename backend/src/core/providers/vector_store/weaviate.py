@@ -2,24 +2,23 @@
 This provides the vector store used by this application.
 """
 
+import logging
 import os
 from functools import cache
-import logging
 
 from langchain_core.documents import Document
-from langchain_weaviate import WeaviateVectorStore
 from langchain_core.embeddings import Embeddings
-
+from langchain_weaviate import WeaviateVectorStore
 from weaviate import WeaviateClient, connect_to_local
-from weaviate.classes.config import Configure, Property, DataType, Tokenization, VectorDistances, VectorFilterStrategy
-from weaviate.classes.init import AdditionalConfig, Timeout, Auth
+from weaviate.classes.config import Configure, DataType, Property, Tokenization, VectorDistances, VectorFilterStrategy
+from weaviate.classes.init import AdditionalConfig, Auth, Timeout
 from weaviate.classes.query import Filter
 from weaviate.connect import ConnectionParams
 
 from global_config import get_global_config
 
+from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
-from ...signals import start_up_handler, reset_data_handler
 
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/

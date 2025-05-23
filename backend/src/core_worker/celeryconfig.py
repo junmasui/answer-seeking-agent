@@ -2,6 +2,7 @@
 # variables will show up in Flower's Config tab for the worker process.
 
 import logging as _logging
+
 from global_config import get_global_config as _get_global_config
 
 _logger = _logging.getLogger(__name__)

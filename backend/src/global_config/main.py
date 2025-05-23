@@ -3,25 +3,24 @@ This is a small stand-alone module that
 provides a global configuration object.
 """
 
-from typing import Union
-from typing_extensions import Annotated
 from functools import cache
+from typing import Union
 
 from pydantic import (
-    BaseModel,
-    Field,
-    PostgresDsn,
-    RedisDsn,
     AnyHttpUrl,
-    StringConstraints,
+    BaseModel,
     DirectoryPath,
+    Field,
     FilePath,
     NewPath,
+    PostgresDsn,
+    RedisDsn,
+    StringConstraints,
 )
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
-
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
+from typing_extensions import Annotated
 
 # Regular expression should match between 32 to 160 hexdecimal characters ( [0-9a-f] )
 JwtSecretStr = Annotated[str, StringConstraints(pattern='[0-9a-f]{32,160}')]

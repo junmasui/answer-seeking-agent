@@ -2,9 +2,9 @@ import textwrap
 
 from core.agent.internal_models import AgentPrompt
 from core.public_models import AgentPromptStatus
-from .prompt import get_prompt, list_prompts, get_prompt_statistics, add_prompt, delete_prompt, update_prompt
 
 from . import initial_prompts
+from .prompt import add_prompt, delete_prompt, get_prompt, get_prompt_statistics, list_prompts, update_prompt
 from .util import add_chat_prompt
 
 

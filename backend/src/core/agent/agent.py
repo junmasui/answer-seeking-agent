@@ -2,33 +2,30 @@
 This module provides the LLM-based agent.
 """
 
-from typing import Optional
-from functools import cache
 import logging
-import uuid
 import pprint
-
-from langgraph.graph import StateGraph, START, END
-from langgraph.pregel import Pregel
-from langgraph.errors import GraphRecursionError
+import uuid
+from functools import cache
+from typing import Optional
 
 from langfuse.callback import CallbackHandler
+from langgraph.errors import GraphRecursionError
+from langgraph.graph import END, START, StateGraph
+from langgraph.pregel import Pregel
 
+from ..doc_mgr import list_document_sets
+from ..public_models import Answer, Citation
 from .agent_state import GraphState
 from .answer_generator import generate_answer
 from .answer_grader import grade_answer
 from .checkpointer import get_checkpointer
-from .deciders import check_for_relevant_documents, check_for_halluciation, check_for_answer_relevancy
+from .deciders import check_for_answer_relevancy, check_for_halluciation, check_for_relevant_documents
 from .document_retriever import query_documents
 from .hallucination_grader import grade_hallucination
 from .postprocess import add_response_to_history
 from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
 from .retrieval_grader import grade_documents
-
-from ..public_models import Answer, Citation
-
-from ..doc_mgr import list_document_sets
 
 logger = logging.getLogger(__name__)
 

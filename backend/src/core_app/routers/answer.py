@@ -1,16 +1,14 @@
-from typing import Union, Annotated, Optional
 import logging
 import uuid
+from typing import Annotated, Optional, Union
 
-from fastapi import Depends, APIRouter
-from fastapi.responses import Response
 from celery.result import AsyncResult
+from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 
-from core import seek_answer, get_mermaid_graph
+from core import get_mermaid_graph, seek_answer
 from core.public_models import Answer, AnswerRequestBody
-
-
-from simple_auth import User, get_scoped_current_user, get_current_user, Scope
+from simple_auth import Scope, User, get_current_user, get_scoped_current_user
 
 logger = logging.getLogger(__name__)
 
