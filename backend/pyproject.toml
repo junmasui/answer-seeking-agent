@@ -89,15 +89,21 @@ asyncio_default_fixture_loop_scope = "module"
 
 
 [tool.ruff]
-select = ["E", "F", "W", "C"]
-ignore = []
+include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py"]
 line-length = 120
-
-[tool.ruff.rules]
-E501 = { line-length = 120 }
 
 [tool.ruff.format]
 quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C"]
+ignore = []
+
+##[tool.ruff.rules]
+##E501 = { line-length = 120 }
 
 [tool.uv]
 # Explicit declaration that the "cpu" and "cuda12" extras are in conflict
