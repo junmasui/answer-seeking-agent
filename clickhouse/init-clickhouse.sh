@@ -7,8 +7,9 @@ set -u  # Unbound variables are errors.
 # Set environment variables from mounted secrets files
 
 set +o history # temporarily turn off history
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
-export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
+# shellcheck disable=SC2046
+export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
 set -o history # turn it back on
 
 [ -z "${CLICKHOUSE_DEFAULT_USER_PASSWORD:-}" ] && echo "missing CLICKHOUSE_DEFAULT_USER_PASSWORD" && exit 1
@@ -100,12 +101,12 @@ sleep 1
 
 call_clickhouse \
     "SHOW TABLES format Pretty" \
-    ${LANGFUSE_CLICKHOUSE_USER_NAME} \
+    "${LANGFUSE_CLICKHOUSE_USER_NAME}" \
     "${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" \
-    ${LANGFUSE_CLICKHOUSE_DATABASE}
+    "${LANGFUSE_CLICKHOUSE_DATABASE}"
 
 call_clickhouse \
     "SELECT name, value FROM system.settings WHERE changed format Pretty" \
-    ${LANGFUSE_CLICKHOUSE_USER_NAME} \
+    "${LANGFUSE_CLICKHOUSE_USER_NAME}" \
     "${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" \
-    ${LANGFUSE_CLICKHOUSE_DATABASE}
+    "${LANGFUSE_CLICKHOUSE_DATABASE}"

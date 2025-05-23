@@ -5,11 +5,12 @@
 
 # Set environment variables from mounted secrets files
 
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # The weaviate image is based on Alpine.
 # Hence we need to use a pure-shell alternative to our more frequent technique
 # of `export $( grep | xargs )`
-for FILE in ${SECRETS_MOUNT}/*_env
+
+for FILE in "${SECRETS_MOUNT}"/*_env
 do
     [ -f "$FILE" ] || continue
     exec 3< "$FILE" # Open file descriptor 3. This robustly avoids subshell issues.
@@ -35,4 +36,4 @@ export AUTHENTICATION_APIKEY_USERS="${WEAVIATE_USER_NAME}"
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker image inspect cr.weaviate.io/semitechnologies/weaviate:1.30.3 | jq '.[0].Config.Entrypoint'
-exec "/bin/weaviate" $@
+exec "/bin/weaviate" "$@"

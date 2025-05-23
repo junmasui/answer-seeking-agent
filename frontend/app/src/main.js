@@ -1,12 +1,11 @@
-
 import './assets/main.css'
-import 'vuetify/dist/vuetify.min.css';
+import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
-import piniaPluginPersistedState from "pinia-plugin-persistedstate"
+import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 
 // Vuetify
 import 'vuetify/styles'
@@ -26,10 +25,9 @@ import { VTreeview } from 'vuetify/labs/VTreeview'
 import router from './router'
 import App from './App.vue'
 
-
 const vuetify = createVuetify({
   icons: {
-    iconfont: 'mdi',
+    iconfont: 'mdi'
   },
   components: {
     ...components,
@@ -53,4 +51,4 @@ createApp(App)
   .use(pinia)
   .use(vuetify)
   // Mount
-  .mount('#app');
+  .mount('#app')

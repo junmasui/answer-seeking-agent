@@ -14,21 +14,23 @@ const routes = [
   { path: '/', component: HomeView },
   // Reinsert when we have meaningful info: { path: '/about', component: AboutView },
   { path: '/conversational', component: ConversationalView },
-  { path: '/doc-mgr', component: DocManagerView,
+  {
+    path: '/doc-mgr',
+    component: DocManagerView,
     children: [
       { name: 'doc-sets', path: '', component: DocManagerDocSetTab, alias: 'doc-sets' },
       { name: 'upload-files', path: 'upload-files', component: DocManagerUploadTab },
-      { name: 'docs', path: 'docs', component: DocManagerIngestTab },
+      { name: 'docs', path: 'docs', component: DocManagerIngestTab }
     ]
-   },
+  },
   { path: '/status', component: StatusCheckView },
-  { path: '/admin', component: AdminCheckView },
+  { path: '/admin', component: AdminCheckView }
 ]
 
 // See createWebHistory at: https://router.vuejs.org/guide/essentials/history-mode#HTML5-Mode
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 })
 
 export default router

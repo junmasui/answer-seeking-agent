@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # Set environment variables from mounted secrets files
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # The minio/minio image does not include the Debian findutil and grep packages.
 # Hence we need to use a pure-shell alternative to our more frequent technique
 # of `export $( grep | xargs )`
-for FILE in ${SECRETS_MOUNT}/*_env
+for FILE in "${SECRETS_MOUNT}"/*_env
 do
     [ -f "$FILE" ] || continue
     exec 3< "$FILE" # Open file descriptor 3. This robustly avoids subshell issues.
@@ -24,4 +24,4 @@ done
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker inspect minio/minio:RELEASE.2024-12-13T22-19-12Z | jq '.[0].Config.Entrypoint'
-exec /usr/bin/docker-entrypoint.sh $@
+exec /usr/bin/docker-entrypoint.sh "$@"

@@ -1,9 +1,7 @@
 <template>
-    <h2>About</h2>
+  <h2>About</h2>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
-<style>
-</style>
+<style></style>

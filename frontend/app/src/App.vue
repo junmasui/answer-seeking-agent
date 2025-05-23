@@ -7,31 +7,43 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon="mdi-theme-light-dark" @click="toggleTheme" variant="text"></v-btn>
-      <v-tooltip max-width="300" text="Optional sign-in will enable long-memory personalization" location="bottom">
-        <template v-slot:activator="{ props }">
-          <v-btn :disabled="signedIn" v-bind="props" icon="mdi-login" @click="signIn" variant="text">
+      <v-btn icon="mdi-theme-light-dark" variant="text" @click="toggleTheme"></v-btn>
+      <v-tooltip
+        max-width="300"
+        text="Optional sign-in will enable long-memory personalization"
+        location="bottom"
+      >
+        <template #activator="{ props }">
+          <v-btn
+            :disabled="signedIn"
+            v-bind="props"
+            icon="mdi-login"
+            variant="text"
+            @click="signIn"
+          >
           </v-btn>
         </template>
       </v-tooltip>
 
-      <v-btn icon="mdi-dots-vertical" id="overflow-button" variant="text">
-      </v-btn>
+      <v-btn id="overflow-button" icon="mdi-dots-vertical" variant="text"> </v-btn>
 
       <v-menu activator="#overflow-button">
         <v-list>
           <v-list-item :disabled="!signedIn" @click="signOut">
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon icon="mdi-logout"></v-icon>
             </template>
             <v-list-item-title>Sign Out</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
-
     </v-app-bar>
-    <sign-in-dialog v-model:active="performSignIn" v-model:accessToken="accessToken" v-model:signedIn="signedIn"
-      @onSuccess="signInSucceeded">
+    <sign-in-dialog
+      v-model:active="performSignIn"
+      v-model:access-token="accessToken"
+      v-model:signed-in="signedIn"
+      @on-success="signInSucceeded"
+    >
     </sign-in-dialog>
 
     <v-main>
@@ -72,19 +84,18 @@ const router = useRouter()
 const drawerModel = ref(false)
 const performSignIn = ref(false)
 
-const currentUserStore = useCurrentUserStore();
+const currentUserStore = useCurrentUserStore()
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 function toggleDrawer() {
-  drawerModel.value = !drawerModel.value;
+  drawerModel.value = !drawerModel.value
 }
 
 function signIn() {
   performSignIn.value = true
 }
 
-function signInSucceeded() {
-}
+function signInSucceeded() {}
 
 function signOut() {
   accessToken.value = ''
@@ -94,7 +105,6 @@ function signOut() {
 function toggleTheme() {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
 }
-
 </script>
 
 <style scoped></style>

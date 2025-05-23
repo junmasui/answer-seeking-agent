@@ -1,10 +1,10 @@
 <template>
-    <v-container fluid class="pa-0 ma-0">
-        <!-- Interpolation expression is used for safety against XSS.
+  <v-container fluid class="pa-0 ma-0">
+    <!-- Interpolation expression is used for safety against XSS.
              It is safer than a v-html binding, which directly renders raw HTML.
         -->
-        <div class="system-bubble">{{ transformed }}</div>
-    </v-container>
+    <div class="system-bubble">{{ transformed }}</div>
+  </v-container>
 </template>
 
 <script setup>
@@ -12,32 +12,30 @@ import { computed } from 'vue'
 import { marked } from 'marked'
 
 const props = defineProps({
-    'message': {
-        type: String,
-    }
+  message: {
+    type: String
+  }
 })
 
 const transformed = computed(() => {
-    return marked(props.message)
+  return marked(props.message)
 })
-
 </script>
 
 <style scope>
 .system-bubble {
-    margin: 5px;
-    padding: 5px;
-    border-radius: 5px;
-    text-align: left;
-  
-    padding-left: 35px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+  margin: 5px;
+  padding: 5px;
+  border-radius: 5px;
+  text-align: left;
 
-    border: 2px solid #5d80cc;
+  padding-left: 35px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 
-    margin-left: 60px;
-  }
-  
+  border: 2px solid #5d80cc;
+
+  margin-left: 60px;
+}
 </style>
