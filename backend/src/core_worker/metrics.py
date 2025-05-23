@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
     CollectorRegistry,
@@ -13,6 +11,7 @@ from prometheus_client import (
 )
 
 from global_config import get_global_config
+
 
 def start_metrics(is_main_worker: bool):
     prometheus_multiproc_dir = get_global_config().celery_worker.prometheus_multiproc_dir

@@ -2,7 +2,9 @@
 This is a small stand-alone module that
 provides a global configuration object.
 """
+
 from functools import cache
+from pathlib import Path
 from typing import Union
 
 from pydantic import (
@@ -32,6 +34,7 @@ PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 class DocManagerConfig(BaseModel):
     chunk_root_dir: str = Field(default='upload_chunks')
     doc_root_dir: str = Field(default='documents')
+
 
 class CeleryWorkerConfig(BaseModel):
     prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
@@ -67,8 +70,13 @@ class Settings(BaseSettings):
         # file_secret_settings: settings values loaded from secret files, which are files in the
         #     directories specified in the `secrets_dir` config value.
 
-        return init_settings, env_settings, file_secret_settings, TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path)
-    
+        return (
+            init_settings,
+            env_settings,
+            file_secret_settings,
+            TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
+        )
+
     jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
 
     logging_config_path: Union[FilePath, NewPath] = Field(
@@ -115,6 +123,7 @@ class Settings(BaseSettings):
     doc_manager: DocManagerConfig = DocManagerConfig()
 
     celery_worker: CeleryWorkerConfig = CeleryWorkerConfig()
+
 
 @cache
 def get_global_config():
