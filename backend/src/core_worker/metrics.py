@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
     CollectorRegistry,
@@ -12,9 +10,11 @@ from prometheus_client import (
     start_wsgi_server,
 )
 
+from global_config import get_global_config
+
 
 def start_metrics(is_main_worker: bool):
-    prometheus_multiproc_dir = Path('/tmp/prometheus_metrics')
+    prometheus_multiproc_dir = get_global_config().celery_worker.prometheus_multiproc_dir
     prometheus_multiproc_dir.mkdir(exist_ok=True)
 
     registry = CollectorRegistry()
@@ -36,5 +36,5 @@ def start_metrics(is_main_worker: bool):
 
 
 def child_exit(child_pid):
-    prometheus_multiproc_dir = Path('/tmp/prometheus_metrics')
+    prometheus_multiproc_dir = get_global_config().celery_worker.prometheus_multiproc_dir
     multiprocess.mark_process_dead(child_pid, path=prometheus_multiproc_dir)

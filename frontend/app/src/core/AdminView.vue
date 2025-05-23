@@ -52,7 +52,7 @@ async function resetConfirmed() {
         }
 
         const data = await response.json();
-        console.log(`Database reset succeeded`, data);
+
     } catch (error) {
         console.error('Error reseting database:', error);
     }

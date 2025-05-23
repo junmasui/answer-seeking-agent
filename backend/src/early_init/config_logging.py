@@ -6,9 +6,10 @@ from rich.logging import RichHandler
 
 class SafeRichHandler(RichHandler):
     def render_message(self, record, message):
-        # Escape square brackets for RichHandler markup
+        # The RichHandler uses square brackets for its own markup syntax.
+        # Thus we need to escape the square brackets that are in the original message.
         if self.markup:
-            message = message.replace('[', '\[').replace(']', '\]')
+            message = message.replace('[', r'\[').replace(']', r'\]')
         return super().render_message(record, message)
 
 

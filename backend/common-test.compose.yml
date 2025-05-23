@@ -13,6 +13,7 @@ services:
       - backend-test-staging-1:/home/python/test-staging-1
       - backend-test-home-2:/home/python/test-home-2
       - backend-test-venv-2:/home/python/test-venv-2
+      - backend-test-prometheus-2:/home/python/test-prometheus-2
       - backend-test-staging-2:/home/python/test-staging-2
       - backend-test-home-3:/home/python/test-home-3
       - backend-test-venv-3:/home/python/test-venv-3
@@ -32,7 +33,7 @@ services:
 
         for VOL in \
           'test-home-1' 'test-venv-1' 'test-staging-1' \
-          'test-home-2' 'test-venv-2' 'test-staging-2' \
+          'test-home-2' 'test-venv-2' 'test-staging-2' 'test-prometheus-2' \
           'test-venv-3' 'test-home-3' \
           'test-venv-4' 'test-home-4'
         do
@@ -193,6 +194,7 @@ services:
       - backend-test-home-2:/home/python
       - backend-test-venv-2:/app/.venv
       - backend-test-staging-2:/staging
+      - backend-test-prometheus-2:/var/local/prometheus
     secrets:
       - answers_test_env
       - answers_jwt_test_env
@@ -375,6 +377,8 @@ volumes:
   backend-test-venv-2:
     driver: local
   backend-test-staging-2:
+    driver: local
+  backend-test-prometheus-2:
     driver: local
   backend-test-home-3:
     driver: local

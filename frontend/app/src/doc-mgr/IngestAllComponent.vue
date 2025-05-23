@@ -36,7 +36,7 @@ async function onIngest(event) {
         }
 
         const data = await response.json();
-        console.log('Ingest started successfully:', data);
+        console.log('Ingest started successfully');
     } catch (error) {
         console.error('Error ingesting:', error);
     }
