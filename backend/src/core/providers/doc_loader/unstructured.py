@@ -5,7 +5,7 @@ This provides the document loader used by this application.
 import os
 from functools import cache
 from pathlib import Path
-#import logging
+# import logging
 
 from langchain_unstructured import UnstructuredLoader
 
@@ -23,7 +23,7 @@ def start(sender):
     if not sender.is_worker:
         return
     # Some version combinations of unstructured and NLTK throw an error about
-    # loading 'punkt_tab'. 
+    # loading 'punkt_tab'.
     #
     # https://github.com/Unstructured-IO/unstructured/issues/3511
     #
@@ -32,7 +32,6 @@ def start(sender):
 
     nltk.download('punkt_tab')
     nltk.download('averaged_perceptron_tagger_eng')
-
 
 
 # def chunk_by_title(
@@ -48,32 +47,27 @@ def start(sender):
 # ) -> list[Element]:
 
 
-
 #
 # Create a document loader.
 #
-def get_doc_loader(file_path: Path|list[Path]):
+def get_doc_loader(file_path: Path | list[Path]):
     config = get_global_config()
 
     # When false, process locally and not thru cloud API.
     use_unstructured_cloud_api = config.use_unstructured_cloud_api
-    kwargs = {
-        'partition_via_api': use_unstructured_cloud_api
-    }
+    kwargs = {'partition_via_api': use_unstructured_cloud_api}
     if use_unstructured_cloud_api:
         kwargs['api_key'] = config.unstructured_api_key
-    
+
     loader = UnstructuredLoader(
-        file_path = file_path,
+        file_path=file_path,
         mode='elements',
         strategy='hi_res',
         chunking_strategy='by_title',
         max_characters=2_000,
         combine_text_under_n_chars=200,
         include_orig_elements=True,
-        **kwargs
+        **kwargs,
     )
 
     return loader
-
-

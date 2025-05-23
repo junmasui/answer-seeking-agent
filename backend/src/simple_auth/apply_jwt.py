@@ -2,6 +2,7 @@
 See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
+
 from typing import Annotated
 import logging
 
@@ -20,6 +21,7 @@ ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 logger = logging.getLogger(__name__)
+
 
 #
 # Use token
@@ -49,7 +51,6 @@ def _decode_token_data(token: str):
 
 
 async def get_current_user_from_token(token: str):
-
     if not token:
         return None
 
@@ -60,11 +61,10 @@ async def get_current_user_from_token(token: str):
         raise_credentials_error()
     return user
 
+
 # authentication is optional: When HTTP Authorization header is not available,
 # the dependency will return None instead of throwing a 401.
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl='token',
-    auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -72,13 +72,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 def get_scoped_current_user(scope: str, missing_ok: bool = False):
-
     auto_error = not missing_ok
     # When auto_error=False: if HTTP Authorization header is not available,
     # the dependency will return None instead of throwing a 401.
-    oauth2_scheme = OAuth2PasswordBearer(
-        tokenUrl='token',
-        auto_error=auto_error)
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=auto_error)
 
     async def scoped_user(token: Annotated[str, Depends(oauth2_scheme)]):
         user = await get_current_user_from_token(token)

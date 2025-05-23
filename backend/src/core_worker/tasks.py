@@ -16,18 +16,17 @@ celery_app.config_from_object(celeryconfig)
 
 @celery_app.task(name='ingest-docs')
 def ingest_task(doc_ids=None):
-    """Ingest
-    """
+    """Ingest"""
     return ingest_documents(doc_ids)
+
 
 @celery_app.task(name='get-logger-tree')
 def get_worker_logger_tree(include_all=False):
-    """Get the actual logger tree of the celery worker
-    """
+    """Get the actual logger tree of the celery worker"""
     return dump_logger_tree(include_all=include_all)
+
 
 @celery_app.task(name='reset-data')
 def reset_data_task():
-    """Handles reset-data event.
-    """
+    """Handles reset-data event."""
     return reset_worker_data()

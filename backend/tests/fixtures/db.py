@@ -23,6 +23,7 @@ __all__ = ['get_connection_str', 'sql_engine', 'reflected_metadata', 'auto_mappe
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
 
+
 def get_connection_str():
     config = get_global_config()
 
@@ -35,7 +36,8 @@ def get_connection_str():
     # Convert away from PyDantic's custom type and to Python string.
     return str(connection_url)
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope='module')
 def sql_engine() -> Generator[Engine, None, None]:
     """Returns the SQLAlchemy engine for the database.
 
@@ -51,7 +53,8 @@ def sql_engine() -> Generator[Engine, None, None]:
 
     engine.dispose()
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope='module')
 def sql_sessionmaker(sql_engine) -> Generator[sessionmaker, None, None]:
     """Returns a SQLAlchemy sessionmaker object for the database.
 
@@ -64,7 +67,7 @@ def sql_sessionmaker(sql_engine) -> Generator[sessionmaker, None, None]:
     yield maker
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     """Returns a Metadata object for the database."""
     metadata = MetaData(schema='answers')
@@ -74,7 +77,6 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     # # Convert the tables attribute to a plain dict. The original reflected
     # # attribute is of type FacadeDict and is read-only
     # metadata.tables = dict(metadata.tables)
-
 
     # # Explicitly override column metadata known to be a custom datatype.
     # # The normal reflection mechanism does not know our custom datatypes.
@@ -101,11 +103,9 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     yield metadata
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def auto_mapped_classes(sql_engine, reflected_metadata) -> Generator[dict[str, type], None, None]:
-    """Returns the default automap base class for an automap schema.
-
-    """
+    """Returns the default automap base class for an automap schema."""
 
     # produce a set of mappings from this MetaData.
     Base = automap_base(metadata=reflected_metadata)
@@ -117,4 +117,3 @@ def auto_mapped_classes(sql_engine, reflected_metadata) -> Generator[dict[str, t
 
     # Use yield so that we do clean up during the test tear-down.
     yield classes
-

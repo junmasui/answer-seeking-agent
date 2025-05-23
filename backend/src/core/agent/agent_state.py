@@ -1,4 +1,3 @@
-
 from typing import Annotated, NotRequired
 from typing_extensions import TypedDict
 from uuid import UUID
@@ -6,6 +5,7 @@ from uuid import UUID
 from langgraph.graph.message import add_messages
 
 from langchain_core.messages import MessageLikeRepresentation, AnyMessage
+
 
 class GraphState(TypedDict):
     """

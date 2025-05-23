@@ -3,6 +3,7 @@ from typing import Optional
 
 from .base import CamelModel
 
+
 #
 # Operator Models
 #

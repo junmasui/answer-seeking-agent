@@ -2,6 +2,7 @@ import logging
 from rich.console import Console
 from rich.logging import RichHandler
 
+
 class SafeRichHandler(RichHandler):
     def render_message(self, record, message):
         # Escape square brackets for RichHandler markup
@@ -9,8 +10,8 @@ class SafeRichHandler(RichHandler):
             message = message.replace('[', '\[').replace(']', '\]')
         return super().render_message(record, message)
 
-def configure_logging():
 
+def configure_logging():
     terminal_width = 120
     console = Console(width=terminal_width) if terminal_width else None
     rich_handler = SafeRichHandler(
@@ -50,5 +51,6 @@ def configure_logging():
     if not has_rich_handler:
         logger.addHandler(rich_handler)
     logger.setLevel(logging.INFO)
+
 
 configure_logging()

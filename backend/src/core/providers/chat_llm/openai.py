@@ -4,6 +4,7 @@ from functools import cache
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 
+
 #
 # Create chat LLM.
 #
@@ -11,8 +12,7 @@ from langchain_openai import ChatOpenAI
 #
 @cache
 def get_chat_llm() -> BaseChatModel:
-    """
-    """
+    """ """
 
     llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)
 

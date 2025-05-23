@@ -3,11 +3,6 @@ from . import event_handlers
 
 from .base import DECLARED_METADATA
 
-from .doc_mgr import (
-    DbTrackedDocument,
-    DbTrackedDocumentSet
-)
+from .doc_mgr import DbTrackedDocument, DbTrackedDocumentSet
 
-from .prompt_mgr import (
-    DbAgentPrompt
-)
+from .prompt_mgr import DbAgentPrompt

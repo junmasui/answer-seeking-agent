@@ -1,19 +1,8 @@
 import enum
 
-from .agent import (
-    Answer,
-    Citation,
-    AnswerRequestBody
-)
+from .agent import Answer, Citation, AnswerRequestBody
 
-from .doc import (
-    BulkDeleteRequestBody,
-    Document,
-    DocumentList,
-    DocumentStats,
-    DocumentStatus,
-    DocumentUpdateRequest
-)
+from .doc import BulkDeleteRequestBody, Document, DocumentList, DocumentStats, DocumentStatus, DocumentUpdateRequest
 
 from .doc_set import (
     DocumentSet,
@@ -21,12 +10,10 @@ from .doc_set import (
     DocumentSetStats,
     DocumentSetStatus,
     DocumentSetAddRequest,
-    DocumentSetUpdateRequest
+    DocumentSetUpdateRequest,
 )
 
-from .ingest import (
-    IngestRequestBody
-)
+from .ingest import IngestRequestBody
 
 from .prompt import (
     AgentPrompt,
@@ -34,8 +21,9 @@ from .prompt import (
     AgentPromptStats,
     AgentPromptStatus,
     AgentPromptAddRequest,
-    AgentPromptUpdateRequest
+    AgentPromptUpdateRequest,
 )
+
 
 class SortDirection(str, enum.Enum):
     ASC = 'asc'

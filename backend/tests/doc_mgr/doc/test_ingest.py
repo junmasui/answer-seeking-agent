@@ -9,11 +9,11 @@ from sqlalchemy import select, func
 
 from core.public_models.doc import DocumentStatus
 
-logger  = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
 
-def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
+def _get_table_count(auto_mapped_table, sql_sessionmaker):
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()
@@ -21,6 +21,7 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
         count = result[0]
 
     return count
+
 
 def _get_doc_set_id(populated_doc_set_table, sql_sessionmaker):
     with sql_sessionmaker() as session:
@@ -31,18 +32,16 @@ def _get_doc_set_id(populated_doc_set_table, sql_sessionmaker):
 
     return doc_set_id
 
+
 @pytest.mark.asyncio
 async def test_ingest(api_server, populated_doc_table, sql_sessionmaker):
-
     with sql_sessionmaker() as session:
         stmt = select(populated_doc_table)
         result = session.execute(stmt).first()
 
         doc_id = result[0].id
 
-    data = {
-        'docUuids': [ str(doc_id) ] 
-    }
+    data = {'docUuids': [str(doc_id)]}
 
     path = f'/documents/ingest'
     content_type, resp = await api_server.post(path=path, content_type='json', data=data)
@@ -65,7 +64,7 @@ async def test_ingest(api_server, populated_doc_table, sql_sessionmaker):
     await asyncio.sleep(5)
 
     loop = 0
-    while loop < 1800: # Allow ingestion to take up to 30 minutes
+    while loop < 1800:  # Allow ingestion to take up to 30 minutes
         loop = loop + 1
         await asyncio.sleep(1)
 
@@ -87,4 +86,3 @@ async def test_ingest(api_server, populated_doc_table, sql_sessionmaker):
             break
 
     assert status == DocumentStatus.INGESTED
-

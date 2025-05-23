@@ -13,22 +13,44 @@ from ...public_models import DocumentStatus
 logger = logging.getLogger(__name__)
 
 
+def add_document(
+    *,
+    document_set_uuid,
+    file_dir,
+    file_name,
+    source_url,
+    content_type,
+    download_time_utc,
+    cloud_path,
+    bucket_path,
+    user_id,
+):
+    """Adds or updates the tracking record for the document."""
+    return _add_or_update_document(
+        document_set_uuid=document_set_uuid,
+        file_dir=file_dir,
+        file_name=file_name,
+        cloud_path=cloud_path,
+        bucket_path=bucket_path,
+        source_url=source_url,
+        content_type=content_type,
+        download_time_utc=download_time_utc,
+        user_id=user_id,
+    )
 
-def add_document(*, document_set_uuid, file_dir, file_name, source_url, content_type, download_time_utc, cloud_path, bucket_path, user_id):
-    """Adds or updates the tracking record for the document.
-    """
-    return _add_or_update_document(document_set_uuid=document_set_uuid,
-                            file_dir=file_dir,
-                            file_name=file_name,
-                            cloud_path=cloud_path,
-                            bucket_path=bucket_path,
-                            source_url=source_url,
-                            content_type=content_type,
-                            download_time_utc=download_time_utc,
-                            user_id=user_id)
 
-
-def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_url, content_type, download_time_utc, cloud_path, bucket_path, user_id):
+def _add_or_update_document(
+    *,
+    document_set_uuid,
+    file_dir,
+    file_name,
+    source_url,
+    content_type,
+    download_time_utc,
+    cloud_path,
+    bucket_path,
+    user_id,
+):
     if not isinstance(document_set_uuid, uuid.UUID):
         raise TypeError('document_set_uuid must be a UUID object')
 
@@ -45,8 +67,8 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
     with sessionmaker() as session:
         with session.begin():
             stmt = select(DbTrackedDocument).where(
-                and_(DbTrackedDocument.filename == file_name,
-                     DbTrackedDocument.document_set_id == document_set_uuid))
+                and_(DbTrackedDocument.filename == file_name, DbTrackedDocument.document_set_id == document_set_uuid)
+            )
             result = session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
@@ -73,11 +95,11 @@ def _add_or_update_document(*, document_set_uuid, file_dir, file_name, source_ur
                     filename=file_name,
                     size_bytes=size_bytes,
                     file_modified_time=file_modification_time,
-                    source_url = source_url,
-                    content_type = content_type,
-                    download_time_utc = download_time_utc,
+                    source_url=source_url,
+                    content_type=content_type,
+                    download_time_utc=download_time_utc,
                     s3_rel_path=str(s3_rel_path),
-                    last_user_id=user_id
+                    last_user_id=user_id,
                 )
                 session.add(new_obj)
 

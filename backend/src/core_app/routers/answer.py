@@ -1,5 +1,3 @@
-
-
 from typing import Union, Annotated, Optional
 import logging
 import uuid
@@ -8,7 +6,7 @@ from fastapi import Depends, APIRouter
 from fastapi.responses import Response
 from celery.result import AsyncResult
 
-from core import (seek_answer, get_mermaid_graph)
+from core import seek_answer, get_mermaid_graph
 from core.public_models import Answer, AnswerRequestBody
 
 
@@ -20,10 +18,11 @@ router = APIRouter()
 
 
 @router.get('/', response_model=Answer)
-async def handle_question(q: Union[str, None] = None,
-                          threadId: Union[uuid.UUID, None] = None,
-                          current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None):
-
+async def handle_question(
+    q: Union[str, None] = None,
+    threadId: Union[uuid.UUID, None] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
+):
     user_id = current_user.user_id if current_user is not None else None
 
     answer = seek_answer(user_input=q, thread_id=threadId, user_id=user_id)
@@ -32,10 +31,12 @@ async def handle_question(q: Union[str, None] = None,
 
     return answer
 
-@router.post('/', response_model=Answer)
-async def handler_question(body: AnswerRequestBody,
-                           current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None):
 
+@router.post('/', response_model=Answer)
+async def handler_question(
+    body: AnswerRequestBody,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
+):
     user_id = current_user.user_id if current_user is not None else None
 
     answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
@@ -43,6 +44,7 @@ async def handler_question(body: AnswerRequestBody,
     logger.info(f'returning {answer}')
 
     return answer
+
 
 @router.get('/mermaid')
 async def handle_mermaid_graph(current_user: Annotated[User, Depends(get_current_user)] = None):

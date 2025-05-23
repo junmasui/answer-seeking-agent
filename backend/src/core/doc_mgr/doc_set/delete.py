@@ -12,9 +12,9 @@ from .query import get_document_sets
 
 logger = logging.getLogger(__name__)
 
+
 def delete_document_set(document_set_id):
-    """Delete document set
-    """
+    """Delete document set"""
 
     # Retrieve tracking record.
 
@@ -32,16 +32,13 @@ def delete_document_set(document_set_id):
 
 
 def _delete_tracking_record(doc_set_uuid):
-    """Deletes the tracking record.
-    """
+    """Deletes the tracking record."""
     if isinstance(doc_set_uuid, str):
         doc_set_uuid = uuid.UUID(hex=doc_set_uuid)
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-
         with session.begin():
-            stmt = delete(DbTrackedDocumentSet).where(
-                DbTrackedDocumentSet.id == doc_set_uuid)
+            stmt = delete(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id == doc_set_uuid)
             result = session.execute(stmt)

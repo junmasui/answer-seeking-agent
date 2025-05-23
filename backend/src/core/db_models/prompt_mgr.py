@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 DbPromptStatus = ENUM(AgentPromptStatus)
 
-class DbAgentPrompt(Base):
 
-    __tablename__ = "agent_prompt"
+class DbAgentPrompt(Base):
+    __tablename__ = 'agent_prompt'
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -25,8 +25,6 @@ class DbAgentPrompt(Base):
     include_history: Mapped[bool] = mapped_column(Boolean, nullable=True)
     system_message: Mapped[str] = mapped_column(String(9000), nullable=True)
     human_message: Mapped[str] = mapped_column(String(9000), nullable=True)
-
-
 
     # Version number
     version: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -43,6 +41,6 @@ class DbAgentPrompt(Base):
     # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_onupdate.
     #
     create_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
-    update_time: Mapped[datetime.datetime] = mapped_column(DateTime, 
-        server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
+    update_time: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )

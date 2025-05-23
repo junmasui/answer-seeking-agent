@@ -17,18 +17,16 @@ from .internal_models import AgentPrompt
 
 logger = logging.getLogger(__name__)
 
-def answer_generator():
 
+def answer_generator():
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GENERATE_ANSWER)
 
     # LLM
     llm = get_chat_llm()
 
-
     # # Post-processing
     # def format_docs(docs):
     #     return '\n\n'.join(doc.page_content for doc in docs)
-
 
     # Chain
     rag_chain = prompt | llm | AnswerCitationParser()
@@ -56,15 +54,11 @@ def generate_answer(state):
     rag_chain = answer_generator()
 
     # RAG generation
-    result = rag_chain.invoke(input={'documents': documents,
-                                     'chat_history': history,
-                                     'question': question},
-                                     config={'configurable': {'documents': documents}})
+    result = rag_chain.invoke(
+        input={'documents': documents, 'chat_history': history, 'question': question},
+        config={'configurable': {'documents': documents}},
+    )
 
     # Update state with generated output
-    stateUpdates = {
-        'generation': result['generation'],
-        'answer': result['answer'],
-        'citations': result['citations']
-    }
+    stateUpdates = {'generation': result['generation'], 'answer': result['answer'], 'citations': result['citations']}
     return stateUpdates

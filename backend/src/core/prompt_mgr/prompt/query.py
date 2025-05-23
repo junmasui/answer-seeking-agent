@@ -17,9 +17,7 @@ from .stats import get_prompt_statistics
 logger = logging.getLogger(__name__)
 
 
-
-def get_prompt(prompt_uuid_list: list[str | uuid.UUID],
-               status: Optional[AgentPromptStatus] = AgentPromptStatus.ACTIVE):
+def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPromptStatus] = AgentPromptStatus.ACTIVE):
     """Return tracking records when matched to specified prommpt UUID."""
 
     def _ensure_uuid(item):
@@ -30,7 +28,6 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID],
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-
         where = [DbAgentPrompt.id.in_(prompt_uuid_list)]
         if status is not None:
             where.append(DbAgentPrompt.status == status)
@@ -46,42 +43,44 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID],
     return existing_objs
 
 
-def list_prompts(*,
-                 name: Optional[str] = None,
-                 status: Optional[AgentPromptStatus] = None,
-                 start: Optional[int] =None, length: Optional[int] =None, sort_by: Optional[list] = None):
-    """Return the list of prompts.
-    """
+def list_prompts(
+    *,
+    name: Optional[str] = None,
+    status: Optional[AgentPromptStatus] = None,
+    start: Optional[int] = None,
+    length: Optional[int] = None,
+    sort_by: Optional[list] = None,
+):
+    """Return the list of prompts."""
 
-    existing_objs = _list_agent_prompts(name=name,
-                                        status=status,
-                                        start=start, length=length, sort_by=sort_by)
+    existing_objs = _list_agent_prompts(name=name, status=status, start=start, length=length, sort_by=sort_by)
     table_stats = get_prompt_statistics()
-
 
     def _to_dict(_x: DbAgentPrompt):
         return AgentPrompt(
-            id = _x.id,
-            name = _x.name,
-            status = _x.status,
-            system_message = _x.system_message,
-            human_message = _x.human_message,
-            version = _x.version
+            id=_x.id,
+            name=_x.name,
+            status=_x.status,
+            system_message=_x.system_message,
+            human_message=_x.human_message,
+            version=_x.version,
         )
 
     prompt_list = [_to_dict(x) for x in existing_objs]
 
     return AgentPromptList(
-        prompts = prompt_list,
-        prompt_count = table_stats.prompt_count,
-        table_updated_time =  table_stats.table_updated_time
+        prompts=prompt_list, prompt_count=table_stats.prompt_count, table_updated_time=table_stats.table_updated_time
     )
 
 
-def _list_agent_prompts(*,
-                        name: Optional[str] = None,
-                        status: Optional[AgentPromptStatus] = None,
-                        start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
+def _list_agent_prompts(
+    *,
+    name: Optional[str] = None,
+    status: Optional[AgentPromptStatus] = None,
+    start: Optional[int] = None,
+    length: Optional[int] = None,
+    sort_by: Optional[list] = None,
+):
     """Return prompts when matched to specified propmt UUID."""
 
     if sort_by is None:
@@ -105,11 +104,10 @@ def _list_agent_prompts(*,
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
         return expr
-    
-    order_by = [ _to_col(x) for x in sort_by ]
+
+    order_by = [_to_col(x) for x in sort_by]
 
     with sessionmaker() as session:
-
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
@@ -121,7 +119,7 @@ def _list_agent_prompts(*,
             where.append(DbAgentPrompt.name.ilike(name))
         if status is not None:
             where.append(DbAgentPrompt.status == status)
-        
+
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
         elif len(where) == 1:
@@ -133,9 +131,7 @@ def _list_agent_prompts(*,
         # Apply pagination if requested
         if paginate:
             # When paginating, we add a windowing function to the selected fields.
-            cte_query= core_query.add_columns(
-                func.row_number().over(order_by=order_by).label('row_num')
-            )
+            cte_query = core_query.add_columns(func.row_number().over(order_by=order_by).label('row_num'))
 
             # Create a CTE from the core query.
             cte = cte_query.cte(name='row_numbered')
@@ -154,10 +150,8 @@ def _list_agent_prompts(*,
         else:
             query = core_query
 
-
         result = session.execute(query)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
     return existing_objs
-

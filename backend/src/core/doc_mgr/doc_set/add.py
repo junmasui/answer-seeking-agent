@@ -14,20 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 def add_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
-
     return _add_or_update_document_set(name=name, is_default=is_default, is_pubic=is_pubic, user_id=user_id)
 
 
 def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
-    """Adds or updates the document set.
-    """
+    """Adds or updates the document set."""
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
         with session.begin():
-            stmt = select(DbTrackedDocumentSet).where(
-                DbTrackedDocumentSet.name == name)
+            stmt = select(DbTrackedDocumentSet).where(DbTrackedDocumentSet.name == name)
             result = session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
@@ -45,14 +42,13 @@ def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, use
 
                 rel_path = doc_root_dir + '/' + name
 
-
                 new_obj = DbTrackedDocumentSet(
                     id=doc_set_uuid,
                     name=name,
                     s3_rel_path=rel_path,
                     is_new_doc_default=is_default,
                     is_public_viewable=is_pubic,
-                    last_user_id=user_id
+                    last_user_id=user_id,
                 )
                 session.add(new_obj)
 

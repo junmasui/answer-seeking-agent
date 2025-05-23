@@ -2,6 +2,7 @@
 See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
+
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional
 import uuid
@@ -28,12 +29,14 @@ logger = logging.getLogger(__name__)
 #
 
 
-def _create_access_token(*,
-                         userid: uuid.UUID,
-                         username: str,
-                         expires_in: Optional[timedelta] = None,
-                         scopes: Optional[list[str]] = None,
-                         additional_claims: Optional[dict] = None) -> Token:
+def _create_access_token(
+    *,
+    userid: uuid.UUID,
+    username: str,
+    expires_in: Optional[timedelta] = None,
+    scopes: Optional[list[str]] = None,
+    additional_claims: Optional[dict] = None,
+) -> Token:
     """
     Simulates an actual token creation inside an true authentication service.
     """
@@ -68,8 +71,7 @@ def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depe
     Simulates the user-password workflow inside an true authentication service.
     """
 
-    user = authenticate_user(username=form_data.username,
-                             password=form_data.password)
+    user = authenticate_user(username=form_data.username, password=form_data.password)
 
     if not user:
         raise HTTPException(
@@ -78,18 +80,7 @@ def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depe
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
-    scopes = [
-        Scope.DOC_READ,
-        Scope.DOC_WRITE,
-        Scope.DOC_INGEST,
-        Scope.DOC_INGEST_BULK,
-        Scope.QUERY,
-        Scope.ADMIN
-    ]
+    scopes = [Scope.DOC_READ, Scope.DOC_WRITE, Scope.DOC_INGEST, Scope.DOC_INGEST_BULK, Scope.QUERY, Scope.ADMIN]
 
-    access_token = _create_access_token(
-        additional_claims={}, userid=user.userid, username=user.username, scopes=scopes
-    )
+    access_token = _create_access_token(additional_claims={}, userid=user.userid, username=user.username, scopes=scopes)
     return access_token
-
-

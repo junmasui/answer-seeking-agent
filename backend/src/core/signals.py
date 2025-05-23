@@ -10,6 +10,7 @@ This module also acts to insulate our application-specific signals
 from already existing framework-specific signals. Both FastAPI and Celery
 also have signals, but those frameworks are not in every node.
 """
+
 from functools import cache
 import logging
 
@@ -50,10 +51,12 @@ def reset_data_handler(receiver):
 class Sender(BaseModel):
     is_worker: bool = False
 
+
 @cache
 def _get_sender():
     sender = Sender()
     return sender
+
 
 def configure_sender(*, is_worker: bool):
     sender = _get_sender()
@@ -61,8 +64,7 @@ def configure_sender(*, is_worker: bool):
 
 
 def send_start_up():
-    """Send the start-up signal
-    """
+    """Send the start-up signal"""
     logger.info('Sending start-up signal')
 
     sender = _get_sender()
@@ -71,7 +73,7 @@ def send_start_up():
 
 def send_db_predefined_data():
     """Send the db-predefined-data signal.
-    
+
     This signal is sent after the database schema is updated or created
     and the database is ready to accept predefined data.
     """
@@ -88,8 +90,7 @@ def send_db_predefined_data():
 
 
 def send_reset_data():
-    """Send the reset-data signal
-    """
+    """Send the reset-data signal"""
     logger.info('Sending reset-data signal')
 
     sender = _get_sender()

@@ -17,7 +17,6 @@ from .stats import get_document_set_statistics
 logger = logging.getLogger(__name__)
 
 
-
 def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     """Return tracking records when matched to specified document UUID."""
 
@@ -29,9 +28,7 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-
-        stmt = select(DbTrackedDocumentSet).where(
-            DbTrackedDocumentSet.id.in_(doc_set_uuid_list))
+        stmt = select(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id.in_(doc_set_uuid_list))
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
@@ -39,40 +36,49 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     return existing_objs
 
 
-def list_document_sets(*,
-                       name: Optional[str] = None,
-                       is_default: Optional[bool] = None, is_public: Optional[bool] = None,
-                       start: Optional[int] =None, length: Optional[int] =None, sort_by: Optional[list] = None):
-    """Return the list of document sets.
-    """
+def list_document_sets(
+    *,
+    name: Optional[str] = None,
+    is_default: Optional[bool] = None,
+    is_public: Optional[bool] = None,
+    start: Optional[int] = None,
+    length: Optional[int] = None,
+    sort_by: Optional[list] = None,
+):
+    """Return the list of document sets."""
 
-    existing_objs = _list_tracking_document_sets(name=name,
-                                                 is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by)
+    existing_objs = _list_tracking_document_sets(
+        name=name, is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by
+    )
     table_stats = get_document_set_statistics()
-
 
     def _to_dict(_x: DbTrackedDocumentSet):
         return DocumentSet(
-            id = _x.id,
-            name = _x.name,
-            status = DocumentSetStatus.ACTIVE, # TODO - Replace hardcode with database column
-            is_new_doc_default = _x.is_new_doc_default,
-            is_public_viewable = _x.is_public_viewable
+            id=_x.id,
+            name=_x.name,
+            status=DocumentSetStatus.ACTIVE,  # TODO - Replace hardcode with database column
+            is_new_doc_default=_x.is_new_doc_default,
+            is_public_viewable=_x.is_public_viewable,
         )
 
     doc_set_list = [_to_dict(x) for x in existing_objs]
 
     return DocumentSetList(
-        document_sets = doc_set_list,
-        document_set_count = table_stats.document_set_count,
-        table_updated_time =  table_stats.table_updated_time
+        document_sets=doc_set_list,
+        document_set_count=table_stats.document_set_count,
+        table_updated_time=table_stats.table_updated_time,
     )
 
 
-def _list_tracking_document_sets(*,
-                                 name: Optional[str] = None,
-                                 is_default: Optional[bool] = None, is_public: Optional[bool] = None,
-                                 start: Optional[int] = None, length: Optional[int] = None, sort_by: Optional[list] = None):
+def _list_tracking_document_sets(
+    *,
+    name: Optional[str] = None,
+    is_default: Optional[bool] = None,
+    is_public: Optional[bool] = None,
+    start: Optional[int] = None,
+    length: Optional[int] = None,
+    sort_by: Optional[list] = None,
+):
     """Return tracking set when matched to specified document UUID."""
 
     if sort_by is None:
@@ -98,11 +104,10 @@ def _list_tracking_document_sets(*,
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
         return expr
-    
-    order_by = [ _to_col(x) for x in sort_by ]
+
+    order_by = [_to_col(x) for x in sort_by]
 
     with sessionmaker() as session:
-
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
@@ -116,7 +121,7 @@ def _list_tracking_document_sets(*,
             where.append(DbTrackedDocumentSet.is_new_doc_default == is_default)
         if is_public is not None:
             where.append(DbTrackedDocumentSet.is_public_viewable == is_public)
-        
+
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
         elif len(where) == 1:
@@ -128,9 +133,7 @@ def _list_tracking_document_sets(*,
         # Apply pagination if requested
         if paginate:
             # When paginating, we add a windowing function to the selected fields.
-            cte_query= core_query.add_columns(
-                func.row_number().over(order_by=order_by).label('row_num')
-            )
+            cte_query = core_query.add_columns(func.row_number().over(order_by=order_by).label('row_num'))
 
             # Create a CTE from the core query.
             cte = cte_query.cte(name='row_numbered')
@@ -149,10 +152,8 @@ def _list_tracking_document_sets(*,
         else:
             query = core_query
 
-
         result = session.execute(query)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
     return existing_objs
-

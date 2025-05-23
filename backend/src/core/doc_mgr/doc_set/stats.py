@@ -10,18 +10,15 @@ from ...public_models import DocumentSetStats
 from ...db_models import DbTrackedDocumentSet
 
 
-
 logger = logging.getLogger(__name__)
 
-def get_document_set_statistics():
 
+def get_document_set_statistics():
     table_stats = _get_document_set_stats()
 
     return DocumentSetStats(
-        document_set_count = table_stats['doc_set_count'],
-        table_updated_time = table_stats['max_update_time']
+        document_set_count=table_stats['doc_set_count'], table_updated_time=table_stats['max_update_time']
     )
-
 
 
 def _get_document_set_stats():
@@ -33,11 +30,7 @@ def _get_document_set_stats():
 
     with sessionmaker() as session:
         stmt = select(
-            func.count().label('doc_set_count'),
-            func.max(DbTrackedDocumentSet.update_time).label('max_update_time')
+            func.count().label('doc_set_count'), func.max(DbTrackedDocumentSet.update_time).label('max_update_time')
         )
         result = session.execute(stmt).first()
-    return {
-        'doc_set_count': result[0],
-        'max_update_time': result[1]
-    }
+    return {'doc_set_count': result[0], 'max_update_time': result[1]}

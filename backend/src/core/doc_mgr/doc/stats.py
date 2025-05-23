@@ -10,18 +10,13 @@ from ...public_models import DocumentStats
 from ...db_models import DbTrackedDocument
 
 
-
 logger = logging.getLogger(__name__)
 
-def get_document_statistics():
 
+def get_document_statistics():
     table_stats = _get_tracking_stats()
 
-    return DocumentStats(
-        document_count = table_stats['doc_count'],
-        table_updated_time = table_stats['max_update_time']
-    )
-
+    return DocumentStats(document_count=table_stats['doc_count'], table_updated_time=table_stats['max_update_time'])
 
 
 def _get_tracking_stats():
@@ -32,12 +27,6 @@ def _get_tracking_stats():
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-        stmt = select(
-            func.count().label('doc_count'),
-            func.max(DbTrackedDocument.update_time).label('max_update_time')
-        )
+        stmt = select(func.count().label('doc_count'), func.max(DbTrackedDocument.update_time).label('max_update_time'))
         result = session.execute(stmt).first()
-    return {
-        'doc_count': result[0],
-        'max_update_time': result[1]
-    }
+    return {'doc_count': result[0], 'max_update_time': result[1]}

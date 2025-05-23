@@ -1,4 +1,3 @@
-
 # NOTE: Use underscore to mark variables as private to this module. Non-private
 # variables will show up in Flower's Config tab for the worker process.
 
@@ -56,14 +55,14 @@ result_backend_transport_options = {
 #
 
 ## The number of concurrent worker processes/threads/green threads executing tasks.
-worker_concurrency=2
+worker_concurrency = 2
 
 ## Maximum number of tasks a pool worker process can execute before it’s replaced with a new one.
-worker_max_tasks_per_child=100
+worker_max_tasks_per_child = 100
 
 ## Maximum amount of resident memory, in kilobytes, that may be consumed by a worker before it will be replaced by a new worker.
 # worker_max_memory_per_child=4_096_000 # 4 Gb
-worker_max_memory_per_child=8_192_000 # 8 Gb
+worker_max_memory_per_child = 8_192_000  # 8 Gb
 
 #
 # Event settings

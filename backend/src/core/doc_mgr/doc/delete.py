@@ -15,9 +15,9 @@ from .query import get_documents
 
 logger = logging.getLogger(__name__)
 
+
 def delete_document(document_id):
-    """Delete tracking record, document from file store, and embeddings from vector store.
-    """
+    """Delete tracking record, document from file store, and embeddings from vector store."""
 
     # Retrieve tracking record.
 
@@ -58,16 +58,13 @@ def delete_document(document_id):
 
 
 def _delete_tracking_record(doc_uuid):
-    """Deletes the tracking record.
-    """
+    """Deletes the tracking record."""
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-
         with session.begin():
-            stmt = delete(DbTrackedDocument).where(
-                DbTrackedDocument.id == doc_uuid)
+            stmt = delete(DbTrackedDocument).where(DbTrackedDocument.id == doc_uuid)
             result = session.execute(stmt)

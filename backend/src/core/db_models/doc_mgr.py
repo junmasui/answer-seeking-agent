@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class DbTrackedDocumentSet(Base):
-
-    __tablename__ = "tracked_document_sets"
+    __tablename__ = 'tracked_document_sets'
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(800), nullable=False)
@@ -39,18 +38,21 @@ class DbTrackedDocumentSet(Base):
     # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_onupdate.
     #
     create_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
-    update_time: Mapped[datetime.datetime] = mapped_column(DateTime, 
-        server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
+    update_time: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )
 
     # Define the relationship to DbTrackedDocument
-    documents: Mapped[list['DbTrackedDocument']] = relationship(order_by='DbTrackedDocument.id', back_populates='document_set')
+    documents: Mapped[list['DbTrackedDocument']] = relationship(
+        order_by='DbTrackedDocument.id', back_populates='document_set'
+    )
+
 
 DbDocumentStatus = ENUM(DocumentStatus)
 
-class DbTrackedDocument(Base):
 
-    __tablename__ = "tracked_documents"
+class DbTrackedDocument(Base):
+    __tablename__ = 'tracked_documents'
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     document_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{DbTrackedDocumentSet.__tablename__}.id'))
@@ -82,8 +84,8 @@ class DbTrackedDocument(Base):
     # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_onupdate.
     #
     create_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
-    update_time: Mapped[datetime.datetime] = mapped_column(DateTime, 
-        server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
+    update_time: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )
 
     # Define the relationship to TrackedDocumentSet

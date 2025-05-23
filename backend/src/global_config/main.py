@@ -2,6 +2,7 @@
 This is a small stand-alone module that
 provides a global configuration object.
 """
+
 from typing import Union
 from typing_extensions import Annotated
 from functools import cache
@@ -15,7 +16,7 @@ from pydantic import (
     StringConstraints,
     DirectoryPath,
     FilePath,
-    NewPath
+    NewPath,
 )
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
@@ -38,9 +39,7 @@ class DocManagerConfig(BaseModel):
 class Settings(BaseSettings):
     # We assume that the .env files were loaded into the environment
     # in an earlier initialization step.
-    model_config = SettingsConfigDict(env_file=None, toml_file=None,
-                                      nested_model_default_partial_update=True)
-
+    model_config = SettingsConfigDict(env_file=None, toml_file=None, nested_model_default_partial_update=True)
 
     @classmethod
     def settings_customise_sources(
@@ -66,10 +65,12 @@ class Settings(BaseSettings):
         #     directories specified in the `secrets_dir` config value.
 
         return init_settings, env_settings, file_secret_settings, TomlConfigSettingsSource(settings_cls)
-    
+
     jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
 
-    logging_config_path: Union[FilePath, NewPath] = Field(default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH')
+    logging_config_path: Union[FilePath, NewPath] = Field(
+        default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH'
+    )
 
     staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
@@ -80,19 +81,16 @@ class Settings(BaseSettings):
     celery_task_queue: str = Field(default='', validation_alias='CELERY_TASK_QUEUE')
     celery_result_key_prefix: str = Field(default='', validation_alias='CELERY_RESULT_KEY_PREFIX')
 
-    postgres_answers_connection_url: PostgresDsn = Field(default='',
-                                validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
-    postgres_vectors_connection_url: PostgresDsn = Field(default='',
-                                validation_alias='POSTGRES_VECTORS_CONNECTION_URL')
+    postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
+    postgres_vectors_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_VECTORS_CONNECTION_URL')
 
-    postgres_checkpoints_connection_url: PostgresDsn = Field(default='',
-                                validation_alias='POSTGRES_CHECKPOINTS_CONNECTION_URL')
-
+    postgres_checkpoints_connection_url: PostgresDsn = Field(
+        default='', validation_alias='POSTGRES_CHECKPOINTS_CONNECTION_URL'
+    )
 
     application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
-    use_unstructured_cloud_api: bool = Field(default=False,
-                      validation_alias='USE_UNSTRUCTURED_API')
+    use_unstructured_cloud_api: bool = Field(default=False, validation_alias='USE_UNSTRUCTURED_API')
 
     unstructured_api_key: str = Field(default='', validation_alias='UNSTRUCTURED_API_KEY')
 
@@ -106,12 +104,13 @@ class Settings(BaseSettings):
     weaviate_http_port: int = Field(default=0, validation_alias='WEAVIATE_HTTP_PORT')
     weaviate_grpc_port: int = Field(default=0, validation_alias='WEAVIATE_GRPC_PORT')
 
-    minio_endpoint_url: AnyHttpUrl =Field(default='', validation_alias='MINIO_ENDPOINT_URL')
+    minio_endpoint_url: AnyHttpUrl = Field(default='', validation_alias='MINIO_ENDPOINT_URL')
     minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
     minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
     minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
 
     doc_manager: DocManagerConfig = DocManagerConfig()
+
 
 @cache
 def get_global_config():

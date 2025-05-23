@@ -4,6 +4,7 @@ to addressing the user question.
 
 See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
+
 import logging
 from functools import cache
 import textwrap
@@ -16,16 +17,17 @@ from .internal_models import GradeDocuments, AgentPrompt
 
 logger = logging.getLogger(__name__)
 
+
 @cache
 def get_retrieval_grader():
-    """
-    """
+    """ """
 
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_RETRIEVED_DOCUMENTS)
 
     retrieval_grader = build_grader(prompt, GradeDocuments, 'retrieval_grader')
 
     return retrieval_grader
+
 
 def grade_documents(state):
     """
@@ -48,9 +50,7 @@ def grade_documents(state):
     # Score each doc
     filtered_docs = []
     for doc in documents:
-        score = retrieval_grader.invoke(
-            {'question': question, 'document': doc.page_content}
-        )
+        score = retrieval_grader.invoke({'question': question, 'document': doc.page_content})
         grade = score.binary_score if score is not None else 'no'
         if grade == 'yes':
             logger.info('---GRADE: DOCUMENT RELEVANT---')
@@ -58,6 +58,6 @@ def grade_documents(state):
         else:
             logger.info('---GRADE: DOCUMENT NOT RELEVANT---')
             continue
-    
+
     # Keep only the relevant documents
-    return { 'documents': filtered_docs }
+    return {'documents': filtered_docs}

@@ -1,4 +1,3 @@
-
 from typing import Union
 import logging
 from contextlib import asynccontextmanager
@@ -8,7 +7,7 @@ from fastapi import FastAPI
 from celery.result import AsyncResult
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from core import (status_check)
+from core import status_check
 from core.signals import send_start_up, send_reset_data, configure_sender
 
 from core_worker import get_worker_logger_tree
@@ -44,15 +43,13 @@ app.add_middleware(ErrorLoggingMiddleware)
 
 instrumentator = Instrumentator().instrument(app)
 
-app.include_router(router=admin.router, prefix='/admin', )
+app.include_router(router=admin.router, prefix='/admin')
 app.include_router(router=answer.router, prefix='/answer')
 app.include_router(router=document_sets.router, prefix='/document-sets')
 app.include_router(router=documents.router, prefix='/documents')
 app.include_router(router=prompts.router, prefix='/prompts')
 
 app.mount('/sim_auth', sim_auth_app.app)
-
-
 
 
 @app.get('/')
@@ -65,25 +62,19 @@ async def handle_status_check():
     return status_check()
 
 
-
 @app.get('/tasks/{task_id}')
-def get_status(task_id,
-               # current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None
-               ):
-    """Return the status of specified task.
-    """
+def get_status(
+    task_id,
+    # current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None
+):
+    """Return the status of specified task."""
     task_result = AsyncResult(task_id)
-    result = {
-        'taskId': task_id,
-        'taskStatus': task_result.status,
-        'taskResult': task_result.result
-    }
+    result = {'taskId': task_id, 'taskStatus': task_result.status, 'taskResult': task_result.result}
     return result
 
 
 @app.get('/loggers')
 async def dump_loggers(includeAll: Union[bool, None] = False, worker: bool = False):
-
     if worker:
         task = get_worker_logger_tree.delay(include_all=includeAll)
         task_id = task.id
@@ -102,11 +93,9 @@ async def dump_loggers(includeAll: Union[bool, None] = False, worker: bool = Fal
         if task_result.status == 'SUCCESS':
             result = task_result.result
         else:
-            logger.info('celery task failed: %s %s %s', repr(task_result),
-                        task_result.status, task_result.result)
+            logger.info('celery task failed: %s %s %s', repr(task_result), task_result.status, task_result.result)
             result = {}
 
         return result
 
     return dump_logger_tree(include_all=includeAll)
-

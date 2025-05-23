@@ -1,8 +1,16 @@
 from pathlib import Path
 
-from prometheus_client import (multiprocess, start_wsgi_server,
-                               generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST, Counter,
-                               GCCollector, ProcessCollector, PlatformCollector)
+from prometheus_client import (
+    multiprocess,
+    start_wsgi_server,
+    generate_latest,
+    CollectorRegistry,
+    CONTENT_TYPE_LATEST,
+    Counter,
+    GCCollector,
+    ProcessCollector,
+    PlatformCollector,
+)
 
 
 def start_metrics(is_main_worker: bool):
@@ -17,8 +25,7 @@ def start_metrics(is_main_worker: bool):
     PlatformCollector(registry=registry)
 
     # NOTE: The multiprocess collector will register itself with the registry.
-    multiprocess.MultiProcessCollector(
-        registry=registry, path=str(prometheus_multiproc_dir))
+    multiprocess.MultiProcessCollector(registry=registry, path=str(prometheus_multiproc_dir))
 
     if is_main_worker:
         port = 8989

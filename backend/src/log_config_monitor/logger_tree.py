@@ -3,8 +3,7 @@ import logging.handlers
 import pprint
 
 
-pp = pprint.PrettyPrinter(
-    indent=2, width=120, compact=False, underscore_numbers=True, sort_dicts=False)
+pp = pprint.PrettyPrinter(indent=2, width=120, compact=False, underscore_numbers=True, sort_dicts=False)
 
 
 def dump_logger_tree(logger=None, include_all=False):
@@ -17,6 +16,7 @@ def dump_logger_tree(logger=None, include_all=False):
     about the actual logger hierarchy. The actual logger hierarchy is needed for
     properly targetting and setting logging levels.
     """
+
     def _dump_handler(_handler: logging.Handler):
         node = {
             'name': _handler.get_name(),
@@ -24,7 +24,7 @@ def dump_logger_tree(logger=None, include_all=False):
             'level': logging.getLevelName(_handler.level),
         }
         if getattr(_handler, 'formatter', None):
-            node['formatter'] = _handler.formatter,
+            node['formatter'] = (_handler.formatter,)
 
         return node
 
@@ -36,9 +36,9 @@ def dump_logger_tree(logger=None, include_all=False):
         }
         if include_all:
             if len(_logger.filters) > 0:
-                node['filters'] = _logger.filters,
+                node['filters'] = (_logger.filters,)
             if len(_logger.handlers) > 0:
-                node['handlers'] = [_dump_handler(h) for h in _logger.handlers],
+                node['handlers'] = ([_dump_handler(h) for h in _logger.handlers],)
         if len(_logger.getChildren()) > 0:
             node['children'] = [_dump_logger(c) for c in _logger.getChildren()]
 

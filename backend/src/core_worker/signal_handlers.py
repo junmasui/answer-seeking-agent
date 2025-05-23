@@ -1,8 +1,13 @@
 import logging
 
-from celery.signals import (after_setup_task_logger,
-                            worker_shutting_down, worker_init,
-                            worker_ready, worker_process_init, worker_process_shutdown)
+from celery.signals import (
+    after_setup_task_logger,
+    worker_shutting_down,
+    worker_init,
+    worker_ready,
+    worker_process_init,
+    worker_process_shutdown,
+)
 from celery.app.log import TaskFormatter
 
 from log_config_monitor import get_logging_conf_monitor
@@ -19,8 +24,9 @@ def setup_task_logger(logger, *args, **kwargs):
     See: https://celery.school/custom-celery-task-logger
     """
     for handler in logger.handlers:
-        handler.setFormatter(TaskFormatter(
-            '%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s'))
+        handler.setFormatter(
+            TaskFormatter('%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s')
+        )
 
 
 @worker_init.connect
@@ -48,7 +54,6 @@ def handle_worker_process_init(**kwargs):
     get_logging_conf_monitor().start()
 
     start_metrics(is_main_worker=False)
-
 
 
 @worker_shutting_down.connect
