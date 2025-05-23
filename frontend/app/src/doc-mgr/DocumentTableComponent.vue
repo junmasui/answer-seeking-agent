@@ -22,7 +22,7 @@
     multi-sort
     :items-per-page-options="itemsPerPageOptions"
     :items-length="totalItems"
-    :headers="headers"
+    :headers="tableHeaders"
     :items="items"
     density="compact"
     item-key="name"
@@ -107,7 +107,7 @@ const tableOutdated = ref(false)
 
 const loading = ref(false)
 
-const headers = ref([
+const tableHeaders = ref([
   {
     title: 'File Name',
     value: 'name',
@@ -458,7 +458,7 @@ async function closeDeleteSelected() {
 // Polling for server table updates.
 //
 
-var intervalId = null
+let intervalId = null
 
 onMounted(async () => {
   await loadItems()
@@ -520,7 +520,7 @@ async function loadItems() {
     if (sortBy.value.length > 0) {
       const sortByParam = sortBy.value
         .map((item) => {
-          var key = item['key']
+          let key = item['key']
           if (item['order'] === 'desc') {
             key = '-' + key
           }

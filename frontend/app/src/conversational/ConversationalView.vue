@@ -128,12 +128,12 @@ async function submit(event) {
 
     threadId.value = data?.threadId ?? ''
 
-    var message = data?.answer ?? ''
+    let message = data?.answer ?? ''
     if (data?.citations) {
       message += '\n\n<p></p>'
 
       data.citations.forEach((citation, index) => {
-        var formatted = `${citation['fileName']}, page ${citation['pageNumber']}, url: ${citation['sourceUrl']}`
+        let formatted = `${citation['fileName']}, page ${citation['pageNumber']}, url: ${citation['sourceUrl']}`
         message += `\n\n[^${index + 1}]: ${formatted}`
       })
     }

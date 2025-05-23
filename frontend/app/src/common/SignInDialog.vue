@@ -70,7 +70,7 @@ const username = ref('')
 const passwordVisible = ref(false)
 const password = ref('')
 
-var alertTimeoutId
+let alertTimeoutId // Updated from var
 
 watch(alertVisible, (newValue, oldValue) => {
   // Clear any existing timeout

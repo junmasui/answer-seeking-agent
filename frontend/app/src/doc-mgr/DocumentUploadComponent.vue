@@ -88,7 +88,7 @@ async function onUpload() {
 
           const formData = new FormData()
           const isoString = new Date().toISOString().split('.')[0] + 'Z'
-          var contentType = 'application/pdf'
+          const contentType = 'application/pdf' // Updated from var
           formData.append('file', chunk, file.name)
           formData.append('sourceUrl', 'https://localhost/files/' + file.name)
           formData.append('contentType', contentType)
@@ -131,7 +131,7 @@ async function onUpload() {
 // Polling for server table updates.
 //
 
-var intervalId = null
+let intervalId = null // Updated from var
 
 onMounted(async () => {
   await loadDocumentSets()
