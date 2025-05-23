@@ -100,7 +100,7 @@ async function submit(event) {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch('/api/answer/', {
@@ -133,7 +133,7 @@ async function submit(event) {
       message += '\n\n<p></p>'
 
       data.citations.forEach((citation, index) => {
-        let formatted = `${citation['fileName']}, page ${citation['pageNumber']}, url: ${citation['sourceUrl']}`
+        let formatted = `${citation.fileName}, page ${citation.pageNumber}, url: ${citation.sourceUrl}`
         message += `\n\n[^${index + 1}]: ${formatted}`
       })
     }

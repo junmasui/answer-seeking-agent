@@ -36,7 +36,7 @@ async function resetConfirmed() {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
     const response = await fetch('/api/admin/resetDatabase', {
       method: 'POST',

@@ -110,7 +110,7 @@ async function onConfirm() {
     const data = await response.json()
 
     signedIn.value = true
-    accessToken.value = data['access_token']
+    accessToken.value = data.access_token
   } catch (error) {
     console.error('Could not sign in:', error)
   }

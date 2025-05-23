@@ -147,7 +147,7 @@ async function addDocumentSet() {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const body = {
@@ -206,7 +206,7 @@ async function editDocumentSet(doc_set_uuid) {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const body = {
@@ -266,7 +266,7 @@ async function deleteDocumentSet(doc_set_uuid) {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
@@ -322,7 +322,7 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const body = {
@@ -380,7 +380,7 @@ async function loadTableStats() {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch('/api/document-sets/stats', {
@@ -421,8 +421,8 @@ async function loadItems() {
     if (sortBy.value.length > 0) {
       const sortByParam = sortBy.value
         .map((item) => {
-          let key = item['key']
-          if (item['order'] === 'desc') {
+          let key = item.key
+          if (item.order === 'desc') {
             key = '-' + key
           }
           return key
@@ -436,7 +436,7 @@ async function loadItems() {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch(`/api/document-sets/?${params}`, {

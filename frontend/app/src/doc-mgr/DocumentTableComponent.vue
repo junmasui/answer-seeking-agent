@@ -195,7 +195,7 @@ async function ingestDocument(doc_uuid) {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
     const response = await fetch('/api/documents/ingest', {
       method: 'POST',
@@ -273,7 +273,7 @@ async function deleteDocument(doc_uuid) {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch(`/api/documents/${doc_uuid}`, {
@@ -322,7 +322,7 @@ async function ingestSelectedDocuments() {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const body = {
@@ -374,7 +374,7 @@ async function ingestAllUploadedDocuments() {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const body = {
@@ -423,7 +423,7 @@ async function deleteSelectedDocuments() {
       'Content-Type': 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const body = {
@@ -479,7 +479,7 @@ async function loadTableStats() {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch('/api/documents/stats', {
@@ -520,8 +520,8 @@ async function loadItems() {
     if (sortBy.value.length > 0) {
       const sortByParam = sortBy.value
         .map((item) => {
-          let key = item['key']
-          if (item['order'] === 'desc') {
+          let key = item.key
+          if (item.order === 'desc') {
             key = '-' + key
           }
           return key
@@ -535,7 +535,7 @@ async function loadItems() {
       Accept: 'application/json'
     }
     if (signedIn.value) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch(`/api/documents/?${params}`, {
