@@ -144,7 +144,7 @@ async function addDocumentSet() {
         }
 
         const data = await response.json();
-        console.log('Added successfully:', data);
+        console.log('Added successfully');
     } catch (error) {
         console.error('Error adding:', error);
     }
@@ -212,7 +212,7 @@ async function editDocumentSet(doc_set_uuid) {
         }
 
         const data = await response.json();
-        console.log('Edited successfully:', data);
+        console.log('Edited successfully');
     } catch (error) {
         console.error('Error editing:', error);
     }
@@ -264,7 +264,7 @@ async function deleteDocumentSet(doc_set_uuid) {
         }
 
         const data = await response.json();
-        console.log('Deleted successfully:', data);
+        console.log('Deleted successfully');
     } catch (error) {
         console.error('Error deleting:', error);
     }
@@ -327,7 +327,7 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
         }
 
         const data = await response.json();
-        console.log('Update successfully:', data);
+        console.log('Update successfully');
     } catch (error) {
         console.error('Error updating document set:', error);
     }

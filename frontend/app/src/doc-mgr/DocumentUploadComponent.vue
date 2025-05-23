@@ -106,7 +106,7 @@ async function onUpload() {
                     }
 
                     const data = await response.json();
-                    console.log(`File uploaded successfully: ${chunkIndex} ${totalChunks}`, data);
+                    console.log(`File uploaded successfully: ${chunkIndex} ${totalChunks}`);
 
                 }
 

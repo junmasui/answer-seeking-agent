@@ -13,6 +13,7 @@ services:
       - backend-staging-1:/home/python/staging-1
       - backend-home-2:/home/python/home-2
       - backend-venv-2:/home/python/venv-2
+      - backend-prometheus-2:/home/python/prometheus-2
       - backend-staging-2:/home/python/staging-2
       - backend-home-3:/home/python/home-3
       - backend-venv-3:/home/python/venv-3
@@ -30,7 +31,7 @@ services:
 
         for VOL in \
           'home-1' 'venv-1' 'staging-1' \
-          'home-2' 'venv-2' 'staging-2' \
+          'home-2' 'venv-2' 'staging-2' 'prometheus-2' \
           'home-3' 'venv-3'
         do
           touch /home/python/$$VOL/.initialized
@@ -190,6 +191,7 @@ services:
       - backend-home-2:/home/python
       - backend-venv-2:/app/.venv
       - backend-staging-2:/staging
+      - backend-prometheus-2:/var/local/prometheus
     secrets:
       - answers_dev_env
       - answers_jwt_dev_env
@@ -345,6 +347,8 @@ volumes:
   backend-home-2:
     driver: local
   backend-venv-2:
+    driver: local
+  backend-prometheus-2:
     driver: local
   backend-staging-2:
     driver: local

@@ -166,7 +166,7 @@ async function ingestDocument(doc_uuid) {
         }
 
         const data = await response.json();
-        console.log('Ingest queued successfully:', data);
+        console.log('Ingest queued successfully');
     } catch (error) {
         console.error('Error ingesting:', error);
     }
@@ -250,7 +250,7 @@ async function deleteDocument(doc_uuid) {
         }
 
         const data = await response.json();
-        console.log('Deleted successfully:', data);
+        console.log('Deleted successfully');
     } catch (error) {
         console.error('Error deleting:', error);
     }
@@ -311,7 +311,7 @@ async function ingestSelectedDocuments() {
         selectedItems.value = []
 
         const data = await response.json();
-        console.log('Ingest queued successfully:', data);
+        console.log('Ingest queued successfully');
     } catch (error) {
         console.error('Error ingesting:', error);
     }
@@ -363,7 +363,7 @@ async function ingestAllUploadedDocuments() {
         }
 
         const data = await response.json();
-        console.log('Ingest queued successfully:', data);
+        console.log('Ingest queued successfully');
     } catch (error) {
         console.error('Error ingesting:', error);
     }
@@ -419,7 +419,7 @@ async function deleteSelectedDocuments() {
         selectedItems.value = []
 
         const data = await response.json();
-        console.log('Deleted successfully:', data);
+        console.log('Deleted successfully');
     } catch (error) {
         console.error('Error deleteing:', error);
     }
