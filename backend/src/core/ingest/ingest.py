@@ -1,30 +1,29 @@
-import os
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import func
 
-from ..db_models import DbTrackedDocument
-from ..public_models import DocumentStatus
-
-from ..doc_mgr import get_documents, update_tracking_record
-from ..providers.file_store import get_s3_bucket
-from ..providers.doc_loader import get_doc_loader
-from ..providers.vector_store import get_vector_store
-
 from global_config import get_global_config
 
+from ..db_models import DbTrackedDocument
+from ..doc_mgr import get_documents, update_tracking_record
+from ..providers.doc_loader import get_doc_loader
+from ..providers.file_store import get_s3_bucket
+from ..providers.vector_store import get_vector_store
+from ..public_models import DocumentStatus
 
 logger = logging.getLogger(__name__)
 
 __all__ = ['ingest_documents', 'reset_worker_data']
 
+
 def ingest_documents(doc_ids):
     """Ingest cloud files. Ingesting is the process of extracting textual data
     from PDF, HTML, etc and generating and storing searchable semantic vectors.
     """
-    
+
     if not doc_ids:
         raise NotImplementedError()
 
@@ -36,11 +35,14 @@ def ingest_documents(doc_ids):
     staging_dir = config.staging_dir / 'ingest'
     staging_dir.mkdir(parents=True, exist_ok=True)
 
-    def _load_one_source(source_path, tracked_rel_path, tracked_doc_set_id,
-                                              source_url: str,
-                                              content_type: str,
-                                              download_time_utc: datetime):
-
+    def _load_one_source(
+        source_path,
+        tracked_rel_path,
+        tracked_doc_set_id,
+        source_url: str,
+        content_type: str,
+        download_time_utc: datetime,
+    ):
         loader = get_doc_loader(file_path=source_path)
 
         for doc in loader.lazy_load():
@@ -85,7 +87,7 @@ def ingest_documents(doc_ids):
             # 2. If file processing uses block reads or rewinds, then processing a local file is faster.
             # 3. If our dependencies (ex unstructured, langchain) are testing against type, cloudlib's
             #    S3Path object might encounter troubles because it is not a subtype of pathlib.Path.
-            #    (S3Path is a duck-type of Path). 
+            #    (S3Path is a duck-type of Path).
             rel_path = detached_record.s3_rel_path
             cloud_path = bucket / rel_path
             local_path = staging_dir / rel_path
@@ -111,12 +113,16 @@ def ingest_documents(doc_ids):
             doc_set_id = detached_record.document_set_id
 
             # Process the file
-            document_chunks = list(_load_one_source(actual_local_path,
-                                              tracked_rel_path=rel_path,
-                                              tracked_doc_set_id=doc_set_id,
-                                              source_url=source_url,
-                                              content_type=content_type,
-                                              download_time_utc=download_time_utc))
+            document_chunks = list(
+                _load_one_source(
+                    actual_local_path,
+                    tracked_rel_path=rel_path,
+                    tracked_doc_set_id=doc_set_id,
+                    source_url=source_url,
+                    content_type=content_type,
+                    download_time_utc=download_time_utc,
+                )
+            )
 
             # Update the vector store. Since the file is fully processed, the vector store
             # will not represent a partially processed file.
@@ -127,7 +133,7 @@ def ingest_documents(doc_ids):
             # Update the tracking store.
             # Also at this time, remove orphaned vectors from the vector store. We didn't
             # remove orphans earlier in case re-processing a file resulted in identical
-            # vectors to the prior processing. 
+            # vectors to the prior processing.
 
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
                 if record is None:
@@ -138,7 +144,7 @@ def ingest_documents(doc_ids):
 
                 if updateable_record.pg_doc_ids is None:
                     updateable_record.pg_doc_ids = []
-                prior_pg_doc_ids =  list(updateable_record.pg_doc_ids)
+                prior_pg_doc_ids = list(updateable_record.pg_doc_ids)
 
                 updateable_record.pg_doc_ids.extend(new_vector_ids)
 
@@ -154,7 +160,6 @@ def ingest_documents(doc_ids):
 
                 logger.info('pruned %d stale vectors regarding %s', len(to_remove), rel_path)
 
-            
         except Exception as ex:
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
                 if record is not None:
@@ -176,17 +181,13 @@ def ingest_documents(doc_ids):
     for record in tracking_records:
         _ingest_one_document(record)
 
-
     logger.info(f'completed ingesting')
 
-    return {
-        'status': 'completed'
-    }
+    return {'status': 'completed'}
 
 
 def reset_worker_data():
-    """Cleanse the staging area.
-    """
+    """Cleanse the staging area."""
     config = get_global_config()
 
     staging_dir = config.staging_dir / 'ingest'

@@ -1,9 +1,10 @@
 """
-This module provides the node that rewrites the user questions 
+This module provides the node that rewrites the user questions
 so that the document retrieval returns with better relevancy.
 
 See: Question Re-writer in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
+
 import logging
 import textwrap
 
@@ -11,17 +12,16 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
-
-from .prompt_util import get_chat_prompt
 from .internal_models import AgentPrompt
+from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
 
 ### Question Re-writer
 
+
 def get_question_rewriter():
-    """
-    """
+    """ """
 
     # LLM
     llm = get_chat_llm()
@@ -33,6 +33,7 @@ def get_question_rewriter():
     chain = chain.with_config({'run_name': 'question_rewriter'})
 
     return chain
+
 
 def rewrite_question(state):
     """
@@ -58,9 +59,6 @@ def rewrite_question(state):
     message = messages[-1]
     updatedMessage = message.model_copy(update={'content': better_question})
 
-    stateUpdates = {
-        'question': better_question,
-        'messages': [ updatedMessage ]
-    }
+    stateUpdates = {'question': better_question, 'messages': [updatedMessage]}
 
     return stateUpdates

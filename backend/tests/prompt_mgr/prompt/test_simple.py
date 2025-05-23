@@ -1,9 +1,10 @@
 import pprint as pp
+
 import pytest
-from sqlalchemy import select, func
+from sqlalchemy import func, select
+
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
-
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()
@@ -15,7 +16,6 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
 @pytest.mark.asyncio
 async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
-
     path = '/prompts/'
     data = {
         'name': 'prompt',
@@ -29,10 +29,8 @@ async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
     assert count == 1
 
 
-
 @pytest.mark.asyncio
 async def test_find(api_server, populated_prompt_table, sql_sessionmaker):
-
     path = '/prompts/'
     content_type, resp = await api_server.get(path=path)
 
@@ -59,9 +57,9 @@ async def test_get(api_server, populated_prompt_table, sql_sessionmaker):
 
     pass
 
+
 @pytest.mark.asyncio
 async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
-
     with sql_sessionmaker() as session:
         stmt = select(populated_prompt_table)
         result = session.execute(stmt).first()
@@ -69,10 +67,7 @@ async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
         prompt_id = result[0].id
 
     path = f'/prompts/{prompt_id}'
-    body = {
-        'humanMessage': 'updated human message',
-        'systemMessage': 'updated system message'
-    }
+    body = {'humanMessage': 'updated human message', 'systemMessage': 'updated system message'}
     content_type, resp = await api_server.patch(path=path, content_type='json', data=body)
 
     assert content_type == 'json'
@@ -81,9 +76,9 @@ async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
 
     assert count == 3
 
+
 @pytest.mark.asyncio
 async def test_delete(api_server, populated_prompt_table, sql_sessionmaker):
-
     with sql_sessionmaker() as session:
         stmt = select(populated_prompt_table)
         result = session.execute(stmt).first()

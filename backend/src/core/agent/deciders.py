@@ -1,11 +1,11 @@
 """
 See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state
 """
+
 import logging
 
-from .hallucination_grader import get_hallucination_grader
 from .answer_grader import get_answer_grader
-
+from .hallucination_grader import get_hallucination_grader
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +28,7 @@ def check_for_relevant_documents(state):
     if not filtered_documents:
         # All documents have been filtered check_relevance
         # We will re-generate a new query
-        logger.info(
-            '---DECISION: ALL DOCUMENTS ARE NOT RELEVANT TO QUESTION, TRANSFORM QUERY---'
-        )
+        logger.info('---DECISION: ALL DOCUMENTS ARE NOT RELEVANT TO QUESTION, TRANSFORM QUERY---')
         return 'no relevant docs'
     else:
         # We have relevant documents, so generate answer

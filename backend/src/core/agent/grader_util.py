@@ -1,14 +1,13 @@
-
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
-
+from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel
 
-from ..providers.chat_llm import get_chat_llm
 from global_config import get_global_config
 
-def build_grader(chat_prompt, output_cls: BaseModel, run_name):
+from ..providers.chat_llm import get_chat_llm
 
+
+def build_grader(chat_prompt, output_cls: BaseModel, run_name):
     config = get_global_config()
     # LLM
     llm = get_chat_llm()
@@ -35,4 +34,3 @@ def build_grader(chat_prompt, output_cls: BaseModel, run_name):
     chain = chain.with_config({'run_name': run_name})
 
     return chain
-

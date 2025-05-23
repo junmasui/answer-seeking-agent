@@ -1,28 +1,24 @@
 import logging
 
+from sqlalchemy import MetaData, text
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import sessionmaker
+
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import MetaData, text
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy.orm import sessionmaker
-
 from global_config import get_global_config
 
-from ..providers.sql_database import get_engine, get_sessionmaker, DataDomain
-
+from ..providers.sql_database import DataDomain, get_engine, get_sessionmaker
 from .base import DECLARED_METADATA
-
 
 logger = logging.getLogger(__name__)
 
 
-
 def create_tables_if_not_exists():
-    """Creates tables for model objects defined with this module's `Base`.
-    """
+    """Creates tables for model objects defined with this module's `Base`."""
     logger.info('creating tables that are absent')
 
     engine = get_engine(DataDomain.ANSWERS)
@@ -62,22 +58,21 @@ def create_tables_if_not_exists():
 
                 logger.info('DB difference: %s %s %s %s', diff_op, obj_name, table_name, schema_name)
 
-
     if initialize:
         _create_tables_if_new(engine)
     if migrate:
         _run_migrations(engine)
 
+
 def get_current_version(engine):
-    """Return the current Alembic version applied to the database.
-    """
+    """Return the current Alembic version applied to the database."""
 
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
 
     if reflected_metadata.tables is None or len(reflected_metadata.tables) == 0:
         logger.info('database is empty.')
-        return  None
+        return None
 
     session_maker = sessionmaker(bind=engine)
     with session_maker() as session:
@@ -90,27 +85,27 @@ def get_current_version(engine):
             # where the examples show the trace:
             #  * SELECT alembic_version.version_num FROM alembic_version
             # The lack of a WHERE clause suggests that this table has only one record.
-            return session.execute(text("SELECT version_num FROM alembic_version")).scalar()
+            return session.execute(text('SELECT version_num FROM alembic_version')).scalar()
         except NoResultFound:
             return None  # No migrations applied
 
+
 def get_head_revision():
-    """Return the head Alembic version of the defined migration steps.
-    """
+    """Return the head Alembic version of the defined migration steps."""
     alembic_ini = get_global_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
     script = ScriptDirectory.from_config(alembic_cfg)
     head_revision = script.get_current_head()
     return head_revision
 
-def get_schema_differences(engine):
 
+def get_schema_differences(engine):
     # Declared metadata.
     metadata = DECLARED_METADATA
 
     # Connect to the database for the actual metadata.
     connection = engine.connect()
-    
+
     # Configure the migration context
     context = MigrationContext.configure(
         connection,
@@ -122,18 +117,18 @@ def get_schema_differences(engine):
             # If True, autogenerate will scan across all schemas located by the SQLAlchemy
             # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.include_schemas
             'include_schemas': False,
-        }
+        },
     )
-    
+
     # Compare the declared metadata with the actual database schema
     #
     # See https://alembic.sqlalchemy.org/en/latest/api/autogenerate.html#getting-diffs
     differences = compare_metadata(context, metadata)
-    
+
     return differences
 
-def _create_tables_if_new(engine):
 
+def _create_tables_if_new(engine):
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
 
@@ -143,16 +138,11 @@ def _create_tables_if_new(engine):
     # Although not in the declared schema, this will show up in the actual schema,
     # and its appearance will cause the migrations to be short-circuited.
     if reflected_tables is not None:
-        reflected_tables = [
-            table
-            for table in reflected_tables
-            if table not in ['answers.alembic_version']
-        ]
+        reflected_tables = [table for table in reflected_tables if table not in ['answers.alembic_version']]
 
     if reflected_tables is not None and len(reflected_tables) > 0:
         logger.info('database is not empty. use formal migration tools.')
-        return 
-
+        return
 
     alembic_ini = get_global_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
@@ -169,8 +159,8 @@ def _create_tables_if_new(engine):
 
     logger.info('initialized database tables.')
 
-def _run_migrations(engine):
 
+def _run_migrations(engine):
     alembic_ini = get_global_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
 
@@ -184,8 +174,7 @@ def _run_migrations(engine):
 
 
 def drop_all_tables():
-    """Drops all tables for model objects defined with this module's `Base`.
-    """
+    """Drops all tables for model objects defined with this module's `Base`."""
     logger.info('dropping all registered tables')
     engine = get_engine(DataDomain.ANSWERS)
 
@@ -196,4 +185,3 @@ def drop_all_tables():
     with engine.connect() as conn:
         conn.execute(text(f'TRUNCATE TABLE "alembic_version" RESTART IDENTITY CASCADE'))
         conn.commit()
-

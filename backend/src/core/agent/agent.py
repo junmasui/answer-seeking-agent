@@ -2,23 +2,24 @@
 This module provides the LLM-based agent.
 """
 
-from typing import Optional
-from functools import cache
 import logging
-import uuid
 import pprint
-
-from langgraph.graph import StateGraph, START, END
-from langgraph.pregel import Pregel
-from langgraph.errors import GraphRecursionError
+import uuid
+from functools import cache
+from typing import Optional
 
 from langfuse.callback import CallbackHandler
+from langgraph.errors import GraphRecursionError
+from langgraph.graph import END, START, StateGraph
+from langgraph.pregel import Pregel
 
+from ..doc_mgr import list_document_sets
+from ..public_models import Answer, Citation
 from .agent_state import GraphState
 from .answer_generator import generate_answer
 from .answer_grader import grade_answer
 from .checkpointer import get_checkpointer
-from .deciders import check_for_relevant_documents, check_for_halluciation, check_for_answer_relevancy
+from .deciders import check_for_answer_relevancy, check_for_halluciation, check_for_relevant_documents
 from .document_retriever import query_documents
 from .hallucination_grader import grade_hallucination
 from .postprocess import add_response_to_history
@@ -26,36 +27,28 @@ from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
 from .retrieval_grader import grade_documents
 
-from ..public_models import Answer, Citation
-
-from ..doc_mgr import list_document_sets
-
 logger = logging.getLogger(__name__)
 
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
 def redo_document_retrieval(state):
-    return {
-        'answer_grade': 'redo document retrieval'
-    }
+    return {'answer_grade': 'redo document retrieval'}
+
 
 def redo_answer_generation(state):
-    return {
-        'answer_grade': 'redo answer generation'
-    }
+    return {'answer_grade': 'redo answer generation'}
+
 
 def accept_answer(state):
-    return {
-        'answer_grade': 'accept answer'
-    }
+    return {'answer_grade': 'accept answer'}
+
 
 def get_answer_grade(state):
     return state['answer_grade']
 
 
 def _get_uncompiled_agent_graph() -> StateGraph:
-
     # Build subgraph for document retrieval.
 
     retrieval_subgraph = StateGraph(GraphState)
@@ -69,13 +62,10 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     retrieval_subgraph.add_conditional_edges(
         'grade_documents',
         check_for_relevant_documents,
-        {
-            'no relevant docs': 'rewrite_query',
-            'relevant docs found': END,
-        },
+        {'no relevant docs': 'rewrite_query', 'relevant docs found': END},
     )
     retrieval_subgraph.add_edge('rewrite_query', 'query_documents')
-    
+
     # Build subgraph for answer guardrails.
 
     guardrail_subgraph = StateGraph(GraphState)
@@ -90,24 +80,15 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     guardrail_subgraph.add_conditional_edges(
         'grade_hallucination',
         check_for_halluciation,
-        {
-            'is hallucinating': 'redo_answer_generation',
-            'not hallucinating': 'grade_answer',
-        },
+        {'is hallucinating': 'redo_answer_generation', 'not hallucinating': 'grade_answer'},
     )
     guardrail_subgraph.set_finish_point('redo_answer_generation')
 
     guardrail_subgraph.add_conditional_edges(
-        'grade_answer',
-        check_for_answer_relevancy,
-        {
-            'useful': 'accept_answer',
-            'not useful': 'redo_document_retrieval',
-        },
+        'grade_answer', check_for_answer_relevancy, {'useful': 'accept_answer', 'not useful': 'redo_document_retrieval'}
     )
     guardrail_subgraph.set_finish_point('accept_answer')
     guardrail_subgraph.set_finish_point('redo_document_retrieval')
-
 
     # Build graph
 
@@ -135,16 +116,17 @@ def _get_uncompiled_agent_graph() -> StateGraph:
         {
             'redo document retrieval': 'retrieve_documents',
             'redo answer generation': 'generate_answer',
-            'accept answer': 'add_response_to_history'
-        })
+            'accept answer': 'add_response_to_history',
+        },
+    )
 
     graph.add_edge('add_response_to_history', END)
 
     return graph
 
+
 @cache
 def get_agent_graph() -> Pregel:
-
     uncompiled_graph = _get_uncompiled_agent_graph()
 
     # Create a checkpointer
@@ -153,6 +135,7 @@ def get_agent_graph() -> Pregel:
     # Compile the graph with a checkpointer
     compiled_graph = uncompiled_graph.compile(checkpointer=checkpointer)
     return compiled_graph
+
 
 def get_mermaid_graph():
     """
@@ -173,7 +156,6 @@ def get_mermaid_graph():
 
 
 def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
-
     logger.info('user input: %s  thread_id: %s', user_input, thread_id)
 
     if not thread_id:
@@ -190,13 +172,9 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     # Initialize Langfuse CallbackHandler for Langchain (tracing)
     langfuse_handler = CallbackHandler(session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
 
-
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
-    input = {
-        'question': user_input,
-        'document_set_ids': doc_set_ids,
-    }
+    input = {'question': user_input, 'document_set_ids': doc_set_ids}
     # Capture into a dict, not TypedDict. We want to make zero assumptions about the
     # graph's stream output's keys. In other words, the set of keys is dynamic not static.
     # And because we are not static, we avoid TypedDict and its subclasses (ex: GraphState).
@@ -206,7 +184,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         if user_id:
             extra_data['user_id'] = user_id
         run_config = {'recursion_limit': 30, 'configurable': extra_data}
-        run_config['callbacks'] = [ langfuse_handler ]
+        run_config['callbacks'] = [langfuse_handler]
         for output in graph.stream(input=input, config=run_config):
             for key, value in output.items():
                 # Node
@@ -230,18 +208,16 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         answer = 'I cannot find the answer to this question at this moment'
         citations = []
 
-    citations = [Citation(doc_uuid=citation['doc_id'],
-                          text=citation['text'],
-                          source_url=citation.get('source_url'),
-                          page_number=citation.get('page_number'),
-                          file_name=citation.get('file_name'))
-                 for citation in citations]
+    citations = [
+        Citation(
+            doc_uuid=citation['doc_id'],
+            text=citation['text'],
+            source_url=citation.get('source_url'),
+            page_number=citation.get('page_number'),
+            file_name=citation.get('file_name'),
+        )
+        for citation in citations
+    ]
 
     logger.info('answer: %s', answer)
-    return Answer(
-        question = user_input,
-        answer = answer,
-        citations = citations,
-        thread_id = thread_id,
-        user_id = user_id
-    )
+    return Answer(question=user_input, answer=answer, citations=citations, thread_id=thread_id, user_id=user_id)

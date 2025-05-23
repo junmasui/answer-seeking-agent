@@ -3,20 +3,21 @@ This module provides the node that evaluates whether an generated answer contain
 
 See: Hallucination Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
-from functools import cache
-import textwrap
-import logging
 
-from .internal_models import GradeHallucinations, AgentPrompt
+import logging
+import textwrap
+from functools import cache
+
 from .grader_util import build_grader
+from .internal_models import AgentPrompt, GradeHallucinations
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
 
+
 @cache
 def get_hallucination_grader():
-    """
-    """
+    """ """
 
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_HALLUCINATION)
 
@@ -42,11 +43,7 @@ def grade_hallucination(state):
 
     hallucination_grader = get_hallucination_grader()
 
-    score = hallucination_grader.invoke(
-        {'documents': documents, 'generation': generation}
-    )
+    score = hallucination_grader.invoke({'documents': documents, 'generation': generation})
     grade = score.binary_score if score is not None else 'no'
 
-    return {
-        'grounded_in_facts': grade
-    }
+    return {'grounded_in_facts': grade}

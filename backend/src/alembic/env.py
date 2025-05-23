@@ -1,4 +1,4 @@
-import early_init
+import early_init  # noqa: I001, F401 ## loading this module configures environment and logging
 
 
 from sqlalchemy import engine_from_config
@@ -25,7 +25,7 @@ db_url = get_global_config().postgres_answers_connection_url
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", str(db_url))
+config.set_main_option('sqlalchemy.url', str(db_url))
 
 target_metadata = core.db_models.DECLARED_METADATA
 
@@ -34,10 +34,12 @@ target_metadata = core.db_models.DECLARED_METADATA
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+
 def is_database_empty(engine):
     inspector = inspect(engine)
     tables = inspector.get_table_names()
-    return len(tables) == 0 or tables == ["alembic_version"]
+    return len(tables) == 0 or tables == ['alembic_version']
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -51,12 +53,9 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option('sqlalchemy.url')
     context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={'paramstyle': 'named'}
     )
 
     with context.begin_transaction():
@@ -71,18 +70,14 @@ def run_migrations_online() -> None:
 
     """
     engine = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
+        config.get_section(config.config_ini_section, {}), prefix='sqlalchemy.', poolclass=pool.NullPool
     )
 
     if is_database_empty(engine):
-        print("Database is empty. Skipping migration generation.")
+        print('Database is empty. Skipping migration generation.')
     else:
         with engine.connect() as connection:
-            context.configure(
-                connection=connection, target_metadata=target_metadata
-            )
+            context.configure(connection=connection, target_metadata=target_metadata)
 
             with context.begin_transaction():
                 context.run_migrations()

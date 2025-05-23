@@ -1,15 +1,11 @@
 import logging
 from pathlib import Path
 
-
 from global_config import get_global_config
 
-from ...providers.file_store import get_s3_directory, get_s3_bucket
-
-from ..doc_set.query import get_document_sets, list_document_sets
+from ...providers.file_store import get_s3_bucket, get_s3_directory
 from ..doc.add import add_document
-
-
+from ..doc_set.query import get_document_sets, list_document_sets
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +22,7 @@ def _get_doc_set(doc_set_uuid):
 
     return doc_set
 
+
 def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
     chunk_root_dir = get_global_config().doc_manager.chunk_root_dir
     chunk_root_dir = Path(chunk_root_dir)
@@ -38,6 +35,7 @@ def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
 
     return cloud_dir / f'{joined.name}.{chunk_index:03d}'
 
+
 def _get_doc_file_path(doc_set, partial_doc_path):
     doc_root_dir = get_global_config().doc_manager.doc_root_dir
     doc_root_dir = Path(doc_root_dir)
@@ -49,6 +47,7 @@ def _get_doc_file_path(doc_set, partial_doc_path):
     cloud_dir = get_s3_directory(joined.parent)
 
     return cloud_dir / joined.name
+
 
 def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, content_type, download_time_utc, user_id):
     """Upload a complete document into our document system.
@@ -70,14 +69,17 @@ def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, cont
 
     bucket = get_s3_bucket()
 
-    add_document(document_set_uuid=doc_set.id,
-                 file_dir=str(Path(partial_doc_path).parent), file_name=Path(partial_doc_path).name,
-                 cloud_path=cloud_doc_path,
-                 bucket_path=bucket,
-                 source_url=source_url,
-                 content_type=content_type,
-                 download_time_utc=download_time_utc,
-                 user_id=user_id)
+    add_document(
+        document_set_uuid=doc_set.id,
+        file_dir=str(Path(partial_doc_path).parent),
+        file_name=Path(partial_doc_path).name,
+        cloud_path=cloud_doc_path,
+        bucket_path=bucket,
+        source_url=source_url,
+        content_type=content_type,
+        download_time_utc=download_time_utc,
+        user_id=user_id,
+    )
 
 
 def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
@@ -90,7 +92,6 @@ def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
 
     logger.info('uploading chunk %d file %s to cloud chunk store', chunk_index, partial_doc_path)
 
-
     _store_file_in_cloud(cloud_chunk_path, local_file)
 
     success = cloud_chunk_path.exists()
@@ -100,7 +101,9 @@ def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
     return True
 
 
-def merge_chunked_document(doc_set_uuid, partial_doc_path, total_chunks, source_url, content_type, download_time_utc, user_id):
+def merge_chunked_document(
+    doc_set_uuid, partial_doc_path, total_chunks, source_url, content_type, download_time_utc, user_id
+):
     """Merge then upload a chunked document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
@@ -112,9 +115,9 @@ def merge_chunked_document(doc_set_uuid, partial_doc_path, total_chunks, source_
 
     cloud_doc_path = _get_doc_file_path(doc_set, partial_doc_path)
 
-    cloud_chunk_paths = [ _get_chunk_file_path(doc_set, partial_doc_path, chunk_index)
-                          for chunk_index in range(total_chunks) ]
-
+    cloud_chunk_paths = [
+        _get_chunk_file_path(doc_set, partial_doc_path, chunk_index) for chunk_index in range(total_chunks)
+    ]
 
     _merge_file_chunks(cloud_doc_path, cloud_chunk_paths)
 
@@ -125,19 +128,21 @@ def merge_chunked_document(doc_set_uuid, partial_doc_path, total_chunks, source_
 
     bucket = get_s3_bucket()
 
-    add_document(document_set_uuid=doc_set.id,
-                 file_dir=str(Path(partial_doc_path).parent), file_name=Path(partial_doc_path).name,
-                 cloud_path=cloud_doc_path,
-                 bucket_path=bucket,
-                 source_url=source_url,
-                 content_type=content_type,
-                 download_time_utc=download_time_utc,
-                 user_id=user_id)
+    add_document(
+        document_set_uuid=doc_set.id,
+        file_dir=str(Path(partial_doc_path).parent),
+        file_name=Path(partial_doc_path).name,
+        cloud_path=cloud_doc_path,
+        bucket_path=bucket,
+        source_url=source_url,
+        content_type=content_type,
+        download_time_utc=download_time_utc,
+        user_id=user_id,
+    )
 
 
 def _merge_file_chunks(cloud_doc_path, cloud_chunk_paths):
-    """Merge file chunks and store the resulting file in cloud storage.
-    """
+    """Merge file chunks and store the resulting file in cloud storage."""
     with cloud_doc_path.open(mode='wb') as dest_file:
         for src_path in cloud_chunk_paths:
             with src_path.open(mode='rb') as src_file:
@@ -152,8 +157,7 @@ def _merge_file_chunks(cloud_doc_path, cloud_chunk_paths):
 
 
 def _store_file_in_cloud(cloud_path, local_file):
-    """Upload a local file to cloud storage.
-    """
+    """Upload a local file to cloud storage."""
     with cloud_path.open(mode='wb') as dest_file:
         while True:
             chunk = local_file.read(1_000_000)

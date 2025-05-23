@@ -2,7 +2,6 @@ import logging
 
 from langchain_core.messages import HumanMessage
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -27,10 +26,9 @@ def add_input_to_history(state):
     next_message_id += 1
 
     stateUpdates = {
-        'messages': [ HumanMessage(content=question, id=message_id) ],
-        'original_messages': [ HumanMessage(content=question, id=message_id) ],
-        'next_message_id': next_message_id
+        'messages': [HumanMessage(content=question, id=message_id)],
+        'original_messages': [HumanMessage(content=question, id=message_id)],
+        'next_message_id': next_message_id,
     }
 
     return stateUpdates
-

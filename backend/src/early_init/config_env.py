@@ -3,8 +3,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-def configure_env():
 
+def configure_env():
     base_env = os.getenv('DOTENV_FILE', '')
 
     if len(base_env) > 0:
@@ -27,5 +27,6 @@ def configure_env():
             raise ValueError()
 
         load_dotenv(dotenv_path=overrides_env, interpolate=False, override=True)
+
 
 configure_env()

@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def _apply_incremental_configuration(log_config_path):
-    """Apply incremental configuration from the specified TOML file.
-    """
+    """Apply incremental configuration from the specified TOML file."""
     # Read the logging config file
     with log_config_path.open('rb') as fin:
         config = tomllib.load(fin)
@@ -24,6 +23,7 @@ def _apply_incremental_configuration(log_config_path):
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         import pprint
+
         formatted = pprint.pformat(object=config, width=120, indent=2, sort_dicts=True)
         logger.debug('Incremental logging config to be applied:\n%s', formatted)
 
@@ -35,26 +35,20 @@ def _apply_incremental_configuration(log_config_path):
     # Also, the configuration dictionary must contain a `"version"` key with value `1`.
     # This is mandatory for future backward compatibility. We hard-code it here. In the
     # future, we will push the `"version"` to the TOML file.
-    config.update({
-        'version': 1,
-        'incremental': True}
-    )
+    config.update({'version': 1, 'incremental': True})
 
     try:
         logging.config.dictConfig(config)
     except Exception as ex:
-        logger.warning(
-            'Error during incremental logging reconfiguration', exc_info=ex)
+        logger.warning('Error during incremental logging reconfiguration', exc_info=ex)
 
     logger.info('Updated logging levels')
 
 
 class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
-    """Watches for changes to logging configuration TOML file.
-    """
+    """Watches for changes to logging configuration TOML file."""
 
     def _handle(self, event: FileSystemEvent, use_target_path: bool = False) -> None:
-
         log_config_path = get_global_config().logging_config_path
 
         # Exit if the logging config file does not exist.
@@ -92,8 +86,7 @@ class LogConfigMonitor:
 
         # Beware! Watchdog's PatternMatchingEventHandler's patterns is a collection of
         # strings. So be sure to cast the Path object to string object.
-        event_handler = _ConfigFileChangeEventHandler(
-            patterns=[str(log_config_path)])
+        event_handler = _ConfigFileChangeEventHandler(patterns=[str(log_config_path)])
 
         self.observer = Observer()
         self.observer.schedule(event_handler, '.', recursive=False)
