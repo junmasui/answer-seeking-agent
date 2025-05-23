@@ -1,36 +1,63 @@
 <template>
-    <v-banner class="pa-2 ma-2" icon="mdi-alert-circle" color="warning" lines="one" v-if="tableOutdated">
-        <v-banner-text>
-            Newer table data is available.
-        </v-banner-text>
+  <v-banner
+    v-if="tableOutdated"
+    class="pa-2 ma-2"
+    icon="mdi-alert-circle"
+    color="warning"
+    lines="one"
+  >
+    <v-banner-text> Newer table data is available. </v-banner-text>
 
-        <template v-slot:actions>
-            <v-btn variant="text" @click="loadItems">Refresh</v-btn>
-        </template>
-    </v-banner>
-    <v-data-table-server show-select return-object v-model="selectedItems" v-model:sort-by="sortBy" multi-sort v-model:page="page"
-        v-model:items-per-page="itemsPerPage" :items-per-page-options="itemsPerPageOptions" :items-length="totalItems"
-        :headers="headers" :items="items" density="compact" item-key="name" @update:options="loadItems">
-        <template v-slot:item.actions="{ item, index }">
-            <div class="action-icons">
-                <v-icon class="me-2" size="small" @click="editItem(item, index)">
-                    mdi-pencil
-                </v-icon>
-                <v-icon size="small" @click="deleteItem(item, index)">
-                    mdi-delete
-                </v-icon>                
-            </div>
-        </template>
-    </v-data-table-server>
-    <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
-    <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
-    <add-doc-set-dialog v-model:active="activeAddDocSet" v-model="targetItem" @done="closeAddDocSet" @confirmed="applyAddDocSet">
-    </add-doc-set-dialog>
-    <edit-doc-set-dialog v-model:active="activeEditDocSet" v-model="targetItem" @done="closeEditDocSet" @confirmed="applyEditDocSet">
-    </edit-doc-set-dialog>
-    <confirmation-dialog v-model:active="activeConfirmDelete" @done="closeDeleteItem" @confirmed="applyDeleteItem">
-        Are you sure you want to delete this item?
-    </confirmation-dialog>
+    <template #actions>
+      <v-btn variant="text" @click="loadItems">Refresh</v-btn>
+    </template>
+  </v-banner>
+  <v-data-table-server
+    v-model="selectedItems"
+    v-model:sort-by="sortBy"
+    v-model:page="page"
+    v-model:items-per-page="itemsPerPage"
+    show-select
+    return-object
+    multi-sort
+    :items-per-page-options="itemsPerPageOptions"
+    :items-length="totalItems"
+    :headers="headers"
+    :items="items"
+    density="compact"
+    item-key="name"
+    @update:options="loadItems"
+  >
+    <template #item.actions="{ item, index }">
+      <div class="action-icons">
+        <v-icon class="me-2" size="small" @click="editItem(item, index)"> mdi-pencil </v-icon>
+        <v-icon size="small" @click="deleteItem(item, index)"> mdi-delete </v-icon>
+      </div>
+    </template>
+  </v-data-table-server>
+  <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
+  <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
+  <add-doc-set-dialog
+    v-model:active="activeAddDocSet"
+    v-model="targetItem"
+    @done="closeAddDocSet"
+    @confirmed="applyAddDocSet"
+  >
+  </add-doc-set-dialog>
+  <edit-doc-set-dialog
+    v-model:active="activeEditDocSet"
+    v-model="targetItem"
+    @done="closeEditDocSet"
+    @confirmed="applyEditDocSet"
+  >
+  </edit-doc-set-dialog>
+  <confirmation-dialog
+    v-model:active="activeConfirmDelete"
+    @done="closeDeleteItem"
+    @confirmed="applyDeleteItem"
+  >
+    Are you sure you want to delete this item?
+  </confirmation-dialog>
 </template>
 
 <script setup>
@@ -38,55 +65,56 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw, watch } fro
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
-import { useDocumentSetStore } from './DocSetStore';
-import ConfirmationDialog from '../common/ConfirmationDialog.vue';
-import AddDocSetDialog from './AddDocSetDialog.vue';
-import EditDocSetDialog from './EditDocSetDialog.vue';
+import { useDocumentSetStore } from './DocSetStore'
+import ConfirmationDialog from '../common/ConfirmationDialog.vue'
+import AddDocSetDialog from './AddDocSetDialog.vue'
+import EditDocSetDialog from './EditDocSetDialog.vue'
 
-const currentUserStore = useCurrentUserStore();
+const currentUserStore = useCurrentUserStore()
 const documentSetStore = useDocumentSetStore()
 
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
-const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentSetStore);
-const tableUpdatedAt = ref();
-const tableOutdated = ref(false);
+const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentSetStore)
+const tableUpdatedAt = ref()
+const tableOutdated = ref(false)
 
-const loading = ref(false);
+const loading = ref(false)
 
 const headers = ref([
-    {
-        title: 'Document Set',
-        key: 'name',
-        width: '150px', sortable: true
-    },
-    { title: 'Is Public', value: 'isPublicViewable', sortable: true },
-    { title: 'Is Default', key: 'isNewDocDefault', sortable: true },
-    {
-        title: 'Last Modified Date',
-        key: 'modificationTime', sortable: false
-    },
-    { title: 'Status', key: 'status', sortable: true },
-    { title: 'Actions', key: 'actions', sortable: false },
+  {
+    title: 'Document Set',
+    key: 'name',
+    width: '150px',
+    sortable: true
+  },
+  { title: 'Is Public', value: 'isPublicViewable', sortable: true },
+  { title: 'Is Default', key: 'isNewDocDefault', sortable: true },
+  {
+    title: 'Last Modified Date',
+    key: 'modificationTime',
+    sortable: false
+  },
+  { title: 'Status', key: 'status', sortable: true },
+  { title: 'Actions', key: 'actions', sortable: false }
 ])
 
 const sortBy = ref([])
 
-watch(sortBy, async(newValue, oldValue)=>{
-    console.log('SORT-BY NEW ', newValue )
-    console.log('SORT-BY OLD ', oldValue )
+watch(sortBy, async (newValue, oldValue) => {
+  console.log('SORT-BY NEW ', newValue)
+  console.log('SORT-BY OLD ', oldValue)
 })
 
-const itemsPerPageOptions = ([
-    { value: 2, title: '2' },
-    { value: 5, title: '5' },
-    { value: 10, title: '10' },
-    { value: 25, title: '25' },
-    { value: 50, title: '50' }
+const itemsPerPageOptions = [
+  { value: 2, title: '2' },
+  { value: 5, title: '5' },
+  { value: 10, title: '10' },
+  { value: 25, title: '25' },
+  { value: 50, title: '50' }
 ]
-)
 
 const selectedItemCount = computed(() => {
-    return selectedItems.value.length;
+  return selectedItems.value.length
 })
 
 const targetIndex = ref(-1)
@@ -98,67 +126,60 @@ const targetItem = ref({})
 const activeAddDocSet = ref(false)
 
 function addDocSet() {
-    activeAddDocSet.value = true
+  activeAddDocSet.value = true
 
-    targetIndex.value = -1
-    targetItem.value = {
-
-        name: '',
-        isPublicViewable: true,
-        isNewDocDefault: false
-
-    }
+  targetIndex.value = -1
+  targetItem.value = {
+    name: '',
+    isPublicViewable: true,
+    isNewDocDefault: false
+  }
 }
 
-
 async function applyAddDocSet() {
-    await addDocumentSet()
+  await addDocumentSet()
 }
 
 async function addDocumentSet() {
-
-    try {
-
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-        if (signedIn.value) {
-            headers['Authorization'] = `Bearer ${accessToken.value}`
-        }
-
-        const body = {
-            name: targetItem.value.name,
-            isNewDocDefault: targetItem.value.isNewDocDefault,
-            isPublicViewable: targetItem.value.isPublicViewable,
-        }
-
-        const response = await fetch(`/api/document-sets/`, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(body, null, 2)
-        });
-
-        if (!response.ok) {
-            throw new Error('Add failed');
-        }
-
-        const data = await response.json();
-        console.log('Added successfully');
-    } catch (error) {
-        console.error('Error adding:', error);
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    if (signedIn.value) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
     }
 
+    const body = {
+      name: targetItem.value.name,
+      isNewDocDefault: targetItem.value.isNewDocDefault,
+      isPublicViewable: targetItem.value.isPublicViewable
+    }
+
+    const response = await fetch(`/api/document-sets/`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body, null, 2)
+    })
+
+    if (!response.ok) {
+      throw new Error('Add failed')
+    }
+
+    const data = await response.json()
+    console.log('Added successfully')
+  } catch (error) {
+    console.error('Error adding:', error)
+  }
 }
 
-
 async function closeAddDocSet() {
-    await loadItems()
+  await loadItems()
 
-    nextTick(() => {
-        targetItem.value = {}
-        targetIndex.value = -1
-    })
+  nextTick(() => {
+    targetItem.value = {}
+    targetIndex.value = -1
+  })
 }
 
 //
@@ -167,65 +188,60 @@ async function closeAddDocSet() {
 const activeEditDocSet = ref(false)
 
 function editItem(item, index) {
-    activeEditDocSet.value = true
-    targetIndex.value = index
-    targetItem.value = Object.assign({}, item)
+  activeEditDocSet.value = true
+  targetIndex.value = index
+  targetItem.value = Object.assign({}, item)
 
-    console.log('EditItem:', JSON.stringify(targetItem.value, null, 2));
-
-
+  console.log('EditItem:', JSON.stringify(targetItem.value, null, 2))
 }
 
 async function applyEditDocSet() {
-    await editDocumentSet(targetItem.value.id)
+  await editDocumentSet(targetItem.value.id)
 }
 
 async function editDocumentSet(doc_set_uuid) {
-    try {
-
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-        if (signedIn.value) {
-            headers['Authorization'] = `Bearer ${accessToken.value}`
-        }
-
-        const body = {
-            // name: targetItem.value.name,
-            isNewDocDefault: targetItem.value.isNewDocDefault,
-            isPublicViewable: targetItem.value.isPublicViewable,
-        }
-
-        console.log('Edited:', body);
-        console.log('Edited:', JSON.stringify(body, null, 2));
-
-
-        const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
-            method: 'PATCH',
-            headers: headers,
-            body: JSON.stringify(body, null, 2)
-        });
-
-        if (!response.ok) {
-            throw new Error('Edit failed');
-        }
-
-        const data = await response.json();
-        console.log('Edited successfully');
-    } catch (error) {
-        console.error('Error editing:', error);
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
+    if (signedIn.value) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
+    const body = {
+      // name: targetItem.value.name,
+      isNewDocDefault: targetItem.value.isNewDocDefault,
+      isPublicViewable: targetItem.value.isPublicViewable
+    }
+
+    console.log('Edited:', body)
+    console.log('Edited:', JSON.stringify(body, null, 2))
+
+    const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify(body, null, 2)
+    })
+
+    if (!response.ok) {
+      throw new Error('Edit failed')
+    }
+
+    const data = await response.json()
+    console.log('Edited successfully')
+  } catch (error) {
+    console.error('Error editing:', error)
+  }
 }
 
-
 async function closeEditDocSet() {
-    await loadItems()
+  await loadItems()
 
-    nextTick(() => {
-        targetItem.value = {}
-        targetIndex.value = -1
-    })
+  nextTick(() => {
+    targetItem.value = {}
+    targetIndex.value = -1
+  })
 }
 
 //
@@ -235,49 +251,47 @@ async function closeEditDocSet() {
 const activeConfirmDelete = ref(false)
 
 function deleteItem(item, index) {
-    activeConfirmDelete.value = true
-    targetIndex.value = index
-    targetItem.value = Object.assign({}, item)
+  activeConfirmDelete.value = true
+  targetIndex.value = index
+  targetItem.value = Object.assign({}, item)
 }
 
 async function applyDeleteItem() {
-    await deleteDocumentSet(targetItem.value.id)
+  await deleteDocumentSet(targetItem.value.id)
 }
 
 async function deleteDocumentSet(doc_set_uuid) {
-    try {
-
-        const headers = {
-            'Accept': 'application/json'
-        }
-        if (signedIn.value) {
-            headers['Authorization'] = `Bearer ${accessToken.value}`
-        }
-
-        const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
-            method: 'DELETE',
-            headers: headers
-        });
-
-        if (!response.ok) {
-            throw new Error('Delete failed');
-        }
-
-        const data = await response.json();
-        console.log('Deleted successfully');
-    } catch (error) {
-        console.error('Error deleting:', error);
+  try {
+    const headers = {
+      Accept: 'application/json'
     }
+    if (signedIn.value) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
+    const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
+      method: 'DELETE',
+      headers: headers
+    })
+
+    if (!response.ok) {
+      throw new Error('Delete failed')
+    }
+
+    const data = await response.json()
+    console.log('Deleted successfully')
+  } catch (error) {
+    console.error('Error deleting:', error)
+  }
 }
 
-
 async function closeDeleteItem() {
-    await loadItems()
+  await loadItems()
 
-    nextTick(() => {
-        targetItem.value = {}
-        targetIndex.value = -1
-    })
+  nextTick(() => {
+    targetItem.value = {}
+    targetIndex.value = -1
+  })
 }
 
 //
@@ -288,109 +302,106 @@ const pickDocumentSet = ref(false)
 const selectedDocumentSet = ref({})
 
 function changeDocumentSet(item, index) {
-    pickDocumentSet.value = true
-    targetIndex.value = index
-    targetItem.value = Object.assign({}, item)
+  pickDocumentSet.value = true
+  targetIndex.value = index
+  targetItem.value = Object.assign({}, item)
 
-    selectedDocumentSet.value = documentSets.value.find(x => x.id === item.documentSetId)
+  selectedDocumentSet.value = documentSets.value.find((x) => x.id === item.documentSetId)
 }
 
 async function selectNewDocSet() {
-    await updateDocSet(targetItem.value.id, selectedDocumentSet.value.id)
+  await updateDocSet(targetItem.value.id, selectedDocumentSet.value.id)
 
-    await closePickDocSet()
+  await closePickDocSet()
 }
 
 async function updateDocSet(doc_uuid, doc_set_uuid) {
-    try {
-
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-        if (signedIn.value) {
-            headers['Authorization'] = `Bearer ${accessToken.value}`
-        }
-
-        const body = {
-            documentSetId: doc_set_uuid
-        }
-
-        const response = await fetch(`/api/documents/${doc_uuid}`, {
-            method: 'PATCH',
-            headers: headers,
-            body: JSON.stringify(body, null, 2)
-        });
-
-        if (!response.ok) {
-            throw new Error('Update failed');
-        }
-
-        const data = await response.json();
-        console.log('Update successfully');
-    } catch (error) {
-        console.error('Error updating document set:', error);
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
+    if (signedIn.value) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
+    const body = {
+      documentSetId: doc_set_uuid
+    }
+
+    const response = await fetch(`/api/documents/${doc_uuid}`, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify(body, null, 2)
+    })
+
+    if (!response.ok) {
+      throw new Error('Update failed')
+    }
+
+    const data = await response.json()
+    console.log('Update successfully')
+  } catch (error) {
+    console.error('Error updating document set:', error)
+  }
 }
 
 async function closePickDocSet() {
-    await loadItems()
+  await loadItems()
 
-    nextTick(() => {
-        targetItem.value = {}
-        targetIndex.value = -1
-    })
+  nextTick(() => {
+    targetItem.value = {}
+    targetIndex.value = -1
+  })
 }
 
 //
 // Polling for server table updates.
 //
 
-var intervalId = null;
+var intervalId = null
 
 onMounted(async () => {
-    await loadItems();
+  await loadItems()
 
-    intervalId = setInterval(async () => {
-        await loadTableStats()
-    },
-        30000)
+  intervalId = setInterval(async () => {
+    await loadTableStats()
+  }, 30000)
 })
 
 onBeforeUnmount(async () => {
-    clearInterval(intervalId);
-    intervalId = null;
+  clearInterval(intervalId)
+  intervalId = null
 })
 
 async function loadTableStats() {
-    try {
-
-        const headers = {
-            'Accept': 'application/json'
-        }
-        if (signedIn.value) {
-            headers['Authorization'] = `Bearer ${accessToken.value}`
-        }
-
-        const response = await fetch(`/api/document-sets/stats`, {
-            method: 'GET',
-            headers: headers
-        });
-
-        if (!response.ok) {
-            throw new Error('Getting table stats failed');
-        }
-
-        const data = await response.json();
-
-        totalItems.value = data.documentSetCount;
-        if (tableUpdatedAt.value !== data.tableUpdatedTime) {
-            tableOutdated.value = true;
-            tableUpdatedAt.value = data.tableUpdatedTime;
-        }
-    } catch (error) {
-        console.error('Error getting table stats:', error);
+  try {
+    const headers = {
+      Accept: 'application/json'
     }
+    if (signedIn.value) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
+    const response = await fetch(`/api/document-sets/stats`, {
+      method: 'GET',
+      headers: headers
+    })
+
+    if (!response.ok) {
+      throw new Error('Getting table stats failed')
+    }
+
+    const data = await response.json()
+
+    totalItems.value = data.documentSetCount
+    if (tableUpdatedAt.value !== data.tableUpdatedTime) {
+      tableOutdated.value = true
+      tableUpdatedAt.value = data.tableUpdatedTime
+    }
+  } catch (error) {
+    console.error('Error getting table stats:', error)
+  }
 }
 
 //
@@ -398,61 +409,60 @@ async function loadTableStats() {
 //
 
 async function loadItems() {
-    loading.value = true
+  loading.value = true
 
-    try {
-        const params = new URLSearchParams({
-            // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
-            page: page.value - 1,
-            itemsPerPage: itemsPerPage.value
+  try {
+    const params = new URLSearchParams({
+      // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
+      page: page.value - 1,
+      itemsPerPage: itemsPerPage.value
+    })
+
+    if (sortBy.value.length > 0) {
+      const sortByParam = sortBy.value
+        .map((item) => {
+          var key = item['key']
+          if (item['order'] === 'desc') {
+            key = '-' + key
+          }
+          return key
         })
+        .join(',')
 
-        if (sortBy.value.length > 0) {
-            const sortByParam = sortBy.value.map(item => {
-                var key = item['key']
-                if (item['order'] === 'desc') {
-                    key = '-' + key
-                }
-                return key
-            }).join(',')
-
-            params.append('sortBy', sortByParam)
-        }
-
-
-        const headers = {
-            'Accept': 'application/json'
-        }
-        if (signedIn.value) {
-            headers['Authorization'] = `Bearer ${accessToken.value}`
-        }
-
-        const response = await fetch(`/api/document-sets/?${params}`, {
-            method: 'GET',
-            headers: headers
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to get files');
-        }
-
-        const data = await response.json();
-
-        totalItems.value = data.documentSetCount;
-        tableUpdatedAt.value = data.tableUpdatedTime
-        tableOutdated.value = false
-        items.value = data.documentSets.map(item => toRaw(item));
-
-    } catch (error) {
-        totalItems.value = 0;
-        tableOutdated.value = false
-        items.value = [];
-        loading.value = false
-        console.error('Error getting files:', error);
+      params.append('sortBy', sortByParam)
     }
-    loading.value = false
-}
 
+    const headers = {
+      Accept: 'application/json'
+    }
+    if (signedIn.value) {
+      headers['Authorization'] = `Bearer ${accessToken.value}`
+    }
+
+    const response = await fetch(`/api/document-sets/?${params}`, {
+      method: 'GET',
+      headers: headers
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to get files')
+    }
+
+    const data = await response.json()
+
+    totalItems.value = data.documentSetCount
+    tableUpdatedAt.value = data.tableUpdatedTime
+    tableOutdated.value = false
+    items.value = data.documentSets.map((item) => toRaw(item))
+  } catch (error) {
+    totalItems.value = 0
+    tableOutdated.value = false
+    items.value = []
+    loading.value = false
+    console.error('Error getting files:', error)
+  }
+  loading.value = false
+}
 </script>
 
 <style>
