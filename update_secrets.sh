@@ -300,6 +300,7 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 #
 set +o history # temporarily turn off history
+# shellcheck disable=SC2046
 export $( grep -h -v "^#" "./secrets/clickhouse.secrets.env" | xargs -n1 )
 set -o history # turn it back on
 
@@ -308,6 +309,7 @@ envsubst < ${RELPATH}.template > secrets/clickhouse.admin-user.xml
 
 #
 set +o history # temporarily turn off history
+# shellcheck disable=SC2046
 export $( grep -h -v "^#" "./secrets/redis.secrets.env" | xargs -n1 )
 set -o history # turn it back on
 
