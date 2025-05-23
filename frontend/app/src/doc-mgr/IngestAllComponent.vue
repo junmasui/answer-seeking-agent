@@ -26,7 +26,7 @@ async function onIngest(event) {
 
     const response = await fetch('/api/ingest', {
       method: 'POST',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {

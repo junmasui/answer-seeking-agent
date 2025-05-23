@@ -199,7 +199,7 @@ async function ingestDocument(doc_uuid) {
     }
     const response = await fetch(`/api/documents/${doc_uuid}/ingest`, {
       method: 'POST',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
@@ -278,7 +278,7 @@ async function deleteDocument(doc_uuid) {
 
     const response = await fetch(`/api/documents/${doc_uuid}`, {
       method: 'DELETE',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
@@ -331,7 +331,7 @@ async function ingestSelectedDocuments() {
 
     const response = await fetch(`/api/documents/ingest`, {
       method: 'POST',
-      headers: headers,
+      headers,
       body: JSON.stringify(body, null, 2)
     })
 
@@ -432,7 +432,7 @@ async function deleteSelectedDocuments() {
 
     const response = await fetch(`/api/documents/delete`, {
       method: 'POST',
-      headers: headers,
+      headers,
       body: JSON.stringify(body, null, 2)
     })
 
@@ -484,7 +484,7 @@ async function loadTableStats() {
 
     const response = await fetch(`/api/documents/stats`, {
       method: 'GET',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
@@ -540,7 +540,7 @@ async function loadItems() {
 
     const response = await fetch(`/api/documents/?${params}`, {
       method: 'GET',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {

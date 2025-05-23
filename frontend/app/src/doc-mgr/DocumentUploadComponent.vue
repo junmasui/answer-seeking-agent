@@ -106,7 +106,7 @@ async function onUpload() {
           const response = await fetch('/api/documents/upload', {
             method: 'POST',
             body: formData,
-            headers: headers
+            headers
           })
 
           if (!response.ok) {
@@ -157,7 +157,7 @@ async function loadTableStats() {
 
     const response = await fetch(`/api/document-sets/stats`, {
       method: 'GET',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
@@ -189,7 +189,7 @@ async function loadDocumentSets() {
 
     const response = await fetch(`/api/document-sets/?${params}`, {
       method: 'GET',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {

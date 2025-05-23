@@ -158,7 +158,7 @@ async function addDocumentSet() {
 
     const response = await fetch(`/api/document-sets/`, {
       method: 'POST',
-      headers: headers,
+      headers,
       body: JSON.stringify(body, null, 2)
     })
 

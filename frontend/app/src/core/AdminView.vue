@@ -40,7 +40,7 @@ async function resetConfirmed() {
     }
     const response = await fetch('/api/admin/resetDatabase', {
       method: 'POST',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
