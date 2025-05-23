@@ -37,7 +37,7 @@ function wait_for_nslookup {
         echo "waiting until DNS name ${LOOKUP_NAME} resolves"
 
         # Try with Docker's internal DNS
-        nslookup $LOOKUP_NAME 127.0.0.11
+        nslookup "$LOOKUP_NAME" 127.0.0.11
         if [ $? -eq 0 ]
         then
             echo "DNS name ${LOOKUP_NAME} resolves"
@@ -45,7 +45,7 @@ function wait_for_nslookup {
         fi
 
         # Try with Podman's DNS setup
-        nslookup $LOOKUP_NAME 172.31.1.1
+        nslookup "$LOOKUP_NAME" 172.31.1.1
         if [ $? -eq 0 ]
         then
             echo "DNS name ${LOOKUP_NAME} resolves"
@@ -75,7 +75,7 @@ function wait_for_minio {
     echo "waiting for minio to be ready"
     while true
     do
-        curl -f ${MINIO_ENDPOINT_URL}/minio/health/live
+        curl -f "${MINIO_ENDPOINT_URL}/minio/health/live"
         if [ $? -eq 0 ]
         then
             echo "minio is live"
@@ -158,7 +158,7 @@ function wait_for_redis {
     declare REDIS_URL=${1:-}
 
     echo redis
-    echo $*
+    echo "$@"
     echo redis
 
     if [ -z "${REDIS_URL:-}" ]

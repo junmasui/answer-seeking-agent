@@ -3,9 +3,8 @@
 # Set environment variables from mounted secrets files
 
 set +o history # temporarily turn off history
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
-export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
-
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
+export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
 export CE_BROKER_URL=redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0
 set -o history # turn it back on
 

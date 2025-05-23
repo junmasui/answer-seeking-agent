@@ -3,11 +3,11 @@ source /wait_for_gate.sh
 
 # Set environment variables from .secrets.env files
 
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # The minio/minio image does not include the Debian findutil and grep packages.
 # Hence we need to use a pure-shell alternative to our more frequent technique
 # of `export $( grep | xargs )`
-for FILE in ${SECRETS_MOUNT}/*_env
+for FILE in "${SECRETS_MOUNT}"/*_env
 do
     [ -f "$FILE" ] || continue
     exec 3< "$FILE" # Open file descriptor 3. This robustly avoids subshell issues.
@@ -35,15 +35,15 @@ WAIT_INTERVAL=5
 ELAPSED=0
 
 echo "Waiting for Minio server to be ready..."
-until ( mc alias set local_server http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} \
+until ( mc alias set local_server http://minio:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" \
         && mc admin info local_server ) \
-      || [ $ELAPSED -ge $WAIT_LIMIT ]; do
-  sleep $WAIT_INTERVAL
+      || [ "$ELAPSED" -ge "$WAIT_LIMIT" ]; do
+  sleep "$WAIT_INTERVAL"
   # The $((...)) syntax is for shell arithematic operations.
   ELAPSED=$((ELAPSED + WAIT_INTERVAL))
 done
 
-if [ $ELAPSED -ge $WAIT_LIMIT ]; then
+if [ "$ELAPSED" -ge "$WAIT_LIMIT" ]; then
   echo "Minio server did not start within ${WAIT_LIMIT} seconds."
   exit 1
 fi
@@ -53,8 +53,8 @@ fi
 #
 echo "initializing Minio server bucket ${LANGFUSE_MINIO_BUCKET}."
 
-mc mb local_server/${LANGFUSE_MINIO_BUCKET}
+mc mb "local_server/${LANGFUSE_MINIO_BUCKET}"
 
-mc admin user add local_server ${LANGFUSE_MINIO_USER_NAME} ${LANGFUSE_MINIO_USER_PASSWORD}
+mc admin user add local_server "${LANGFUSE_MINIO_USER_NAME}" "${LANGFUSE_MINIO_USER_PASSWORD}"
 
-mc admin policy attach local_server readwrite --user ${LANGFUSE_MINIO_USER_NAME}
+mc admin policy attach local_server readwrite --user "${LANGFUSE_MINIO_USER_NAME}"
