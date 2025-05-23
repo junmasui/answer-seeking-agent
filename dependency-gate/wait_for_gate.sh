@@ -50,11 +50,11 @@ function close_dependency_gate {
     SIGNAL_FILE="${1}"
     SIGNAL_DIR="${SIGNAL_FILE%/*}"
 
-    if [ -f $SIGNAL_FILE ]
+    if [ -f "$SIGNAL_FILE" ]
     then
-        rm $SIGNAL_FILE
+        rm "$SIGNAL_FILE"
     else
-        if [ ! -d ${SIGNAL_DIR} ]
+        if [ ! -d "${SIGNAL_DIR}" ]
         then
             echo "WARNING!!  Shared directory ${SIGNAL_DIR} is missing!"
         fi
@@ -67,7 +67,7 @@ function open_dependency_gate {
 
     SIGNAL_FILE="${1}"
 
-    date --iso-8601=seconds > $SIGNAL_FILE
+    date --iso-8601=seconds > "$SIGNAL_FILE"
 
     echo "opened gate"
 }

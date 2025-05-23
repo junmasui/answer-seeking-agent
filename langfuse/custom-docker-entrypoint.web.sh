@@ -7,11 +7,12 @@ set -u  # Unbound variables are errors.
 # Set environment variables from mounted secrets files
 
 ## set +o history # temporarily turn off history
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # The langfuse image is based on Alpine.
 # Hence we need to use a pure-shell alternative to our more frequent technique
 # of `export $( grep | xargs )`
-for FILE in ${SECRETS_MOUNT}/*_env
+
+for FILE in "${SECRETS_MOUNT}"/*_env
 do
     [ -f "$FILE" ] || continue
     exec 3< "$FILE" # Open file descriptor 3. This robustly avoids subshell issues.
@@ -27,7 +28,7 @@ do
     exec 3<&- # Close file descriptor 3.
 done
 ## set -o history # turn it back on
-
+    
 # Wait for dependency-gate to open.
 #
 . /wait_for_gate.sh
@@ -35,20 +36,20 @@ done
 wait_for_dependency_gate /init-signal/langfuse-gate
 
 
-export DATABASE_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
-export DIRECT_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
+export DATABASE_URL="postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse"
+export DIRECT_URL="postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse"
 
-export SALT=${LANGFUSE_SALT}
-export ENCRYPTION_KEY=${LANGFUSE_ENCRYPTION_KEY}
+export SALT="${LANGFUSE_SALT}"
+export ENCRYPTION_KEY="${LANGFUSE_ENCRYPTION_KEY}"
 
-export CLICKHOUSE_PASSWORD=${LANGFUSE_CLICKHOUSE_USER_PASSWORD}
+export CLICKHOUSE_PASSWORD="${LANGFUSE_CLICKHOUSE_USER_PASSWORD}"
 
-export LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=${LANGFUSE_MINIO_USER_PASSWORD}
-export LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY=${LANGFUSE_MINIO_USER_PASSWORD}
+export LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY="${LANGFUSE_MINIO_USER_PASSWORD}"
+export LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY="${LANGFUSE_MINIO_USER_PASSWORD}"
 
 export REDIS_CONNECTION_STRING="redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
 
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker inspect langfuse/langfuse:3.24 | jq '.[0].Config.Entrypoint'
-exec "./web/entrypoint.sh" $@
+exec "./web/entrypoint.sh" "$@"

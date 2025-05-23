@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 
 export const useUploadStore = defineStore('upload', {
-    state: () => {
-        return {
-            fileList: [],
-            selectedDocSet: null
-        }
-    },
+  state: () => {
+    return {
+      fileList: [],
+      selectedDocSet: null
+    }
+  }
 })

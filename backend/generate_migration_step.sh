@@ -1,4 +1,3 @@
-
 MESSAGE=$1
 
 if [ -z "${MESSAGE:-}" ]
@@ -12,8 +11,9 @@ fi
 # can be made more flexible.
 
 set +o history # temporarily turn off history
-SECRETS_MOUNT=${SECRETS_MOUNT:-/run/secrets}
-export $( grep -h -v "^#" ${SECRETS_MOUNT}/*_env | xargs -n1 )
+SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
+# shellcheck disable=SC2046
+export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
 set -o history # turn it back on
 
 set +o history # temporarily turn off history
@@ -34,4 +34,4 @@ source .venv/bin/activate
 # See https://alembic.sqlalchemy.org/en/latest/autogenerate.html#auto-generating-migrations
 # Also see https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#postgresql-schema-reflection
 
-PYTHONPATH=./src alembic revision --autogenerate -m "$MESSAGE" 
+PYTHONPATH=./src alembic revision --autogenerate -m "$MESSAGE"

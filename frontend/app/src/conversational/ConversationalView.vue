@@ -1,15 +1,14 @@
 <template>
   <h2>Conversational View</h2>
 
-
   <div class="d-flex justify-end">
-    <v-btn @click="onClearConversation" class="pa-2 ma-2" variant="tonal">
+    <v-btn class="pa-2 ma-2" variant="tonal" @click="onClearConversation">
       Clear Conversation
     </v-btn>
   </div>
 
   <v-container fluid>
-    <v-container fluid v-for="(item, index) in messages" :key="index" class="pa-0 ma-0">
+    <v-container v-for="(item, index) in messages" :key="index" fluid class="pa-0 ma-0">
       <v-row class="pa-0 ma-0">
         <v-col v-if="item.type === 'user'" cols="12" class="pa-0 ma-0">
           <UserMessageComponent :message="item.message" />
@@ -18,7 +17,6 @@
           <SystemMessageComponent :message="item.message" />
         </v-col>
       </v-row>
-
     </v-container>
 
     <!--- Regarding `@keydown.enter`:
@@ -27,20 +25,31 @@
       `.prevent' instructs the browser to ignore the event, which will keep a spurious newline from
       being appended.
      -->
-    <v-textarea label="Query" clearable counter persistent-clear persistent-counter v-model="userInput"
+    <v-textarea
+      v-model="userInput"
+      label="Query"
+      clearable
+      counter
+      persistent-clear
+      persistent-counter
       :disabled="querySubmitted"
-      @click:clear="onClear" @keydown.enter.exact.prevent="submit()"></v-textarea>
+      @click:clear="onClear"
+      @keydown.enter.exact.prevent="submit()"
+    ></v-textarea>
 
     <v-container>
       <v-row class="flex-nowrap" no-gutters>
         <v-col cols="4"> </v-col>
         <v-col cols="4" class="justify-center max-width: 200px">
-          <v-progress-linear :active="querySubmitted" :indeterminate="true" color="primary"></v-progress-linear>
+          <v-progress-linear
+            :active="querySubmitted"
+            :indeterminate="true"
+            color="primary"
+          ></v-progress-linear>
         </v-col>
         <v-col cols="4"> </v-col>
       </v-row>
     </v-container>
-
   </v-container>
 </template>
 
@@ -54,14 +63,13 @@ import { useConversationStore } from './ConversationStore'
 import SystemMessageComponent from './SystemMessageComponent.vue'
 import UserMessageComponent from './UserMessageComponent.vue'
 
-const currentUserStore = useCurrentUserStore();
-const conversationStore = useConversationStore();
+const currentUserStore = useCurrentUserStore()
+const conversationStore = useConversationStore()
 
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
-const { userInput, messages, threadId } = storeToRefs(conversationStore);
+const { userInput, messages, threadId } = storeToRefs(conversationStore)
 
 const querySubmitted = ref(false)
-
 
 function onClearConversation(event) {
   messages.value = []
@@ -75,13 +83,12 @@ function onClear(event) {
 
 async function submit(event) {
   try {
-
     const queryParams = {
       input: userInput.value
-    };
+    }
     // Nuance about false-y: null, undefined and zero-length strings are falsey
     if (threadId.value) {
-      queryParams.threadId = threadId.value;
+      queryParams.threadId = threadId.value
     }
 
     //threadId on queryParams
@@ -89,61 +96,53 @@ async function submit(event) {
     querySubmitted.value = true
 
     const headers = {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
-    if ( signedIn.value ) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`
+    if (signedIn.value) {
+      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
-    const response = await fetch('/api/answer/',
-      {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(queryParams, null, 2)
-      }
-    );
+    const response = await fetch('/api/answer/', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(queryParams, null, 2)
+    })
 
     querySubmitted.value = false
 
-
     if (!response.ok) {
-      throw new Error('Query failed');
+      throw new Error('Query failed')
     }
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
       console.log(`Response content type: ${contentType}`)
-      throw new TypeError("Oops, we haven't got JSON!");
+      throw new TypeError("Oops, we haven't got JSON!")
     }
 
-    const data = await response.json();
+    const data = await response.json()
 
     messages.value.push({ type: 'user', message: userInput.value })
     userInput.value = ''
 
     threadId.value = data?.threadId ?? ''
 
-    var message = data?.answer ?? ''
+    let message = data?.answer ?? ''
     if (data?.citations) {
       message += '\n\n<p></p>'
 
       data.citations.forEach((citation, index) => {
-        var formatted = `${citation['fileName']}, page ${citation['pageNumber']}, url: ${citation['sourceUrl']}`
+        let formatted = `${citation.fileName}, page ${citation.pageNumber}, url: ${citation.sourceUrl}`
         message += `\n\n[^${index + 1}]: ${formatted}`
       })
     }
 
     messages.value.push({ type: 'system', message: message })
-
   } catch (error) {
-    console.error('Error: query failed', error);
+    console.error('Error: query failed', error)
   }
-
-
 }
-
-
 </script>
 
 <style module>
