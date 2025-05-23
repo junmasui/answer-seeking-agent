@@ -42,11 +42,13 @@ def setup_monitoring(app):
         logger.info('Task sent: %s[%s] %s', task.name, task.uuid, task.info())
 
     with app.connection() as connection:
-        recv = app.events.Receiver(connection,
-                                   handlers={
-                                       'worker-online': announce_worker_online,
-                                       'worker-offline': announce_worker_offline,
-                                       'task-sent': announce_sent_tasks,
-                                       '*': state.event,
-                                   })
+        recv = app.events.Receiver(
+            connection,
+            handlers={
+                'worker-online': announce_worker_online,
+                'worker-offline': announce_worker_offline,
+                'task-sent': announce_sent_tasks,
+                '*': state.event,
+            },
+        )
         recv.capture(limit=None, timeout=None, wakeup=True)

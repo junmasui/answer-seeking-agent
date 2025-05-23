@@ -15,8 +15,6 @@ from global_config import get_global_config
 
 from ..providers.retriever import get_retriever
 
-
-
 logger = logging.getLogger(__name__)
 
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
@@ -44,18 +42,14 @@ def query_documents(state):
         case 'pgvector':
             if doc_set_ids and len(doc_set_ids) > 0:
                 doc_set_ids = [str(x) for x in doc_set_ids]
-                kwargs['filter'] = {
-                    'document_set_id': {
-                        '$in': doc_set_ids
-                    }
-                }
+                kwargs['filter'] = {'document_set_id': {'$in': doc_set_ids}}
         case 'weaviate':
             if doc_set_ids and len(doc_set_ids) > 0:
                 # Create a weaviate-specific Filter object. This will be passed into
                 # the weaviate API thru the key-word arguments of the call stack.
                 # A code review shows that no conversion is made from a generic dict to
-                # a weaviate-specific Filter object. 
-                where_filter = Filter.by_property("document_set_id").contains_any(doc_set_ids)
+                # a weaviate-specific Filter object.
+                where_filter = Filter.by_property('document_set_id').contains_any(doc_set_ids)
                 kwargs['filters'] = where_filter
 
                 # Return the chunk ID's.
@@ -71,7 +65,6 @@ def query_documents(state):
     # Remove irrelevant metadata. It's stuff that we don't need for processing
     # or evaluation.
     def _clean_up_retrieved(x: Document):
-
         if 'orig_elements' in x.metadata:
             del x.metadata['orig_elements']
 
@@ -88,6 +81,5 @@ def query_documents(state):
     documents = [_clean_up_retrieved(x) for x in documents]
 
     # Update agent state with retrieved documents
-    stateUpdates = { 'documents': documents }
+    stateUpdates = {'documents': documents}
     return stateUpdates
-

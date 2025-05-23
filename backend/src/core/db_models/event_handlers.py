@@ -1,12 +1,10 @@
 import logging
 
-from .model_ops import (create_tables_if_not_exists,
-                        drop_all_tables)
-
-from ..signals import start_up_handler, reset_data_handler, send_db_predefined_data
-
+from ..signals import reset_data_handler, send_db_predefined_data, start_up_handler
+from .model_ops import create_tables_if_not_exists, drop_all_tables
 
 logger = logging.getLogger(__name__)
+
 
 @start_up_handler
 def documents_startup(sender):

@@ -7,18 +7,17 @@ from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from core.public_models.prompt import AgentPromptStatus
 
-from ...providers.sql_database import get_sessionmaker, DataDomain
-
 from ...db_models import DbAgentPrompt
-
+from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)
 
-def update_prompt(prompt_uuid, status: AgentPromptStatus, system_message: str = None, human_message:str = None, last_user_id=None):
-    """Updates status field with option to update 
-    """
-    with update_prompt_record(prompt_uuid=prompt_uuid) as record:
 
+def update_prompt(
+    prompt_uuid, status: AgentPromptStatus, system_message: str = None, human_message: str = None, last_user_id=None
+):
+    """Updates status field with option to update"""
+    with update_prompt_record(prompt_uuid=prompt_uuid) as record:
         if status is not None:
             record.status = status
 
@@ -32,22 +31,18 @@ def update_prompt(prompt_uuid, status: AgentPromptStatus, system_message: str = 
             record.last_user_id = last_user_id
 
 
-
 @contextmanager
 def update_prompt_record(prompt_uuid):
-    """Updates the prompt record.
-    """
+    """Updates the prompt record."""
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-
         try:
             with session.begin():
-                stmt = select(DbAgentPrompt).where(
-                    DbAgentPrompt.id == prompt_uuid)
+                stmt = select(DbAgentPrompt).where(DbAgentPrompt.id == prompt_uuid)
                 result = session.execute(stmt)
 
                 existing_obj = result.scalar_one()
@@ -73,17 +68,16 @@ def update_prompt_record(prompt_uuid):
 
         # Count versions. The count will be the number of records with this prompt's name.
         with session.begin():
-            stmt = select(func.count()).select_from(DbAgentPrompt).where(
-                DbAgentPrompt.name == name)
+            stmt = select(func.count()).select_from(DbAgentPrompt).where(DbAgentPrompt.name == name)
             result = session.execute(stmt)
             version_count = result.scalar()
-        
+
         # Only one version can be active
         if status == AgentPromptStatus.ACTIVE and version_count > 1:
             with session.begin():
-                stmt = update(DbAgentPrompt).where(
-                        and_(DbAgentPrompt.name == name, DbAgentPrompt.version != version)
-                    ).value(
-                        status = AgentPromptStatus.INACTIVE
-                    )
+                stmt = (
+                    update(DbAgentPrompt)
+                    .where(and_(DbAgentPrompt.name == name, DbAgentPrompt.version != version))
+                    .value(status=AgentPromptStatus.INACTIVE)
+                )
                 result = session.execute(stmt)

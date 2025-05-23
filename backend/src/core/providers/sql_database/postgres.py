@@ -1,11 +1,12 @@
 """
 This provides the vector store used by this application.
 """
+
 from functools import cache
 
+from psycopg_pool import ConnectionPool
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from psycopg_pool import ConnectionPool
 
 from global_config import get_global_config
 
@@ -37,6 +38,7 @@ def get_connection_str(db_schema: DataDomain):
     # Convert away from PyDantic's custom type and to Python string.
     return str(connection_url)
 
+
 @cache
 def get_engine(db_schema: DataDomain):
     """Returns a SQLAlchemy engine for the database.
@@ -48,6 +50,7 @@ def get_engine(db_schema: DataDomain):
 
     engine = create_engine(connection_str)
     return engine
+
 
 @cache
 def get_sessionmaker(db_schema: DataDomain):
@@ -61,6 +64,7 @@ def get_sessionmaker(db_schema: DataDomain):
 
     session = sessionmaker(bind=engine)
     return session
+
 
 @cache
 def get_connection_pool(db_schema: DataDomain):

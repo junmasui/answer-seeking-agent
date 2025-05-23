@@ -1,27 +1,24 @@
 import asyncio
-from datetime import datetime, timezone
 import logging
-import uuid
 import pprint
+import uuid
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import pytest
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from core.public_models.doc import DocumentStatus
 
-logger  = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
 
 
 @pytest.mark.asyncio
 async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker):
-
     path = f'/answer/'
 
-    data = {
-        'input': 'When did deep learning emerge?'
-    }
+    data = {'input': 'When did deep learning emerge?'}
 
     content_type, resp = await api_server.post(path=path, content_type='json', timeout=60.0, data=data)
 
@@ -46,7 +43,6 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
     assert isinstance(resp['citations'], list)
     assert len(resp['citations']) > 0
 
-
     for citation in resp['citations']:
         assert 'docUuid' in citation
         assert isinstance(citation['docUuid'], str)
@@ -68,7 +64,7 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
         assert len(citation['sourceUrl']) > 10
         parsed_url = urlparse(citation['sourceUrl'])
         assert all([parsed_url.scheme, parsed_url.netloc]), f"sourceUrl '{citation['sourceUrl']}' is not a valid URL"
-    
+
         assert 'text' in citation
         assert isinstance(citation['text'], str)
         assert len(citation['text']) > 10
