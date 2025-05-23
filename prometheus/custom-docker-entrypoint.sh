@@ -43,4 +43,4 @@ fi
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   podman image inspect prom/prometheus | jq '.[0].Config.Entrypoint'
-exec /bin/prometheus $@
+exec /bin/prometheus "$@"

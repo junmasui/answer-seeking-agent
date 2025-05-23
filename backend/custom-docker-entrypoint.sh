@@ -1,4 +1,3 @@
-
 set -eu
 
 cd /app
@@ -17,4 +16,4 @@ fi
 
 source .venv/bin/activate
 
-exec $@
+exec "$@"

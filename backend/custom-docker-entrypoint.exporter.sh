@@ -12,4 +12,4 @@ set -o history # turn it back on
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker image inspect danihodovic/celery-exporter | jq '.[0].Config.Entrypoint'
-exec python /app/cli.py $@
+exec python /app/cli.py "$@"
