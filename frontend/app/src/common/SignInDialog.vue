@@ -98,7 +98,7 @@ async function onConfirm() {
     formData.append('username', username.value)
     formData.append('password', password.value)
 
-    const response = await fetch(`/api/sim_auth/token`, {
+    const response = await fetch('/api/sim_auth/token', {
       method: 'POST',
       body: formData
     })

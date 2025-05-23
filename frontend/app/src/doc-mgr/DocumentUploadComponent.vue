@@ -155,7 +155,7 @@ async function loadTableStats() {
       headers['Authorization'] = `Bearer ${accessToken.value}`
     }
 
-    const response = await fetch(`/api/document-sets/stats`, {
+    const response = await fetch('/api/document-sets/stats', {
       method: 'GET',
       headers
     })

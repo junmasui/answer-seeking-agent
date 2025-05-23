@@ -156,7 +156,7 @@ async function addDocumentSet() {
       isPublicViewable: targetItem.value.isPublicViewable
     }
 
-    const response = await fetch(`/api/document-sets/`, {
+    const response = await fetch('/api/document-sets/', {
       method: 'POST',
       headers,
       body: JSON.stringify(body, null, 2)
@@ -383,7 +383,7 @@ async function loadTableStats() {
       headers['Authorization'] = `Bearer ${accessToken.value}`
     }
 
-    const response = await fetch(`/api/document-sets/stats`, {
+    const response = await fetch('/api/document-sets/stats', {
       method: 'GET',
       headers: headers
     })

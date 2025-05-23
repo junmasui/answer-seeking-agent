@@ -197,7 +197,7 @@ async function ingestDocument(doc_uuid) {
     if (signedIn.value) {
       headers['Authorization'] = `Bearer ${accessToken.value}`
     }
-    const response = await fetch(`/api/documents/${doc_uuid}/ingest`, {
+    const response = await fetch('/api/documents/ingest', {
       method: 'POST',
       headers
     })
@@ -430,7 +430,7 @@ async function deleteSelectedDocuments() {
       docUuids: selectedItems.value.map((x) => x.id)
     }
 
-    const response = await fetch(`/api/documents/delete`, {
+    const response = await fetch('/api/documents/delete', {
       method: 'POST',
       headers,
       body: JSON.stringify(body, null, 2)
@@ -482,7 +482,7 @@ async function loadTableStats() {
       headers['Authorization'] = `Bearer ${accessToken.value}`
     }
 
-    const response = await fetch(`/api/documents/stats`, {
+    const response = await fetch('/api/documents/stats', {
       method: 'GET',
       headers
     })
