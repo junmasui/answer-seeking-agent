@@ -41,10 +41,10 @@ def update_doc_set_record(doc_set_uuid):
                 existing_obj = result.scalar_one()
 
         except NoResultFound as ex:
-            logger.warning('No tracking doc record found for %s', doc_uuid, exc_info=ex)
+            logger.warning('No tracking doc record found for %s', doc_set_uuid, exc_info=ex)
             return
         except MultipleResultsFound as ex:
-            logger.warning('Multiple tracking doc records found for %s', doc_uuid, exc_info=ex)
+            logger.warning('Multiple tracking doc records found for %s', doc_set_uuid, exc_info=ex)
             return
 
         with session.begin():
