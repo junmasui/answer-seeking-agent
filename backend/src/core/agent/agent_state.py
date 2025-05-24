@@ -1,7 +1,7 @@
 from typing import Annotated, NotRequired
 from uuid import UUID
 
-from langchain_core.messages import AnyMessage, MessageLikeRepresentation
+from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 

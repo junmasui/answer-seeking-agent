@@ -9,7 +9,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 import sim_auth_app
 from core import status_check
-from core.signals import configure_sender, send_reset_data, send_start_up
+from core.signals import configure_sender, send_start_up
 from core_worker import get_worker_logger_tree
 from log_config_monitor import dump_logger_tree, get_logging_conf_monitor
 

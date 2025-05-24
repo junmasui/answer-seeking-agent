@@ -11,7 +11,7 @@ from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from global_config import get_global_config
 
-from ..providers.sql_database import DataDomain, get_engine, get_sessionmaker
+from ..providers.sql_database import DataDomain, get_engine
 from .base import DECLARED_METADATA
 
 logger = logging.getLogger(__name__)

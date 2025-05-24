@@ -1,3 +1,4 @@
+# ruff: noqa: F401 # Exposes package-level imports.
 from .doc import (
     add_document,
     delete_document,

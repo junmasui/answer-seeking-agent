@@ -3,15 +3,10 @@ import pprint
 from typing import Generator
 
 import pytest
-from sqlalchemy import Column, Engine, Enum, MetaData, Table, cast, create_engine
-from sqlalchemy.dialects.postgresql import ENUM
-from sqlalchemy.ext.automap import AutomapBase, automap_base
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import column_property, sessionmaker
+from sqlalchemy import Engine, MetaData, create_engine
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import sessionmaker
 
-from core.db_models.doc_mgr import DbDocumentStatus
-from core.db_models.prompt_mgr import DbPromptStatus
-from core.public_models.doc import DocumentStatus
 from global_config import get_global_config
 
 # Explicitly define the exported symbols: the exported symbols

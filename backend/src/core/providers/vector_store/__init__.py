@@ -2,8 +2,6 @@
 This provides the vector store used by this application.
 """
 
-import os
-
 from global_config import get_global_config
 
 # Explicitly define the exported symbols: the exported symbols
