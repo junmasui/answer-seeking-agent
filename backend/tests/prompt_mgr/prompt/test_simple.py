@@ -1,4 +1,3 @@
-
 import pytest
 from sqlalchemy import func, select
 

@@ -1,6 +1,8 @@
-# ruff: noqa: F401 # Exposes package-level imports.
 from .add import add_prompt
 from .delete import delete_prompt
 from .query import get_prompt, list_prompts
 from .stats import get_prompt_statistics
 from .update import update_prompt
+
+# Explicitly define the exported names: these names are the contract of this module.
+__all__ = ['add_prompt', 'delete_prompt', 'get_prompt', 'list_prompts', 'get_prompt_statistics', 'update_prompt']

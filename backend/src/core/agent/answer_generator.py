@@ -6,7 +6,6 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 
 import logging
 
-
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser
 from .internal_models import AgentPrompt

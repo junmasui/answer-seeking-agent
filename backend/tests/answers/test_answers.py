@@ -5,14 +5,13 @@ from urllib.parse import urlparse
 
 import pytest
 
-
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
 
 
 @pytest.mark.asyncio
 async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker):
-    path = f'/answer/'
+    path = '/answer/'
 
     data = {'input': 'When did deep learning emerge?'}
 

@@ -5,13 +5,14 @@ name = "python"
 
   [analyzers.meta]
   runtime_version = "3.x.x"
+  max_line_length = 120
 
 [[analyzers]]
 name = "javascript"
 
   [analyzers.meta]
   plugins = ["vue"]
-  environment = ["nodejs"]
+  environment = ["browser", "vitest"]
 
 [[analyzers]]
 name = "shell"

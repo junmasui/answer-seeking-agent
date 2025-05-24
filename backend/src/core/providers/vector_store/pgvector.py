@@ -6,7 +6,6 @@ import logging
 from functools import cache
 
 from langchain_postgres import PGVector
-from langchain_postgres.vectorstores import PGVector
 
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
