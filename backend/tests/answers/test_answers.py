@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 
 import pytest
 
-
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
 

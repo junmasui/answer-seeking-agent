@@ -1,4 +1,3 @@
-# ruff: noqa: F401 # Exposes package-level imports.
 import textwrap
 
 from core.agent.internal_models import AgentPrompt
@@ -6,7 +5,17 @@ from core.public_models import AgentPromptStatus
 
 from . import initial_prompts
 from .prompt import add_prompt, delete_prompt, get_prompt, get_prompt_statistics, list_prompts, update_prompt
-from .util import add_chat_prompt
+
+# Explicitly define the exported names: these names are the contract of this module.
+__all__ = [
+    'add_prompt',
+    'delete_prompt',
+    'get_prompt',
+    'get_prompt_statistics',
+    'list_prompts',
+    'update_prompt',
+    'add_chat_prompt',
+]
 
 
 def add_chat_prompt(*, prompt_name: AgentPrompt, system_message: str = None, human_message: str = None):
