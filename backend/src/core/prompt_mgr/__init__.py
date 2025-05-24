@@ -15,6 +15,7 @@ __all__ = [
     'list_prompts',
     'update_prompt',
     'add_chat_prompt',
+    'initial_prompts',
 ]
 
 
