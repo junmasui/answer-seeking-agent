@@ -5,10 +5,7 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 """
 
 import logging
-import textwrap
 
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser

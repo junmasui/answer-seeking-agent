@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Annotated, Optional, Union
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, Form, Path, Query, UploadFile
 

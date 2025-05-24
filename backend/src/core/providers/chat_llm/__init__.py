@@ -2,9 +2,6 @@
 This provides the chat LLM used by this application.
 """
 
-import os
-from functools import cache
-
 from global_config import get_global_config
 
 # Explicitly define the exported symbols: the exported symbols

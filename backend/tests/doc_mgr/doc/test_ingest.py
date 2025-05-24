@@ -2,7 +2,6 @@ import asyncio
 import logging
 import pprint
 import uuid
-from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy import func, select

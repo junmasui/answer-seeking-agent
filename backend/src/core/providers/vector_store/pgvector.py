@@ -3,10 +3,8 @@ This provides the vector store used by this application.
 """
 
 import logging
-import os
 from functools import cache
 
-from langchain_core.documents import Document
 from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import PGVector
 

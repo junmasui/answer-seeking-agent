@@ -6,10 +6,8 @@ See: Question Re-writer in https://langchain-ai.github.io/langgraph/tutorials/ra
 """
 
 import logging
-import textwrap
 
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 
 from ..providers.chat_llm import get_chat_llm
 from .internal_models import AgentPrompt

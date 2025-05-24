@@ -1,11 +1,8 @@
 from prometheus_client import (
-    CONTENT_TYPE_LATEST,
     CollectorRegistry,
-    Counter,
     GCCollector,
     PlatformCollector,
     ProcessCollector,
-    generate_latest,
     multiprocess,
     start_wsgi_server,
 )

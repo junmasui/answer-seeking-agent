@@ -1,7 +1,5 @@
 import logging
-import os
 from functools import cache
-from urllib.parse import unquote
 
 from cloudpathlib.s3 import S3Client, S3Path
 

@@ -1,8 +1,7 @@
 import logging
 import uuid
-from typing import Annotated, Optional, Union
+from typing import Annotated, Union
 
-from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 

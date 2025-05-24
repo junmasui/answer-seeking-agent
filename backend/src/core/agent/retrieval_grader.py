@@ -6,7 +6,6 @@ See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/
 """
 
 import logging
-import textwrap
 from functools import cache
 
 from .grader_util import build_grader

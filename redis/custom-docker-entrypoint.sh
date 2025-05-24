@@ -19,4 +19,4 @@ cat redis.conf
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker inspect redis:latest | jq '.[0].Config.Entrypoint'
-exec docker-entrypoint.sh $@
+exec docker-entrypoint.sh "$@"

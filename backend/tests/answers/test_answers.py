@@ -1,14 +1,10 @@
-import asyncio
 import logging
 import pprint
 import uuid
-from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import pytest
-from sqlalchemy import func, select
 
-from core.public_models.doc import DocumentStatus
 
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
