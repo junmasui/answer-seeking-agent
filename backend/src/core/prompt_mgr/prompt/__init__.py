@@ -1,3 +1,4 @@
+# ruff: noqa: F401 # Exposes package-level imports.
 from .add import add_prompt
 from .delete import delete_prompt
 from .query import get_prompt, list_prompts

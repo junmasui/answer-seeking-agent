@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 
-from sqlalchemy import Boolean, DateTime, Enum, Integer, String, Uuid
+from sqlalchemy import Boolean, DateTime, Integer, String, Uuid
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import current_timestamp

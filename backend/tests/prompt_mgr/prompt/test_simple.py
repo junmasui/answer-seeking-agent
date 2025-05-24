@@ -1,4 +1,3 @@
-import pprint as pp
 
 import pytest
 from sqlalchemy import func, select

@@ -4,7 +4,6 @@ import uuid
 from sqlalchemy import and_, select, update
 
 from core.public_models.prompt import AgentPromptStatus
-from global_config import get_global_config
 
 from ...db_models import DbAgentPrompt
 from ...providers.sql_database import DataDomain, get_sessionmaker

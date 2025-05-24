@@ -13,7 +13,7 @@ from jwt.exceptions import InvalidTokenError
 
 from global_config import get_global_config
 
-from .models import TokenData, User
+from .models import TokenData
 from .users import retrieve_user
 
 ALGORITHM = 'HS256'

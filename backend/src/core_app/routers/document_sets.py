@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Annotated, Optional, Union
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
 

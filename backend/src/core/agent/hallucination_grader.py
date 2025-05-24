@@ -5,7 +5,6 @@ See: Hallucination Grader in https://langchain-ai.github.io/langgraph/tutorials/
 """
 
 import logging
-import textwrap
 from functools import cache
 
 from .grader_util import build_grader

@@ -1,3 +1,4 @@
+# ruff: noqa: F401 # Exposes package-level imports.
 from .agent import get_mermaid_graph, seek_answer
 from .db_models import event_handlers
 from .doc_mgr import (

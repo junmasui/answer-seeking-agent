@@ -1,5 +1,4 @@
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel
 
 from global_config import get_global_config

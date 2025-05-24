@@ -2,16 +2,12 @@
 This provides the document loader used by this application.
 """
 
-import os
-from functools import cache
 from pathlib import Path
 
 import nltk
 
 # import logging
 from langchain_unstructured import UnstructuredLoader
-from unstructured.chunking import Chunker, add_chunking_strategy
-from unstructured.chunking.title import chunk_by_title
 
 from global_config import get_global_config
 

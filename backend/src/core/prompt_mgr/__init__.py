@@ -1,3 +1,4 @@
+# ruff: noqa: F401 # Exposes package-level imports.
 import textwrap
 
 from core.agent.internal_models import AgentPrompt

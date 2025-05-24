@@ -3,17 +3,12 @@ This provides the vector store used by this application.
 """
 
 import logging
-import os
 from functools import cache
 
-from langchain_core.documents import Document
-from langchain_core.embeddings import Embeddings
 from langchain_weaviate import WeaviateVectorStore
-from weaviate import WeaviateClient, connect_to_local
+from weaviate import connect_to_local
 from weaviate.classes.config import Configure, DataType, Property, Tokenization, VectorDistances, VectorFilterStrategy
 from weaviate.classes.init import AdditionalConfig, Auth, Timeout
-from weaviate.classes.query import Filter
-from weaviate.connect import ConnectionParams
 
 from global_config import get_global_config
 

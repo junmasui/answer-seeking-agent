@@ -1,6 +1,5 @@
 import logging
 import uuid
-from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import and_, column, func, select
