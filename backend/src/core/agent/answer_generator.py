@@ -56,5 +56,5 @@ def generate_answer(state):
     )
 
     # Update state with generated output
-    stateUpdates = {'generation': result['generation'], 'answer': result['answer'], 'citations': result['citations']}
-    return stateUpdates
+    state_updates = {'generation': result['generation'], 'answer': result['answer'], 'citations': result['citations']}
+    return state_updates

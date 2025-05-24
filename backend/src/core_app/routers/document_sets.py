@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, Path, Query
 
 from core import list_document_sets
 from core.doc_mgr import add_document_set, delete_document_set, get_document_set_statistics, update_document_set
@@ -40,7 +40,7 @@ async def handle_list_doc_sets(
 
 @router.post('/')
 async def handle_single_insert(
-    body: DocumentSetAddRequest,
+    body: Annotated[DocumentSetAddRequest, Body(...)],
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
@@ -67,7 +67,7 @@ async def handle_table_stats(
 
 @router.patch('/{doc_set_uuid}')
 async def handle_single_update(
-    body: DocumentSetUpdateRequest,
+    body: Annotated[DocumentSetUpdateRequest, Body(...)],
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))

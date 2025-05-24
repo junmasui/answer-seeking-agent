@@ -61,3 +61,12 @@ class DocumentUpdateRequest(CamelModel):
 
 class BulkDeleteRequestBody(CamelModel):
     doc_uuids: list[UUID]
+
+
+class DocumentUploadFormData(CamelModel):
+    document_set_id: UUID
+    total_chunks: int
+    chunk_index: int
+    source_url: str
+    content_type: str
+    download_time_utc_str: str

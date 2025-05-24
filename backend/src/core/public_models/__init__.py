@@ -8,6 +8,7 @@ from .doc import (
     DocumentStats,
     DocumentStatus,
     DocumentUpdateRequest,
+    DocumentUploadFormData,
 )
 from .doc_set import (
     DocumentSet,
@@ -38,6 +39,7 @@ __all__ = [
     'DocumentStats',
     'DocumentStatus',
     'DocumentUpdateRequest',
+    'DocumentUploadFormData',
     'DocumentSet',
     'DocumentSetAddRequest',
     'DocumentSetList',

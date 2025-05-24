@@ -4,5 +4,4 @@ from .agent import get_mermaid_graph, seek_answer
 from .checkpointer import checkpointer_startup
 
 # Explicitly define the exported names: these names are the contract of this module.
-__all__ = ["get_mermaid_graph", "seek_answer"]
-
+__all__ = ['get_mermaid_graph', 'seek_answer']

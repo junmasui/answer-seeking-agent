@@ -72,7 +72,7 @@ async def _populate_doc_set_table(doc_set_table, api_server, sql_engine, sql_ses
     for index in range(3):
         data = {'name': f'doc set {index}', 'status': 'active', 'isNewDocDefault': is_default, 'isPublicViewable': True}
         is_default = False
-        resp = await api_server.post(path=path, content_type='json', data=data)
+        await api_server.post(path=path, content_type='json', data=data)
 
     count = _get_table_count(doc_set_table, sql_sessionmaker)
     if count != 3:

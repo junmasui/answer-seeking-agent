@@ -108,7 +108,7 @@ async def api_server() -> AsyncGenerator[ApiClient, None]:
             pytest.exit('API server not available')
         await asyncio.sleep(delay)
 
-        status, content = await api_client.get(path='/')
+        status, _content = await api_client.get(path='/')
         if status == 'json':
             break
 
@@ -121,9 +121,21 @@ async def api_server() -> AsyncGenerator[ApiClient, None]:
 async def global_reset(api_server) -> AsyncGenerator[None, None]:
     path = '/admin/reset-database'
     logger.info('Resetting global state')
-    resp = await api_server.post(path=path, content_type=None)
+    resp_type, resp = await api_server.post(path=path, content_type=None)
+    if resp_type != 'json':
+        if resp_type == 'exception':
+            logger.info('data reset failed', exc_info=resp)
+        else:
+            logger.info('data reset failed:\n%s', resp)
+        pytest.fail('data reset failed')
 
     yield
 
     logger.info('Resetting global state')
-    resp = await api_server.post(path=path, content_type=None)
+    resp_type, _ = await api_server.post(path=path, content_type=None)
+    if resp_type != 'json':
+        if resp_type == 'exception':
+            logger.info('data reset failed', exc_info=resp)
+        else:
+            logger.info('data reset failed:\n%s', resp)
+        pytest.fail('data reset failed')
