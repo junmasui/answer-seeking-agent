@@ -134,7 +134,7 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
 
             doc_ids = [row[0].id for row in result]
 
-        path = f'/documents/ingest'
+        path = '/documents/ingest'
 
         data = {'docUuids': [str(doc_id) for doc_id in doc_ids]}
 
@@ -145,7 +145,7 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
         task_ids = resp.get('task_ids')
 
         if not isinstance(task_ids, list) or len(task_ids) != len(doc_ids):
-            raise RuntimeError(f'Document ingestion did not correctly queue.')
+            raise RuntimeError('Document ingestion did not correctly queue.')
 
         await asyncio.sleep(5)
 

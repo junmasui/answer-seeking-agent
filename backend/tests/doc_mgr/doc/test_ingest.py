@@ -42,7 +42,7 @@ async def test_ingest(api_server, populated_doc_table, sql_sessionmaker):
 
     data = {'docUuids': [str(doc_id)]}
 
-    path = f'/documents/ingest'
+    path = '/documents/ingest'
     content_type, resp = await api_server.post(path=path, content_type='json', data=data)
 
     assert content_type == 'json'

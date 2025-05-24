@@ -40,11 +40,11 @@ async def test_insert(api_server, readonly_doc_set_table, empty_doc_table, sql_s
         'documentSetId': str(doc_set_id),
         'chunkIndex': 0,
         'totalChunks': 1,
-        'sourceUrl': f'https://example.test/test-insert-file-1.pdf',
+        'sourceUrl': 'https://example.test/test-insert-file-1.pdf',
         'contentType': 'application/pdf',
         'downloadTimeUtc': datetime.now(tz=timezone.utc).isoformat(timespec='minutes'),
     }
-    files = {'file': (f'test-insert-file-1.pdf', f'not a PDF insert 1')}
+    files = {'file': ('test-insert-file-1.pdf', 'not a PDF insert 1')}
     resp = await api_server.post(path=path, content_type='multipart', data=data, files=files)
 
     count = _get_table_count(empty_doc_table, sql_sessionmaker)

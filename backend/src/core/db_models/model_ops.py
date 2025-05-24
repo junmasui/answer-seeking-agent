@@ -183,5 +183,5 @@ def drop_all_tables():
     # Reset the Alembic migration table. If this table remains populated, our migration detection
     # logic will prevent the recreation of the registered tables.
     with engine.connect() as conn:
-        conn.execute(text(f'TRUNCATE TABLE "alembic_version" RESTART IDENTITY CASCADE'))
+        conn.execute(text('TRUNCATE TABLE "alembic_version" RESTART IDENTITY CASCADE'))
         conn.commit()
