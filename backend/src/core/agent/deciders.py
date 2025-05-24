@@ -4,7 +4,6 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 

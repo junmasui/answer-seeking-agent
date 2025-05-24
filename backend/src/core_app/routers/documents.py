@@ -82,7 +82,7 @@ async def handle_upload(
     user_id = current_user.userid if current_user is not None else None
     downloadTimeUtc = datetime.fromisoformat(downloadTimeUtc)
 
-    logger.debug(f'handling %s chunk: %d %d', file.filename, chunkIndex, totalChunks)
+    logger.debug('handling %s chunk: %d %d', file.filename, chunkIndex, totalChunks)
 
     if totalChunks > 1:
         upload_chunk(

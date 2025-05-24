@@ -179,7 +179,7 @@ def ingest_documents(doc_ids):
     for record in tracking_records:
         _ingest_one_document(record)
 
-    logger.info(f'completed ingesting')
+    logger.info('completed ingesting')
 
     return {'status': 'completed'}
 
