@@ -45,7 +45,9 @@ async def test_insert(api_server, readonly_doc_set_table, empty_doc_table, sql_s
         'downloadTimeUtc': datetime.now(tz=timezone.utc).isoformat(timespec='minutes'),
     }
     files = {'file': ('test-insert-file-1.pdf', 'not a PDF insert 1')}
-    resp = await api_server.post(path=path, content_type='multipart', data=data, files=files)
+    resp_type, _resp = await api_server.post(path=path, content_type='multipart', data=data, files=files)
+
+    assert resp_type == 'json'
 
     count = _get_table_count(empty_doc_table, sql_sessionmaker)
 
@@ -84,6 +86,9 @@ async def test_get(api_server, populated_doc_table, sql_sessionmaker):
 
         doc_id = result[0].id
 
+        assert doc_id is not None
+
+
 
 @pytest.mark.asyncio
 async def test_update(api_server, populated_doc_table, sql_sessionmaker):
@@ -96,9 +101,9 @@ async def test_update(api_server, populated_doc_table, sql_sessionmaker):
     data = {'documentSetId': None}
 
     path = f'/documents/{doc_id}'
-    content_type, resp = await api_server.patch(path=path, content_type='json', data=data)
+    resp_type, _resp = await api_server.patch(path=path, content_type='json', data=data)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     count = _get_table_count(populated_doc_table, sql_sessionmaker)
 
@@ -114,9 +119,9 @@ async def test_delete(api_server, populated_doc_table, sql_sessionmaker):
         doc_id = result[0].id
 
     path = f'/documents/{doc_id}'
-    content_type, resp = await api_server.delete(path=path)
+    resp_type, _resp = await api_server.delete(path=path)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     count = _get_table_count(populated_doc_table, sql_sessionmaker)
 
