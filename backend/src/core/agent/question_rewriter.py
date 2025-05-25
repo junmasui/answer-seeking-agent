@@ -59,8 +59,8 @@ def rewrite_question(state):
     # Update agent state with rewritten question.
     messages = [msg for msg in state['messages'] if msg.type == 'human']
     message = messages[-1]
-    updatedMessage = message.model_copy(update={'content': better_question})
+    updated_message = message.model_copy(update={'content': better_question})
 
-    stateUpdates = {'question': better_question, 'messages': [updatedMessage]}
+    state_updates = {'question': better_question, 'messages': [updated_message]}
 
-    return stateUpdates
+    return state_updates
