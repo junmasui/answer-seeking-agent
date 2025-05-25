@@ -127,4 +127,9 @@ class Settings(BaseSettings):
 
 @cache
 def get_global_config():
+    """Return the cached global configuration settings instance.
+
+    Uses functools.cache to ensure a single Settings instance is created
+    and reused across the application for performance and consistency.
+    """
     return Settings()

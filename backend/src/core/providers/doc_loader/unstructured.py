@@ -16,6 +16,11 @@ from ...signals import start_up_handler
 
 @start_up_handler
 def start(sender):
+    """Download required NLTK data for the unstructured document loader.
+
+    Downloads 'punkt_tab' and 'averaged_perceptron_tagger_eng' to resolve
+    compatibility issues between unstructured and NLTK libraries.
+    """
     if not sender.is_worker:
         return
     # Some version combinations of unstructured and NLTK throw an error about
@@ -47,6 +52,10 @@ def start(sender):
 # Create a document loader.
 #
 def get_doc_loader(file_path: Path | list[Path]):
+    """Return an UnstructuredLoader instance for the given file path(s).
+    Configures the loader based on global settings, including whether to use the Unstructured cloud API.
+    It uses a 'hi_res' strategy and 'by_title' chunking.
+    """
     config = get_global_config()
 
     # When false, process locally and not thru cloud API.

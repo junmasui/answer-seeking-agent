@@ -28,6 +28,10 @@ _TEXT_KEY = 'content'
 
 @cache
 def _get_client():
+    """Return a Weaviate client instance, creating it if necessary.
+    This function is cached to ensure only one client is created.
+    It also ensures the 'Agent' collection exists.
+    """
     config = get_global_config()
 
     client_secret = Auth.api_key(config.weaviate_api_key)
@@ -48,6 +52,9 @@ def _get_client():
 
 
 def _create_collection(client):
+    """Create the 'Agent' collection in Weaviate if it doesn't already exist.
+    Defines the schema for the collection, including properties and vector index configuration.
+    """
     if not client.collections.exists(_COLLECTION_NAME):
         # Create collection with ACORN filter strategy
         client.collections.create(
@@ -131,6 +138,9 @@ def _create_collection(client):
 
 @cache
 def get_vector_store():
+    """Return a WeaviateVectorStore instance, configured with embeddings and the Weaviate client.
+    This function is cached to ensure only one vector store is created.
+    """
     embeddings = get_embeddings()
 
     client = _get_client()
@@ -144,6 +154,7 @@ def get_vector_store():
 
 @start_up_handler
 def startup(sender):
+    """Initialize the vector store on application startup if not a worker process."""
     if sender.is_worker:
         return
 
@@ -152,6 +163,7 @@ def startup(sender):
 
 @reset_data_handler
 def reset(sender):
+    """Reset the Weaviate collection by deleting and recreating it if not a worker process."""
     if sender.is_worker:
         return
 

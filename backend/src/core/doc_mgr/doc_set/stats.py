@@ -10,6 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_document_set_statistics():
+    """Get statistics about the document sets table.
+
+    Returns a DocumentSetStats object containing the total count of document sets
+    and the last update time from the tracking table.
+    """
     table_stats = _get_document_set_stats()
 
     return DocumentSetStats(

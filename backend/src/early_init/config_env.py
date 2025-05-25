@@ -5,6 +5,12 @@ from dotenv import load_dotenv
 
 
 def configure_env():
+    """Configure environment variables by loading from .env files.
+
+    Loads environment variables from base and override .env files specified
+    by DOTENV_FILE and DOTENV_OVERRIDES_FILE environment variables.
+    Override values take precedence over base values.
+    """
     base_env = os.getenv('DOTENV_FILE', '')
 
     if len(base_env) > 0:

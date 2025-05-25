@@ -46,6 +46,9 @@ def startup(sender):
 
 @reset_data_handler
 def reset(sender):
+    """Handle the reset_data signal to clear the S3 bucket if not a worker process.
+    It recursively deletes all files and subdirectories within the configured S3 bucket.
+    """
     if sender.is_worker:
         return
 

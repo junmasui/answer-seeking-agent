@@ -45,10 +45,12 @@ async def handler_question(
 
 @router.get('/mermaid')
 async def handle_mermaid_graph(current_user: Annotated[User, Depends(get_current_user)] = None):
+    """Generate and return a Mermaid diagram representation of the agent graph.
+
+    Returns the agent's workflow graph in Mermaid format for visualization purposes.
     """
-    For the MIME type, https://www.iana.org/assignments/media-types/application/vnd.mermaid
-    See https://github.com/mermaid-js/mermaid/issues/3098 and https://github.com/mermaid-js/mermaid/pull/4485
-    """
+    # For the MIME type, https://www.iana.org/assignments/media-types/application/vnd.mermaid
+    # See https://github.com/mermaid-js/mermaid/issues/3098 and https://github.com/mermaid-js/mermaid/pull/4485
 
     media_type = 'application/vnd.mermaid'
     content = get_mermaid_graph()

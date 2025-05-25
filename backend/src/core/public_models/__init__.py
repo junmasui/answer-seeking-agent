@@ -59,5 +59,6 @@ __all__ = [
 
 class SortDirection(str, enum.Enum):
     """Specifies the direction for sorting, either ascending or descending."""
+
     ASC = 'asc'
     DESC = 'desc'

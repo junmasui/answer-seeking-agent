@@ -21,6 +21,11 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Manage the application's lifespan events.
+    Starts the logging configuration monitor and exposes Prometheus metrics on startup.
+    Configures the signal sender and sends the start_up signal.
+    Stops the logging configuration monitor on shutdown.
+    """
     logger.info('Logging config watcher starting')
     get_logging_conf_monitor().start()
 
@@ -53,11 +58,13 @@ app.mount('/sim_auth', sim_auth_app.app)
 
 @app.get('/')
 async def handle_root():
+    """Handle requests to the root path. Returns a simple tag line."""
     return {'Tag': 'Seeking answers'}
 
 
 @app.get('/status')
 async def handle_status_check():
+    """Handle requests to the status path. Returns the application status."""
     return status_check()
 
 
@@ -74,6 +81,10 @@ def get_status(
 
 @app.get('/loggers')
 async def dump_loggers(include_all: Union[bool, None] = False, worker: bool = False):
+    """Dump the current logger tree for the main application or a Celery worker.
+    If 'worker' is true, it retrieves the logger tree from a Celery worker asynchronously.
+    'include_all' determines if non-default loggers are included.
+    """
     if worker:
         task = get_worker_logger_tree.delay(include_all=include_all)
         task_id = task.id
