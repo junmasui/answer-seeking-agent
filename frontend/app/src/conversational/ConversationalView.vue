@@ -62,6 +62,7 @@ import { useConversationStore } from './ConversationStore'
 
 import SystemMessageComponent from './SystemMessageComponent.vue'
 import UserMessageComponent from './UserMessageComponent.vue'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 const conversationStore = useConversationStore()
@@ -71,16 +72,28 @@ const { userInput, messages, threadId } = storeToRefs(conversationStore)
 
 const querySubmitted = ref(false)
 
+/**
+ * Clears the conversation history and resets the chat interface.
+ * Removes all messages, clears user input, and resets the thread ID for a fresh conversation.
+ */
 function onClearConversation(event) {
   messages.value = []
   userInput.value = ''
   threadId.value = ''
 }
 
+/**
+ * Clears the current user input text field.
+ * Provides a quick way to reset the input without affecting conversation history.
+ */
 function onClear(event) {
   userInput.value = ''
 }
 
+/**
+ * Submits the user's input to the conversational API and processes the response.
+ * Handles the complete conversation flow including message display, API communication, and citation formatting.
+ */
 async function submit(event) {
   try {
     const queryParams = {
@@ -117,7 +130,7 @@ async function submit(event) {
 
     const contentType = response.headers.get('content-type')
     if (!contentType || !contentType.includes('application/json')) {
-      console.log(`Response content type: ${contentType}`)
+      logger.warn('Unexpected response content type', { contentType })
       throw new TypeError("Oops, we haven't got JSON!")
     }
 
@@ -139,8 +152,14 @@ async function submit(event) {
     }
 
     messages.value.push({ type: 'system', message: message })
+    
+    logger.apiSuccess('Conversational query completed', { 
+      threadId: threadId.value,
+      responseLength: message.length,
+      citationCount: data?.citations?.length || 0
+    })
   } catch (error) {
-    console.error('Error: query failed', error)
+    logger.apiError('Conversational query failed', error)
   }
 }
 </script>

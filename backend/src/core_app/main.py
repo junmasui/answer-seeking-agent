@@ -73,9 +73,9 @@ def get_status(
 
 
 @app.get('/loggers')
-async def dump_loggers(includeAll: Union[bool, None] = False, worker: bool = False):
+async def dump_loggers(include_all: Union[bool, None] = False, worker: bool = False):
     if worker:
-        task = get_worker_logger_tree.delay(include_all=includeAll)
+        task = get_worker_logger_tree.delay(include_all=include_all)
         task_id = task.id
         task_result = AsyncResult(task_id)
         # For possible values:
@@ -84,10 +84,10 @@ async def dump_loggers(includeAll: Union[bool, None] = False, worker: bool = Fal
         # Celery 5 does not have async-await support. We will wait the old-fashioned way,
         # which is to loop and poll. The sleep itself is async so that we don't block
         # the process from getting other work done.
-        loop = 0
-        while task_result.status not in ['SUCCESS', 'FAILURE'] and loop < 30:
+        loop_count = 0
+        while task_result.status not in ['SUCCESS', 'FAILURE'] and loop_count < 30:
             await asyncio.sleep(1)
-            loop += 1
+            loop_count += 1
 
         if task_result.status == 'SUCCESS':
             result = task_result.result
@@ -97,4 +97,4 @@ async def dump_loggers(includeAll: Union[bool, None] = False, worker: bool = Fal
 
         return result
 
-    return dump_logger_tree(include_all=includeAll)
+    return dump_logger_tree(include_all=include_all)

@@ -16,18 +16,17 @@ RUN set -eux ; \
 
 RUN apt-get update \
     && apt-get install -y \
-        curl \
-        poppler-utils \
-        tesseract-ocr \
-        libmagic1 \
-    && apt-get install -y \
         bind9-dnsutils \
-        libglx-mesa0 \
+        curl \
         libgl1 \
         libgl1-mesa-dri \
         libglu1-mesa \
-        libxext6 \
+        libglx-mesa0 \
+        libmagic1 \
         libx11-6 \
+        libxext6 \
+        poppler-utils \
+        tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

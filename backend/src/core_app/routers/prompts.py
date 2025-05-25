@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, Path, Query
 
 from core.prompt_mgr import add_prompt, delete_prompt, get_prompt_statistics, list_prompts, update_prompt
 from core.public_models import AgentPromptAddRequest, AgentPromptList, AgentPromptStats, AgentPromptUpdateRequest
@@ -40,7 +40,7 @@ async def handle_list_prompts(
 
 @router.post('/')
 async def handle_single_insert(
-    body: AgentPromptAddRequest,
+    body: Annotated[AgentPromptAddRequest, Body(...)],
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
@@ -66,7 +66,7 @@ async def handle_table_stats(
 
 @router.patch('/{prompt_uuid}')
 async def handle_single_update(
-    body: AgentPromptUpdateRequest,
+    body: Annotated[AgentPromptUpdateRequest, Body(...)],
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))

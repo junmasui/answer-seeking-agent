@@ -15,10 +15,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import logger from '../common/Logger.js'
 
 const systemStatus = ref('unknown')
 const statusColor = ref('primary')
 
+/**
+ * Handles the manual status check button click.
+ * Resets the status to unknown and triggers a fresh status check from the server.
+ */
 async function onCheckStatus() {
   systemStatus.value = 'unknown'
   await checkStatus()
@@ -28,6 +33,10 @@ onMounted(async () => {
   await checkStatus()
 })
 
+/**
+ * Performs a health check by calling the server status endpoint.
+ * Updates the system status display and handles offline scenarios with proper error logging.
+ */
 async function checkStatus() {
   try {
     const response = await fetch('/api/status', {
@@ -36,18 +45,17 @@ async function checkStatus() {
 
     if (!response.ok) {
       systemStatus.value = 'offline'
-
       throw new Error('Status check failed')
     }
 
     const data = await response.json()
-    console.log('Status check success')
+    logger.apiSuccess('Status check completed', { status: data.status })
 
     if (data['status']) {
       systemStatus.value = data['status']
     }
   } catch (error) {
-    console.error('Error during status check:', error)
+    logger.apiError('Status check failed', error)
   }
 }
 </script>

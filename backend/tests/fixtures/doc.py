@@ -70,6 +70,7 @@ def empty_doc_table(doc_table, sql_engine, sql_sessionmaker):
 
 
 async def populate_doc_table(doc_table, populated_doc_set_table, api_server, sql_engine, sql_sessionmaker):
+    """Populate the 'tracked_documents' table with sample data."""
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
     _truncate_table(doc_table, sql_engine, sql_sessionmaker)
@@ -101,7 +102,7 @@ async def populate_doc_table(doc_table, populated_doc_set_table, api_server, sql
         with book_path.open('rb') as fin:
             content = fin.read()
         files = {'file': (books[index], content)}
-        resp = await api_server.post(path=path, content_type='multipart', data=data, files=files)
+        await api_server.post(path=path, content_type='multipart', data=data, files=files)
 
     count = _get_table_count(doc_table, sql_sessionmaker)
     if count != 3:
@@ -138,9 +139,9 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
 
         data = {'docUuids': [str(doc_id) for doc_id in doc_ids]}
 
-        content_type, resp = await api_server.post(path=path, content_type='json', data=data)
+        resp_type, resp = await api_server.post(path=path, content_type='json', data=data)
 
-        assert content_type == 'json'
+        assert resp_type == 'json'
 
         task_ids = resp.get('task_ids')
 

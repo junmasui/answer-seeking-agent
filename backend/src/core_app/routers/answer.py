@@ -1,8 +1,7 @@
 import logging
-import uuid
-from typing import Annotated, Union
+from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from fastapi.responses import Response
 
 from core import get_mermaid_graph, seek_answer
@@ -16,13 +15,13 @@ router = APIRouter()
 
 @router.get('/', response_model=Answer)
 async def handle_question(
-    q: Union[str, None] = None,
-    threadId: Union[uuid.UUID, None] = None,
+    params: Annotated[AnswerRequestBody, Depends()],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
+    """Handle a question submitted via GET request and return an answer."""
     user_id = current_user.user_id if current_user is not None else None
 
-    answer = seek_answer(user_input=q, thread_id=threadId, user_id=user_id)
+    answer = seek_answer(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
 
     logger.info(f'returning {answer}')
 
@@ -31,9 +30,10 @@ async def handle_question(
 
 @router.post('/', response_model=Answer)
 async def handler_question(
-    body: AnswerRequestBody,
+    body: Annotated[AnswerRequestBody, Body(...)],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
+    """Handle a question submitted via POST request and return an answer."""
     user_id = current_user.user_id if current_user is not None else None
 
     answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)

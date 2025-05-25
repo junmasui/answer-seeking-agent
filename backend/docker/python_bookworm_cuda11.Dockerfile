@@ -7,9 +7,9 @@ FROM docker.io/python:3.12.8-slim-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        gnupg2 \
-        curl \
         ca-certificates \
+        curl \
+        gnupg2 \
     && apt-get clean \
     && curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/3bf863cc.pub \
         | apt-key add - \
@@ -28,8 +28,8 @@ ENV NV_CUDA_CUDART_VERSION=11.8.89-1
 
 RUN apt-get update \
    && apt-get install -y --no-install-recommends \
-      cuda-cudart-11-8=${NV_CUDA_CUDART_VERSION} \
       cuda-compat-11-8 \
+      cuda-cudart-11-8=${NV_CUDA_CUDART_VERSION} \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
 
@@ -112,10 +112,10 @@ ENV NV_LIBNCCL_PACKAGE_VERSION=2.15.5-1+cuda11.8
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         cuda-libraries-11-8=${NV_CUDA_LIB_VERSION} \
-        libnpp-11-8=${NV_LIBNPP_VERSION} \
         cuda-nvtx-11-8=${NV_NVTX_VERSION} \
-        libcusparse-11-8=${NV_LIBCUSPARSE_VERSION} \
         libcublas-11-8=${NV_LIBCUBLAS_VERSION} \
+        libcusparse-11-8=${NV_LIBCUSPARSE_VERSION} \
+        libnpp-11-8=${NV_LIBNPP_VERSION} \
    && apt-get clean \
    && apt-mark hold libcublas-11-8 \
    && rm -rf /var/lib/apt/lists/*

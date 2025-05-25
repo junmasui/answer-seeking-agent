@@ -11,7 +11,7 @@ from global_config import get_global_config
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
-__all__ = ['get_connection_str', 'sql_engine', 'reflected_metadata', 'auto_mapped_classes', 'get_sessionmaker']
+__all__ = ['get_connection_str', 'sql_engine', 'reflected_metadata', 'auto_mapped_classes', 'sql_sessionmaker']
 
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)

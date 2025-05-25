@@ -19,7 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_question_rewriter():
-    """ """
+    """Initializes and returns a question rewriting chain.
+
+    The chain consists of a language model, a prompt for rewriting questions,
+    and an output parser. It's configured to run with the name 'question_rewriter'.
+    """
 
     # LLM
     llm = get_chat_llm()

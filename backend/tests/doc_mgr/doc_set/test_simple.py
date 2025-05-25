@@ -3,6 +3,7 @@ from sqlalchemy import func, select
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
+    """Return count of records in the specified table."""
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()
@@ -49,6 +50,8 @@ async def test_get(api_server, populated_doc_set_table, sql_sessionmaker):
 
         doc_set_id = result[0].id
 
+        assert doc_set_id is not None
+
 
 @pytest.mark.asyncio
 async def test_update(api_server, populated_doc_set_table, sql_sessionmaker):
@@ -60,9 +63,9 @@ async def test_update(api_server, populated_doc_set_table, sql_sessionmaker):
 
     path = f'/document-sets/{doc_set_id}'
     data = {'name': 'updated doc set 1'}
-    content_type, resp = await api_server.patch(path=path, content_type='json', data=data)
+    resp_type, _resp = await api_server.patch(path=path, content_type='json', data=data)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
 
 @pytest.mark.asyncio
@@ -74,9 +77,9 @@ async def test_delete(api_server, populated_doc_set_table, sql_sessionmaker):
         doc_set_id = result[0].id
 
     path = f'/document-sets/{doc_set_id}'
-    content_type, resp = await api_server.delete(path=path)
+    resp_type, _resp = await api_server.delete(path=path)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     count = _get_table_count(populated_doc_set_table, sql_sessionmaker)
 

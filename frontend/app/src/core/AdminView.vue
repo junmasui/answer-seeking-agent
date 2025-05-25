@@ -26,10 +26,18 @@ const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 const confirmReset = ref(false)
 
+/**
+ * Opens the confirmation dialog for database reset operation.
+ * Shows a confirmation prompt before proceeding with the destructive reset action.
+ */
 function onResetDatabase() {
   confirmReset.value = true
 }
 
+/**
+ * Executes the database reset operation after user confirmation.
+ * Sends a request to reset the tracking table, vector store, and file store.
+ */
 async function resetConfirmed() {
   try {
     const headers = {

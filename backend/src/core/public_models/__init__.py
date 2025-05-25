@@ -8,6 +8,7 @@ from .doc import (
     DocumentStats,
     DocumentStatus,
     DocumentUpdateRequest,
+    DocumentUploadFormData,
 )
 from .doc_set import (
     DocumentSet,
@@ -38,6 +39,7 @@ __all__ = [
     'DocumentStats',
     'DocumentStatus',
     'DocumentUpdateRequest',
+    'DocumentUploadFormData',
     'DocumentSet',
     'DocumentSetAddRequest',
     'DocumentSetList',
@@ -56,5 +58,6 @@ __all__ = [
 
 
 class SortDirection(str, enum.Enum):
+    """Specifies the direction for sorting, either ascending or descending."""
     ASC = 'asc'
     DESC = 'desc'
