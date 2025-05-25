@@ -49,7 +49,8 @@ def _add_or_update_document(
     bucket_path,
     user_id,
 ):
-    """Add or update a document tracking record in the database.
+    """
+    Add or update a document tracking record in the database.
 
     Creates a new tracking record or updates an existing one based on filename and document set.
     Extracts file metadata from the cloud storage path and stores relative path information.

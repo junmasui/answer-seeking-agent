@@ -54,9 +54,7 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        """
-        Define the sources and their order for loading the settings values.
-        """
+        """Define the sources and their order for loading the settings values."""
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
 
@@ -127,7 +125,8 @@ class Settings(BaseSettings):
 
 @cache
 def get_global_config():
-    """Return the cached global configuration settings instance.
+    """
+    Return the cached global configuration settings instance.
 
     Uses functools.cache to ensure a single Settings instance is created
     and reused across the application for performance and consistency.

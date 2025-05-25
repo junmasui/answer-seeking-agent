@@ -1,6 +1,4 @@
-"""
-See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state
-"""
+"""See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state"""
 
 import logging
 
@@ -17,7 +15,6 @@ def check_for_relevant_documents(state):
     Returns:
         str: Binary decision for next node to call
     """
-
     logger.info('---ASSESS GRADED DOCUMENTS---')
 
     filtered_documents = state['documents']
@@ -43,7 +40,6 @@ def check_for_halluciation(state):
     Returns:
         str: Decision for next node to call
     """
-
     grade = state['grounded_in_facts']
 
     if grade == 'yes':
@@ -63,7 +59,6 @@ def check_for_answer_relevancy(state):
     Returns:
         str: Decision for next node to call
     """
-
     grade = state['answer_addresses_question']
 
     if grade == 'yes':

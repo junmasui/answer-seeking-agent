@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 @cache
 def get_answer_grader():
-    """Initializes and returns an answer grading chain.
+    """
+    Initializes and returns an answer grading chain.
 
     This function builds a grader that uses a chat prompt (GRADE_ANSWER)
     and a Pydantic model (GradeAnswer) for structured output.
     The grader is cached to avoid reinitialization.
     """
-
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_ANSWER)
 
     answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
@@ -40,7 +40,6 @@ def grade_answer(state):
     Returns:
         str: Decision for next node to call
     """
-
     logger.info('---CHECK ANSWER---')
 
     question = state['question']

@@ -18,10 +18,10 @@ __all__ = ['ingest_documents', 'reset_worker_data']
 
 
 def ingest_documents(doc_ids):
-    """Ingest cloud files. Ingesting is the process of extracting textual data
+    """
+    Ingest cloud files. Ingesting is the process of extracting textual data
     from PDF, HTML, etc and generating and storing searchable semantic vectors.
     """
-
     if not doc_ids:
         raise NotImplementedError()
 

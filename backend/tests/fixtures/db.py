@@ -33,7 +33,8 @@ def get_connection_str():
 
 @pytest.fixture(scope='module')
 def sql_engine() -> Generator[Engine, None, None]:
-    """Returns the SQLAlchemy engine for the database.
+    """
+    Returns the SQLAlchemy engine for the database.
 
     The engine is a global object created just once for a particular database server.
     It creates and holds connections to the database server
@@ -50,7 +51,8 @@ def sql_engine() -> Generator[Engine, None, None]:
 
 @pytest.fixture(scope='module')
 def sql_sessionmaker(sql_engine) -> Generator[sessionmaker, None, None]:
-    """Returns a SQLAlchemy sessionmaker object for the database.
+    """
+    Returns a SQLAlchemy sessionmaker object for the database.
 
     A sessionmaker is a factory for creating new Session objects.
     A Session object is like a connection with enhanced functionality for using
@@ -100,7 +102,6 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
 @pytest.fixture(scope='module')
 def auto_mapped_classes(sql_engine, reflected_metadata) -> Generator[dict[str, type], None, None]:
     """Returns the default automap base class for an automap schema."""
-
     # produce a set of mappings from this MetaData.
     Base = automap_base(metadata=reflected_metadata)
 

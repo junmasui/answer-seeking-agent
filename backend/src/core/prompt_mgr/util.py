@@ -7,9 +7,7 @@ from .prompt.query import list_prompts
 
 
 def add_chat_prompt(*, prompt_name: AgentPrompt, system_message: str = None, human_message: str = None):
-    """
-    Add a prompt in the database if it does not exist, using the provided defaults.
-    """
+    """Add a prompt in the database if it does not exist, using the provided defaults."""
     if not isinstance(prompt_name, AgentPrompt):
         raise TypeError(f'prompt_name must be an instance of AgentPrompt enum: {type(prompt_name)}')
 

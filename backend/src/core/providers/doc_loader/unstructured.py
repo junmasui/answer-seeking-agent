@@ -1,6 +1,4 @@
-"""
-This provides the document loader used by this application.
-"""
+"""This provides the document loader used by this application."""
 
 from pathlib import Path
 
@@ -16,7 +14,8 @@ from ...signals import start_up_handler
 
 @start_up_handler
 def start(sender):
-    """Download required NLTK data for the unstructured document loader.
+    """
+    Download required NLTK data for the unstructured document loader.
 
     Downloads 'punkt_tab' and 'averaged_perceptron_tagger_eng' to resolve
     compatibility issues between unstructured and NLTK libraries.
@@ -52,7 +51,8 @@ def start(sender):
 # Create a document loader.
 #
 def get_doc_loader(file_path: Path | list[Path]):
-    """Return an UnstructuredLoader instance for the given file path(s).
+    """
+    Return an UnstructuredLoader instance for the given file path(s).
     Configures the loader based on global settings, including whether to use the Unstructured cloud API.
     It uses a 'hi_res' strategy and 'by_title' chunking.
     """

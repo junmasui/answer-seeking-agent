@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 def delete_document(document_id):
     """Delete tracking record, document from file store, and embeddings from vector store."""
-
     # Retrieve tracking record.
 
     tracking_records = get_documents(doc_uuid_list=[document_id])

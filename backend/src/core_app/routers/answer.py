@@ -45,7 +45,8 @@ async def handler_question(
 
 @router.get('/mermaid')
 async def handle_mermaid_graph(current_user: Annotated[User, Depends(get_current_user)] = None):
-    """Generate and return a Mermaid diagram representation of the agent graph.
+    """
+    Generate and return a Mermaid diagram representation of the agent graph.
 
     Returns the agent's workflow graph in Mermaid format for visualization purposes.
     """

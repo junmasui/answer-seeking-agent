@@ -12,9 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_chat_prompt(prompt_name: AgentPrompt):
-    """
-    Retrieve a chat prompt from the database and return a ChatPromptTemplate.
-    """
+    """Retrieve a chat prompt from the database and return a ChatPromptTemplate."""
     if not isinstance(prompt_name, AgentPrompt):
         raise TypeError(f'prompt_name must be an instance of AgentPrompt enum, got {type(prompt_name)}')
 

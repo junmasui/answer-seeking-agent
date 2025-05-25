@@ -1,4 +1,5 @@
-"""add prompt table
+"""
+add prompt table
 
 Revision ID: 8137477f7563
 Revises: efd59824ec9f

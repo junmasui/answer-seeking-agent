@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 
 
 def configure_env():
-    """Configure environment variables by loading from .env files.
+    """
+    Configure environment variables by loading from .env files.
 
     Loads environment variables from base and override .env files specified
     by DOTENV_FILE and DOTENV_OVERRIDES_FILE environment variables.

@@ -1,6 +1,4 @@
-"""
-This provides the embedding model used by this application.
-"""
+"""This provides the embedding model used by this application."""
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.

@@ -11,7 +11,8 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingF
 #
 @cache
 def get_chat_llm() -> BaseChatModel:
-    """Return a BaseChatModel instance, configured to use a HuggingFace text-generation pipeline.
+    """
+    Return a BaseChatModel instance, configured to use a HuggingFace text-generation pipeline.
     It uses the 'microsoft/Phi-3.5-mini-instruct' model and is cached.
     The LLM cache is set to an InMemoryCache.
     """

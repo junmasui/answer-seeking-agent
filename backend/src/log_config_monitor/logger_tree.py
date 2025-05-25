@@ -6,7 +6,8 @@ pp = pprint.PrettyPrinter(indent=2, width=120, compact=False, underscore_numbers
 
 
 def dump_logger_tree(logger=None, include_all=False):
-    """Returns the logger hierarchy.
+    """
+    Returns the logger hierarchy.
 
     Knowledge of the actual logger hierarchy in the running process
     is very helpful.

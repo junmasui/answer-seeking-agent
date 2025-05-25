@@ -100,7 +100,9 @@ skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C"]
-ignore = []
+ignore = [
+  "D212"  # Suppress the rule that multi-line docstring summary should start at the first line
+]
 
 ##[tool.ruff.rules]
 ##E501 = { line-length = 120 }

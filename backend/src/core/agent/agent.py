@@ -1,6 +1,4 @@
-"""
-This module provides the LLM-based agent.
-"""
+"""This module provides the LLM-based agent."""
 
 import logging
 import pprint
@@ -152,7 +150,6 @@ def get_mermaid_graph():
     This would allow live testing to pass (because it's infrequent) but would
     raise errors in visualization (because all paths are examined for rendering purposes).
     """
-
     graph = get_agent_graph()
     drawable_graph = graph.get_graph(xray=True)
     mermaid_graph = drawable_graph.draw_mermaid()

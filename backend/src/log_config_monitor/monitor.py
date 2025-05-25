@@ -49,7 +49,8 @@ class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
     """Watches for changes to logging configuration TOML file."""
 
     def _handle(self, event: FileSystemEvent, use_target_path: bool = False) -> None:
-        """Handle file system events for the logging configuration file.
+        """
+        Handle file system events for the logging configuration file.
 
         Applies incremental logging configuration when the target file is modified.
         """
@@ -86,7 +87,8 @@ class LogConfigMonitor:
     observer = None
 
     def start(self):
-        """Start monitoring the logging configuration file for changes.
+        """
+        Start monitoring the logging configuration file for changes.
 
         Sets up a file system observer to watch for changes to the logging
         configuration file and applies incremental updates when detected.
@@ -118,7 +120,8 @@ class LogConfigMonitor:
 
 @cache
 def get_logging_conf_monitor():
-    """Return the cached logging configuration monitor instance.
+    """
+    Return the cached logging configuration monitor instance.
 
     Uses functools.cache to ensure a single LogConfigMonitor instance
     is created and reused across the application.

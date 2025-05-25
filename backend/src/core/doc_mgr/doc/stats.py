@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_document_statistics():
-    """Get statistics about the documents table.
+    """
+    Get statistics about the documents table.
 
     Returns a DocumentStats object containing the total count of documents
     and the last update time from the tracking table.
@@ -21,10 +22,10 @@ def get_document_statistics():
 
 
 def _get_tracking_stats():
-    """Return the count of records and maximum updated_date time
+    """
+    Return the count of records and maximum updated_date time
     in the tracking table.
     """
-
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

@@ -4,7 +4,8 @@ from core.public_models import SortDirection
 
 
 def parse_sort_by(str_val):
-    """Parse a comma-separated sort string into a list of field-direction tuples.
+    """
+    Parse a comma-separated sort string into a list of field-direction tuples.
 
     Converts camelCase field names to snake_case and handles direction prefixes.
     Fields prefixed with '-' are sorted in descending order, others in ascending order.
