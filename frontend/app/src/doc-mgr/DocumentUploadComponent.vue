@@ -69,6 +69,10 @@ const documentSetCount = ref(0)
 const documentSetsUpdatedAt = ref()
 const documentSetsOutdated = ref(false)
 
+/**
+ * Handles the file upload process by uploading files in chunks to the server.
+ * Processes all files in the fileList and uploads them one by one with progress tracking.
+ */
 async function onUpload() {
   downloading.value = true
 
@@ -147,6 +151,10 @@ onBeforeUnmount(async () => {
   intervalId = null
 })
 
+/**
+ * Loads table statistics from the server to check if document sets have been updated.
+ * Updates the document set count and tracks when the table was last modified.
+ */
 async function loadTableStats() {
   try {
     const headers = {
@@ -177,6 +185,10 @@ async function loadTableStats() {
   }
 }
 
+/**
+ * Fetches the list of available document sets from the server.
+ * Populates the documentSets array for use in the document set selection dropdown.
+ */
 async function loadDocumentSets() {
   try {
     const headers = {

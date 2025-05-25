@@ -31,12 +31,20 @@ const modelValue = defineModel({
 
 const emit = defineEmits(['canceled', 'confirmed', 'done'])
 
+/**
+ * Handles the cancel action by emitting appropriate events and closing the dialog.
+ * Notifies parent components that the operation was canceled.
+ */
 async function onCancel() {
   emit('canceled')
   emit('done')
   active.value = false
 }
 
+/**
+ * Handles the confirm action by emitting appropriate events and closing the dialog.
+ * Notifies parent components that the operation was confirmed.
+ */
 async function onConfirm() {
   emit('confirmed')
   emit('done')

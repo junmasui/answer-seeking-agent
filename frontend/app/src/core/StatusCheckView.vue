@@ -20,6 +20,10 @@ import logger from '../common/Logger.js'
 const systemStatus = ref('unknown')
 const statusColor = ref('primary')
 
+/**
+ * Handles the manual status check button click.
+ * Resets the status to unknown and triggers a fresh status check from the server.
+ */
 async function onCheckStatus() {
   systemStatus.value = 'unknown'
   await checkStatus()
@@ -29,6 +33,10 @@ onMounted(async () => {
   await checkStatus()
 })
 
+/**
+ * Performs a health check by calling the server status endpoint.
+ * Updates the system status display and handles offline scenarios with proper error logging.
+ */
 async function checkStatus() {
   try {
     const response = await fetch('/api/status', {

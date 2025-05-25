@@ -87,21 +87,41 @@ const performSignIn = ref(false)
 const currentUserStore = useCurrentUserStore()
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
+/**
+ * Toggles the visibility of the navigation drawer.
+ * Opens or closes the side navigation menu for mobile and desktop navigation.
+ */
 function toggleDrawer() {
   drawerModel.value = !drawerModel.value
 }
 
+/**
+ * Opens the sign-in dialog for user authentication.
+ * Displays the authentication modal for users to enter their credentials.
+ */
 function signIn() {
   performSignIn.value = true
 }
 
+/**
+ * Handles successful sign-in completion.
+ * Called after the user successfully authenticates through the sign-in dialog.
+ */
 function signInSucceeded() {}
 
+/**
+ * Signs out the current user by clearing authentication data.
+ * Resets the access token and signed-in status to log out the user.
+ */
 function signOut() {
   accessToken.value = ''
   signedIn.value = false
 }
 
+/**
+ * Toggles between light and dark themes.
+ * Switches the Vuetify theme between light and dark modes based on current setting.
+ */
 function toggleTheme() {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
 }

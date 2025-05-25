@@ -72,16 +72,28 @@ const { userInput, messages, threadId } = storeToRefs(conversationStore)
 
 const querySubmitted = ref(false)
 
+/**
+ * Clears the conversation history and resets the chat interface.
+ * Removes all messages, clears user input, and resets the thread ID for a fresh conversation.
+ */
 function onClearConversation(event) {
   messages.value = []
   userInput.value = ''
   threadId.value = ''
 }
 
+/**
+ * Clears the current user input text field.
+ * Provides a quick way to reset the input without affecting conversation history.
+ */
 function onClear(event) {
   userInput.value = ''
 }
 
+/**
+ * Submits the user's input to the conversational API and processes the response.
+ * Handles the complete conversation flow including message display, API communication, and citation formatting.
+ */
 async function submit(event) {
   try {
     const queryParams = {

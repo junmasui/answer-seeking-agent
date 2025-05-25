@@ -84,14 +84,26 @@ watch(alertVisible, (newValue, oldValue) => {
   }
 })
 
+/**
+ * Toggles the visibility of the password field between text and password input types.
+ * Allows users to show or hide their password while typing for better usability.
+ */
 function togglePasswordVisibility() {
   passwordVisible.value = !passwordVisible.value
 }
 
+/**
+ * Handles the cancel action by closing the sign-in dialog.
+ * Allows users to dismiss the dialog without attempting authentication.
+ */
 async function onCancel() {
   active.value = false
 }
 
+/**
+ * Handles the sign-in confirmation by attempting authentication with the provided credentials.
+ * Sends credentials to the simulated auth endpoint and updates the signed-in state on success.
+ */
 async function onConfirm() {
   try {
     const formData = new FormData()

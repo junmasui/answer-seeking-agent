@@ -128,6 +128,10 @@ const targetItem = ref({})
 //
 const activeAddDocSet = ref(false)
 
+/**
+ * Opens the dialog for adding a new document set.
+ * Initializes the target item with default values for a new document set.
+ */
 function addDocSet() {
   activeAddDocSet.value = true
 
@@ -139,10 +143,18 @@ function addDocSet() {
   }
 }
 
+/**
+ * Applies the add document set operation after user confirmation.
+ * Calls the addDocumentSet function to create the new document set.
+ */
 async function applyAddDocSet() {
   await addDocumentSet()
 }
 
+/**
+ * Sends a request to the server to create a new document set.
+ * Uses the values from the target item to populate the new document set properties.
+ */
 async function addDocumentSet() {
   try {
     const headers = {
@@ -176,6 +188,10 @@ async function addDocumentSet() {
   }
 }
 
+/**
+ * Closes the add document set dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closeAddDocSet() {
   await loadItems()
 
@@ -190,6 +206,11 @@ async function closeAddDocSet() {
 //
 const activeEditDocSet = ref(false)
 
+/**
+ * Opens the edit dialog for a specific document set.
+ * @param {Object} item - The document set item to be edited
+ * @param {number} index - The index of the item in the table
+ */
 function editItem(item, index) {
   activeEditDocSet.value = true
   targetIndex.value = index
@@ -201,10 +222,18 @@ function editItem(item, index) {
   })
 }
 
+/**
+ * Applies the edit document set operation after user confirmation.
+ * Calls the editDocumentSet function with the target item's ID.
+ */
 async function applyEditDocSet() {
   await editDocumentSet(targetItem.value.id)
 }
 
+/**
+ * Sends a request to the server to update an existing document set.
+ * @param {string} doc_set_uuid - The unique identifier of the document set to edit
+ */
 async function editDocumentSet(doc_set_uuid) {
   try {
     const headers = {
@@ -239,6 +268,10 @@ async function editDocumentSet(doc_set_uuid) {
   }
 }
 
+/**
+ * Closes the edit document set dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closeEditDocSet() {
   await loadItems()
 
@@ -254,16 +287,29 @@ async function closeEditDocSet() {
 
 const activeConfirmDelete = ref(false)
 
+/**
+ * Opens the confirmation dialog for deleting a document set.
+ * @param {Object} item - The document set item to be deleted
+ * @param {number} index - The index of the item in the table
+ */
 function deleteItem(item, index) {
   activeConfirmDelete.value = true
   targetIndex.value = index
   targetItem.value = Object.assign({}, item)
 }
 
+/**
+ * Applies the deletion operation after user confirmation.
+ * Calls the deleteDocumentSet function with the target item's ID.
+ */
 async function applyDeleteItem() {
   await deleteDocumentSet(targetItem.value.id)
 }
 
+/**
+ * Sends a request to the server to delete a specific document set.
+ * @param {string} doc_set_uuid - The unique identifier of the document set to delete
+ */
 async function deleteDocumentSet(doc_set_uuid) {
   try {
     const headers = {
@@ -289,6 +335,10 @@ async function deleteDocumentSet(doc_set_uuid) {
   }
 }
 
+/**
+ * Closes the delete confirmation dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closeDeleteItem() {
   await loadItems()
 
@@ -305,6 +355,11 @@ async function closeDeleteItem() {
 const pickDocumentSet = ref(false)
 const selectedDocumentSet = ref({})
 
+/**
+ * Opens the dialog for changing a document's document set assignment.
+ * @param {Object} item - The document item whose document set will be changed
+ * @param {number} index - The index of the item in the table
+ */
 function changeDocumentSet(item, index) {
   pickDocumentSet.value = true
   targetIndex.value = index
@@ -313,12 +368,21 @@ function changeDocumentSet(item, index) {
   selectedDocumentSet.value = documentSets.value.find((x) => x.id === item.documentSetId)
 }
 
+/**
+ * Applies the document set change operation after user selection.
+ * Updates the document's assignment to the newly selected document set.
+ */
 async function selectNewDocSet() {
   await updateDocSet(targetItem.value.id, selectedDocumentSet.value.id)
 
   await closePickDocSet()
 }
 
+/**
+ * Sends a request to the server to update a document's document set assignment.
+ * @param {string} doc_uuid - The unique identifier of the document to update
+ * @param {string} doc_set_uuid - The unique identifier of the new document set
+ */
 async function updateDocSet(doc_uuid, doc_set_uuid) {
   try {
     const headers = {
@@ -350,6 +414,10 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
   }
 }
 
+/**
+ * Closes the document set picker dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closePickDocSet() {
   await loadItems()
 
@@ -378,6 +446,10 @@ onBeforeUnmount(async () => {
   intervalId = null
 })
 
+/**
+ * Loads table statistics from the server to check for document set updates.
+ * Updates the total item count and tracks when the table was last modified to show refresh notifications.
+ */
 async function loadTableStats() {
   try {
     const headers = {
@@ -412,6 +484,10 @@ async function loadTableStats() {
 // Loading data from server
 //
 
+/**
+ * Loads document set data from the server with pagination and sorting support.
+ * Fetches document sets based on current page, items per page, and sort criteria, then updates the table display.
+ */
 async function loadItems() {
   loading.value = true
 
