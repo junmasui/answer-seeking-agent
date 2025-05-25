@@ -23,6 +23,7 @@ class DocumentStatus(str, enum.Enum):
 
 
 class Document(CamelModel):
+    """Represents a document with its metadata, status, and content information."""
     id: UUID
     name: str = Field(description='File name of document.')
     status: DocumentStatus = Field(description='Status.')
@@ -37,6 +38,7 @@ class Document(CamelModel):
 
 
 class DocumentStats(CamelModel):
+    """Provides statistics about documents, such as the total count and last update time."""
     document_count: int = None
     table_updated_time: Optional[datetime] = None
 
@@ -47,6 +49,7 @@ class DocumentStats(CamelModel):
 
 
 class DocumentList(CamelModel):
+    """Represents a list of documents, along with optional count and update time information."""
     documents: list[Document]
     document_count: Optional[int] = None
     table_updated_time: Optional[datetime] = None
@@ -56,8 +59,20 @@ class DocumentList(CamelModel):
 # Operator Models
 #
 class DocumentUpdateRequest(CamelModel):
+    """Represents a request to update a document, typically to change its document set."""
     document_set_id: Optional[UUID] = Field(description='Document set UUID.')
 
 
 class BulkDeleteRequestBody(CamelModel):
+    """Represents the request body for bulk deleting documents, containing a list of document UUIDs."""
     doc_uuids: list[UUID]
+
+
+class DocumentUploadFormData(CamelModel):
+    """Represents the form data for uploading a document, including details about the document set, chunks, and source."""
+    document_set_id: UUID
+    total_chunks: int
+    chunk_index: int
+    source_url: str
+    content_type: str
+    download_time_utc_str: str

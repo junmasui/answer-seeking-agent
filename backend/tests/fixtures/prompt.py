@@ -77,7 +77,7 @@ async def populated_prompt_table(prompt_table, api_server, sql_engine, sql_sessi
                 'humanMessage': f'placeholder human message {index}',
                 'systemMessage': f'placeholder system message {index}',
             }
-            resp = await api_server.post(path=path, content_type='json', data=data)
+            await api_server.post(path=path, content_type='json', data=data)
 
         count = _get_table_count(prompt_table, sql_sessionmaker)
         if count != 3:

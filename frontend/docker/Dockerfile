@@ -7,7 +7,8 @@ ARG GROUP_ID=1000
 # Install Debian packages
 RUN apt-get update \
   && apt-get install -y \
-     curl wget \
+     curl \
+     wget \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

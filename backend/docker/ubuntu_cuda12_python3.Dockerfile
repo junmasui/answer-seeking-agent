@@ -7,9 +7,9 @@ FROM docker.io/ubuntu:24.04
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        gnupg2 \
-        curl \
         ca-certificates \
+        curl \
+        gnupg2 \
     && curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/3bf863cc.pub \
        | apt-key add - \
     && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
@@ -27,8 +27,8 @@ ENV NV_CUDA_CUDART_VERSION=12.6.77-1
 
 RUN apt-get update \
    && apt-get install -y --no-install-recommends \
-      cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
       cuda-compat-12-6 \
+      cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
    && rm -rf /var/lib/apt/lists/*
 
 # Required for nvidia-docker v1
@@ -113,11 +113,11 @@ ENV NV_LIBNCCL_PACKAGE_VERSION=2.23.4-1+cuda12.6
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         cuda-libraries-12-6=${NV_CUDA_LIB_VERSION} \
-        libnpp-12-6=${NV_LIBNPP_VERSION} \
         cuda-nvtx-12-6=${NV_NVTX_VERSION} \
-        libcusparse-12-6=${NV_LIBCUSPARSE_VERSION} \
         libcublas-12-6=${NV_LIBCUBLAS_VERSION} \
+        libcusparse-12-6=${NV_LIBCUSPARSE_VERSION} \
         libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
+        libnpp-12-6=${NV_LIBNPP_VERSION} \
    && apt-mark hold libcublas-12-6 libnccl2 \
    && rm -rf /var/lib/apt/lists/*
 

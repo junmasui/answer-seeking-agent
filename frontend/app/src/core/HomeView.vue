@@ -14,6 +14,10 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+/**
+ * Navigates to the About page using Vue Router.
+ * Provides programmatic navigation to the about route when called.
+ */
 function goToAbout() {
   router.push('/about')
 }

@@ -14,6 +14,7 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
 @pytest.mark.asyncio
 async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
+    """Test inserting a new prompt."""
     path = '/prompts/'
     data = {
         'name': 'prompt',
@@ -29,6 +30,7 @@ async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
 
 @pytest.mark.asyncio
 async def test_find(api_server, populated_prompt_table, sql_sessionmaker):
+    """Test finding prompts."""
     path = '/prompts/'
     content_type, resp = await api_server.get(path=path)
 
@@ -47,6 +49,7 @@ async def test_find(api_server, populated_prompt_table, sql_sessionmaker):
 
 @pytest.mark.asyncio
 async def test_get(api_server, populated_prompt_table, sql_sessionmaker):
+    """Test getting a specific prompt."""
     with sql_sessionmaker() as session:
         stmt = select(populated_prompt_table)
         result = session.execute(stmt).first()
@@ -58,6 +61,7 @@ async def test_get(api_server, populated_prompt_table, sql_sessionmaker):
 
 @pytest.mark.asyncio
 async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
+    """Test updating an existing prompt."""
     with sql_sessionmaker() as session:
         stmt = select(populated_prompt_table)
         result = session.execute(stmt).first()
@@ -77,6 +81,7 @@ async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
 
 @pytest.mark.asyncio
 async def test_delete(api_server, populated_prompt_table, sql_sessionmaker):
+    """Test deleting a prompt."""
     with sql_sessionmaker() as session:
         stmt = select(populated_prompt_table)
         result = session.execute(stmt).first()

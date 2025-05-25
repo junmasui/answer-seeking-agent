@@ -96,6 +96,7 @@ import { storeToRefs } from 'pinia'
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 const documentStore = useDocumentStore()
@@ -179,16 +180,29 @@ const targetItem = ref({})
 
 const activeConfirmIngestItem = ref(false)
 
+/**
+ * Opens the confirmation dialog for ingesting a single document.
+ * @param {Object} item - The document item to be ingested
+ * @param {number} index - The index of the item in the table
+ */
 function ingestItem(item, index) {
   activeConfirmIngestItem.value = true
   targetIndex.value = index
   targetItem.value = Object.assign({}, item)
 }
 
+/**
+ * Applies the ingestion operation after user confirmation.
+ * Calls the ingestDocument function with the target item's ID.
+ */
 async function applyIngestItem() {
   await ingestDocument(targetItem.value.id)
 }
 
+/**
+ * Sends a request to the server to ingest a specific document.
+ * @param {string} doc_uuid - The unique identifier of the document to ingest
+ */
 async function ingestDocument(doc_uuid) {
   try {
     const headers = {
@@ -207,12 +221,16 @@ async function ingestDocument(doc_uuid) {
     }
 
     const data = await response.json()
-    console.log('Ingest queued successfully')
+    logger.apiSuccess('Document ingest queued', { docId: doc_uuid })
   } catch (error) {
     console.error('Error ingesting:', error)
   }
 }
 
+/**
+ * Closes the ingest confirmation dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closeIngestItem() {
   await loadItems()
 
@@ -228,20 +246,37 @@ async function closeIngestItem() {
 
 const activeEditDoc = ref(false)
 
+/**
+ * Opens the edit dialog for a specific document.
+ * @param {Object} item - The document item to be edited
+ * @param {number} index - The index of the item in the table
+ */
 function editItem(item, index) {
   activeEditDoc.value = true
   targetIndex.value = index
   targetItem.value = Object.assign({}, item)
 }
 
+/**
+ * Applies the document edit operation after user confirmation.
+ * Calls the editDocument function and closes the dialog.
+ */
 async function applyEditDoc() {
   await editDocument(targetItem.value.id)
 
   await closeEditDoc()
 }
 
+/**
+ * Placeholder function for editing a document.
+ * @param {string} doc_uuid - The unique identifier of the document to edit
+ */
 async function editDocument(doc_uuid) {}
 
+/**
+ * Closes the edit document dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closeEditDoc() {
   await loadItems()
 
@@ -257,16 +292,29 @@ async function closeEditDoc() {
 
 const activeConfirmDeleteItem = ref(false)
 
+/**
+ * Opens the confirmation dialog for deleting a single document.
+ * @param {Object} item - The document item to be deleted
+ * @param {number} index - The index of the item in the table
+ */
 function deleteItem(item, index) {
   activeConfirmDeleteItem.value = true
   targetIndex.value = index
   targetItem.value = Object.assign({}, item)
 }
 
+/**
+ * Applies the deletion operation after user confirmation.
+ * Calls the deleteDocument function with the target item's ID.
+ */
 async function applyDeleteItem() {
   await deleteDocument(targetItem.value.id)
 }
 
+/**
+ * Sends a request to the server to delete a specific document.
+ * @param {string} doc_uuid - The unique identifier of the document to delete
+ */
 async function deleteDocument(doc_uuid) {
   try {
     const headers = {
@@ -286,12 +334,16 @@ async function deleteDocument(doc_uuid) {
     }
 
     const data = await response.json()
-    console.log('Deleted successfully')
+    logger.apiSuccess('Document deleted', { docId: doc_uuid })
   } catch (error) {
     console.error('Error deleting:', error)
   }
 }
 
+/**
+ * Closes the delete confirmation dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
 async function closeDeleteItem() {
   await loadItems()
 
@@ -307,14 +359,26 @@ async function closeDeleteItem() {
 
 const activeConfirmIngestSelected = ref(false)
 
+/**
+ * Opens the confirmation dialog for ingesting multiple selected documents.
+ * Displays a confirmation prompt before proceeding with batch ingestion.
+ */
 async function ingestSelectedItems() {
   activeConfirmIngestSelected.value = true
 }
 
+/**
+ * Applies the batch ingestion operation after user confirmation.
+ * Calls the ingestSelectedDocuments function to process all selected items.
+ */
 async function applyIngestSelected() {
   await ingestSelectedDocuments()
 }
 
+/**
+ * Sends a request to the server to ingest all currently selected documents.
+ * Clears the selection after successful ingestion and logs the operation.
+ */
 async function ingestSelectedDocuments() {
   try {
     const headers = {
@@ -343,12 +407,16 @@ async function ingestSelectedDocuments() {
     selectedItems.value = []
 
     const data = await response.json()
-    console.log('Ingest queued successfully')
+    logger.apiSuccess('Selected documents ingest queued', { count: body.docUuids.length })
   } catch (error) {
     console.error('Error ingesting:', error)
   }
 }
 
+/**
+ * Closes the batch ingest confirmation dialog and refreshes the table data.
+ * Called after the batch ingestion operation completes.
+ */
 async function closeIngestSelected() {
   await loadItems()
 }
@@ -359,14 +427,26 @@ async function closeIngestSelected() {
 
 const activeConfirmIngestAllUploaded = ref(false)
 
+/**
+ * Opens the confirmation dialog for ingesting all uploaded documents.
+ * Displays a confirmation prompt before proceeding with full batch ingestion.
+ */
 async function ingestAllUploaded() {
   activeConfirmIngestAllUploaded.value = true
 }
 
+/**
+ * Applies the operation to ingest all uploaded documents after user confirmation.
+ * Calls the ingestAllUploadedDocuments function to process all uploaded files.
+ */
 async function applyIngestAllUploaded() {
   await ingestAllUploadedDocuments()
 }
 
+/**
+ * Sends a request to the server to ingest all documents with uploaded status.
+ * Processes all uploaded documents regardless of current selection state.
+ */
 async function ingestAllUploadedDocuments() {
   try {
     const headers = {
@@ -392,12 +472,16 @@ async function ingestAllUploadedDocuments() {
     }
 
     const data = await response.json()
-    console.log('Ingest queued successfully')
+    logger.apiSuccess('All uploaded documents ingest queued')
   } catch (error) {
     console.error('Error ingesting:', error)
   }
 }
 
+/**
+ * Closes the ingest all confirmation dialog and refreshes the table data.
+ * Called after the batch ingestion operation completes.
+ */
 async function closeIngestAllUploaded() {
   await loadItems()
 }
@@ -408,14 +492,26 @@ async function closeIngestAllUploaded() {
 
 const activeConfirmDeleteSelected = ref(false)
 
+/**
+ * Opens the confirmation dialog for deleting multiple selected documents.
+ * Displays a confirmation prompt before proceeding with batch deletion.
+ */
 async function deleteSelectedItems() {
   activeConfirmDeleteSelected.value = true
 }
 
+/**
+ * Applies the batch deletion operation after user confirmation.
+ * Calls the deleteSelectedDocuments function to process all selected items.
+ */
 async function applyDeleteSelected() {
   await deleteSelectedDocuments()
 }
 
+/**
+ * Sends a request to the server to delete all currently selected documents.
+ * Clears the selection after successful deletion and logs the operation.
+ */
 async function deleteSelectedDocuments() {
   try {
     const headers = {
@@ -444,12 +540,16 @@ async function deleteSelectedDocuments() {
     selectedItems.value = []
 
     const data = await response.json()
-    console.log('Deleted successfully')
+    logger.apiSuccess('Selected documents deleted', { count: body.docUuids.length })
   } catch (error) {
     console.error('Error deleteing:', error)
   }
 }
 
+/**
+ * Closes the batch delete confirmation dialog and refreshes the table data.
+ * Called after the batch deletion operation completes.
+ */
 async function closeDeleteSelected() {
   await loadItems()
 }
@@ -473,6 +573,10 @@ onBeforeUnmount(async () => {
   intervalId = null
 })
 
+/**
+ * Loads table statistics from the server to check for data updates.
+ * Updates the total item count and tracks when the table was last modified to show refresh notifications.
+ */
 async function loadTableStats() {
   try {
     const headers = {
@@ -507,6 +611,10 @@ async function loadTableStats() {
 // Loading data from server
 //
 
+/**
+ * Loads document data from the server with pagination and sorting support.
+ * Fetches documents based on current page, items per page, and sort criteria, then updates the table display.
+ */
 async function loadItems() {
   loading.value = true
 

@@ -1,9 +1,9 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Union
 
-from fastapi import APIRouter, Depends, Form, Path, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, Form, Path, Query, UploadFile
 
 from core import (
     delete_document,
@@ -21,6 +21,7 @@ from core.public_models import (
     DocumentStats,
     DocumentStatus,
     DocumentUpdateRequest,
+    DocumentUploadFormData,
     IngestRequestBody,
 )
 from core_worker import ingest_task
@@ -34,6 +35,26 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 jwt_write_claim_missing_ok = get_global_config().jwt_write_claim_missing_ok
+
+
+# Dependency function to gather form data into the Pydantic model
+async def get_upload_form_data(
+    document_set_id: Annotated[uuid.UUID, Form(alias='documentSetId')],
+    total_chunks: Annotated[int, Form(alias='totalChunks')],
+    chunk_index: Annotated[int, Form(alias='chunkIndex')],
+    source_url: Annotated[str, Form(alias='sourceUrl')],
+    content_type: Annotated[str, Form(alias='contentType')],
+    download_time_utc_str: Annotated[str, Form(alias='downloadTimeUtc')],
+) -> DocumentUploadFormData:
+    """Parse and validate document upload form data into a Pydantic model."""
+    return DocumentUploadFormData(
+        document_set_id=document_set_id,
+        total_chunks=total_chunks,
+        chunk_index=chunk_index,
+        source_url=source_url,
+        content_type=content_type,
+        download_time_utc_str=download_time_utc_str,
+    )
 
 
 @router.get('/', response_model=DocumentList)
@@ -67,12 +88,7 @@ async def handle_table_stats(
 @router.post('/upload')
 async def handle_upload(
     file: UploadFile,
-    documentSetId: Annotated[uuid.UUID, Form()],
-    totalChunks: Annotated[int, Form()],
-    chunkIndex: Annotated[int, Form()],
-    sourceUrl: Annotated[str, Form()],
-    contentType: Annotated[str, Form()],
-    downloadTimeUtc: Annotated[str, Form()],
+    form_data: Annotated[DocumentUploadFormData, Depends(get_upload_form_data)],  # Use the dependency
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
@@ -80,34 +96,38 @@ async def handle_upload(
     """Upload a file. Chunked upload of large files is supported."""
 
     user_id = current_user.userid if current_user is not None else None
-    downloadTimeUtc = datetime.fromisoformat(downloadTimeUtc)
+    # Convert string to datetime from the form_data model
+    download_time_utc = datetime.fromisoformat(form_data.download_time_utc_str)
 
-    logger.debug('handling %s chunk: %d %d', file.filename, chunkIndex, totalChunks)
+    logger.debug('handling %s chunk: %d %d', file.filename, form_data.chunk_index, form_data.total_chunks)
 
-    if totalChunks > 1:
+    if form_data.total_chunks > 1:
         upload_chunk(
-            doc_set_uuid=documentSetId, partial_doc_path=file.filename, chunk_index=chunkIndex, local_file=file.file
+            doc_set_uuid=form_data.document_set_id,
+            partial_doc_path=file.filename,
+            chunk_index=form_data.chunk_index,
+            local_file=file.file,
         )
 
-        if chunkIndex == totalChunks - 1:
+        if form_data.chunk_index == form_data.total_chunks - 1:
             merge_chunked_document(
-                doc_set_uuid=documentSetId,
+                doc_set_uuid=form_data.document_set_id,
                 partial_doc_path=file.filename,
-                total_chunks=totalChunks,
-                source_url=sourceUrl,
-                content_type=contentType,
-                download_time_utc=downloadTimeUtc,
+                total_chunks=form_data.total_chunks,
+                source_url=form_data.source_url,
+                content_type=form_data.content_type,
+                download_time_utc=download_time_utc,
                 user_id=user_id,
             )
         return
 
     upload_document(
-        doc_set_uuid=documentSetId,
+        doc_set_uuid=form_data.document_set_id,
         partial_doc_path=file.filename,
         local_file=file.file,
-        source_url=sourceUrl,
-        content_type=contentType,
-        download_time_utc=downloadTimeUtc,
+        source_url=form_data.source_url,
+        content_type=form_data.content_type,
+        download_time_utc=download_time_utc,
         user_id=user_id,
     )
 
@@ -115,7 +135,7 @@ async def handle_upload(
 @router.patch('/{doc_uuid}')
 async def handle_single_update(
     doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-    body: Optional[DocumentUpdateRequest] = None,
+    body: Annotated[Optional[DocumentUpdateRequest], Body()] = None,
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
@@ -167,7 +187,7 @@ async def handle_single_ingest(
 
 @router.post('/ingest')
 async def handle_ingest(
-    body: Optional[IngestRequestBody] = None,
+    body: Annotated[Union[IngestRequestBody, None], Body()] = None,
     current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))
     ] = None,

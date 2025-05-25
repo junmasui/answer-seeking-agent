@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 @start_up_handler
 def checkpointer_startup(sender):
+    """Set up database objects for the LangGraph checkpointer on application startup."""
     if sender.is_worker:
         return
 
@@ -26,6 +27,7 @@ def checkpointer_startup(sender):
 
 @cache
 def get_checkpointer():
+    """Return a cached instance of the PostgresSaver checkpointer."""
     connection_pool = get_connection_pool(DataDomain.CHECKPOINTS)
 
     checkpointer = PostgresSaver(connection_pool)

@@ -44,6 +44,7 @@ import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useUploadStore } from './UploadStore'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 const updateStore = useUploadStore()
@@ -68,6 +69,10 @@ const documentSetCount = ref(0)
 const documentSetsUpdatedAt = ref()
 const documentSetsOutdated = ref(false)
 
+/**
+ * Handles the file upload process by uploading files in chunks to the server.
+ * Processes all files in the fileList and uploads them one by one with progress tracking.
+ */
 async function onUpload() {
   downloading.value = true
 
@@ -75,7 +80,7 @@ async function onUpload() {
     while (fileList.value.length > 0) {
       const file = fileList.value.pop()
       // Upload the file
-      console.log(`Uploading file: ${file.name}`)
+      logger.uploadProgress(file.name, 'starting')
 
       const CHUNK_SIZE = 0.5 * 1024 * 1024 // 05.MB chunks
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
@@ -114,13 +119,13 @@ async function onUpload() {
           }
 
           const data = await response.json()
-          console.log(`File uploaded successfully: ${chunkIndex} ${totalChunks}`)
+          logger.uploadProgress(file.name, `chunk ${chunkIndex + 1}/${totalChunks}`)
         }
       } catch (error) {
-        console.error('Error uploading file:', error)
+        logger.apiError('File upload failed', error, { fileName: file.name })
       }
 
-      console.log(`Uploaded file: ${file.name}`)
+      logger.apiSuccess('File uploaded', { fileName: file.name })
     }
   } finally {
     downloading.value = false
@@ -146,6 +151,10 @@ onBeforeUnmount(async () => {
   intervalId = null
 })
 
+/**
+ * Loads table statistics from the server to check if document sets have been updated.
+ * Updates the document set count and tracks when the table was last modified.
+ */
 async function loadTableStats() {
   try {
     const headers = {
@@ -176,6 +185,10 @@ async function loadTableStats() {
   }
 }
 
+/**
+ * Fetches the list of available document sets from the server.
+ * Populates the documentSets array for use in the document set selection dropdown.
+ */
 async function loadDocumentSets() {
   try {
     const headers = {

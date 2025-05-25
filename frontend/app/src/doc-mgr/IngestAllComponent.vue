@@ -10,11 +10,16 @@
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
+/**
+ * Handles the ingest all operation by sending a request to process all uploaded documents.
+ * Initiates server-side ingestion of all available documents with proper authentication.
+ */
 async function onIngest(event) {
   try {
     const headers = {
@@ -34,9 +39,9 @@ async function onIngest(event) {
     }
 
     const data = await response.json()
-    console.log('Ingest started successfully')
+    logger.apiSuccess('Ingest all started')
   } catch (error) {
-    console.error('Error ingesting:', error)
+    logger.apiError('Ingest all failed', error)
   }
 }
 </script>
