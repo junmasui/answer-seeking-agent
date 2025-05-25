@@ -9,8 +9,8 @@ RUN apt-get update \
         bind9-dnsutils \
         curl \
         gettext-base \
-        postgresql-client-common \
         postgresql-client-15 \
+        postgresql-client-common \
         procps \
         redis-tools \
     && apt-get clean \
