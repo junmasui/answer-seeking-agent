@@ -96,7 +96,7 @@ def _list_tracking_records(
     row is augmented with the windowing function ROW_NUMBER. Then the rows whose
     ROW_NUMBER values fall into the page range are choosen. Finally, the row
     data minus the ROW_NUMBER values are returned.
-"""
+    """
 
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]

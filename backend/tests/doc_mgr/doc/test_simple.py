@@ -91,7 +91,6 @@ async def test_get(api_server, populated_doc_table, sql_sessionmaker):
         assert doc_id is not None
 
 
-
 @pytest.mark.asyncio
 async def test_update(api_server, populated_doc_table, sql_sessionmaker):
     with sql_sessionmaker() as session:
