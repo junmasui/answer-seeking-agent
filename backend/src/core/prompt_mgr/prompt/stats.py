@@ -16,10 +16,10 @@ def get_prompt_statistics():
 
 
 def _get_agent_prompt_stats():
-    """Return the count of records and maximum updated_date time
+    """
+    Return the count of records and maximum updated_date time
     in the prompt table.
     """
-
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

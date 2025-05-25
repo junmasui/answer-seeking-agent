@@ -14,7 +14,8 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next):
-        """Handle HTTP requests and log errors for responses with status codes >= 400.
+        """
+        Handle HTTP requests and log errors for responses with status codes >= 400.
 
         Captures request and response bodies for logging purposes while preserving
         the original request body for downstream handlers.

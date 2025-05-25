@@ -25,7 +25,8 @@ _RESET_DATA = signal('reset-data')
 
 
 def start_up_handler(receiver):
-    """Registers the reciever as a start-up handler.
+    """
+    Registers the reciever as a start-up handler.
 
     This can be used as a decorater, for better readability.
     """
@@ -33,7 +34,8 @@ def start_up_handler(receiver):
 
 
 def db_predefined_data_handler(receiver):
-    """Registers the reciever as a db-ready-for-predefined-data handler.
+    """
+    Registers the reciever as a db-ready-for-predefined-data handler.
 
     This can be used as a decorater, for better readability.
     """
@@ -41,7 +43,8 @@ def db_predefined_data_handler(receiver):
 
 
 def reset_data_handler(receiver):
-    """Registers the reciever as a reset-data handler.
+    """
+    Registers the reciever as a reset-data handler.
 
     This can be used as a decorater, for better readability.
     """
@@ -72,7 +75,8 @@ def send_start_up():
 
 
 def send_db_predefined_data():
-    """Send the db-predefined-data signal.
+    """
+    Send the db-predefined-data signal.
 
     This signal is sent after the database schema is updated or created
     and the database is ready to accept predefined data.

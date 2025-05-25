@@ -56,7 +56,6 @@ def doc_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 @pytest.fixture(scope='function')
 def empty_doc_table(doc_table, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'tracked_documents'."""
-
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
     _truncate_table(doc_table, sql_engine, sql_sessionmaker)
@@ -125,7 +124,6 @@ async def populated_doc_table(doc_table, readonly_doc_set_table, api_server, sql
 @pytest_asyncio.fixture(scope='module', loop_scope='module')
 async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_engine, sql_sessionmaker):
     """Ingest the documents uploaded in the populated_doc_table fixture."""
-
     try:
         await populate_doc_table(doc_table, readonly_doc_set_table, api_server, sql_engine, sql_sessionmaker)
 

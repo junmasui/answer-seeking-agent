@@ -1,6 +1,4 @@
-"""
-This provides the vector store used by this application.
-"""
+"""This provides the vector store used by this application."""
 
 from functools import cache
 
@@ -41,7 +39,8 @@ def get_connection_str(db_schema: DataDomain):
 
 @cache
 def get_engine(db_schema: DataDomain):
-    """Returns a SQLAlchemy engine for the database.
+    """
+    Returns a SQLAlchemy engine for the database.
 
     The engine is a global object created just once for a particular database server.
     It creates and holds connections to the database server
@@ -54,7 +53,8 @@ def get_engine(db_schema: DataDomain):
 
 @cache
 def get_sessionmaker(db_schema: DataDomain):
-    """Returns a SQLAlchemy sessionmaker object for the database.
+    """
+    Returns a SQLAlchemy sessionmaker object for the database.
 
     A sessionmaker is a factory for creating new Session objects.
     A Session object is like a connection with enhanced functionality for using
@@ -68,7 +68,8 @@ def get_sessionmaker(db_schema: DataDomain):
 
 @cache
 def get_connection_pool(db_schema: DataDomain):
-    """Return a database connection pool. This pool will be different from
+    """
+    Return a database connection pool. This pool will be different from
     the one used by SQLAlchemy
     """
     connection_str = get_connection_str(db_schema)

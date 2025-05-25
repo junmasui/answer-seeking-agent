@@ -1,6 +1,4 @@
-"""
-This provides the vector store used by this application.
-"""
+"""This provides the vector store used by this application."""
 
 import logging
 from functools import cache
@@ -28,7 +26,8 @@ _TEXT_KEY = 'content'
 
 @cache
 def _get_client():
-    """Return a Weaviate client instance, creating it if necessary.
+    """
+    Return a Weaviate client instance, creating it if necessary.
     This function is cached to ensure only one client is created.
     It also ensures the 'Agent' collection exists.
     """
@@ -52,7 +51,8 @@ def _get_client():
 
 
 def _create_collection(client):
-    """Create the 'Agent' collection in Weaviate if it doesn't already exist.
+    """
+    Create the 'Agent' collection in Weaviate if it doesn't already exist.
     Defines the schema for the collection, including properties and vector index configuration.
     """
     if not client.collections.exists(_COLLECTION_NAME):
@@ -138,7 +138,8 @@ def _create_collection(client):
 
 @cache
 def get_vector_store():
-    """Return a WeaviateVectorStore instance, configured with embeddings and the Weaviate client.
+    """
+    Return a WeaviateVectorStore instance, configured with embeddings and the Weaviate client.
     This function is cached to ensure only one vector store is created.
     """
     embeddings = get_embeddings()

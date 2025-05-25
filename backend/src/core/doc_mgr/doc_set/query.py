@@ -42,7 +42,6 @@ def list_document_sets(
     sort_by: Optional[list] = None,
 ):
     """Return the list of document sets."""
-
     existing_objs = _list_tracking_document_sets(
         name=name, is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by
     )
@@ -76,7 +75,6 @@ def _list_tracking_document_sets(
     sort_by: Optional[list] = None,
 ):
     """Return tracking set when matched to specified document UUID."""
-
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]
     elif not isinstance(sort_by, (list, tuple)):

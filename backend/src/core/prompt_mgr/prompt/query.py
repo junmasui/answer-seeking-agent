@@ -48,7 +48,6 @@ def list_prompts(
     sort_by: Optional[list] = None,
 ):
     """Return the list of prompts."""
-
     existing_objs = _list_agent_prompts(name=name, status=status, start=start, length=length, sort_by=sort_by)
     table_stats = get_prompt_statistics()
 
@@ -78,7 +77,6 @@ def _list_agent_prompts(
     sort_by: Optional[list] = None,
 ):
     """Return prompts when matched to specified propmt UUID."""
-
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]
     elif not isinstance(sort_by, (list, tuple)):

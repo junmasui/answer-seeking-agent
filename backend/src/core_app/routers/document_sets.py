@@ -46,7 +46,6 @@ async def handle_single_insert(
     ] = None,
 ):
     """Add document set."""
-
     user_id = current_user.userid if current_user is not None else None
 
     add_document_set(
@@ -61,7 +60,6 @@ async def handle_table_stats(
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
-
     return get_document_set_statistics()
 
 
@@ -74,7 +72,6 @@ async def handle_single_update(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     update_document_set(
@@ -95,7 +92,6 @@ async def handle_single_delete(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     delete_document_set(doc_set_uuid)

@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 
 @after_setup_task_logger.connect
 def setup_task_logger(logger, *args, **kwargs):
-    """
-    See: https://celery.school/custom-celery-task-logger
-    """
+    """See: https://celery.school/custom-celery-task-logger"""
     for handler in logger.handlers:
         handler.setFormatter(
             TaskFormatter('%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s')

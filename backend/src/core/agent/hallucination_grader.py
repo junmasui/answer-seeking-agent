@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 @cache
 def get_hallucination_grader():
-    """Initializes and returns a hallucination grading chain.
+    """
+    Initializes and returns a hallucination grading chain.
 
     This function builds a grader that uses a chat prompt (GRADE_HALLUCINATION)
     and a Pydantic model (GradeHallucination) for structured output.
     The grader is cached to avoid reinitialization.
     """
-
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_HALLUCINATION)
 
     hallucination_grader = build_grader(prompt, GradeHallucinations, 'hallucination_grader')
@@ -40,7 +40,6 @@ def grade_hallucination(state):
     Returns:
         str: Decision for next node to call
     """
-
     logger.info('---CHECK HALLUCINATIONS---')
     documents = state['documents']
     generation = state['answer']

@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 def add_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
-    """Add a new document set with the specified name and configuration.
+    """
+    Add a new document set with the specified name and configuration.
 
     Creates a document set that can be marked as default for new documents
     and configured for public visibility.
@@ -22,7 +23,6 @@ def add_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.
 
 def _add_or_update_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
     """Adds or updates the document set."""
-
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def setup_monitoring(app):
-    """Set up real-time monitoring for Celery events to track worker and task states.
+    """
+    Set up real-time monitoring for Celery events to track worker and task states.
 
     Monitors worker online/offline events and task state changes, updating document
     status when tasks are sent to the queue.

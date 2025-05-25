@@ -1,4 +1,5 @@
-"""added prompt columns
+"""
+added prompt columns
 
 Revision ID: 6b3f59aa577b
 Revises: 8137477f7563

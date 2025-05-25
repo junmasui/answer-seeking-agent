@@ -66,7 +66,6 @@ def create_tables_if_not_exists():
 
 def get_current_version(engine):
     """Return the current Alembic version applied to the database."""
-
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
 

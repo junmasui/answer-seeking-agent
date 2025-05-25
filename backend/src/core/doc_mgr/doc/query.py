@@ -44,7 +44,6 @@ def list_documents(
     sort_by: Optional[list] = None,
 ):
     """Return the list of files in cloud storage."""
-
     existing_objs = _list_tracking_records(
         doc_set_id=doc_set_id, status=status, file_name=file_name, start=start, length=length, sort_by=sort_by
     )
@@ -89,7 +88,8 @@ def _list_tracking_records(
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
 ):
-    """Return a page of tracking records.
+    """
+    Return a page of tracking records.
 
     The implementation is an older known-performance technique. The technique
     creates a CTE (alternatively, a subquery could have been used) where each
@@ -97,7 +97,6 @@ def _list_tracking_records(
     ROW_NUMBER values fall into the page range are choosen. Finally, the row
     data minus the ROW_NUMBER values are returned.
     """
-
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]
     elif not isinstance(sort_by, (list, tuple)):

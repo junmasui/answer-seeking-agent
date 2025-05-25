@@ -41,14 +41,14 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
     def invoke(
         self, input: Union[str, BaseMessage], config: Optional[RunnableConfig] = None, **kwargs: Any
     ) -> dict[str, str]:
-        """Critical override to bypass an internal lambda function that is preventing
+        """
+        Critical override to bypass an internal lambda function that is preventing
         the parse_result method from seeing the config object.
 
         See v0.3.41 codebase: https://github.com/langchain-ai/langchain/blob/langchain-core%3D%3D0.3.41/libs/core/langchain_core/output_parsers/base.py#L90
         Monitor the latest to see if the internal lambda function is removed:
         https://github.com/langchain-ai/langchain/blob/master/libs/core/langchain_core/output_parsers/base.py#L90
         """
-
         if not isinstance(input, BaseMessage):
             raise TypeError(f'Input must be a BaseMessage, but got {type(input).__name__}.')
 
@@ -56,7 +56,6 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
     def parse_result(self, result: list[Generation], *, partial: bool = False, config: dict = None) -> dict[str, str]:
         """Parse the output of an LLM call."""
-
         documents = config['configurable'].get('documents', [])
         documents = {doc.id: doc for doc in documents}
 

@@ -20,7 +20,6 @@ app = FastAPI()
 @app.post('/token', response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     """Return a JWT token for the user specified in the OAuth2 FormData."""
-
     return create_token_from_login(form_data)
 
 

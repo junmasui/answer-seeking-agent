@@ -1,6 +1,4 @@
-"""
-This provides the vector store used by this application.
-"""
+"""This provides the vector store used by this application."""
 
 import logging
 from functools import cache
