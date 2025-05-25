@@ -49,7 +49,6 @@ def prompt_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 @pytest.fixture(scope='function')
 def empty_prompt_table(prompt_table, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'agent_prompt'."""
-
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
     _truncate_table(prompt_table, sql_engine, sql_sessionmaker)

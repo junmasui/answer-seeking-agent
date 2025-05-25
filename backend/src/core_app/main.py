@@ -21,7 +21,8 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage the application's lifespan events.
+    """
+    Manage the application's lifespan events.
     Starts the logging configuration monitor and exposes Prometheus metrics on startup.
     Configures the signal sender and sends the start_up signal.
     Stops the logging configuration monitor on shutdown.
@@ -81,7 +82,8 @@ def get_status(
 
 @app.get('/loggers')
 async def dump_loggers(include_all: Union[bool, None] = False, worker: bool = False):
-    """Dump the current logger tree for the main application or a Celery worker.
+    """
+    Dump the current logger tree for the main application or a Celery worker.
     If 'worker' is true, it retrieves the logger tree from a Celery worker asynchronously.
     'include_all' determines if non-default loggers are included.
     """

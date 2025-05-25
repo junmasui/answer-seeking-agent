@@ -34,7 +34,8 @@ target_metadata = core.db_models.DECLARED_METADATA
 
 
 def is_database_empty(engine):
-    """Check if the database connected to the given engine is empty or only contains the Alembic version table.
+    """
+    Check if the database connected to the given engine is empty or only contains the Alembic version table.
     Returns True if the database is considered empty, False otherwise.
     """
     inspector = inspect(engine)
@@ -43,7 +44,8 @@ def is_database_empty(engine):
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
+    """
+    Run migrations in 'offline' mode.
 
     This configures the context with just a URL
     and not an Engine, though an Engine is acceptable
@@ -64,7 +66,8 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+    """
+    Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.

@@ -81,7 +81,6 @@ async def handle_table_stats(
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
-
     return get_document_statistics()
 
 
@@ -94,7 +93,6 @@ async def handle_upload(
     ] = None,
 ):
     """Upload a file. Chunked upload of large files is supported."""
-
     user_id = current_user.userid if current_user is not None else None
     # Convert string to datetime from the form_data model
     download_time_utc = datetime.fromisoformat(form_data.download_time_utc_str)
@@ -141,7 +139,6 @@ async def handle_single_update(
     ] = None,
 ):
     """Update the file specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     update_document(doc_uuid, doc_set_uuid=body.document_set_id, last_user_id=user_id)
@@ -157,7 +154,6 @@ async def handle_single_delete(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     success = delete_document(doc_uuid)
@@ -175,7 +171,6 @@ async def handle_single_ingest(
     ] = None,
 ):
     """Ingest the file specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     update_document_status(doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)

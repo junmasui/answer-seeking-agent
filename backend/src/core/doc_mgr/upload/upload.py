@@ -52,7 +52,8 @@ def _get_doc_file_path(doc_set, partial_doc_path):
 
 
 def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, content_type, download_time_utc, user_id):
-    """Upload a complete document into our document system.
+    """
+    Upload a complete document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
     """
@@ -106,11 +107,11 @@ def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
 def merge_chunked_document(
     doc_set_uuid, partial_doc_path, total_chunks, source_url, content_type, download_time_utc, user_id
 ):
-    """Merge then upload a chunked document into our document system.
+    """
+    Merge then upload a chunked document into our document system.
     This involves storing the document in our cloud file store
     and adding a tracking record.
     """
-
     logger.info('merging file %s to cloud file store', partial_doc_path)
 
     doc_set = _get_doc_set(doc_set_uuid)

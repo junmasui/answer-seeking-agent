@@ -1,6 +1,4 @@
-"""
-This provides the chat LLM used by this application.
-"""
+"""This provides the chat LLM used by this application."""
 
 from global_config import get_global_config
 

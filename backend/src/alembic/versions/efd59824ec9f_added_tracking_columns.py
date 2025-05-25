@@ -1,4 +1,5 @@
-"""Added tracking columns
+"""
+Added tracking columns
 
 Revision ID: efd59824ec9f
 Revises:

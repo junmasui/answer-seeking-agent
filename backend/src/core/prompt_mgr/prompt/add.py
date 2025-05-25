@@ -23,7 +23,6 @@ def _add_or_update_agent_prompt(
     name: str, status: AgentPromptStatus, system_message: str, human_message: str, user_id: uuid.UUID
 ):
     """Adds or updates the prompt."""
-
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

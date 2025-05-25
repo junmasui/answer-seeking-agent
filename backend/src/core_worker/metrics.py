@@ -11,7 +11,8 @@ from global_config import get_global_config
 
 
 def start_metrics(is_main_worker: bool):
-    """Start the Prometheus metrics collection system for the Celery worker.
+    """
+    Start the Prometheus metrics collection system for the Celery worker.
 
     Sets up collectors for garbage collection, process, and platform metrics.
     If this is the main worker, also starts a WSGI server to expose metrics.
@@ -38,7 +39,8 @@ def start_metrics(is_main_worker: bool):
 
 
 def child_exit(child_pid):
-    """Mark a child process as dead in the Prometheus multiprocess collector.
+    """
+    Mark a child process as dead in the Prometheus multiprocess collector.
 
     Called when a child worker process exits to clean up metrics data.
     """

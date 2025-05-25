@@ -46,7 +46,6 @@ async def handle_single_insert(
     ] = None,
 ):
     """Add document set."""
-
     status = AgentPromptStatus.ACTIVE
     user_id = current_user.userid if current_user is not None else None
 
@@ -60,7 +59,6 @@ async def handle_table_stats(
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
-
     return get_prompt_statistics()
 
 
@@ -73,7 +71,6 @@ async def handle_single_update(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     update_prompt(
@@ -95,7 +92,6 @@ async def handle_single_delete(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-
     user_id = current_user.userid if current_user is not None else None
 
     delete_prompt(prompt_uuid)

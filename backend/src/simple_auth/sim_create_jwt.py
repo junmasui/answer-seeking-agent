@@ -36,9 +36,7 @@ def _create_access_token(
     scopes: Optional[list[str]] = None,
     additional_claims: Optional[dict] = None,
 ) -> Token:
-    """
-    Simulates an actual token creation inside an true authentication service.
-    """
+    """Simulates an actual token creation inside an true authentication service."""
     to_encode = {'sub': userid.urn}
 
     if not expires_in:
@@ -66,10 +64,7 @@ def _create_access_token(
 
 
 def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    """
-    Simulates the user-password workflow inside an true authentication service.
-    """
-
+    """Simulates the user-password workflow inside an true authentication service."""
     user = authenticate_user(username=form_data.username, password=form_data.password)
 
     if not user:
