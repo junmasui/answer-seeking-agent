@@ -17,7 +17,7 @@ from ...signals import start_up_handler
 @start_up_handler
 def start(sender):
     """Download required NLTK data for the unstructured document loader.
-    
+
     Downloads 'punkt_tab' and 'averaged_perceptron_tagger_eng' to resolve
     compatibility issues between unstructured and NLTK libraries.
     """

@@ -9,6 +9,7 @@ def parse_sort_by(str_val):
     Converts camelCase field names to snake_case and handles direction prefixes.
     Fields prefixed with '-' are sorted in descending order, others in ascending order.
     """
+
     def _to_sort(x):
         direction = SortDirection.ASC
         if x.startswith('-'):

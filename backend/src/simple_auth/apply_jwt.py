@@ -36,7 +36,7 @@ def raise_credentials_error():
 
 def _decode_token_data(token: str):
     """Decode JWT token and extract user data.
-    
+
     Validates the token signature and extracts userid, username, and scope claims.
     Raises credentials error for invalid or malformed tokens.
     """
@@ -57,7 +57,7 @@ def _decode_token_data(token: str):
 
 async def get_current_user_from_token(token: str):
     """Extract and validate user information from a JWT token.
-    
+
     Returns the authenticated user object or None if no token is provided.
     Raises credentials error for invalid tokens.
     """
@@ -84,7 +84,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 def get_scoped_current_user(scope: str, missing_ok: bool = False):
     """Create a FastAPI dependency that validates user authentication and authorization scope.
-    
+
     Returns a dependency function that checks if the user has the required scope.
     If missing_ok is True, returns None when no token is provided instead of raising an error.
     """
