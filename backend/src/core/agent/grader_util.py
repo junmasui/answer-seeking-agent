@@ -7,6 +7,10 @@ from ..providers.chat_llm import get_chat_llm
 
 
 def build_grader(chat_prompt, output_cls: BaseModel, run_name):
+    """Build a Langchain runnable for grading, using a chat model and an output parser.
+    It supports both models with native structured output and models requiring custom parsing instructions.
+    The resulting chain is configured with a specific run name.
+    """
     config = get_global_config()
     # LLM
     llm = get_chat_llm()

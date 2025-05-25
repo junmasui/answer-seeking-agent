@@ -49,6 +49,10 @@ class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
     """Watches for changes to logging configuration TOML file."""
 
     def _handle(self, event: FileSystemEvent, use_target_path: bool = False) -> None:
+        """Handle file system events for the logging configuration file.
+
+        Applies incremental logging configuration when the target file is modified.
+        """
         log_config_path = get_global_config().logging_config_path
 
         # Exit if the logging config file does not exist.
@@ -66,12 +70,15 @@ class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
         _apply_incremental_configuration(log_config_path)
 
     def on_created(self, event: FileSystemEvent) -> None:
+        """Handle file creation events."""
         self._handle(event)
 
     def on_modified(self, event: FileSystemEvent) -> None:
+        """Handle file modification events."""
         self._handle(event)
 
     def on_moved(self, event: FileSystemEvent) -> None:
+        """Handle file move events."""
         self._handle(event)
 
 
@@ -79,6 +86,11 @@ class LogConfigMonitor:
     observer = None
 
     def start(self):
+        """Start monitoring the logging configuration file for changes.
+
+        Sets up a file system observer to watch for changes to the logging
+        configuration file and applies incremental updates when detected.
+        """
         if self.observer is not None:
             return
 
@@ -98,6 +110,7 @@ class LogConfigMonitor:
         _apply_incremental_configuration(log_config_path)
 
     def stop(self):
+        """Stop the logging configuration file monitor and clean up resources."""
         self.observer.stop()
         self.observer.join()
         self.observer = None
@@ -105,4 +118,9 @@ class LogConfigMonitor:
 
 @cache
 def get_logging_conf_monitor():
+    """Return the cached logging configuration monitor instance.
+
+    Uses functools.cache to ensure a single LogConfigMonitor instance
+    is created and reused across the application.
+    """
     return LogConfigMonitor()

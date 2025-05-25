@@ -34,6 +34,9 @@ target_metadata = core.db_models.DECLARED_METADATA
 
 
 def is_database_empty(engine):
+    """Check if the database connected to the given engine is empty or only contains the Alembic version table.
+    Returns True if the database is considered empty, False otherwise.
+    """
     inspector = inspect(engine)
     tables = inspector.get_table_names()
     return len(tables) == 0 or tables == ['alembic_version']

@@ -26,7 +26,11 @@ def update_document_set(doc_set_uuid, is_new_doc_default=None, is_public_viewabl
 
 @contextmanager
 def update_doc_set_record(doc_set_uuid):
-    """Updates the document set."""
+    """Context manager for updating a document set record in the database.
+
+    Yields the document set record object for modification within a database transaction.
+    Handles conversion of string UUIDs and logs warnings for missing or duplicate records.
+    """
     if isinstance(doc_set_uuid, str):
         doc_set_uuid = uuid.UUID(hex=doc_set_uuid)
 

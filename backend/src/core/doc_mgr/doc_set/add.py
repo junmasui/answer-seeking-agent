@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 def add_document_set(name: str, is_default: bool, is_pubic: bool, user_id: uuid.UUID):
+    """Add a new document set with the specified name and configuration.
+    
+    Creates a document set that can be marked as default for new documents
+    and configured for public visibility.
+    """
     return _add_or_update_document_set(name=name, is_default=is_default, is_pubic=is_pubic, user_id=user_id)
 
 
