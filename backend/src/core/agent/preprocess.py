@@ -25,10 +25,10 @@ def add_input_to_history(state):
     message_id = str(next_message_id)
     next_message_id += 1
 
-    stateUpdates = {
+    state_updates = {
         'messages': [HumanMessage(content=question, id=message_id)],
         'original_messages': [HumanMessage(content=question, id=message_id)],
         'next_message_id': next_message_id,
     }
 
-    return stateUpdates
+    return state_updates

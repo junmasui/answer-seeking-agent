@@ -6,7 +6,11 @@ from rich.logging import RichHandler
 
 class SafeRichHandler(RichHandler):
     def render_message(self, record, message):
-        """Render the log message, escaping square brackets for Rich markup."""
+        """Render the log message, escaping square brackets for Rich markup.
+
+        Overrides RichHandler's render_message to escape square brackets in the
+        original message to prevent conflicts with Rich's markup syntax.
+        """
         # The RichHandler uses square brackets for its own markup syntax.
         # Thus we need to escape the square brackets that are in the original message.
         if self.markup:
@@ -15,6 +19,11 @@ class SafeRichHandler(RichHandler):
 
 
 def configure_logging():
+    """Configure logging with Rich console handler for better terminal output.
+
+    Sets up a SafeRichHandler for core modules with Rich formatting, tracebacks,
+    and proper console width. Prevents duplicate handlers and sets appropriate log levels.
+    """
     terminal_width = 120
     console = Console(width=terminal_width) if terminal_width else None
     rich_handler = SafeRichHandler(

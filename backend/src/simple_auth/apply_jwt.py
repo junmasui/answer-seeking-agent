@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 # Use token
 #
 def raise_credentials_error():
+    """Raise an HTTP 401 Unauthorized error for invalid credentials."""
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Could not validate credentials',
@@ -34,6 +35,11 @@ def raise_credentials_error():
 
 
 def _decode_token_data(token: str):
+    """Decode JWT token and extract user data.
+
+    Validates the token signature and extracts userid, username, and scope claims.
+    Raises credentials error for invalid or malformed tokens.
+    """
     try:
         secret_key = get_global_config().application_jwt_secret
         payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
@@ -50,6 +56,11 @@ def _decode_token_data(token: str):
 
 
 async def get_current_user_from_token(token: str):
+    """Extract and validate user information from a JWT token.
+
+    Returns the authenticated user object or None if no token is provided.
+    Raises credentials error for invalid tokens.
+    """
     if not token:
         return None
 
@@ -67,10 +78,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """FastAPI dependency to get the current authenticated user from JWT token."""
     return await get_current_user_from_token(token)
 
 
 def get_scoped_current_user(scope: str, missing_ok: bool = False):
+    """Create a FastAPI dependency that validates user authentication and authorization scope.
+
+    Returns a dependency function that checks if the user has the required scope.
+    If missing_ok is True, returns None when no token is provided instead of raising an error.
+    """
     auto_error = not missing_ok
     # When auto_error=False: if HTTP Authorization header is not available,
     # the dependency will return None instead of throwing a 401.

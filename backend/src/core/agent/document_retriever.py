@@ -81,5 +81,5 @@ def query_documents(state):
     documents = [_clean_up_retrieved(x) for x in documents]
 
     # Update agent state with retrieved documents
-    stateUpdates = {'documents': documents}
-    return stateUpdates
+    state_updates = {'documents': documents}
+    return state_updates
