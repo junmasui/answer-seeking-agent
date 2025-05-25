@@ -46,6 +46,7 @@ async def get_upload_form_data(
     content_type: Annotated[str, Form(alias='contentType')],
     download_time_utc_str: Annotated[str, Form(alias='downloadTimeUtc')],
 ) -> DocumentUploadFormData:
+    """Parse and validate document upload form data into a Pydantic model."""
     return DocumentUploadFormData(
         document_set_id=document_set_id,
         total_chunks=total_chunks,

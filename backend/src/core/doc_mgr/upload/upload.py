@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_doc_set(doc_set_uuid):
+    """Retrieve a document set by its UUID, or the default document set if no UUID is provided."""
     if doc_set_uuid:
         document_sets = get_document_sets([doc_set_uuid])
         if len(document_sets) > 0:
@@ -24,6 +25,7 @@ def _get_doc_set(doc_set_uuid):
 
 
 def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
+    """Generate the file path for a document chunk based on the document set, partial path, and chunk index."""
     chunk_root_dir = get_global_config().doc_manager.chunk_root_dir
     chunk_root_dir = Path(chunk_root_dir)
     if chunk_root_dir.is_absolute():

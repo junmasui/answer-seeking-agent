@@ -70,6 +70,7 @@ def empty_doc_table(doc_table, sql_engine, sql_sessionmaker):
 
 
 async def populate_doc_table(doc_table, populated_doc_set_table, api_server, sql_engine, sql_sessionmaker):
+    """Populate the 'tracked_documents' table with sample data."""
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
     _truncate_table(doc_table, sql_engine, sql_sessionmaker)

@@ -17,7 +17,12 @@ logger = logging.getLogger(__name__)
 
 @cache
 def get_retrieval_grader():
-    """ """
+    """Initializes and returns a retrieval grading chain.
+
+    This function builds a grader that uses a chat prompt (GRADE_RETRIEVED_DOCUMENTS)
+    and a Pydantic model (GradeDocuments) for structured output.
+    The grader is cached to avoid reinitialization.
+    """
 
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_RETRIEVED_DOCUMENTS)
 

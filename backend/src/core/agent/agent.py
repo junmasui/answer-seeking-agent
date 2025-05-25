@@ -33,22 +33,27 @@ pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
 def redo_document_retrieval(state):
+    """Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should be redone."""
     return {'answer_grade': 'redo document retrieval'}
 
 
 def redo_answer_generation(state):
+    """Set the answer_grade to 'redo answer generation' to indicate that answer generation should be redone."""
     return {'answer_grade': 'redo answer generation'}
 
 
 def accept_answer(state):
+    """Set the answer_grade to 'accept answer' to indicate that the current answer is acceptable."""
     return {'answer_grade': 'accept answer'}
 
 
 def get_answer_grade(state):
+    """Return the current answer_grade from the state."""
     return state['answer_grade']
 
 
 def _get_uncompiled_agent_graph() -> StateGraph:
+    """Define and return the uncompiled LangGraph agent graph structure."""
     # Build subgraph for document retrieval.
 
     retrieval_subgraph = StateGraph(GraphState)
@@ -156,6 +161,10 @@ def get_mermaid_graph():
 
 
 def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
+    """
+    Seek an answer to the user's input using the agent graph.
+    This involves retrieving documents, generating an answer, and applying guardrails.
+    """
     logger.info('user input: %s  thread_id: %s', user_input, thread_id)
 
     if not thread_id:

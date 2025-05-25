@@ -13,9 +13,11 @@ logger = logging.getLogger(__name__)
 
 class ApiClient:
     def __init__(self, base_url):
+        """Initialize the API client with the base URL."""
         self.base_url = base_url
 
     async def _send(self, *, path: str, action, **kwargs):
+        """Send an HTTP request and handle the response."""
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 url = self.base_url
@@ -34,7 +36,7 @@ class ApiClient:
         return 'json', resp.json()
 
     async def get(self, *, path: str):
-        """Send HTTP GET request."""
+        """Send HTTP GET request to API Server."""
 
         async def _get(client, url):
             return await client.get(url)
@@ -42,7 +44,7 @@ class ApiClient:
         return await self._send(path=path, action=_get)
 
     async def delete(self, *, path: str):
-        """Send HTTP DELETE request."""
+        """Send HTTP DELETE request to API Server."""
 
         async def _delete(client, url):
             return await client.delete(url)
@@ -50,7 +52,7 @@ class ApiClient:
         return await self._send(path=path, action=_delete)
 
     async def patch(self, *, path: str, content_type: str, data: dict | list | str = None, files: dict = None):
-        """Send HTTP PATCH request."""
+        """Send HTTP PATCH request to API Server."""
 
         async def _patch(client, url):
             kwargs = {}
@@ -70,7 +72,7 @@ class ApiClient:
     async def post(
         self, *, path: str, content_type: str, timeout=None, data: dict | list | str = None, files: dict = None
     ):
-        """Send HTTP POST request."""
+        """Send HTTP POST request to API Server."""
 
         async def _post(client, url):
             kwargs = {}

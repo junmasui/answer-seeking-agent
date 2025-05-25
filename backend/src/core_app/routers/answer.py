@@ -18,6 +18,7 @@ async def handle_question(
     params: Annotated[AnswerRequestBody, Depends()],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
+    """Handle a question submitted via GET request and return an answer."""
     user_id = current_user.user_id if current_user is not None else None
 
     answer = seek_answer(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
@@ -32,6 +33,7 @@ async def handler_question(
     body: Annotated[AnswerRequestBody, Body(...)],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
+    """Handle a question submitted via POST request and return an answer."""
     user_id = current_user.user_id if current_user is not None else None
 
     answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)

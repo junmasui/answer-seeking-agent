@@ -13,6 +13,7 @@ pp = pprint.PrettyPrinter(indent=2, width=120)
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
+    """Return count of records in the specified table."""
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()
@@ -23,6 +24,7 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
 
 def _get_doc_set_id(populated_doc_set_table, sql_sessionmaker):
+    """Return the ID of the first document set in the 'populated_doc_set_table'."""
     with sql_sessionmaker() as session:
         stmt = select(populated_doc_set_table.id, populated_doc_set_table.name).select_from(populated_doc_set_table)
         result = session.execute(stmt).first()
