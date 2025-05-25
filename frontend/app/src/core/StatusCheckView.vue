@@ -15,6 +15,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import logger from '../common/Logger.js'
 
 const systemStatus = ref('unknown')
 const statusColor = ref('primary')
@@ -36,18 +37,17 @@ async function checkStatus() {
 
     if (!response.ok) {
       systemStatus.value = 'offline'
-
       throw new Error('Status check failed')
     }
 
     const data = await response.json()
-    console.log('Status check success')
+    logger.apiSuccess('Status check completed', { status: data.status })
 
     if (data['status']) {
       systemStatus.value = data['status']
     }
   } catch (error) {
-    console.error('Error during status check:', error)
+    logger.apiError('Status check failed', error)
   }
 }
 </script>

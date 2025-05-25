@@ -10,6 +10,7 @@
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 
@@ -34,9 +35,9 @@ async function onIngest(event) {
     }
 
     const data = await response.json()
-    console.log('Ingest started successfully')
+    logger.apiSuccess('Ingest all started')
   } catch (error) {
-    console.error('Error ingesting:', error)
+    logger.apiError('Ingest all failed', error)
   }
 }
 </script>

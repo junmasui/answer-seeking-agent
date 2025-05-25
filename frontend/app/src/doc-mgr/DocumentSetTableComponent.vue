@@ -69,6 +69,7 @@ import { useDocumentSetStore } from './DocSetStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import AddDocSetDialog from './AddDocSetDialog.vue'
 import EditDocSetDialog from './EditDocSetDialog.vue'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 const documentSetStore = useDocumentSetStore()
@@ -101,8 +102,10 @@ const tableHeaders = ref([
 const sortBy = ref([])
 
 watch(sortBy, async (newValue, oldValue) => {
-  console.log('SORT-BY NEW ', newValue)
-  console.log('SORT-BY OLD ', oldValue)
+  logger.debug('Sort criteria changed', { 
+    newSort: newValue, 
+    oldSort: oldValue 
+  })
 })
 
 const itemsPerPageOptions = [
@@ -167,9 +170,9 @@ async function addDocumentSet() {
     }
 
     const data = await response.json()
-    console.log('Added successfully')
+    logger.apiSuccess('Document set added', { name: targetItem.value.name })
   } catch (error) {
-    console.error('Error adding:', error)
+    logger.apiError('Document set add failed', error, { name: targetItem.value.name })
   }
 }
 
@@ -192,7 +195,10 @@ function editItem(item, index) {
   targetIndex.value = index
   targetItem.value = Object.assign({}, item)
 
-  console.log('EditItem:', JSON.stringify(targetItem.value, null, 2))
+  logger.debug('Edit document set dialog opened', { 
+    docSetName: targetItem.value.name,
+    docSetId: targetItem.value.id 
+  })
 }
 
 async function applyEditDocSet() {
@@ -210,13 +216,11 @@ async function editDocumentSet(doc_set_uuid) {
     }
 
     const body = {
-      // name: targetItem.value.name,
       isNewDocDefault: targetItem.value.isNewDocDefault,
       isPublicViewable: targetItem.value.isPublicViewable
     }
 
-    console.log('Edited:', body)
-    console.log('Edited:', JSON.stringify(body, null, 2))
+    logger.debug('Editing document set', { docSetId: doc_set_uuid, changes: body })
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
       method: 'PATCH',
@@ -229,9 +233,9 @@ async function editDocumentSet(doc_set_uuid) {
     }
 
     const data = await response.json()
-    console.log('Edited successfully')
+    logger.apiSuccess('Document set edited', { docSetId: doc_set_uuid })
   } catch (error) {
-    console.error('Error editing:', error)
+    logger.apiError('Document set edit failed', error, { docSetId: doc_set_uuid })
   }
 }
 
@@ -279,9 +283,9 @@ async function deleteDocumentSet(doc_set_uuid) {
     }
 
     const data = await response.json()
-    console.log('Deleted successfully')
+    logger.apiSuccess('Document set deleted', { docSetId: doc_set_uuid })
   } catch (error) {
-    console.error('Error deleting:', error)
+    logger.apiError('Document set deletion failed', error, { docSetId: doc_set_uuid })
   }
 }
 
@@ -340,9 +344,9 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
     }
 
     const data = await response.json()
-    console.log('Update successfully')
+    logger.apiSuccess('Document set updated', { docId: doc_uuid, newDocSetId: doc_set_uuid })
   } catch (error) {
-    console.error('Error updating document set:', error)
+    logger.apiError('Document set update failed', error, { docId: doc_uuid, newDocSetId: doc_set_uuid })
   }
 }
 

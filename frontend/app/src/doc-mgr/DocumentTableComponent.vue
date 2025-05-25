@@ -96,6 +96,7 @@ import { storeToRefs } from 'pinia'
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 const documentStore = useDocumentStore()
@@ -207,7 +208,7 @@ async function ingestDocument(doc_uuid) {
     }
 
     const data = await response.json()
-    console.log('Ingest queued successfully')
+    logger.apiSuccess('Document ingest queued', { docId: doc_uuid })
   } catch (error) {
     console.error('Error ingesting:', error)
   }
@@ -286,7 +287,7 @@ async function deleteDocument(doc_uuid) {
     }
 
     const data = await response.json()
-    console.log('Deleted successfully')
+    logger.apiSuccess('Document deleted', { docId: doc_uuid })
   } catch (error) {
     console.error('Error deleting:', error)
   }
@@ -343,7 +344,7 @@ async function ingestSelectedDocuments() {
     selectedItems.value = []
 
     const data = await response.json()
-    console.log('Ingest queued successfully')
+    logger.apiSuccess('Selected documents ingest queued', { count: body.docUuids.length })
   } catch (error) {
     console.error('Error ingesting:', error)
   }
@@ -392,7 +393,7 @@ async function ingestAllUploadedDocuments() {
     }
 
     const data = await response.json()
-    console.log('Ingest queued successfully')
+    logger.apiSuccess('All uploaded documents ingest queued')
   } catch (error) {
     console.error('Error ingesting:', error)
   }
@@ -444,7 +445,7 @@ async function deleteSelectedDocuments() {
     selectedItems.value = []
 
     const data = await response.json()
-    console.log('Deleted successfully')
+    logger.apiSuccess('Selected documents deleted', { count: body.docUuids.length })
   } catch (error) {
     console.error('Error deleteing:', error)
   }

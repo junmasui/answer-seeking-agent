@@ -44,6 +44,7 @@ import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useUploadStore } from './UploadStore'
+import logger from '../common/Logger.js'
 
 const currentUserStore = useCurrentUserStore()
 const updateStore = useUploadStore()
@@ -75,7 +76,7 @@ async function onUpload() {
     while (fileList.value.length > 0) {
       const file = fileList.value.pop()
       // Upload the file
-      console.log(`Uploading file: ${file.name}`)
+      logger.uploadProgress(file.name, 'starting')
 
       const CHUNK_SIZE = 0.5 * 1024 * 1024 // 05.MB chunks
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
@@ -114,13 +115,13 @@ async function onUpload() {
           }
 
           const data = await response.json()
-          console.log(`File uploaded successfully: ${chunkIndex} ${totalChunks}`)
+          logger.uploadProgress(file.name, `chunk ${chunkIndex + 1}/${totalChunks}`)
         }
       } catch (error) {
-        console.error('Error uploading file:', error)
+        logger.apiError('File upload failed', error, { fileName: file.name })
       }
 
-      console.log(`Uploaded file: ${file.name}`)
+      logger.apiSuccess('File uploaded', { fileName: file.name })
     }
   } finally {
     downloading.value = false
