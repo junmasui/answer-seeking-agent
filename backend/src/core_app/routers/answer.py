@@ -1,6 +1,5 @@
 import logging
-import uuid
-from typing import Annotated, Union
+from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import Response
