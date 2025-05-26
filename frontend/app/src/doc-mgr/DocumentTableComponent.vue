@@ -271,7 +271,7 @@ async function applyEditDoc() {
  * Placeholder function for editing a document.
  * @param {string} doc_uuid - The unique identifier of the document to edit
  */
-async function editDocument(doc_uuid) {}
+function editDocument(doc_uuid) {}
 
 /**
  * Closes the edit document dialog and refreshes the table data.
@@ -363,7 +363,7 @@ const activeConfirmIngestSelected = ref(false)
  * Opens the confirmation dialog for ingesting multiple selected documents.
  * Displays a confirmation prompt before proceeding with batch ingestion.
  */
-async function ingestSelectedItems() {
+function ingestSelectedItems() {
   activeConfirmIngestSelected.value = true
 }
 
@@ -431,7 +431,7 @@ const activeConfirmIngestAllUploaded = ref(false)
  * Opens the confirmation dialog for ingesting all uploaded documents.
  * Displays a confirmation prompt before proceeding with full batch ingestion.
  */
-async function ingestAllUploaded() {
+function ingestAllUploaded() {
   activeConfirmIngestAllUploaded.value = true
 }
 
@@ -496,7 +496,7 @@ const activeConfirmDeleteSelected = ref(false)
  * Opens the confirmation dialog for deleting multiple selected documents.
  * Displays a confirmation prompt before proceeding with batch deletion.
  */
-async function deleteSelectedItems() {
+function deleteSelectedItems() {
   activeConfirmDeleteSelected.value = true
 }
 

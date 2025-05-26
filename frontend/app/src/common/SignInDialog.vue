@@ -96,7 +96,7 @@ function togglePasswordVisibility() {
  * Handles the cancel action by closing the sign-in dialog.
  * Allows users to dismiss the dialog without attempting authentication.
  */
-async function onCancel() {
+function onCancel() {
   active.value = false
 }
 
