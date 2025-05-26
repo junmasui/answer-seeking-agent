@@ -39,6 +39,12 @@ def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
 
 
 def _get_doc_file_path(doc_set, partial_doc_path):
+    """
+    Generate the full cloud file path for a document.
+
+    Combines the document root directory, document set name, and partial path
+    to create the complete cloud storage path for a document.
+    """
     doc_root_dir = get_global_config().doc_manager.doc_root_dir
     doc_root_dir = Path(doc_root_dir)
     if doc_root_dir.is_absolute():

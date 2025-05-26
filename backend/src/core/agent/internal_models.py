@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 
 
 class AgentPrompt(str, Enum):
+    """Enumeration of available agent prompt templates for different AI operations."""
+
     GENERATE_ANSWER = 'Generate Answer'
     REWRITE_QUERY = 'Rewrite Query'
     GRADE_RETRIEVED_DOCUMENTS = 'Grade Retrieved Documents'
