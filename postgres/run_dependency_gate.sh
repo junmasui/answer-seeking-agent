@@ -21,7 +21,7 @@ wait_for_resolv_conf
 wait_for_nslookup "pgvector"
 
 
-DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgvector:5432/postgres
+DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgvector:5432/postgres"
 
 wait_for_pgvector "$DATABASE_URL"
 

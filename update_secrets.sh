@@ -9,16 +9,16 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # Generate the manually managed secrets file.
 if [ ! -e secrets-dev.env ]
 then
-    HF_TOKEN=${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN} \
-       HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN} \
+    HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}" \
+       HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}" \
        envsubst < ./secrets.env.template > ./secrets-dev.env
 fi
 
 # Generate the manually managed secrets file.
 if [ ! -e secrets-test.env ]
 then
-    HF_TOKEN=${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN} \
-       HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN} \
+    HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}" \
+       HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}" \
        envsubst < ./secrets.env.template > ./secrets-test.env
 fi
 
@@ -44,11 +44,11 @@ fi
 # Auto-generate passwords that will never leave the local Docker environment.
 
 function generate_secret ()  {
-    SECRETS_FILE=$1
-    VAR_NAME=$2
-    ALGO=$3
-    PREFIX=$4
-    DESCR=$5
+    SECRETS_FILE="$1"
+    VAR_NAME="$2"
+    ALGO="$3"
+    PREFIX="$4"
+    DESCR="$5"
     if [[ ! -e "$SECRETS_FILE" \
         || ! $( grep "$VAR_NAME" "$SECRETS_FILE" ) ]]
     then
@@ -73,8 +73,8 @@ function generate_secret ()  {
             esac
             declare "${VAR_NAME}=${PREFIX}${SECRET}"
         fi
-        echo -e "\n# ${DESCR}  (auto-generated secret)" >> $SECRETS_FILE
-        echo "$VAR_NAME=${!VAR_NAME}" >> $SECRETS_FILE
+        echo -e "\n# ${DESCR}  (auto-generated secret)" >> "$SECRETS_FILE"
+        echo "$VAR_NAME=${!VAR_NAME}" >> "$SECRETS_FILE"
     fi
 }
 
@@ -117,7 +117,7 @@ VAR_NAME=CLICKHOUSE_DEFAULT_USER_PASSWORD
 VALUE_PREFIX=clickhouse_default_
 DESCR="Clickhouse's default account's password."
 
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" $VALUE_PREFIX "$DESCR"
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 VAR_NAME=CLICKHOUSE_ADMIN_USER_PASSWORD
 VALUE_PREFIX=clickhouse_admin_
@@ -306,7 +306,7 @@ export $( grep -h -v "^#" "./secrets/clickhouse.secrets.env" | xargs -n1 )
 set -o history # turn it back on
 
 RELPATH=clickhouse/admin-user.xml
-envsubst < ${RELPATH}.template > secrets/clickhouse.admin-user.xml
+envsubst < "${RELPATH}.template" > "secrets/clickhouse.admin-user.xml"
 
 #
 set +o history # temporarily turn off history
@@ -316,4 +316,4 @@ export $( grep -h -v "^#" "./secrets/redis.secrets.env" | xargs -n1 )
 set -o history # turn it back on
 
 RELPATH=redis/redis.conf
-envsubst < ${RELPATH}.template > secrets/redis.conf
+envsubst < "${RELPATH}.template" > "secrets/redis.conf"

@@ -99,6 +99,13 @@ def get_head_revision():
 
 
 def get_schema_differences(engine):
+    """
+    Compare the declared database schema with the actual database schema.
+
+    Uses Alembic's autogenerate functionality to detect differences between
+    the SQLAlchemy metadata and the actual database schema, including
+    table structure, columns, and server defaults.
+    """
     # Declared metadata.
     metadata = DECLARED_METADATA
 
@@ -128,6 +135,12 @@ def get_schema_differences(engine):
 
 
 def _create_tables_if_new(engine):
+    """
+    Create database tables for a new/empty database and initialize Alembic tracking.
+
+    Only creates tables if the database is empty (no reflected tables except alembic_version).
+    After creating tables, stamps the database with the current Alembic head revision.
+    """
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
 
@@ -160,6 +173,12 @@ def _create_tables_if_new(engine):
 
 
 def _run_migrations(engine):
+    """
+    Run Alembic database migrations to upgrade to the latest schema version.
+
+    Executes all pending migrations from the current database version to the head revision.
+    Logs warnings if migration errors occur but allows the process to continue.
+    """
     alembic_ini = get_global_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
 

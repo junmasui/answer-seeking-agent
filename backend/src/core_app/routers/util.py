@@ -5,10 +5,11 @@ from core.public_models import SortDirection
 
 def parse_sort_by(str_val):
     """
-    Parse a comma-separated sort string into a list of field-direction tuples.
+    Parse a comma-separated string of sort criteria into a list of tuples.
 
-    Converts camelCase field names to snake_case and handles direction prefixes.
-    Fields prefixed with '-' are sorted in descending order, others in ascending order.
+    Each criterion can be prefixed with '-' for descending order or '+' (or no prefix)
+    for ascending order. Returns a list of (field_name, direction) tuples where
+    direction is either 'asc' or 'desc'.
     """
 
     def _to_sort(x):

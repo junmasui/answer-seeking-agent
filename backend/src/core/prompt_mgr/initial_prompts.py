@@ -12,6 +12,12 @@ logger = logging.getLogger(__name__)
 
 @db_predefined_data_handler
 def register_initial_prompts(sender):
+    """
+    Register initial agent prompts from YAML configuration file.
+
+    Loads predefined prompts from initial_prompts.yml and adds them to the database
+    when the database is ready for predefined data. Only runs on non-worker processes.
+    """
     if sender.is_worker:
         return
 

@@ -103,6 +103,12 @@ class ApiClient:
 
 @pytest_asyncio.fixture(loop_scope='module', scope='module')
 async def api_server() -> AsyncGenerator[ApiClient, None]:
+    """
+    Provide an ApiClient instance for testing API endpoints.
+
+    Waits for the FastAPI server to come online and complete startup processing
+    (including database migrations and ML model downloads) before yielding the client.
+    """
     # Wait (poll) for FastAPI to come on-line. "On-line" is later than the
     # process starting: it also means that start-up processing has completed.
     # Start-up processing includes pending database migrations, and ML model
@@ -128,6 +134,12 @@ async def api_server() -> AsyncGenerator[ApiClient, None]:
 
 @pytest_asyncio.fixture(loop_scope='module', scope='module', autouse=True)
 async def global_reset(api_server) -> AsyncGenerator[None, None]:
+    """
+    Reset the global application state before and after tests.
+
+    This fixture automatically resets the database, vector store, and file store
+    at the beginning and end of the test module to ensure test isolation.
+    """
     path = '/admin/reset-database'
     logger.info('Resetting global state')
     resp_type, resp = await api_server.post(path=path, content_type=None)
