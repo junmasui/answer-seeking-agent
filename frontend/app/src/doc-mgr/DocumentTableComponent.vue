@@ -271,7 +271,10 @@ async function applyEditDoc() {
  * Placeholder function for editing a document.
  * @param {string} doc_uuid - The unique identifier of the document to edit
  */
-function editDocument(doc_uuid) {}
+async function editDocument(doc_uuid) {
+  // Simulate the delay from a real call to the API Server.
+  await new Promise(resolve => setTimeout(resolve, 100));
+}
 
 /**
  * Closes the edit document dialog and refreshes the table data.
