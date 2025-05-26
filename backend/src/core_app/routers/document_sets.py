@@ -48,12 +48,7 @@ async def handle_single_insert(
     """Add document set."""
     user_id = current_user.userid if current_user is not None else None
 
-    add_document_set(
-        name=body.name,
-        is_new_doc_default=body.is_new_doc_default,
-        is_public_viewable=body.is_public_viewable,
-        user_id=user_id,
-    )
+    add_document_set(name=body.name, is_new_doc_default=body.is_new_doc_default, is_public_viewable=body.is_public_viewable, user_id=user_id)
 
     return {}
 
