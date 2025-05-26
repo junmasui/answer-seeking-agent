@@ -49,7 +49,13 @@ async def handle_single_insert(
     status = AgentPromptStatus.ACTIVE
     user_id = current_user.userid if current_user is not None else None
 
-    add_prompt(name=body.name, status=status, system_message=body.system_message, human_message=body.human_message, user_id=user_id)
+    add_prompt(
+        name=body.name,
+        status=status,
+        system_message=body.system_message,
+        human_message=body.human_message,
+        user_id=user_id,
+    )
 
     return {}
 
