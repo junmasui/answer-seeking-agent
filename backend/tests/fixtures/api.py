@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 class ApiClient:
+    """
+    HTTP client for testing API endpoints with support for various request types.
+
+    Provides async methods for GET, POST, PATCH, and DELETE requests with
+    JSON and multipart form data support for integration testing.
+    """
+
     def __init__(self, base_url):
         """Initialize the API client with the base URL."""
         self.base_url = base_url

@@ -84,6 +84,13 @@ class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
 
 
 class LogConfigMonitor:
+    """
+    Monitors logging configuration files for changes and applies updates dynamically.
+
+    Uses file system watching to detect changes to logging configuration files
+    and applies incremental configuration updates without restarting the application.
+    """
+
     observer = None
 
     def start(self):

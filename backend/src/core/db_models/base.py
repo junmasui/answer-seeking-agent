@@ -6,5 +6,11 @@ DECLARED_REGISTRY = registry(metadata=DECLARED_METADATA)
 
 
 class Base(DeclarativeBase):
+    """
+    Base class for all SQLAlchemy database models.
+
+    Provides shared metadata and registry for declarative model definitions.
+    """
+
     metadata = DECLARED_METADATA
     registry = DECLARED_REGISTRY

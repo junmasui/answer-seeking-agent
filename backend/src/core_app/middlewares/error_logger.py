@@ -9,6 +9,13 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorLoggingMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware that logs HTTP requests and responses for error status codes.
+
+    Captures and logs request/response details when HTTP status codes are >= 400,
+    helping with debugging and monitoring of API errors.
+    """
+
     def __init__(self, app: ASGIApp):
         """Initialize the error logging middleware with the ASGI application."""
         super().__init__(app)

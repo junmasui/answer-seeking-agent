@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 class DbTrackedDocumentSet(Base):
+    """
+    SQLAlchemy model representing a tracked document set in the database.
+
+    Manages collections of documents with properties for default status and public visibility.
+    """
+
     __tablename__ = 'tracked_document_sets'
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
@@ -52,6 +58,12 @@ DbDocumentStatus = ENUM(DocumentStatus)
 
 
 class DbTrackedDocument(Base):
+    """
+    SQLAlchemy model representing a tracked document in the database.
+
+    Stores document metadata, processing status, and relationships to document sets and vector store IDs.
+    """
+
     __tablename__ = 'tracked_documents'
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)

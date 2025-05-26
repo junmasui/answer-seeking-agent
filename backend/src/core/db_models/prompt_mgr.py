@@ -16,6 +16,12 @@ DbPromptStatus = ENUM(AgentPromptStatus)
 
 
 class DbAgentPrompt(Base):
+    """
+    SQLAlchemy model representing an agent prompt template in the database.
+
+    Stores versioned prompt templates with system and human messages for AI agent interactions.
+    """
+
     __tablename__ = 'agent_prompt'
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)

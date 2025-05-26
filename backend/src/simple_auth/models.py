@@ -14,6 +14,8 @@ from pydantic import BaseModel
 #
 #
 class Scope(StrEnum):
+    """Enumeration of available authorization scopes for API access control."""
+
     DOC_READ = 'doc:read'
     DOC_WRITE = 'doc:write'
     DOC_INGEST = 'doc:ingest'
@@ -32,6 +34,8 @@ class Scope(StrEnum):
 
 
 class Token(BaseModel):
+    """Represents an authentication token with expiration and optional refresh token."""
+
     access_token: str
     token_type: str
     # Number of seconds until access token expires.
@@ -40,12 +44,16 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
+    """Contains decoded JWT token data including user identity and authorization scope."""
+
     userid: uuid.UUID
     username: str
     scope: str | None
 
 
 class User(BaseModel):
+    """Represents a user with identification and authorization scopes."""
+
     userid: uuid.UUID
     username: Optional[str] = None
     scopes: Optional[list[str]] = None
