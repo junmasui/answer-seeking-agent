@@ -17,20 +17,20 @@ function wait_for_dependency_gate {
     ELAPSED=0
 
     MESSAGE_INTERVAL=60
-    NEXT_MESSAGE=$MESSAGE_INTERVAL
+    NEXT_MESSAGE="$MESSAGE_INTERVAL"
 
     while [ ! -f "$SIGNAL_FILE" ]
     do
-        if (( ELAPSED > NEXT_MESSAGE ))
+        if (( "$ELAPSED" > "$NEXT_MESSAGE" ))
         then
             echo "waiting for dependency gate to open."
             NEXT_MESSAGE=$(( NEXT_MESSAGE + MESSAGE_INTERVAL ))
         fi
 
-        sleep $WAIT_INTERVAL
+        sleep "$WAIT_INTERVAL"
         # The $((...)) syntax is for shell arithematic operations.
         ELAPSED=$(( ELAPSED + WAIT_INTERVAL ))
-        if [ $ELAPSED -ge $WAIT_LIMIT ]; then
+        if [ "$ELAPSED" -ge "$WAIT_LIMIT" ]; then
             echo "dependency gate did not open within ${WAIT_LIMIT} seconds."
             exit 1
         fi

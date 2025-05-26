@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 
 @cache
 def get_vector_store():
+    """
+    Get the cached PGVector vector store instance.
+
+    Creates and returns a PGVector instance configured with embeddings and
+    connected to the vectors database for storing and retrieving document embeddings.
+    """
     engine = get_engine(DataDomain.VECTORS)
 
     collection_name = 'searchable_docs'
@@ -31,6 +37,12 @@ def get_vector_store():
 
 @start_up_handler
 def startup(sender):
+    """
+    Initialize the vector store database schema on application startup.
+
+    Creates the vector extension, tables, and collection if they don't exist.
+    Only runs on non-worker processes to avoid duplicate initialization.
+    """
     if sender.is_worker:
         return
 
@@ -43,6 +55,12 @@ def startup(sender):
 
 @reset_data_handler
 def reset(sender):
+    """
+    Reset the vector store by dropping and recreating all tables and collections.
+
+    Called during data reset operations to clean up all vector store data.
+    Only runs on non-worker processes to avoid conflicts.
+    """
     if sender.is_worker:
         return
 

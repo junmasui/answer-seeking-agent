@@ -26,7 +26,7 @@ wait_for_redis "${REDIS_URL}"
 wait_for_minio "${MINIO_ENDPOINT_URL}"
 wait_for_clickhouse "${CLICKHOUSE_URL}" "${CLICKHOUSE_USER}" "${LANGFUSE_CLICKHOUSE_USER_PASSWORD}" "${CLICKHOUSE_DB}"
 
-DATABASE_URL=postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse
+DATABASE_URL="postgres://langfuse:${LANGFUSE_POSTGRES_USER_PASSWORD}@pgvector:5432/langfuse"
 
 wait_for_pgvector "$DATABASE_URL"
 

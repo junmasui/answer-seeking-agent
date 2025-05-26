@@ -41,6 +41,11 @@ def get_s3_directory(dir_name: str) -> S3Path:
 
 @start_up_handler
 def startup(sender):
+    """
+    Handle the startup signal for file store initialization.
+
+    Currently a no-op placeholder for future file store startup logic.
+    """
     pass
 
 

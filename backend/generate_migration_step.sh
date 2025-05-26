@@ -1,4 +1,4 @@
-MESSAGE=$1
+MESSAGE="$1"
 
 if [ -z "${MESSAGE:-}" ]
 then

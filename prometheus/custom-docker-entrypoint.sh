@@ -18,23 +18,23 @@ WAIT_INTERVAL=5
 ELAPSED=0
 
 echo "Waiting for alertmanager server to be ready..."
-until [ $ELAPSED -ge $WAIT_LIMIT ]
+until [ "$ELAPSED" -ge "$WAIT_LIMIT" ]
 do
-    sleep $WAIT_INTERVAL
+    sleep "$WAIT_INTERVAL"
     # The $((...)) syntax is for shell arithematic operations.
     ELAPSED=$(( ELAPSED + WAIT_INTERVAL ))
     ( wget -qS -O - http://alertmanager:9093/-/healthy 2>&1 ) \
             | grep -q 'HTTP/1.1 200 OK'
-    RESULT=$?
-    echo result $RESULT
-    if [ $RESULT == 0 ]
+    RESULT="$?"
+    echo result "$RESULT"
+    if [ "$RESULT" == 0 ]
     then
         echo "alertmanager server started."
         break
     fi
 done
 
-if [ $ELAPSED -ge $WAIT_LIMIT ]; then
+if [ "$ELAPSED" -ge "$WAIT_LIMIT" ]; then
   echo "alertmanager server did not start within ${WAIT_LIMIT} seconds."
   exit 1
 fi

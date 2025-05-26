@@ -12,7 +12,7 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
 set -o history # turn it back on
 
-cp ${SECRETS_MOUNT}/redis_conf redis.conf
+cp "${SECRETS_MOUNT}/redis_conf" redis.conf
 
 cat redis.conf
 
