@@ -26,27 +26,30 @@ _RESET_DATA = signal('reset-data')
 
 def start_up_handler(receiver):
     """
-    Registers the reciever as a start-up handler.
+    Register a receiver function as a start-up signal handler.
 
-    This can be used as a decorater, for better readability.
+    This decorator registers the receiver to be called when the application
+    sends a start-up signal. Can be used as a decorator for better readability.
     """
     return _START_UP.connect(receiver=receiver)
 
 
 def db_predefined_data_handler(receiver):
     """
-    Registers the reciever as a db-ready-for-predefined-data handler.
+    Register a receiver function as a database predefined data handler.
 
-    This can be used as a decorater, for better readability.
+    This decorator registers the receiver to be called when the database
+    is ready to accept predefined data after schema initialization.
     """
     return _DB_READY_FOR_PREDEFINED_DATA.connect(receiver=receiver)
 
 
 def reset_data_handler(receiver):
     """
-    Registers the reciever as a reset-data handler.
+    Register a receiver function as a reset data signal handler.
 
-    This can be used as a decorater, for better readability.
+    This decorator registers the receiver to be called when the application
+    sends a reset-data signal to clean up and reinitialize data stores.
     """
     return _RESET_DATA.connect(receiver=receiver)
 
@@ -59,11 +62,13 @@ class Sender(BaseModel):
 
 @cache
 def _get_sender():
+    """Get the cached sender instance for application signals."""
     sender = Sender()
     return sender
 
 
 def configure_sender(*, is_worker: bool):
+    """Configure the signal sender to indicate whether it's from a worker process."""
     sender = _get_sender()
     sender.is_worker = is_worker
 
@@ -81,7 +86,7 @@ def send_db_predefined_data():
     Send the db-predefined-data signal.
 
     This signal is sent after the database schema is updated or created
-    and the database is ready to accept predefined data.
+    and the database is ready to accept predefined data like initial prompts.
     """
     logger.info('Sending db-predefined-data signal')
 

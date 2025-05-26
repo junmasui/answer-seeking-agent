@@ -17,6 +17,12 @@ __all__ = ['get_connection_str', 'get_engine', 'get_sessionmaker', 'get_connecti
 
 @cache
 def get_connection_str(db_schema: DataDomain):
+    """
+    Get the PostgreSQL connection string for the specified database schema.
+
+    Maps the DataDomain enum to the appropriate connection URL from configuration
+    and validates that it uses the psycopg3 driver format.
+    """
     config = get_global_config()
 
     match db_schema:

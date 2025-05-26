@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 def setup_monitoring(app):
     """
-    Set up real-time monitoring for Celery events to track worker and task states.
+    Set up monitoring and metrics collection for the Celery application.
+
+    Configures application-level monitoring infrastructure when the Celery
+    worker application is initialized. This is typically called during
+    the worker startup process.
 
     Monitors worker online/offline events and task state changes, updating document
     status when tasks are sent to the queue.

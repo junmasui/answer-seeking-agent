@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 def answer_generator():
+    """
+    Create an answer generation chain for RAG (Retrieval-Augmented Generation).
+
+    Combines a chat prompt, language model, and answer citation parser to generate
+    answers from retrieved documents with proper citation extraction.
+    """
     prompt = get_chat_prompt(prompt_name=AgentPrompt.GENERATE_ANSWER)
 
     # LLM

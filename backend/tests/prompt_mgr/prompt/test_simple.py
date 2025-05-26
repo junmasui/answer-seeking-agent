@@ -3,6 +3,12 @@ from sqlalchemy import func, select
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
+    """
+    Get the total number of records in the specified database table.
+
+    Helper function for testing that executes a COUNT query against
+    the provided SQLAlchemy table using the given session maker.
+    """
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()

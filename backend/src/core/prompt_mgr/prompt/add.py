@@ -14,6 +14,12 @@ logger = logging.getLogger(__name__)
 def add_prompt(
     name: str, status: AgentPromptStatus, system_message: str, human_message: str, user_id: uuid.UUID = None
 ):
+    """
+    Add a new agent prompt with the specified configuration.
+
+    Creates a new prompt entry with automatic version incrementing. If the status
+    is ACTIVE, deactivates all other versions of the same prompt name.
+    """
     _add_or_update_agent_prompt(
         name=name, status=status, system_message=system_message, human_message=human_message, user_id=user_id
     )

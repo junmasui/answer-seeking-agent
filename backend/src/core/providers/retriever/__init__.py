@@ -17,6 +17,12 @@ __all__ = ['get_retriever']
 
 @cache
 def get_retriever():
+    """
+    Get the cached document retriever instance.
+
+    Returns a retriever interface for the vector store that can be used
+    to search and retrieve relevant document chunks based on queries.
+    """
     vector_store = get_vector_store()
 
     return vector_store.as_retriever()
