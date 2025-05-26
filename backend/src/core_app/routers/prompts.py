@@ -30,7 +30,7 @@ async def handle_list_prompts(
             ..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending'
         ),
     ] = 'name',
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
 ):
     """Returns a list of document sets."""
     sort_by = parse_sort_by(sortBy)
