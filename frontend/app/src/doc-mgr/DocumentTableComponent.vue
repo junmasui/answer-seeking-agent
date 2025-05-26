@@ -396,7 +396,7 @@ async function ingestSelectedDocuments() {
       docUuids: selectedItems.value.map((x) => x.id)
     }
 
-    const response = await fetch(`/api/documents/ingest`, {
+    const response = await fetch('/api/documents/ingest', {
       method: 'POST',
       headers,
       body: JSON.stringify(body, null, 2)
@@ -464,7 +464,7 @@ async function ingestAllUploadedDocuments() {
       allUploaded: true
     }
 
-    const response = await fetch(`/api/documents/ingest`, {
+    const response = await fetch('/api/documents/ingest', {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(body, null, 2)
