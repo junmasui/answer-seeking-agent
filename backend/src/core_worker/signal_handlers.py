@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @after_setup_task_logger.connect
-def setup_task_logger(logger, *args, **kwargs):
+def setup_task_logger(logger, *_args, **_kwargs):
     """See: https://celery.school/custom-celery-task-logger"""
     for handler in logger.handlers:
         handler.setFormatter(
@@ -28,7 +28,7 @@ def setup_task_logger(logger, *args, **kwargs):
 
 
 @worker_init.connect
-def handle_worker_init(**kwargs):
+def handle_worker_init(**_kwargs):
     """
     Handle worker initialization signal.
 
@@ -47,7 +47,7 @@ def handle_worker_init(**kwargs):
 
 
 @worker_ready.connect
-def handle_worker_ready(**kwargs):
+def handle_worker_ready(**_kwargs):
     """
     Handle worker ready signal.
 
@@ -58,7 +58,7 @@ def handle_worker_ready(**kwargs):
 
 
 @worker_process_init.connect
-def handle_worker_process_init(**kwargs):
+def handle_worker_process_init(**_kwargs):
     """
     Handle worker process initialization signal.
 
@@ -73,7 +73,7 @@ def handle_worker_process_init(**kwargs):
 
 
 @worker_shutting_down.connect
-def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
+def handle_worker_shutting_down(sig, how, exitcode, **_kwargs):
     """
     Handle worker shutdown signal.
 
@@ -86,7 +86,7 @@ def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
 
 
 @worker_process_shutdown.connect
-def handle_worker_shutting_down(pid, exitcode, **kwargs):
+def handle_worker_shutting_down(pid, exitcode, **_kwargs):
     """
     Handle worker process shutdown signal.
 

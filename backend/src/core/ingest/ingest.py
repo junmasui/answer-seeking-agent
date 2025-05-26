@@ -72,7 +72,7 @@ def ingest_documents(doc_ids):
 
     def _ingest_one_document(detached_record: DbTrackedDocument):
         with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
-            if record is None:
+            if updateable_record is None:
                 return
 
             updateable_record.status = DocumentStatus.INGESTING
@@ -124,8 +124,6 @@ def ingest_documents(doc_ids):
 
             # Update the vector store. Since the file is fully processed, the vector store
             # will not represent a partially processed file.
-            new_pg_doc_ids = [doc.id for doc in document_chunks]
-
             new_vector_ids = vector_store.add_documents(documents=document_chunks)
 
             # Update the tracking store.
@@ -134,7 +132,10 @@ def ingest_documents(doc_ids):
             # vectors to the prior processing.
 
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
-                if record is None:
+                if updateable_record is None:
+                    # The tracking record should exist when operations are normal: the same call at
+                    # the beginning of this function tested for existance.
+                    logger.warning('tracking record %s was deleted elsewhere', detached_record.id)
                     return
 
                 updateable_record.status = DocumentStatus.INGESTED
@@ -160,8 +161,13 @@ def ingest_documents(doc_ids):
 
         except Exception as ex:
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
-                if record is not None:
-                    updateable_record.status = DocumentStatus.ERROR
+                if updateable_record is None:
+                    # The tracking record should exist when operations are normal: the same call at
+                    # the beginning of this function tested for existance.
+                    logger.warning('tracking record %s was deleted elsewhere', detached_record.id)
+                    return
+
+                updateable_record.status = DocumentStatus.ERROR
 
             raise
         finally:
@@ -200,4 +206,4 @@ def reset_worker_data():
             filepath = dirpath / filename
             filepath.unlink()
         if len(filenames) > 0:
-            logger.debug('cleared %d files from %s', len(dirnames), str(dirpath))
+            logger.debug('cleared %d files from %s', len(filenames), str(dirpath))

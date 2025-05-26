@@ -40,7 +40,7 @@ def get_s3_directory(dir_name: str) -> S3Path:
 
 
 @start_up_handler
-def startup(sender):
+def startup(_sender):
     """
     Handle the startup signal for file store initialization.
 
@@ -69,4 +69,4 @@ def reset(sender):
             filepath = dirpath / filename
             filepath.unlink()
         if len(filenames) > 0:
-            logger.debug('cleared %d files from %s', len(dirnames), str(dirpath))
+            logger.debug('cleared %d files from %s', len(filenames), str(dirpath))

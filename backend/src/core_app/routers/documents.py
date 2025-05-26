@@ -78,7 +78,7 @@ async def handle_list_files(
 
 @router.get('/stats', response_model=DocumentStats)
 async def handle_table_stats(
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_document_statistics()
@@ -154,9 +154,9 @@ async def handle_single_delete(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-    user_id = current_user.userid if current_user is not None else None
+    _user_id = current_user.userid if current_user is not None else None
 
-    success = delete_document(doc_uuid)
+    _success = delete_document(doc_uuid)
 
     return {}
 
@@ -220,7 +220,7 @@ async def handle_delete(
     ] = None,
 ):
     """Delete the files specified in the list of document UUIDs"""
-    user_id = current_user.userid if current_user is not None else None
+    _user_id = current_user.userid if current_user is not None else None
 
     doc_uuids = body.doc_uuids if body.doc_uuids else []
 

@@ -21,6 +21,6 @@ def get_embeddings():
 
 
 @start_up_handler
-def start(sender):
+def start(_sender):
     """Handle the application startup signal. Currently does nothing."""
     pass

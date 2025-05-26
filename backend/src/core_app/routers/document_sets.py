@@ -48,16 +48,14 @@ async def handle_single_insert(
     """Add document set."""
     user_id = current_user.userid if current_user is not None else None
 
-    add_document_set(
-        name=body.name, is_default=body.is_new_doc_default, is_pubic=body.is_public_viewable, user_id=user_id
-    )
+    add_document_set(name=body.name, is_new_doc_default=body.is_new_doc_default, is_public_viewable=body.is_public_viewable, user_id=user_id)
 
     return {}
 
 
 @router.get('/stats', response_model=DocumentSetStats)
 async def handle_table_stats(
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_document_set_statistics()
@@ -87,12 +85,12 @@ async def handle_single_update(
 @router.delete('/{doc_set_uuid}')
 async def handle_single_delete(
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
-    current_user: Annotated[
+    _current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-    user_id = current_user.userid if current_user is not None else None
+    _user_id = _current_user.userid if _current_user is not None else None
 
     delete_document_set(doc_set_uuid)
 
