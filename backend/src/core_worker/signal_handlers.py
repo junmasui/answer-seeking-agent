@@ -29,6 +29,12 @@ def setup_task_logger(logger, *args, **kwargs):
 
 @worker_init.connect
 def handle_worker_init(**kwargs):
+    """
+    Handle worker initialization signal.
+
+    Sets up logging monitor, metrics collection, configures sender as worker,
+    and sends startup signal when the main worker process initializes.
+    """
     logger.info('worker init')
 
     get_logging_conf_monitor().start()
@@ -42,11 +48,23 @@ def handle_worker_init(**kwargs):
 
 @worker_ready.connect
 def handle_worker_ready(**kwargs):
+    """
+    Handle worker ready signal.
+
+    Called when the worker is ready to receive tasks. Logs the worker
+    ready status for monitoring purposes.
+    """
     logger.info('worker ready')
 
 
 @worker_process_init.connect
 def handle_worker_process_init(**kwargs):
+    """
+    Handle worker process initialization signal.
+
+    Sets up logging monitor and metrics collection for child worker processes.
+    Called when a new worker process is spawned in a multiprocessing setup.
+    """
     logger.info('worker process init')
 
     get_logging_conf_monitor().start()
@@ -56,6 +74,12 @@ def handle_worker_process_init(**kwargs):
 
 @worker_shutting_down.connect
 def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
+    """
+    Handle worker shutdown signal.
+
+    Called when the main worker is shutting down. Stops the logging configuration
+    monitor and logs shutdown details including signal, method, and exit code.
+    """
     logger.info('worker process shutting down %s %s %s', sig, how, exitcode)
 
     get_logging_conf_monitor().stop()
@@ -63,6 +87,12 @@ def handle_worker_shutting_down(sig, how, exitcode, **kwargs):
 
 @worker_process_shutdown.connect
 def handle_worker_shutting_down(pid, exitcode, **kwargs):
+    """
+    Handle worker process shutdown signal.
+
+    Called when a child worker process shuts down. Marks the process as dead
+    in metrics collection and stops the logging configuration monitor.
+    """
     logger.info('worker process shutting down %s %s', pid, exitcode)
 
     child_exit(pid)

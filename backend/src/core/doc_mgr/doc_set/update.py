@@ -12,7 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 def update_document_set(doc_set_uuid, is_new_doc_default=None, is_public_viewable=None, last_user_id=None):
-    """Updates status field with option to update"""
+    """
+    Update specific fields of a document set record.
+
+    Updates the document set with the provided field values. Only non-None
+    parameters will be updated in the database record.
+    """
     with update_doc_set_record(doc_set_uuid=doc_set_uuid) as record:
         if is_new_doc_default is not None:
             record.is_new_doc_default = is_new_doc_default
