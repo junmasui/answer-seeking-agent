@@ -11,7 +11,7 @@ function wait_for_resolv_conf {
     while true
     do
         grep -qE "nameserver[ \t]+(127\.0\.0\.11|172\.31\.1\.1)" /etc/resolv.conf
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "/etc/resolv.conf is populated"
             break
@@ -38,7 +38,7 @@ function wait_for_nslookup {
 
         # Try with Docker's internal DNS
         nslookup "$LOOKUP_NAME" 127.0.0.11
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "DNS name ${LOOKUP_NAME} resolves"
             break
@@ -46,7 +46,7 @@ function wait_for_nslookup {
 
         # Try with Podman's DNS setup
         nslookup "$LOOKUP_NAME" 172.31.1.1
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "DNS name ${LOOKUP_NAME} resolves"
             break
@@ -56,7 +56,7 @@ function wait_for_nslookup {
 }
 
 function wait_for_minio {
-    declare MINIO_ENDPOINT_URL=${1:-}
+    declare MINIO_ENDPOINT_URL="${1:-}"
 
     if [ -z "${MINIO_ENDPOINT_URL:-}" ]
     then
@@ -76,7 +76,7 @@ function wait_for_minio {
     while true
     do
         curl -f "${MINIO_ENDPOINT_URL}/minio/health/live"
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "minio is live"
             break
@@ -89,7 +89,7 @@ function wait_for_minio {
 }
 
 function wait_for_pgvector {
-    declare DATABASE_URL=${1:-}
+    declare DATABASE_URL="${1:-}"
 
     if [ -z "${DATABASE_URL:-}" ]
     then
@@ -109,7 +109,7 @@ function wait_for_pgvector {
     while true
     do
         pg_isready -d "${DATABASE_URL}"
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "postgres is ready"
             break
@@ -121,10 +121,10 @@ function wait_for_pgvector {
 }
 
 function wait_for_clickhouse {
-    declare CLICKHOUSE_URL=${1:-}
-    declare CLICKHOUSE_USER=${2:-}
-    declare CLICKHOUSE_PASSWORD=${3:-}
-    declare CLICKHOUSE_DB=${4:-}
+    declare CLICKHOUSE_URL="${1:-}"
+    declare CLICKHOUSE_USER="${2:-}"
+    declare CLICKHOUSE_PASSWORD="${3:-}"
+    declare CLICKHOUSE_DB="${4:-}"
 
     if [ -z "${CLICKHOUSE_URL:-}" ]
     then
@@ -144,7 +144,7 @@ function wait_for_clickhouse {
     while true
     do
         curl -u "${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}" -f "${CLICKHOUSE_URL}/?database=${CLICKHOUSE_DB}&query=SHOW%20TABLES"
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "clickhouse is live"
             break
@@ -155,7 +155,7 @@ function wait_for_clickhouse {
 
 
 function wait_for_redis {
-    declare REDIS_URL=${1:-}
+    declare REDIS_URL="${1:-}"
 
     echo redis
     echo "$@"
@@ -179,7 +179,7 @@ function wait_for_redis {
     while true
     do
         redis-cli -u "${REDIS_URL}" ping
-        if [ $? -eq 0 ]
+        if [ "$?" -eq 0 ]
         then
             echo "redis is live"
             break

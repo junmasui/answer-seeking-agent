@@ -23,14 +23,14 @@ source /wait_for_resource.sh
 
 wait_for_nslookup "clickhouse"
 
-CLICKHOUSE_URL=http://clickhouse:8123
+CLICKHOUSE_URL="http://clickhouse:8123"
 wait_for_clickhouse "${CLICKHOUSE_URL}" "${CLICKHOUSE_ADMIN_USER}" "${CLICKHOUSE_ADMIN_USER_PASSWORD}" "default"
 
 call_clickhouse () {
-    local command=$1
-    local username=$2
-    local password=$3
-    local database=${4:-}
+    local command="$1"
+    local username="$2"
+    local password="$3"
+    local database="${4:-}"
 
     declare -a headers=( \
         -H "X-ClickHouse-User: ${username}" \

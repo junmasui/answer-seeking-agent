@@ -31,8 +31,8 @@ source /wait_for_gate.sh
 
 wait_for_dependency_gate /init-signal/pgvector-gate
 
-export PGPASSWORD=$POSTGRES_PASSWORD
+export PGPASSWORD="$POSTGRES_PASSWORD"
 
 envsubst < /init-langfuse-db.sql.template > /init-langfuse-db.sql
 sleep 10
-psql -h pgvector -U $POSTGRES_USER -f /init-langfuse-db.sql
+psql -h pgvector -U "$POSTGRES_USER" -f /init-langfuse-db.sql
