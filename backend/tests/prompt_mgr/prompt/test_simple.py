@@ -27,7 +27,7 @@ async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
         'humanMessage': 'placeholder human message',
         'systemMessage': 'placeholder system message',
     }
-    resp = await api_server.post(path=path, content_type='json', data=data)
+    _resp = await api_server.post(path=path, content_type='json', data=data)
 
     count = _get_table_count(empty_prompt_table, sql_sessionmaker)
 
@@ -38,9 +38,9 @@ async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
 async def test_find(api_server, populated_prompt_table, sql_sessionmaker):
     """Test finding prompts."""
     path = '/prompts/'
-    content_type, resp = await api_server.get(path=path)
+    resp_type, resp = await api_server.get(path=path)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     assert resp.get('promptCount') == 3
 
@@ -60,7 +60,7 @@ async def test_get(api_server, populated_prompt_table, sql_sessionmaker):
         stmt = select(populated_prompt_table)
         result = session.execute(stmt).first()
 
-        prompt_id = result[0].id
+        _prompt_id = result[0].id
 
     pass
 
@@ -76,9 +76,9 @@ async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
 
     path = f'/prompts/{prompt_id}'
     body = {'humanMessage': 'updated human message', 'systemMessage': 'updated system message'}
-    content_type, resp = await api_server.patch(path=path, content_type='json', data=body)
+    resp_type, _resp = await api_server.patch(path=path, content_type='json', data=body)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     count = _get_table_count(populated_prompt_table, sql_sessionmaker)
 
@@ -95,9 +95,9 @@ async def test_delete(api_server, populated_prompt_table, sql_sessionmaker):
         prompt_id = result[0].id
 
     path = f'/prompts/{prompt_id}'
-    content_type, resp = await api_server.delete(path=path)
+    resp_type, _resp = await api_server.delete(path=path)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     count = _get_table_count(populated_prompt_table, sql_sessionmaker)
 

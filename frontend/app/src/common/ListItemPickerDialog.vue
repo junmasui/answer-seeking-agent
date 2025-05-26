@@ -55,7 +55,7 @@ const emit = defineEmits(['canceled', 'selected'])
  * Handles the cancel action by emitting the canceled event and closing the dialog.
  * Allows users to dismiss the picker without making a selection.
  */
-async function onCancel() {
+function onCancel() {
   emit('canceled')
   active.value = false
 }
@@ -64,9 +64,8 @@ async function onCancel() {
  * Handles the selection confirmation by emitting the selected event and closing the dialog.
  * Confirms the user's selection and notifies the parent component of the chosen item.
  */
-async function onSelect() {
+function onSelect() {
   emit('selected')
   active.value = false
 }
 </script>
-<style></style>

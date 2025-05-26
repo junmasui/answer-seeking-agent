@@ -17,7 +17,9 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 async def test_insert(api_server, populated_doc_set_table, empty_doc_set_table, sql_sessionmaker):
     path = '/document-sets/'
     data = {'name': 'doc set 1', 'status': 'active', 'isNewDocDefault': False, 'isPublicViewable': True}
-    resp = await api_server.post(path=path, content_type='json', data=data)
+    resp_type, _resp = await api_server.post(path=path, content_type='json', data=data)
+
+    assert resp_type == 'json'
 
     count = _get_table_count(empty_doc_set_table, sql_sessionmaker)
 
@@ -27,9 +29,9 @@ async def test_insert(api_server, populated_doc_set_table, empty_doc_set_table, 
 @pytest.mark.asyncio
 async def test_find(api_server, populated_doc_set_table, sql_sessionmaker):
     path = '/document-sets/'
-    content_type, resp = await api_server.get(path=path)
+    resp_type, resp = await api_server.get(path=path)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     assert resp.get('documentSetCount') == 3
 

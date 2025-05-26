@@ -6,4 +6,3 @@
 <script setup>
 import DocumentSetTableComponent from './DocumentSetTableComponent.vue'
 </script>
-<style></style>

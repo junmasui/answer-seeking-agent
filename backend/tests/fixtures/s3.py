@@ -29,6 +29,7 @@ def s3_bucket(s3_client) -> Generator[S3Path, None, None]:
 
     yield bucket
 
+    # Walk the bucket and clean out subdirectories and files added during the test(s).
     for dirpath, dirnames, filenames in bucket.walk(top_down=False):
         for subdirname in dirnames:
             subdirpath = dirpath / subdirname
@@ -39,4 +40,4 @@ def s3_bucket(s3_client) -> Generator[S3Path, None, None]:
             filepath = dirpath / filename
             filepath.unlink()
         if len(filenames) > 0:
-            logger.debug('cleared %d files from %s', len(dirnames), str(dirpath))
+            logger.debug('cleared %d files from %s', len(filenames), str(dirpath))

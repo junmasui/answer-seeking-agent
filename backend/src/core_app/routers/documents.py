@@ -68,7 +68,7 @@ async def handle_list_files(
             ..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending'
         ),
     ] = 'name',
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
 ):
     """Returns a list of documents."""
     sort_by = parse_sort_by(sortBy)
@@ -78,7 +78,7 @@ async def handle_list_files(
 
 @router.get('/stats', response_model=DocumentStats)
 async def handle_table_stats(
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_document_statistics()
@@ -149,14 +149,14 @@ async def handle_single_update(
 @router.delete('/{doc_uuid}')
 async def handle_single_delete(
     doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-    current_user: Annotated[
+    _current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-    user_id = current_user.userid if current_user is not None else None
+    # _user_id = _current_user.userid if _current_user is not None else None
 
-    success = delete_document(doc_uuid)
+    delete_document(doc_uuid)
 
     return {}
 
@@ -215,12 +215,12 @@ async def handle_ingest(
 @router.post('/delete')
 async def handle_delete(
     body: Optional[BulkDeleteRequestBody] = None,
-    current_user: Annotated[
+    _current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
     """Delete the files specified in the list of document UUIDs"""
-    user_id = current_user.userid if current_user is not None else None
+    # _user_id = _current_user.userid if _current_user is not None else None
 
     doc_uuids = body.doc_uuids if body.doc_uuids else []
 
