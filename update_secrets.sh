@@ -9,17 +9,21 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # Generate the manually managed secrets file.
 if [ ! -e secrets-dev.env ]
 then
-    HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}" \
-       HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}" \
-       envsubst < ./secrets.env.template > ./secrets-dev.env
+    (
+        export HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}"
+        export HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}"
+        envsubst < ./secrets.env.template > ./secrets-dev.env
+    )
 fi
 
 # Generate the manually managed secrets file.
 if [ ! -e secrets-test.env ]
 then
-    HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}" \
-       HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}" \
-       envsubst < ./secrets.env.template > ./secrets-test.env
+    (
+        export HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}"
+        export HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}"
+        envsubst < ./secrets.env.template > ./secrets-test.env
+    )
 fi
 
 
