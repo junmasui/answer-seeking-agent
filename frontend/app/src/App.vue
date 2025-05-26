@@ -127,4 +127,5 @@ function toggleTheme() {
 }
 </script>
 
+<!-- Scoped styles - ensures CSS rules only apply to this component, preventing style conflicts -->
 <style scoped></style>

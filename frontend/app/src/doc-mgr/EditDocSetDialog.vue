@@ -59,4 +59,3 @@ async function onConfirm() {
   active.value = false
 }
 </script>
-<style></style>

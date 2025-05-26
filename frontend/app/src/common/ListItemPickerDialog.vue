@@ -69,4 +69,3 @@ async function onSelect() {
   active.value = false
 }
 </script>
-<style></style>

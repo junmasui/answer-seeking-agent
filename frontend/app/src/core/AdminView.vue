@@ -61,5 +61,3 @@ async function resetConfirmed() {
   }
 }
 </script>
-
-<style></style>

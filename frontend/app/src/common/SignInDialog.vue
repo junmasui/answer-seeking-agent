@@ -132,4 +132,3 @@ async function onConfirm() {
   emit('onSuccess')
 }
 </script>
-<style></style>

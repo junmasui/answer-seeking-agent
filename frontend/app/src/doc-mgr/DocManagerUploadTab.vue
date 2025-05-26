@@ -6,4 +6,3 @@
 <script setup>
 import DocumentUploadComponent from './DocumentUploadComponent.vue'
 </script>
-<style></style>
