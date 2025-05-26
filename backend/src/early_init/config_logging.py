@@ -5,6 +5,13 @@ from rich.logging import RichHandler
 
 
 class SafeRichHandler(RichHandler):
+    """
+    A custom Rich logging handler that safely escapes square brackets in log messages.
+
+    Extends RichHandler to prevent conflicts between user message content containing
+    square brackets and Rich's markup syntax by automatically escaping them.
+    """
+
     def render_message(self, record, message):
         """
         Render the log message, escaping square brackets for Rich markup.

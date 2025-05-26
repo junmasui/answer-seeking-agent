@@ -32,15 +32,26 @@ PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 
 class DocManagerConfig(BaseModel):
+    """Configuration settings for document management operations."""
+
     chunk_root_dir: str = Field(default='upload_chunks')
     doc_root_dir: str = Field(default='documents')
 
 
 class CeleryWorkerConfig(BaseModel):
+    """Configuration settings for Celery worker operations and monitoring."""
+
     prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
 
 
 class Settings(BaseSettings):
+    """
+    Application-wide configuration settings loaded from environment variables and TOML files.
+
+    Provides centralized configuration management with support for multiple sources including
+    environment variables, TOML configuration files, and secrets.
+    """
+
     # We assume that the .env files were loaded into the environment
     # in an earlier initialization step.
     model_config = SettingsConfigDict(env_file=None, toml_file=None, nested_model_default_partial_update=True)
