@@ -271,7 +271,10 @@ async function applyEditDoc() {
  * Placeholder function for editing a document.
  * @param {string} doc_uuid - The unique identifier of the document to edit
  */
-async function editDocument(doc_uuid) {}
+async function editDocument(doc_uuid) {
+  // Simulate the delay from a real call to the API Server.
+  await new Promise(resolve => setTimeout(resolve, 100));
+}
 
 /**
  * Closes the edit document dialog and refreshes the table data.
@@ -363,7 +366,7 @@ const activeConfirmIngestSelected = ref(false)
  * Opens the confirmation dialog for ingesting multiple selected documents.
  * Displays a confirmation prompt before proceeding with batch ingestion.
  */
-async function ingestSelectedItems() {
+function ingestSelectedItems() {
   activeConfirmIngestSelected.value = true
 }
 
@@ -393,7 +396,7 @@ async function ingestSelectedDocuments() {
       docUuids: selectedItems.value.map((x) => x.id)
     }
 
-    const response = await fetch(`/api/documents/ingest`, {
+    const response = await fetch('/api/documents/ingest', {
       method: 'POST',
       headers,
       body: JSON.stringify(body, null, 2)
@@ -431,7 +434,7 @@ const activeConfirmIngestAllUploaded = ref(false)
  * Opens the confirmation dialog for ingesting all uploaded documents.
  * Displays a confirmation prompt before proceeding with full batch ingestion.
  */
-async function ingestAllUploaded() {
+function ingestAllUploaded() {
   activeConfirmIngestAllUploaded.value = true
 }
 
@@ -461,7 +464,7 @@ async function ingestAllUploadedDocuments() {
       allUploaded: true
     }
 
-    const response = await fetch(`/api/documents/ingest`, {
+    const response = await fetch('/api/documents/ingest', {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(body, null, 2)
@@ -496,7 +499,7 @@ const activeConfirmDeleteSelected = ref(false)
  * Opens the confirmation dialog for deleting multiple selected documents.
  * Displays a confirmation prompt before proceeding with batch deletion.
  */
-async function deleteSelectedItems() {
+function deleteSelectedItems() {
   activeConfirmDeleteSelected.value = true
 }
 

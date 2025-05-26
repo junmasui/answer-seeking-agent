@@ -59,9 +59,9 @@ async def test_insert(api_server, readonly_doc_set_table, empty_doc_table, sql_s
 @pytest.mark.asyncio
 async def test_find(api_server, populated_doc_table, sql_sessionmaker):
     path = '/documents/'
-    content_type, resp = await api_server.get(path=path)
+    resp_type, resp = await api_server.get(path=path)
 
-    assert content_type == 'json'
+    assert resp_type == 'json'
 
     assert resp.get('documentCount') == 3
 

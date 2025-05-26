@@ -46,4 +46,5 @@ async function onIngest(event) {
 }
 </script>
 
+<!-- CSS modules - enables locally scoped CSS class names to avoid style conflicts -->
 <style module></style>

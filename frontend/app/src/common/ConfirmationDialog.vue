@@ -26,7 +26,7 @@ const emit = defineEmits(['canceled', 'confirmed', 'done'])
  * Handles the cancel action by emitting appropriate events and closing the dialog.
  * Notifies parent components that the user chose to cancel the operation.
  */
-async function onCancel() {
+function onCancel() {
   emit('canceled')
   emit('done')
   active.value = false
@@ -36,10 +36,9 @@ async function onCancel() {
  * Handles the confirm action by emitting appropriate events and closing the dialog.
  * Notifies parent components that the user confirmed the operation should proceed.
  */
-async function onConfirm() {
+function onConfirm() {
   emit('confirmed')
   emit('done')
   active.value = false
 }
 </script>
-<style></style>

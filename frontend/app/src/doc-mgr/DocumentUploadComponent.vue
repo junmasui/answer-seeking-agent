@@ -219,4 +219,5 @@ async function loadDocumentSets() {
 }
 </script>
 
+<!-- CSS modules - enables locally scoped CSS class names to avoid style conflicts -->
 <style module></style>

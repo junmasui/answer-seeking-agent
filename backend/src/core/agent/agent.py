@@ -30,17 +30,17 @@ logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
-def redo_document_retrieval(state):
+def redo_document_retrieval(_state):
     """Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should be redone."""
     return {'answer_grade': 'redo document retrieval'}
 
 
-def redo_answer_generation(state):
+def redo_answer_generation(_state):
     """Set the answer_grade to 'redo answer generation' to indicate that answer generation should be redone."""
     return {'answer_grade': 'redo answer generation'}
 
 
-def accept_answer(state):
+def accept_answer(_state):
     """Set the answer_grade to 'accept answer' to indicate that the current answer is acceptable."""
     return {'answer_grade': 'accept answer'}
 

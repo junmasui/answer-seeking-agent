@@ -30,7 +30,7 @@ async def handle_list_prompts(
             ..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending'
         ),
     ] = 'name',
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
 ):
     """Returns a list of document sets."""
     sort_by = parse_sort_by(sortBy)
@@ -49,14 +49,20 @@ async def handle_single_insert(
     status = AgentPromptStatus.ACTIVE
     user_id = current_user.userid if current_user is not None else None
 
-    add_prompt(name=body.name, status=status, system_message=body.system_message, human_message=body.human_message)
+    add_prompt(
+        name=body.name,
+        status=status,
+        system_message=body.system_message,
+        human_message=body.human_message,
+        user_id=user_id,
+    )
 
     return {}
 
 
 @router.get('/stats', response_model=AgentPromptStats)
 async def handle_table_stats(
-    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_prompt_statistics()
@@ -87,12 +93,12 @@ async def handle_single_update(
 @router.delete('/{prompt_uuid}')
 async def handle_single_delete(
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
-    current_user: Annotated[
+    _current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-    user_id = current_user.userid if current_user is not None else None
+    _user_id = _current_user.userid if _current_user is not None else None
 
     delete_prompt(prompt_uuid)
 
