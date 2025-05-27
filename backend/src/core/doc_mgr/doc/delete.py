@@ -25,11 +25,11 @@ def delete_document(document_id):
 
     # Delete vectors from vector store.
 
-    pg_doc_ids = tracking_record.pg_doc_ids
+    vector_ids = tracking_record.vector_ids
 
-    if pg_doc_ids:
+    if vector_ids:
         vector_store = get_vector_store()
-        vector_store.delete(ids=pg_doc_ids)
+        vector_store.delete(ids=vector_ids)
     else:
         if tracking_record.status == DocumentStatus.INGESTED:
             logger.info('deleting tracking record without deleting vectors: %s', tracking_record.source_url)
