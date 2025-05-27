@@ -102,6 +102,7 @@ class Settings(BaseSettings):
     celery_result_key_prefix: str = Field(default='', validation_alias='CELERY_RESULT_KEY_PREFIX')
 
     postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
+    postgres_vectors_schema: str = Field(default='vectors', validation_alias='POSTGRES_VECTORS_SCHEMA')
     postgres_vectors_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_VECTORS_CONNECTION_URL')
 
     postgres_checkpoints_connection_url: PostgresDsn = Field(

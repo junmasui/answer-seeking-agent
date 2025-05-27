@@ -67,9 +67,7 @@ def schema_downgrade():
 
 def data_upgrade():
     """Migrate existing data upward."""
-    pass
 
 
 def data_downgrade():
     """Migrate existing data downward."""
-    pass
