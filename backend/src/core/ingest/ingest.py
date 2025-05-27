@@ -52,7 +52,7 @@ def ingest_documents(doc_ids):
                     doc.id = element_id
 
             if not doc.id:
-                logger.info(f'skip loading {doc}')
+                logger.info('skip loading %s', doc)
                 continue
 
             # Must convert the 'source' metadata field to a string because the metadata
@@ -159,7 +159,7 @@ def ingest_documents(doc_ids):
 
                 logger.info('pruned %d stale vectors regarding %s', len(to_remove), rel_path)
 
-        except Exception as ex:
+        except Exception as _ex:
             with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
                 if updateable_record is None:
                     # The tracking record should exist when operations are normal: the same call at

@@ -38,3 +38,8 @@ def _delete_tracking_record(doc_set_uuid):
         with session.begin():
             stmt = delete(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id == doc_set_uuid)
             result = session.execute(stmt)
+
+    if result.rowcount == 0:
+        logger.warning('No document set found with UUID %s', doc_set_uuid)
+    else:
+        logger.debug('Successfully deleted document set with UUID %s', doc_set_uuid)
