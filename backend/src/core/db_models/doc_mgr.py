@@ -81,7 +81,7 @@ class DbTrackedDocument(Base):
     s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=False)
     # https://docs.sqlalchemy.org/en/20/orm/extensions/mutable.html
     # and https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#sqlalchemy.dialects.postgresql.ARRAY
-    pg_doc_ids: Mapped[list[str]] = mapped_column(MutableList.as_mutable(ARRAY(String)), nullable=True)
+    vector_ids: Mapped[list[str]] = mapped_column(MutableList.as_mutable(ARRAY(String)), nullable=True)
     ingested_time: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
     # Used to track the last user who acted on this document.
