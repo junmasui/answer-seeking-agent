@@ -6,7 +6,7 @@ from sqlalchemy import delete
 from ...db_models import DbTrackedDocument
 from ...providers.file_store import get_s3_bucket
 from ...providers.sql_database import DataDomain, get_sessionmaker
-from ...providers.vector_store import get_vector_store
+from ...providers.vector_store import delete_vectors_by_document_id, get_vector_store
 from ...public_models.doc import DocumentStatus
 from .query import get_documents
 
@@ -25,16 +25,9 @@ def delete_document(document_id):
 
     # Delete vectors from vector store.
 
-    vector_ids = tracking_record.vector_ids
+    delete_vectors_by_document_id(tracking_record.id)
 
-    if vector_ids:
-        vector_store = get_vector_store()
-        vector_store.delete(ids=vector_ids)
-    else:
-        if tracking_record.status == DocumentStatus.INGESTED:
-            logger.info('deleting tracking record without deleting vectors: %s', tracking_record.source_url)
-        else:
-            logger.debug('deleting tracking record without deleting vectors: %s', tracking_record.source_url)
+    logger.info('deleted vectors: %s (%s)', tracking_record.id, tracking_record.source_url)
 
     # Delete file from cloud storage.
 

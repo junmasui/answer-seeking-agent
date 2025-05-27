@@ -1,12 +1,14 @@
 """This provides the vector store used by this application."""
 
 import logging
+import uuid
 from functools import cache
 
 from langchain_weaviate import WeaviateVectorStore
 from weaviate import connect_to_local
 from weaviate.classes.config import Configure, DataType, Property, Tokenization, VectorDistances, VectorFilterStrategy
 from weaviate.classes.init import AdditionalConfig, Auth, Timeout
+from weaviate.classes.query import Filter
 
 from global_config import get_global_config
 
@@ -20,7 +22,7 @@ from ..embeddings import get_embeddings
 logger = logging.getLogger(__name__)
 
 
-_COLLECTION_NAME = 'Agent'
+_COLLECTION_NAME = 'DocEmbeddings'
 _TEXT_KEY = 'content'
 
 
@@ -29,7 +31,7 @@ def _get_client():
     """
     Return a Weaviate client instance, creating it if necessary.
     This function is cached to ensure only one client is created.
-    It also ensures the 'Agent' collection exists.
+    It also ensures the 'DocEmbeddings' collection exists.
     """
     config = get_global_config()
 
@@ -52,13 +54,13 @@ def _get_client():
 
 def _create_collection(client):
     """
-    Create the 'Agent' collection in Weaviate if it doesn't already exist.
+    Create the 'DocEmbeddings' collection in Weaviate if it doesn't already exist.
     Defines the schema for the collection, including properties and vector index configuration.
     """
     if not client.collections.exists(_COLLECTION_NAME):
         # Create collection with ACORN filter strategy
         client.collections.create(
-            'Agent',
+            _COLLECTION_NAME,
             properties=[
                 # Property(name='id', data_type=DataType.UUID,
                 #          index_filterable=True, index_range_filters=False, index_searchable=False),
@@ -77,6 +79,13 @@ def _create_collection(client):
                     index_range_filters=False,
                     index_searchable=True,
                     tokenization=Tokenization.FIELD,
+                ),
+                Property(
+                    name='document_id',
+                    data_type=DataType.UUID,
+                    index_filterable=True,
+                    index_range_filters=False,
+                    index_searchable=False,
                 ),
                 Property(
                     name='document_set_id',
@@ -137,6 +146,19 @@ def _create_collection(client):
 
 
 @cache
+def _get_collection():
+    """
+    Return the Weaviate 'Agent' collection instance.
+    This function is cached to ensure only one collection reference is created.
+    """
+    client = _get_client()
+
+    collection = client.collections.get(_COLLECTION_NAME)
+
+    return collection
+
+
+@cache
 def get_vector_store():
     """
     Return a WeaviateVectorStore instance, configured with embeddings and the Weaviate client.
@@ -151,6 +173,48 @@ def get_vector_store():
     )
 
     return vector_store
+
+
+def find_vectors_by_document_id(doc_id: uuid.UUID):
+    """
+    Find vector embedding UUIDs associated with a specific document ID.
+
+    Returns a list of vector embedding UUID strings that belong to the specified
+    parent document by querying the custom metadata field 'parent_document_id'.
+    """
+    collection = _get_collection()
+
+    ids = []
+    batch_size = 50
+    offset = 0
+    while True:
+        query_response = collection.query.fetch_objects(
+            filters=Filter.by_property('document_id').equal(str(doc_id)), limit=batch_size, offset=offset
+        )
+
+        if len(query_response.objects) == 0:
+            break
+
+        batch_ids = [obj.uuid for obj in query_response.objects]
+        ids.extend(batch_ids)
+        offset = offset + batch_size
+
+    return ids
+
+
+def delete_vectors_by_document_id(doc_id: uuid.UUID):
+    """
+    Delete all vector embeddings associated with a specific document ID.
+
+    Finds and removes all vector embeddings that belong to the specified parent
+    document from the vector store by first querying for their IDs.
+    """
+    vector_ids = find_vectors_by_document_id(doc_id)
+
+    vector_store = get_vector_store()
+
+    if len(vector_ids) > 0:
+        vector_store.delete(ids=vector_ids)
 
 
 @start_up_handler

@@ -15,7 +15,7 @@ from ..db_models import DbTrackedDocument
 from ..doc_mgr import get_documents, update_tracking_record
 from ..providers.doc_loader import get_doc_loader
 from ..providers.file_store import get_s3_bucket
-from ..providers.vector_store import get_vector_store
+from ..providers.vector_store import delete_vectors_by_document_id, get_vector_store
 from ..public_models import DocumentStatus
 
 logger = logging.getLogger(__name__)
@@ -170,6 +170,9 @@ def _ingest_one_document(
                 # The tracking record should exist when operations are normal: this big function
                 # started with a verification that the tracking record existed.
                 logger.warning('tracking record %s was deleted elsewhere', detached_record.id)
+
+                delete_vectors_by_document_id(detached_record.id)
+
                 return
 
             updateable_record.status = DocumentStatus.INGESTED
@@ -199,6 +202,9 @@ def _ingest_one_document(
                 # The tracking record should exist when operations are normal: the same call at
                 # the beginning of this function tested for existance.
                 logger.warning('tracking record %s was deleted elsewhere', detached_record.id)
+
+                delete_vectors_by_document_id(detached_record.id)
+
                 return
 
             updateable_record.status = DocumentStatus.ERROR
