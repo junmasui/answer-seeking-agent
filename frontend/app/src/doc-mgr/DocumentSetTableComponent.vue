@@ -181,7 +181,7 @@ async function addDocumentSet() {
       throw new Error('Add failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Document set added', { name: targetItem.value.name })
   } catch (error) {
     logger.apiError('Document set add failed', error, { name: targetItem.value.name })
@@ -261,7 +261,7 @@ async function editDocumentSet(doc_set_uuid) {
       throw new Error('Edit failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Document set edited', { docSetId: doc_set_uuid })
   } catch (error) {
     logger.apiError('Document set edit failed', error, { docSetId: doc_set_uuid })
@@ -328,7 +328,7 @@ async function deleteDocumentSet(doc_set_uuid) {
       throw new Error('Delete failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Document set deleted', { docSetId: doc_set_uuid })
   } catch (error) {
     logger.apiError('Document set deletion failed', error, { docSetId: doc_set_uuid })
@@ -407,7 +407,7 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
       throw new Error('Update failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Document set updated', { docId: doc_uuid, newDocSetId: doc_set_uuid })
   } catch (error) {
     logger.apiError('Document set update failed', error, { docId: doc_uuid, newDocSetId: doc_set_uuid })

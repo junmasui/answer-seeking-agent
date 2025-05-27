@@ -38,7 +38,7 @@ async function onIngest(event) {
       throw new Error('Ingest failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Ingest all started')
   } catch (error) {
     logger.apiError('Ingest all failed', error)
