@@ -23,7 +23,7 @@ async def handle_question(
 
     answer = seek_answer(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
 
-    logger.info(f'returning {answer}')
+    logger.info('returning %s', answer)
 
     return answer
 
@@ -38,7 +38,7 @@ async def handler_question(
 
     answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
 
-    logger.info(f'returning {answer}')
+    logger.info('returning %s', answer)
 
     return answer
 

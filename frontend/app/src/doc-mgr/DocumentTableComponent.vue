@@ -220,7 +220,7 @@ async function ingestDocument(doc_uuid) {
       throw new Error('Ingest failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Document ingest queued', { docId: doc_uuid })
   } catch (error) {
     console.error('Error ingesting:', error)
@@ -336,7 +336,7 @@ async function deleteDocument(doc_uuid) {
       throw new Error('Delete failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Document deleted', { docId: doc_uuid })
   } catch (error) {
     console.error('Error deleting:', error)
@@ -409,7 +409,7 @@ async function ingestSelectedDocuments() {
     // Clear the selections
     selectedItems.value = []
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Selected documents ingest queued', { count: body.docUuids.length })
   } catch (error) {
     console.error('Error ingesting:', error)
@@ -474,7 +474,7 @@ async function ingestAllUploadedDocuments() {
       throw new Error('Ingest failed')
     }
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('All uploaded documents ingest queued')
   } catch (error) {
     console.error('Error ingesting:', error)
@@ -542,7 +542,7 @@ async function deleteSelectedDocuments() {
     // Clear the selections
     selectedItems.value = []
 
-    const data = await response.json()
+    await response.json()
     logger.apiSuccess('Selected documents deleted', { count: body.docUuids.length })
   } catch (error) {
     console.error('Error deleteing:', error)

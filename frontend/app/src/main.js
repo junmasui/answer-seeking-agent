@@ -12,7 +12,6 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
 // Labs components require a manual import and installation of the component.
 import { VDateInput } from 'vuetify/labs/VDateInput'

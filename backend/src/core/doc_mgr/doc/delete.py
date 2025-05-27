@@ -64,3 +64,8 @@ def _delete_tracking_record(doc_uuid):
         with session.begin():
             stmt = delete(DbTrackedDocument).where(DbTrackedDocument.id == doc_uuid)
             result = session.execute(stmt)
+
+    if result.rowcount == 0:
+        logger.warning('No tracking record found with UUID %s', doc_uuid)
+    else:
+        logger.debug('Successfully deleted tracking record with UUID %s', doc_uuid)

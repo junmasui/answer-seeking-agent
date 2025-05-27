@@ -38,3 +38,8 @@ def _delete_agent_prompt(prompt_uuid):
         with session.begin():
             stmt = delete(DbAgentPrompt).where(DbAgentPrompt.id == prompt_uuid)
             result = session.execute(stmt)
+
+    if result.rowcount == 0:
+        logger.warning('No prompt found with UUID %s', prompt_uuid)
+    else:
+        logger.debug('Successfully deleted prompt with UUID %s', prompt_uuid)
