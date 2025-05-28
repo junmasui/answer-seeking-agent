@@ -33,5 +33,5 @@ def register_initial_prompts(sender):
             prompt_name=prompt_name,
             system_message=prompt.get('system_message', ''),
             human_message=prompt.get('human_message', ''),
-            include_prompt=prompt.get('include_history', False),
+            include_history=prompt.get('include_history', False),
         )
