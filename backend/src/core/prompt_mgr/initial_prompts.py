@@ -28,7 +28,7 @@ def register_initial_prompts(sender):
         prompts = yaml.safe_load(yaml_file)
 
     for prompt in prompts:
-        prompt_name = AgentPrompt[prompt['prompt_name']]
+        prompt_name = AgentPrompt.by_name(prompt['prompt_name'])
         add_chat_prompt(
             prompt_name=prompt_name,
             system_message=prompt.get('system_message', ''),
