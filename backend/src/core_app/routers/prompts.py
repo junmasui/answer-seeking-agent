@@ -54,6 +54,7 @@ async def handle_single_insert(
         status=status,
         system_message=body.system_message,
         human_message=body.human_message,
+        include_history=body.include_history,
         user_id=user_id,
     )
 
@@ -84,6 +85,7 @@ async def handle_single_update(
         status=None,
         system_message=body.system_message,
         human_message=body.human_message,
+        include_history=body.include_history,
         last_user_id=user_id,
     )
 

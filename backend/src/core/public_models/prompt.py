@@ -56,6 +56,7 @@ class AgentPromptAddRequest(CamelModel):
     name: str = Field(description='Name of prompt.')
     system_message: str = Field(description='Prompt')
     human_message: str = Field(description='Prompt')
+    include_history: bool = Field(description='Include chat history')
 
 
 class AgentPromptUpdateRequest(CamelModel):
@@ -64,3 +65,4 @@ class AgentPromptUpdateRequest(CamelModel):
     name: Optional[str] = Field(description='Name of prompt.', default=None)
     system_message: str = Field(description='Prompt')
     human_message: str = Field(description='Prompt')
+    include_history: bool = Field(description='Include chat history')
