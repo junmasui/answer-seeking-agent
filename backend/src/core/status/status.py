@@ -21,10 +21,6 @@ def status_check():
             device_name = torch.cuda.get_device_name(0)
             status['CUDA device'] = device_name
 
-        if True:
-            # do something
-            pass
-
         # TODO ping redis
         # TODO ping postgres
         # TODO ping minio
