@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 def add_prompt(
     name: str,
     status: AgentPromptStatus,
-    system_message: str,
-    human_message: str,
-    include_history: bool,
+    system_message: str | None,
+    human_message: str | None,
+    include_history: bool | None,
     user_id: uuid.UUID = None,
 ):
     """
@@ -38,9 +38,9 @@ def add_prompt(
 def _add_or_update_agent_prompt(
     name: str,
     status: AgentPromptStatus,
-    system_message: str,
-    human_message: str,
-    include_history: bool,
+    system_message: str | None,
+    human_message: str | None,
+    include_history: bool | None,
     user_id: uuid.UUID,
 ):
     """Adds or updates the prompt."""
