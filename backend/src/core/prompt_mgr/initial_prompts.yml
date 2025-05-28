@@ -1,5 +1,6 @@
 - prompt_name: GENERATE_ANSWER
   system_message: ''
+  include_history: true
   human_message: |
     You are an assistant for question-answering tasks.
     Use the following chat history and pieces of retrieved source documents
@@ -33,6 +34,7 @@
   system_message: |
     You a question re-writer that converts an input question to a better version that is optimized
     for vectorstore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning.
+  include_history: true
   human_message: |
     Here is the initial question:
 
@@ -46,6 +48,7 @@
     It does not need to be a stringent test. The goal is to filter out erroneous retrievals.
     If the document contains keyword(s) or semantic meaning related to the user question, grade it as relevant.
     Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question.
+  include_history: true
   human_message: |
     Retrieved document:
 
@@ -59,6 +62,7 @@
   system_message: |
     You are a grader assessing whether an answer addresses / resolves a question
     Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question.
+  include_history: true
   human_message: |
     User question:
 
@@ -73,6 +77,7 @@
     You are a grader assessing whether an LLM generation is grounded in / supported by a set of retrieved facts.
 
     Give a binary score 'yes' or 'no'. 'Yes' means that the answer is grounded in / supported by the set of facts.
+  include_history: true
   human_message: |
     Set of facts:
 

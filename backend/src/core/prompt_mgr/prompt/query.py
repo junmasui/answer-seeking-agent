@@ -58,6 +58,7 @@ def list_prompts(
             status=_x.status,
             system_message=_x.system_message,
             human_message=_x.human_message,
+            include_history=_x.include_history,
             version=_x.version,
         )
 

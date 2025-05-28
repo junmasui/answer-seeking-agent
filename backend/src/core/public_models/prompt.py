@@ -21,6 +21,7 @@ class AgentPrompt(CamelModel):
     status: AgentPromptStatus = Field(description='Status.')
     system_message: Optional[str] = Field(description='Prompt')
     human_message: Optional[str] = Field(description='Prompt')
+    include_history: Optional[bool] = Field(description='Include chat history')
     version: int = Field(description='Version number of prompt.')
 
 

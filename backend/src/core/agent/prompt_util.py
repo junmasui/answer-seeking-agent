@@ -1,6 +1,6 @@
 import logging
 
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
 
 from global_config import get_global_config
 
@@ -23,6 +23,7 @@ def get_chat_prompt(prompt_name: AgentPrompt):
     prompt = result.prompts[0]
     system_message = prompt.system_message
     human_message = prompt.human_message
+    _include_history = prompt.include_history
 
     messages = []
     if system_message:
@@ -37,10 +38,12 @@ def get_chat_prompt(prompt_name: AgentPrompt):
         if not has_structured_output:
             system_message = system_message + '\n\n{format_instructions}'
 
-        messages.append(('system', system_message))
+        system_message = SystemMessagePromptTemplate.from_template(system_message)
+        messages.append(system_message)
 
     if human_message:
-        messages.append(('human', human_message))
+        human_message = HumanMessagePromptTemplate.from_template(human_message)
+        messages.append(human_message)
 
     chat_prompt = ChatPromptTemplate.from_messages(messages)
     return chat_prompt
