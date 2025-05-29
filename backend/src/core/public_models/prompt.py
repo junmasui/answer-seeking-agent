@@ -8,9 +8,14 @@ from pydantic import Field
 from .base import CamelModel
 
 
-class AgentPromptStatus(str, enum.Enum):
+class AgentPromptStatus(enum.StrEnum):
     ACTIVE = 'active'
     DEACTIVATED = 'deactivated'
+
+
+class OwnerType(enum.StrEnum):
+    SYSTEM = 'system'
+    USER = 'user'
 
 
 class AgentPrompt(CamelModel):
@@ -22,6 +27,7 @@ class AgentPrompt(CamelModel):
     system_message: Optional[str] = Field(description='Prompt')
     human_message: Optional[str] = Field(description='Prompt')
     include_history: Optional[bool] = Field(description='Include chat history')
+    owner_type: OwnerType = Field(description='Record owner type')
     version: int = Field(description='Version number of prompt.')
 
 

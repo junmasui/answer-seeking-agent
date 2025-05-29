@@ -2,7 +2,7 @@
 rename vector_ids column
 
 Revision ID: 5c6bb5056269
-Revises: 6b3f59aa577b
+Revises: 8137477f7563
 Create Date: 2025-05-27 01:05:31.154576
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '5c6bb5056269'
-down_revision: Union[str, None] = '6b3f59aa577b'
+down_revision: Union[str, None] = '8137477f7563'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

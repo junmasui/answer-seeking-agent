@@ -1,6 +1,11 @@
 import logging
 
-from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    MessagesPlaceholder,
+    SystemMessagePromptTemplate,
+)
 
 from global_config import get_global_config
 
@@ -42,7 +47,7 @@ def get_chat_prompt(prompt_name: str):
         messages.append(system_message)
 
     if include_history:
-        history_placeholder = MessagesPlaceholder("chat_history")
+        history_placeholder = MessagesPlaceholder('chat_history')
         messages.append(history_placeholder)
 
     if human_message:

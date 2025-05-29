@@ -7,12 +7,13 @@ from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import current_timestamp
 
-from ..public_models import AgentPromptStatus
+from ..public_models import AgentPromptStatus, OwnerType
 from .base import Base
 
 logger = logging.getLogger(__name__)
 
 DbPromptStatus = ENUM(AgentPromptStatus)
+DbOwnerType = ENUM(OwnerType)
 
 
 class DbAgentPrompt(Base):
@@ -27,6 +28,7 @@ class DbAgentPrompt(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[AgentPromptStatus] = mapped_column(DbPromptStatus, nullable=False)
+    owner_type: Mapped[OwnerType] = mapped_column(DbOwnerType, nullable=False)
 
     include_history: Mapped[bool] = mapped_column(Boolean, nullable=True)
     system_message: Mapped[str] = mapped_column(String(9000), nullable=True)

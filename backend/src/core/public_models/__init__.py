@@ -26,6 +26,7 @@ from .prompt import (
     AgentPromptStats,
     AgentPromptStatus,
     AgentPromptUpdateRequest,
+    OwnerType,
 )
 
 # Explicitly define the exported names: these names are the contract of this module.
@@ -53,6 +54,7 @@ __all__ = [
     'AgentPromptStats',
     'AgentPromptStatus',
     'AgentPromptUpdateRequest',
+    'OwnerType',
     'SortDirection',
 ]
 
