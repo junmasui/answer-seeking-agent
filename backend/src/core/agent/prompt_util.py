@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 def get_chat_prompt(prompt_name: str):
     """Retrieve a chat prompt from the database and return a ChatPromptTemplate."""
-    if not isinstance(prompt_name, AgentPromptName):
-        raise TypeError(f'prompt_name must be an instance of AgentPrompt, got {type(prompt_name)}')
+    if prompt_name not in AgentPromptName:
+        raise TypeError(f'prompt_name must be a valid AgentPromptName, got {prompt_name}')
 
     result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
     if not result.prompts:

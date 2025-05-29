@@ -15,8 +15,8 @@ def add_chat_prompt(
     include_history: Optional[bool] = None,
 ):
     """Add a prompt in the database if it does not exist, using the provided defaults."""
-    if prompt_name not in AgentPromptName.all_prompts():
-        raise ValueError('prompt_name must be an instance of AgentPrompt constant')
+    if prompt_name not in AgentPromptName:
+        raise ValueError('prompt_name must be a valid AgentPromptName constant')
 
     result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
 
