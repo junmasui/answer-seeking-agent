@@ -18,7 +18,7 @@ def add_chat_prompt(
     if prompt_name not in AgentPromptName.all_prompts():
         raise ValueError('prompt_name must be an instance of AgentPrompt constant')
 
-    result = list_prompts(name=prompt_name.value, status=AgentPromptStatus.ACTIVE)
+    result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
 
     if result.prompts:
         return
@@ -28,7 +28,7 @@ def add_chat_prompt(
     if human_message:
         human_message = textwrap.dedent(human_message)
     add_prompt(
-        name=prompt_name.value,
+        name=prompt_name,
         status=AgentPromptStatus.ACTIVE,
         human_message=human_message,
         system_message=system_message,

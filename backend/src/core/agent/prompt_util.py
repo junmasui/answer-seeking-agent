@@ -16,9 +16,9 @@ def get_chat_prompt(prompt_name: str):
     if not isinstance(prompt_name, AgentPromptName):
         raise TypeError(f'prompt_name must be an instance of AgentPrompt, got {type(prompt_name)}')
 
-    result = list_prompts(name=prompt_name.value, status=AgentPromptStatus.ACTIVE)
+    result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
     if not result.prompts:
-        raise ValueError(f"Prompt '{prompt_name.value}' not found in database.")
+        raise ValueError(f"Prompt '{prompt_name}' not found in database.")
 
     prompt = result.prompts[0]
     system_message = prompt.system_message

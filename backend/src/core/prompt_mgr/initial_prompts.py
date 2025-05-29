@@ -3,7 +3,6 @@ from pathlib import Path
 
 import yaml
 
-from ..agent.internal_models import AgentPromptName
 from ..signals import db_predefined_data_handler
 from .util import add_chat_prompt
 
@@ -28,7 +27,7 @@ def register_initial_prompts(sender):
         prompts = yaml.safe_load(yaml_file)
 
     for prompt in prompts:
-        prompt_name = AgentPromptName.by_name(prompt['prompt_name'])
+        prompt_name = prompt['prompt_name']
         add_chat_prompt(
             prompt_name=prompt_name,
             system_message=prompt.get('system_message', ''),

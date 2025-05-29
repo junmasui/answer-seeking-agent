@@ -1,4 +1,4 @@
-- prompt_name: GENERATE_ANSWER
+- prompt_name: 'Generate Answer'
   system_message: ''
   include_history: true
   human_message: |
@@ -30,7 +30,7 @@
 
     Answer:
 
-- prompt_name: REWRITE_QUERY
+- prompt_name: 'Rewrite Query'
   system_message: |
     You a question re-writer that converts an input question to a better version that is optimized
     for vectorstore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning.
@@ -42,7 +42,7 @@
 
     Formulate an improved question.
 
-- prompt_name: GRADE_RETRIEVED_DOCUMENTS
+- prompt_name: 'Grade Retrieved Documents'
   system_message: |
     You are a grader assessing relevance of a retrieved document to a user question.
     It does not need to be a stringent test. The goal is to filter out erroneous retrievals.
@@ -58,7 +58,7 @@
 
     {question}
 
-- prompt_name: GRADE_ANSWER
+- prompt_name: 'Grade Answer'
   system_message: |
     You are a grader assessing whether an answer addresses / resolves a question
     Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question.
@@ -72,7 +72,7 @@
 
     {generation}
 
-- prompt_name: GRADE_HALLUCINATION
+- prompt_name: 'Grade Hallucination'
   system_message: |
     You are a grader assessing whether an LLM generation is grounded in / supported by a set of retrieved facts.
 

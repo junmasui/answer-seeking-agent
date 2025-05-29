@@ -1,6 +1,8 @@
 import functools
 import re
+
 from pydantic import BaseModel, Field
+
 
 class AgentPromptName:
     """
@@ -21,7 +23,7 @@ class AgentPromptName:
     def all_prompts(cls):
         """
         Get a list of all static constant values from this class.
-        
+
         Returns:
             list: List of prompt template names (cached after first call)
         """
@@ -29,16 +31,16 @@ class AgentPromptName:
         for attr_name in dir(cls):
             # Skip private/magic methods and attributes, check if not callable,
             # and ensure name contains only uppercase letters and underscores
-            if (not attr_name.startswith('_') and 
-                not callable(getattr(cls, attr_name)) and
-                re.match(r'^[A-Z_]+$', attr_name)):
+            if (
+                not attr_name.startswith('_')
+                and not callable(getattr(cls, attr_name))
+                and re.match(r'^[A-Z_]+$', attr_name)
+            ):
                 attr_value = getattr(cls, attr_name)
                 # Only include string constants (our prompt names)
                 if isinstance(attr_value, str):
                     prompts.append(attr_value)
         return prompts
-
-
 
 
 class GradeDocuments(BaseModel):
