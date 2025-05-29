@@ -8,7 +8,7 @@ import logging
 
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser
-from .internal_models import AgentPrompt
+from .internal_models import AgentPromptName
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ def answer_generator():
     Combines a chat prompt, language model, and answer citation parser to generate
     answers from retrieved documents with proper citation extraction.
     """
-    prompt = get_chat_prompt(prompt_name=AgentPrompt.GENERATE_ANSWER)
+    prompt = get_chat_prompt(prompt_name=AgentPromptName.GENERATE_ANSWER)
 
     # LLM
     llm = get_chat_llm()

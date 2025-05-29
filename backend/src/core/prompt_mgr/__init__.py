@@ -1,6 +1,6 @@
 import textwrap
 
-from core.agent.internal_models import AgentPrompt
+from core.agent.internal_models import AgentPromptName
 from core.public_models import AgentPromptStatus
 
 from . import initial_prompts
@@ -19,10 +19,10 @@ __all__ = [
 ]
 
 
-def add_chat_prompt(*, prompt_name: AgentPrompt, system_message: str = None, human_message: str = None):
+def add_chat_prompt(*, prompt_name: str, system_message: str = None, human_message: str = None):
     """Add a prompt in the database if it does not exist, using the provided defaults."""
-    if not isinstance(prompt_name, AgentPrompt):
-        raise TypeError(f'prompt_name must be an instance of AgentPrompt enum: {type(prompt_name)}')
+    if prompt_name not in AgentPromptName.all_prompts():
+        raise ValueError('prompt_name must be an instance of AgentPrompt constant')
 
     result = list_prompts(name=prompt_name.value, status=AgentPromptStatus.ACTIVE)
 

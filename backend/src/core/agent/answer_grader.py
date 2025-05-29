@@ -8,7 +8,7 @@ import logging
 from functools import cache
 
 from .grader_util import build_grader
-from .internal_models import AgentPrompt, GradeAnswer
+from .internal_models import AgentPromptName, GradeAnswer
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def get_answer_grader():
     and a Pydantic model (GradeAnswer) for structured output.
     The grader is cached to avoid reinitialization.
     """
-    prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_ANSWER)
+    prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_ANSWER)
 
     answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
 

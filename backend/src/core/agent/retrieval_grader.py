@@ -9,7 +9,7 @@ import logging
 from functools import cache
 
 from .grader_util import build_grader
-from .internal_models import AgentPrompt, GradeDocuments
+from .internal_models import AgentPromptName, GradeDocuments
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ def get_retrieval_grader():
     and a Pydantic model (GradeDocuments) for structured output.
     The grader is cached to avoid reinitialization.
     """
-    prompt = get_chat_prompt(prompt_name=AgentPrompt.GRADE_RETRIEVED_DOCUMENTS)
+    prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_RETRIEVED_DOCUMENTS)
 
     retrieval_grader = build_grader(prompt, GradeDocuments, 'retrieval_grader')
 

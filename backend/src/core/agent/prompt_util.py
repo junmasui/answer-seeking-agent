@@ -6,15 +6,15 @@ from global_config import get_global_config
 
 from ..prompt_mgr import list_prompts
 from ..public_models import AgentPromptStatus
-from .internal_models import AgentPrompt
+from .internal_models import AgentPromptName
 
 logger = logging.getLogger(__name__)
 
 
-def get_chat_prompt(prompt_name: AgentPrompt):
+def get_chat_prompt(prompt_name: str):
     """Retrieve a chat prompt from the database and return a ChatPromptTemplate."""
-    if not isinstance(prompt_name, AgentPrompt):
-        raise TypeError(f'prompt_name must be an instance of AgentPrompt enum, got {type(prompt_name)}')
+    if not isinstance(prompt_name, AgentPromptName):
+        raise TypeError(f'prompt_name must be an instance of AgentPrompt, got {type(prompt_name)}')
 
     result = list_prompts(name=prompt_name.value, status=AgentPromptStatus.ACTIVE)
     if not result.prompts:
