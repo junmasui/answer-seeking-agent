@@ -27,7 +27,12 @@ def register_initial_prompts(sender):
         prompts = yaml.safe_load(yaml_file)
 
     for prompt in prompts:
-        prompt_name = prompt['prompt_name']
+        try:
+            prompt_name = prompt['prompt_name']
+        except KeyError:
+            logger.warning("Skipping prompt missing 'prompt_name' key: %s", prompt)
+            continue
+
         add_chat_prompt(
             prompt_name=prompt_name,
             system_message=prompt.get('system_message', ''),
