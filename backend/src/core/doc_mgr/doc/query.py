@@ -97,35 +97,9 @@ def _list_tracking_records(
     ROW_NUMBER values fall into the page range are choosen. Finally, the row
     data minus the ROW_NUMBER values are returned.
     """
-    if sort_by is None:
-        sort_by = [('name', SortDirection.ASC)]
-    elif not isinstance(sort_by, (list, tuple)):
-        raise TypeError('sort_by must be a list or tuple')
-    elif len(sort_by) == 0:
-        raise ValueError('sort_by cannot be empty')
+    order_by = _build_order_by(sort_by)
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
-
-    def _to_col(x):
-        name, direction = x
-        expr = None
-        match name:
-            case 'name':
-                expr = DbTrackedDocument.filename
-            case 'size_bytes':
-                expr = DbTrackedDocument.size_bytes
-            case 'modification_time':
-                expr = DbTrackedDocument.file_modified_time
-            case 'ingestion_time':
-                expr = DbTrackedDocument.ingested_time
-            case 'status':
-                expr = DbTrackedDocument.status
-            case _:
-                raise ValueError('unknown field name', name)
-        expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
-        return expr
-
-    order_by = [_to_col(x) for x in sort_by]
 
     with sessionmaker() as session:
         paginate = start is not None and length is not None
@@ -133,21 +107,7 @@ def _list_tracking_records(
         core_query = select(DbTrackedDocument)
 
         # Apply query filters
-        where = []
-        if doc_set_id is not None:
-            if isinstance(doc_set_id, list):
-                where.append(DbTrackedDocument.document_set_id.in_(doc_set_id))
-            elif isinstance(doc_set_id, uuid.UUID):
-                where.append(DbTrackedDocument.document_set_id == doc_set_id)
-        if status is not None:
-            if isinstance(status, list):
-                if len(status) > 0:
-                    where.append(DbTrackedDocument.status.in_(status))
-            elif isinstance(status, DocumentStatus):
-                where.append(DbTrackedDocument.status == status)
-
-        if file_name is not None:
-            where.append(DbTrackedDocument.filename.ilike(file_name))
+        where = _build_query_filter(doc_set_id, status, file_name)
 
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -187,3 +147,88 @@ def _list_tracking_records(
         existing_objs = result.scalars().all()
 
     return existing_objs
+
+
+def _build_query_filter(
+    doc_set_id: Optional[uuid.UUID | list[uuid.UUID]],
+    status: Optional[DocumentStatus | list[DocumentStatus]],
+    file_name: Optional[str],
+):
+    """
+    Build WHERE clause conditions from filter parameters.
+
+    Args:
+        doc_set_id: Single document set UUID or list of UUIDs to filter by.
+                   If None, no document set filtering is applied.
+        status: Single DocumentStatus or list of statuses to filter by.
+               If None, no status filtering is applied.
+        file_name: Filename pattern for ILIKE matching (case-insensitive).
+                  If None, no filename filtering is applied.
+
+    Returns:
+        list: List of SQLAlchemy WHERE clause conditions that can be used
+              with and_() or applied individually to a query.
+    """
+    where = []
+    if doc_set_id is not None:
+        if isinstance(doc_set_id, list):
+            where.append(DbTrackedDocument.document_set_id.in_(doc_set_id))
+        elif isinstance(doc_set_id, uuid.UUID):
+            where.append(DbTrackedDocument.document_set_id == doc_set_id)
+    if status is not None:
+        if isinstance(status, list):
+            if len(status) > 0:
+                where.append(DbTrackedDocument.status.in_(status))
+        elif isinstance(status, DocumentStatus):
+            where.append(DbTrackedDocument.status == status)
+
+    if file_name is not None:
+        where.append(DbTrackedDocument.filename.ilike(file_name))
+    return where
+
+
+def _build_order_by(sort_by: Optional[list] = None):
+    """
+    Build ORDER BY clause expressions from sort specification.
+
+    Args:
+        sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
+                If None, defaults to [('name', SortDirection.ASC)].
+                Supported field names: 'name', 'size_bytes', 'modification_time', 'ingestion_time', 'status'
+                Direction should be SortDirection.ASC or SortDirection.DESC
+
+    Returns:
+        list: List of SQLAlchemy order_by expressions that can be passed to query.order_by()
+
+    Raises:
+        TypeError: If sort_by is not a list or tuple
+        ValueError: If sort_by is empty or contains unknown field names
+    """
+    if sort_by is None:
+        sort_by = [('name', SortDirection.ASC)]
+    elif not isinstance(sort_by, (list, tuple)):
+        raise TypeError('sort_by must be a list or tuple')
+    elif len(sort_by) == 0:
+        raise ValueError('sort_by cannot be empty')
+
+    def _to_col(x):
+        name, direction = x
+        expr = None
+        match name:
+            case 'name':
+                expr = DbTrackedDocument.filename
+            case 'size_bytes':
+                expr = DbTrackedDocument.size_bytes
+            case 'modification_time':
+                expr = DbTrackedDocument.file_modified_time
+            case 'ingestion_time':
+                expr = DbTrackedDocument.ingested_time
+            case 'status':
+                expr = DbTrackedDocument.status
+            case _:
+                raise ValueError('unknown field name', name)
+        expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
+        return expr
+
+    order_by = [_to_col(x) for x in sort_by]
+    return order_by
