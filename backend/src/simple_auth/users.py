@@ -43,6 +43,11 @@ def authenticate_user(username: str, password: str):
     """
     user = get_user_by_name(username=username)
 
+    # When the mock password is blank or less than 3 characters, fail the
+    # password check.
+    if len(password) < 3:
+        return None
+
     # Since we are simulating authentication, the password check always passes here.
 
     return user
