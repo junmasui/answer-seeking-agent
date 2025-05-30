@@ -29,7 +29,7 @@ def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker):
     count = _get_table_count(auto_mapped_table, sql_sessionmaker)
 
     if count != 0:
-        raise ValueError(f'Something went wrong with truncating {auto_mapped_table.__table__.name}')
+        raise RuntimeError(f'Something went wrong with truncating {auto_mapped_table.__table__.name}')
 
 
 @pytest.fixture(scope='module')
@@ -39,7 +39,7 @@ def doc_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
     auto_mapped_table = auto_mapped_classes.get(full_name, None)
 
     if auto_mapped_table is None:
-        raise ValueError(f'Table {full_name} is absent')
+        raise RuntimeError(f'Table {full_name} is absent')
 
     # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
     # errors where clean-up did not occur.
@@ -105,7 +105,7 @@ async def populate_doc_table(doc_table, populated_doc_set_table, api_server, sql
 
     count = _get_table_count(doc_table, sql_sessionmaker)
     if count != 3:
-        raise ValueError(f'Something went wrong with {doc_table.__table__.name}')
+        raise RuntimeError(f'Something went wrong with {doc_table.__table__.name}')
 
 
 @pytest_asyncio.fixture(scope='function', loop_scope='function')
@@ -139,7 +139,8 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
 
         resp_type, resp = await api_server.post(path=path, content_type='json', data=data)
 
-        assert resp_type == 'json'
+        if resp_type != 'json':
+            raise RuntimeError(f"Expected 'json' response type, but got '{resp_type}'")
 
         task_ids = resp.get('task_ids')
 

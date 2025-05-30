@@ -34,7 +34,7 @@ def start_metrics(is_main_worker: bool):
         port = 8989
         # Start a synchronous webserver to expose the metrics. Underneath, this
         # webserver will run on its own thread.
-        httpd, thread = start_wsgi_server(port, registry=registry)
+        _httpd, _thread = start_wsgi_server(port, registry=registry)
         print(f'Prometheus metrics server started on port {port}')
 
 
