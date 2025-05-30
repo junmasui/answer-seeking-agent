@@ -3,8 +3,6 @@
 from pathlib import Path
 
 import nltk
-
-# import logging
 from langchain_unstructured import UnstructuredLoader
 
 from global_config import get_global_config
