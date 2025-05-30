@@ -152,8 +152,8 @@ async function submit(event) {
     }
 
     messages.value.push({ type: 'system', message: message })
-    
-    logger.apiSuccess('Conversational query completed', { 
+
+    logger.apiSuccess('Conversational query completed', {
       threadId: threadId.value,
       responseLength: message.length,
       citationCount: data?.citations?.length || 0
