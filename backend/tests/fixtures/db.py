@@ -25,7 +25,7 @@ def get_connection_str():
 
     # The connection string must use psycopg3!
     if not connection_url.scheme == 'postgresql+psycopg':
-        raise ValueError
+        raise RuntimeError("Connection string must use 'postgresql+psycopg' scheme")
 
     # Convert away from PyDantic's custom type and to Python string.
     return str(connection_url)
