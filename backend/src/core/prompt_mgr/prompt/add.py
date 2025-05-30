@@ -3,6 +3,7 @@ import uuid
 
 from sqlalchemy import and_, select, update
 
+from core.public_models.base import OwnerType
 from core.public_models.prompt import AgentPromptStatus
 
 from ...db_models import DbAgentPrompt
@@ -12,7 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 def add_prompt(
-    name: str, status: AgentPromptStatus, system_message: str, human_message: str, user_id: uuid.UUID = None
+    name: str,
+    owner_type: OwnerType,
+    status: AgentPromptStatus,
+    system_message: str | None,
+    human_message: str | None,
+    include_history: bool | None,
+    user_id: uuid.UUID = None,
 ):
     """
     Add a new agent prompt with the specified configuration.
@@ -21,12 +28,24 @@ def add_prompt(
     is ACTIVE, deactivates all other versions of the same prompt name.
     """
     _add_or_update_agent_prompt(
-        name=name, status=status, system_message=system_message, human_message=human_message, user_id=user_id
+        name=name,
+        owner_type=owner_type,
+        status=status,
+        system_message=system_message,
+        human_message=human_message,
+        include_history=include_history,
+        user_id=user_id,
     )
 
 
 def _add_or_update_agent_prompt(
-    name: str, status: AgentPromptStatus, system_message: str, human_message: str, user_id: uuid.UUID
+    name: str,
+    owner_type: OwnerType,
+    status: AgentPromptStatus,
+    system_message: str | None,
+    human_message: str | None,
+    include_history: bool | None,
+    user_id: uuid.UUID,
 ):
     """Adds or updates the prompt."""
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
@@ -54,16 +73,18 @@ def _add_or_update_agent_prompt(
             new_obj = DbAgentPrompt(
                 id=prompt_uuid,
                 name=name,
+                owner_type=owner_type,
                 status=status,
                 system_message=system_message,
                 human_message=human_message,
+                include_history=include_history,
                 version=version,
                 last_user_id=user_id,
             )
             session.add(new_obj)
 
         # Only one version can be active
-        if status == AgentPromptStatus.ACTIVE and version > 1:
+        if status == AgentPromptStatus.ACTIVE:
             with session.begin():
                 stmt = (
                     update(DbAgentPrompt)

@@ -8,6 +8,7 @@ from sqlalchemy.orm import aliased
 from ...db_models import DbAgentPrompt
 from ...providers.sql_database import DataDomain, get_sessionmaker
 from ...public_models import AgentPrompt, AgentPromptList, AgentPromptStatus, SortDirection
+from ...public_models.base import OwnerType
 from .stats import get_prompt_statistics
 
 logger = logging.getLogger(__name__)
@@ -43,21 +44,26 @@ def list_prompts(
     *,
     name: Optional[str] = None,
     status: Optional[AgentPromptStatus] = None,
+    owner_type: Optional[OwnerType] = None,
     start: Optional[int] = None,
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
 ):
     """Return the list of prompts."""
-    existing_objs = _list_agent_prompts(name=name, status=status, start=start, length=length, sort_by=sort_by)
+    existing_objs = _list_agent_prompts(
+        name=name, status=status, owner_type=owner_type, start=start, length=length, sort_by=sort_by
+    )
     table_stats = get_prompt_statistics()
 
     def _to_dict(_x: DbAgentPrompt):
         return AgentPrompt(
             id=_x.id,
             name=_x.name,
+            owner_type=_x.owner_type,
             status=_x.status,
             system_message=_x.system_message,
             human_message=_x.human_message,
+            include_history=_x.include_history,
             version=_x.version,
         )
 
@@ -72,6 +78,7 @@ def _list_agent_prompts(
     *,
     name: Optional[str] = None,
     status: Optional[AgentPromptStatus] = None,
+    owner_type: Optional[OwnerType] = None,
     start: Optional[int] = None,
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
@@ -113,6 +120,8 @@ def _list_agent_prompts(
             where.append(DbAgentPrompt.name.ilike(name))
         if status is not None:
             where.append(DbAgentPrompt.status == status)
+        if owner_type is not None:
+            where.append(DbAgentPrompt.owner_type == owner_type)
 
         if len(where) > 1:
             core_query = core_query.where(and_(*where))

@@ -102,7 +102,7 @@ def get_scoped_current_user(scope: str, missing_ok: bool = False):
             return None
         if not user.scopes:
             raise_credentials_error()
-        if not scope in user.scopes:
+        if scope not in user.scopes:
             raise_credentials_error()
         return user
 

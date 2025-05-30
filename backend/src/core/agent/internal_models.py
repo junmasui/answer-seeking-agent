@@ -1,13 +1,12 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-# Data model
 
-
-class AgentPrompt(str, Enum):
+class AgentPromptName(StrEnum):
     """Enumeration of available agent prompt templates for different AI operations."""
 
+    # Static constants for core prompts
     GENERATE_ANSWER = 'Generate Answer'
     REWRITE_QUERY = 'Rewrite Query'
     GRADE_RETRIEVED_DOCUMENTS = 'Grade Retrieved Documents'

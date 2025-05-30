@@ -26,6 +26,7 @@ async def test_insert(api_server, empty_prompt_table, sql_sessionmaker):
         'name': 'prompt',
         'humanMessage': 'placeholder human message',
         'systemMessage': 'placeholder system message',
+        'includeHistory': True,
     }
     _resp = await api_server.post(path=path, content_type='json', data=data)
 
@@ -75,7 +76,7 @@ async def test_update(api_server, populated_prompt_table, sql_sessionmaker):
         prompt_id = result[0].id
 
     path = f'/prompts/{prompt_id}'
-    body = {'humanMessage': 'updated human message', 'systemMessage': 'updated system message'}
+    body = {'humanMessage': 'updated human message', 'systemMessage': 'updated system message', 'includeHistory': True}
     resp_type, _resp = await api_server.patch(path=path, content_type='json', data=body)
 
     assert resp_type == 'json'
