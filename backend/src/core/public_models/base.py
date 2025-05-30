@@ -9,3 +9,14 @@ class CamelModel(BaseModel):
     """
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+
+class OwnerType(enum.StrEnum):
+    """
+    Identifies the creator type of agent prompt templates.
+
+    Distinguishes between system-provided default prompts and user-created custom prompts.
+    """
+
+    SYSTEM = 'system'
+    USER = 'user'

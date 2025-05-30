@@ -2,7 +2,8 @@ import textwrap
 from typing import Optional
 
 from core.agent.internal_models import AgentPromptName
-from core.public_models import AgentPromptStatus, OwnerType
+from core.public_models import AgentPromptStatus
+from core.public_models.base import OwnerType
 
 from .add import add_prompt
 from .query import list_prompts

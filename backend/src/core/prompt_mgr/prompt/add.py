@@ -3,7 +3,8 @@ import uuid
 
 from sqlalchemy import and_, select, update
 
-from core.public_models.prompt import AgentPromptStatus, OwnerType
+from core.public_models.base import OwnerType
+from core.public_models.prompt import AgentPromptStatus
 
 from ...db_models import DbAgentPrompt
 from ...providers.sql_database import DataDomain, get_sessionmaker

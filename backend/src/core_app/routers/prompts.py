@@ -6,7 +6,8 @@ from fastapi import APIRouter, Body, Depends, Path, Query
 
 from core.prompt_mgr import add_prompt, delete_prompt, get_prompt_statistics, list_prompts, update_prompt
 from core.public_models import AgentPromptAddRequest, AgentPromptList, AgentPromptStats, AgentPromptUpdateRequest
-from core.public_models.prompt import AgentPromptStatus, OwnerType
+from core.public_models.base import OwnerType
+from core.public_models.prompt import AgentPromptStatus
 from global_config import get_global_config
 from simple_auth import Scope, User, get_scoped_current_user
 

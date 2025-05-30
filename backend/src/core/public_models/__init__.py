@@ -1,6 +1,7 @@
 import enum
 
 from .agent import Answer, AnswerRequestBody, Citation
+from .base import OwnerType
 from .doc import (
     BulkDeleteRequestBody,
     Document,
@@ -26,7 +27,6 @@ from .prompt import (
     AgentPromptStats,
     AgentPromptStatus,
     AgentPromptUpdateRequest,
-    OwnerType,
 )
 
 # Explicitly define the exported names: these names are the contract of this module.

@@ -5,17 +5,21 @@ from uuid import UUID
 
 from pydantic import Field
 
+from core.public_models.base import OwnerType
+
 from .base import CamelModel
 
 
 class AgentPromptStatus(enum.StrEnum):
+    """
+    Defines the lifecycle status of agent prompt templates.
+
+    Controls whether a prompt version is currently active for use or has been
+    deactivated in favor of a newer version.
+    """
+
     ACTIVE = 'active'
     DEACTIVATED = 'deactivated'
-
-
-class OwnerType(enum.StrEnum):
-    SYSTEM = 'system'
-    USER = 'user'
 
 
 class AgentPrompt(CamelModel):

@@ -7,13 +7,13 @@ from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import current_timestamp
 
-from ..public_models import AgentPromptStatus, OwnerType
-from .base import Base
+from ..public_models import AgentPromptStatus
+from ..public_models.base import OwnerType
+from .base import Base, DbOwnerType
 
 logger = logging.getLogger(__name__)
 
 DbPromptStatus = ENUM(AgentPromptStatus)
-DbOwnerType = ENUM(OwnerType)
 
 
 class DbAgentPrompt(Base):
