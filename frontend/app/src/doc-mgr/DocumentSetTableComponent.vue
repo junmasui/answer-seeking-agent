@@ -101,10 +101,10 @@ const tableHeaders = ref([
 
 const sortBy = ref([])
 
-watch(sortBy, async (newValue, oldValue) => {
+watch(sortBy, async (newValue, _oldValue) => {
   logger.debug('Sort criteria changed', {
     newSort: newValue,
-    oldSort: oldValue
+    oldSort: _oldValue
   })
 })
 
