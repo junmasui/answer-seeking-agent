@@ -180,7 +180,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
-    input = {'question': user_input, 'document_set_ids': doc_set_ids}
+    graph_input = {'question': user_input, 'document_set_ids': doc_set_ids}
     # Capture into a dict, not TypedDict. We want to make zero assumptions about the
     # graph's stream output's keys. In other words, the set of keys is dynamic not static.
     # And because we are not static, we avoid TypedDict and its subclasses (ex: GraphState).
@@ -191,7 +191,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
             extra_data['user_id'] = user_id
         run_config = {'recursion_limit': 30, 'configurable': extra_data}
         run_config['callbacks'] = [langfuse_handler]
-        for output in graph.stream(input=input, config=run_config):
+        for output in graph.stream(input=graph_input, config=run_config):
             for key, value in output.items():
                 # Node
                 logger.info("Node '%s':", key)
