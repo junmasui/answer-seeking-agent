@@ -46,16 +46,16 @@ def get_chat_llm() -> BaseChatModel:
     base_llm = HuggingFacePipeline(
         pipeline=pipeline,
         model_id=model_id,
-        pipeline_kwargs=dict(
-            max_new_tokens=2048,
-            top_k=10,
-            top_p=0.95,
-            typical_p=0.95,
-            temperature=0.01,
-            streaming=False,
-            do_sample=False,
-            repetition_penalty=1.03,
-        ),
+        pipeline_kwargs={
+            'max_new_tokens': 2048,
+            'top_k': 10,
+            'top_p': 0.95,
+            'typical_p': 0.95,
+            'temperature': 0.01,
+            'streaming': False,
+            'do_sample': False,
+            'repetition_penalty': 1.03,
+        },
     )
 
     llm = ChatHuggingFace(llm=base_llm, cache=True, streaming=False, disable_streaming=True, verbose=True)
