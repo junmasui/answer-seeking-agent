@@ -35,9 +35,6 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
             except UnicodeDecodeError:
                 request_body_text = request_body_bytes.decode('utf-8', errors='replace')
 
-            # Reassign body so downstream can still read it
-            request._body = request_body_bytes
-
             response = await call_next(request)
 
             if response.status_code >= 400:

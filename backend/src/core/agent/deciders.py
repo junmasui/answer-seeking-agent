@@ -24,10 +24,10 @@ def check_for_relevant_documents(state):
         # We will re-generate a new query
         logger.info('---DECISION: ALL DOCUMENTS ARE NOT RELEVANT TO QUESTION, TRANSFORM QUERY---')
         return 'no relevant docs'
-    else:
-        # We have relevant documents, so generate answer
-        logger.info('---DECISION: GENERATE---')
-        return 'relevant docs found'
+
+    # We have relevant documents, so generate answer
+    logger.info('---DECISION: GENERATE---')
+    return 'relevant docs found'
 
 
 def check_for_halluciation(state):
@@ -42,11 +42,13 @@ def check_for_halluciation(state):
     """
     grade = state['grounded_in_facts']
 
-    if grade == 'yes':
-        logger.info('---DECISION: GENERATION IS GROUNDED IN FACTS FROM DOCUMENTS---')
-        return 'not hallucinating'
-    logger.info('---DECISION: GENERATION IS NOT GROUNDED IN FACTS FROM DOCUMENTS---')
-    return 'is hallucinating'
+    if grade != 'yes':
+        logger.info('---DECISION: GENERATION IS NOT GROUNDED IN FACTS FROM DOCUMENTS---')
+        return 'is hallucinating'
+
+    # Generated answer is grounded in facts from the document.
+    logger.info('---DECISION: GENERATION IS GROUNDED IN FACTS FROM DOCUMENTS---')
+    return 'not hallucinating'
 
 
 def check_for_answer_relevancy(state):
@@ -61,9 +63,10 @@ def check_for_answer_relevancy(state):
     """
     grade = state['answer_addresses_question']
 
-    if grade == 'yes':
-        logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
-        return 'useful'
+    if grade != 'yes':
+        logger.info('---DECISION: GENERATION DOES NOT ADDRESS QUESTION---')
+        return 'not useful'
 
-    logger.info('---DECISION: GENERATION DOES NOT ADDRESS QUESTION---')
-    return 'not useful'
+    # Generated answer does address the user's question.
+    logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
+    return 'useful'
