@@ -26,24 +26,29 @@ def add_chat_prompt(
     if human_message:
         human_message = textwrap.dedent(human_message)
 
-    exact = any(
+    has_matching = any(
         prompt.system_message == system_message
         and prompt.human_message == human_message
         and prompt.include_history == include_history
         for prompt in result.prompts
     )
 
-    if exact:
+    # If a system-controlled record already matches the YAML-defined record,
+    # then do nothing.
+    if has_matching:
         return
 
-    is_active = any(
+    # If a system-controlled record is the active prompt, then we will add
+    # the new system-controlled record as the active prompt.
+    has_active = any(
         prompt.status == AgentPromptStatus.ACTIVE
         for prompt in result.prompts
     )
+    status = AgentPromptStatus.ACTIVE if has_active else AgentPromptStatus.DEACTIVATED
 
     add_prompt(
         name=prompt_name,
-        status=AgentPromptStatus.ACTIVE if is_active else AgentPromptStatus.DEACTIVATED,
+        status=status,
         owner_type=OwnerType.SYSTEM,
         human_message=human_message,
         system_message=system_message,
