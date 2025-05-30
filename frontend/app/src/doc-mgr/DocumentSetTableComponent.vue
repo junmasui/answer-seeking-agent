@@ -102,9 +102,9 @@ const tableHeaders = ref([
 const sortBy = ref([])
 
 watch(sortBy, async (newValue, oldValue) => {
-  logger.debug('Sort criteria changed', { 
-    newSort: newValue, 
-    oldSort: oldValue 
+  logger.debug('Sort criteria changed', {
+    newSort: newValue,
+    oldSort: oldValue
   })
 })
 
@@ -216,9 +216,9 @@ function editItem(item, index) {
   targetIndex.value = index
   targetItem.value = Object.assign({}, item)
 
-  logger.debug('Edit document set dialog opened', { 
+  logger.debug('Edit document set dialog opened', {
     docSetName: targetItem.value.name,
-    docSetId: targetItem.value.id 
+    docSetId: targetItem.value.id
   })
 }
 
@@ -410,7 +410,10 @@ async function updateDocSet(doc_uuid, doc_set_uuid) {
     await response.json()
     logger.apiSuccess('Document set updated', { docId: doc_uuid, newDocSetId: doc_set_uuid })
   } catch (error) {
-    logger.apiError('Document set update failed', error, { docId: doc_uuid, newDocSetId: doc_set_uuid })
+    logger.apiError('Document set update failed', error, {
+      docId: doc_uuid,
+      newDocSetId: doc_set_uuid
+    })
   }
 }
 

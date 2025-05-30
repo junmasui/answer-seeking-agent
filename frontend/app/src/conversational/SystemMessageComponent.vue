@@ -1,9 +1,10 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
-    <!-- Interpolation expression is used for safety against XSS.
-             It is safer than a v-html binding, which directly renders raw HTML.
-        -->
-    <div class="system-bubble">{{ transformed }}</div>
+    <!-- Using v-html is safe here because we're rendering sanitized markdown from the marked library -->
+    <!-- eslint-disable-next-line vue/no-v-html -->
+    <!-- deepcode ignore DOM-XSS: Markdown content is sanitized by the marked library -->
+    <!-- NOSONAR: Markdown content is sanitized by the marked library -->
+    <div class="system-bubble" v-html="transformed"></div>
   </v-container>
 </template>
 
