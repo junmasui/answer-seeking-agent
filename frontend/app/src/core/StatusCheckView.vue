@@ -51,8 +51,8 @@ async function checkStatus() {
     const data = await response.json()
     logger.apiSuccess('Status check completed', { status: data.status })
 
-    if (data['status']) {
-      systemStatus.value = data['status']
+    if (data.status) {
+      systemStatus.value = data.status
     }
   } catch (error) {
     logger.apiError('Status check failed', error)

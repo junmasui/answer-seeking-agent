@@ -101,10 +101,10 @@ const tableHeaders = ref([
 
 const sortBy = ref([])
 
-watch(sortBy, async (newValue, oldValue) => {
+watch(sortBy, async (newValue, _oldValue) => {
   logger.debug('Sort criteria changed', {
     newSort: newValue,
-    oldSort: oldValue
+    oldSort: _oldValue
   })
 })
 
@@ -340,88 +340,6 @@ async function deleteDocumentSet(doc_set_uuid) {
  * Resets the target item and index after the operation completes.
  */
 async function closeDeleteItem() {
-  await loadItems()
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
-}
-
-//
-// Dialog for single document set change
-//
-
-const pickDocumentSet = ref(false)
-const selectedDocumentSet = ref({})
-
-/**
- * Opens the dialog for changing a document's document set assignment.
- * @param {Object} item - The document item whose document set will be changed
- * @param {number} index - The index of the item in the table
- */
-function changeDocumentSet(item, index) {
-  pickDocumentSet.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
-
-  selectedDocumentSet.value = documentSets.value.find((x) => x.id === item.documentSetId)
-}
-
-/**
- * Applies the document set change operation after user selection.
- * Updates the document's assignment to the newly selected document set.
- */
-async function selectNewDocSet() {
-  await updateDocSet(targetItem.value.id, selectedDocumentSet.value.id)
-
-  await closePickDocSet()
-}
-
-/**
- * Sends a request to the server to update a document's document set assignment.
- * @param {string} doc_uuid - The unique identifier of the document to update
- * @param {string} doc_set_uuid - The unique identifier of the new document set
- */
-async function updateDocSet(doc_uuid, doc_set_uuid) {
-  try {
-    const headers = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
-    }
-
-    const body = {
-      documentSetId: doc_set_uuid
-    }
-
-    const response = await fetch(`/api/documents/${doc_uuid}`, {
-      method: 'PATCH',
-      headers: headers,
-      body: JSON.stringify(body, null, 2)
-    })
-
-    if (!response.ok) {
-      throw new Error('Update failed')
-    }
-
-    await response.json()
-    logger.apiSuccess('Document set updated', { docId: doc_uuid, newDocSetId: doc_set_uuid })
-  } catch (error) {
-    logger.apiError('Document set update failed', error, {
-      docId: doc_uuid,
-      newDocSetId: doc_set_uuid
-    })
-  }
-}
-
-/**
- * Closes the document set picker dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closePickDocSet() {
   await loadItems()
 
   nextTick(() => {

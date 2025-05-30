@@ -77,7 +77,7 @@ const password = ref('')
 
 let alertTimeoutId // Updated from var
 
-watch(alertVisible, (newValue, oldValue) => {
+watch(alertVisible, (newValue, _oldValue) => {
   // Clear any existing timeout
   clearTimeout(alertTimeoutId)
   alertTimeoutId = 0

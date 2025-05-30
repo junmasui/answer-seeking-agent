@@ -20,7 +20,7 @@ const { signedIn, accessToken } = storeToRefs(currentUserStore)
  * Handles the ingest all operation by sending a request to process all uploaded documents.
  * Initiates server-side ingestion of all available documents with proper authentication.
  */
-async function onIngest(event) {
+async function onIngest() {
   try {
     const headers = {
       Accept: 'application/json'

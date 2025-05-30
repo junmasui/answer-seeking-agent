@@ -269,9 +269,9 @@ async function applyEditDoc() {
 
 /**
  * Placeholder function for editing a document.
- * @param {string} doc_uuid - The unique identifier of the document to edit
+ * @param {string} _doc_uuid - The unique identifier of the document to edit (unused in placeholder implementation)
  */
-async function editDocument(doc_uuid) {
+async function editDocument(_doc_uuid) {
   // Simulate the delay from a real call to the API Server.
   await new Promise((resolve) => setTimeout(resolve, 100))
 }
