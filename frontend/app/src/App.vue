@@ -68,9 +68,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from './common/CurrentUserStore.js'
@@ -80,6 +80,7 @@ import SignInDialog from './common/SignInDialog.vue'
 const theme = useTheme()
 
 const router = useRouter()
+const route = useRoute()
 
 const drawerModel = ref(false)
 const performSignIn = ref(false)
@@ -107,7 +108,24 @@ function signIn() {
  * Handles successful sign-in completion.
  * Called after the user successfully authenticates through the sign-in dialog.
  */
-function signInSucceeded() {}
+function signInSucceeded() {
+  // If user was trying to access a protected route, redirect there
+  // Otherwise, redirect to conversational page
+  const returnTo = route.query.returnTo || '/conversational'
+  router.push(returnTo)
+}
+
+// Watch for route changes to handle protected routes
+watch(
+  () => route.path,
+  (newPath) => {
+    // Redirect to sign-in if accessing admin without authentication
+    if (newPath === '/admin' && !signedIn.value) {
+      router.push('/?returnTo=' + encodeURIComponent(newPath))
+      performSignIn.value = true
+    }
+  }
+)
 
 /**
  * Signs out the current user by clearing authentication data.
@@ -116,6 +134,8 @@ function signInSucceeded() {}
 function signOut() {
   accessToken.value = ''
   signedIn.value = false
+  // Redirect to home page after sign-out
+  router.push('/')
 }
 
 /**

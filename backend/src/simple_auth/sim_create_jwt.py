@@ -74,7 +74,7 @@ def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depe
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
-    scopes = [Scope.DOC_READ, Scope.DOC_WRITE, Scope.DOC_INGEST, Scope.DOC_INGEST_BULK, Scope.QUERY, Scope.ADMIN]
+    scopes = [Scope.DOC_READ, Scope.DOC_WRITE, Scope.DOC_INGEST, Scope.QUERY, Scope.ADMIN]
 
     access_token = _create_access_token(additional_claims={}, userid=user.userid, username=user.username, scopes=scopes)
     return access_token
