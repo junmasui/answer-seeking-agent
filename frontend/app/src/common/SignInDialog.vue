@@ -7,11 +7,16 @@
           v-model="alertVisible"
           closable
           title="Simulated authentication in use"
-          text="Do not expose to beyond local system before replacing witha real OAuth2 service. Email/username and password are not being validated."
           type="info"
           variant="tonal"
           class="mb-2"
-        ></v-alert>
+        >
+          <ul>
+            <li>Do not expose to beyond local system before replacing with a real OAuth2 service.</li>
+            <li>Email/username and password are not validated.</li>
+            <li>Password field must have minimum 3 characters.</li>
+          </ul>
+        </v-alert>
 
         <v-form>
           <!-- alternative prepend-inner-icon was mdi-email-outline -->
@@ -62,7 +67,7 @@ const accessToken = defineModel('acccessToken', {
   default: ''
 })
 
-const emit = defineEmits(['onSuccess'])
+const emit = defineEmits(['onSuccess', 'onFail'])
 
 const alertVisible = ref(true)
 
@@ -123,12 +128,12 @@ async function onConfirm() {
 
     signedIn.value = true
     accessToken.value = data.access_token
+    emit('onSuccess')
   } catch (error) {
     console.error('Could not sign in:', error)
+    emit('onFail', error)
   }
 
   active.value = false
-
-  emit('onSuccess')
 }
 </script>
