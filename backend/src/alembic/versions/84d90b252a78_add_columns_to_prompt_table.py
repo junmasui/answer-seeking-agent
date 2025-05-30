@@ -50,7 +50,7 @@ def schema_downgrade():
     op.drop_column('agent_prompt', 'include_history')
     op.drop_column('agent_prompt', 'owner_type')
     # Drop the enum type if it's no longer used
-    op.execute("DROP TYPE IF EXISTS ownertype")
+    op.execute('DROP TYPE IF EXISTS ownertype')
     # ### end Alembic commands ###
 
 
@@ -58,7 +58,7 @@ def data_upgrade():
     """Migrate existing data upward."""
     # Set default value for existing rows (assuming they should be SYSTEM type)
     op.execute("UPDATE agent_prompt SET owner_type = 'SYSTEM' WHERE owner_type IS NULL")
-    
+
     # Now make the column non-nullable
     op.alter_column('agent_prompt', 'owner_type', nullable=False)
 

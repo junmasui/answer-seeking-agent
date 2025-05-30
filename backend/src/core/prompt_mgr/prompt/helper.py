@@ -40,10 +40,7 @@ def add_chat_prompt(
 
     # If a system-controlled record is the active prompt, then we will add
     # the new system-controlled record as the active prompt.
-    has_active = any(
-        prompt.status == AgentPromptStatus.ACTIVE
-        for prompt in result.prompts
-    )
+    has_active = any(prompt.status == AgentPromptStatus.ACTIVE for prompt in result.prompts)
     status = AgentPromptStatus.ACTIVE if has_active else AgentPromptStatus.DEACTIVATED
 
     add_prompt(

@@ -49,7 +49,9 @@ def list_prompts(
     sort_by: Optional[list] = None,
 ):
     """Return the list of prompts."""
-    existing_objs = _list_agent_prompts(name=name, status=status, owner_type=owner_type, start=start, length=length, sort_by=sort_by)
+    existing_objs = _list_agent_prompts(
+        name=name, status=status, owner_type=owner_type, start=start, length=length, sort_by=sort_by
+    )
     table_stats = get_prompt_statistics()
 
     def _to_dict(_x: DbAgentPrompt):
