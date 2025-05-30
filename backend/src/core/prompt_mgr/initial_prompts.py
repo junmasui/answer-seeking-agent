@@ -3,6 +3,8 @@ from pathlib import Path
 
 import yaml
 
+from ..public_models import OwnerType
+
 from ..signals import db_predefined_data_handler
 from .util import add_chat_prompt
 
@@ -35,6 +37,7 @@ def register_initial_prompts(sender):
 
         add_chat_prompt(
             prompt_name=prompt_name,
+            owner_type=OwnerType.SYSTEM,
             system_message=prompt.get('system_message', ''),
             human_message=prompt.get('human_message', ''),
             include_history=prompt.get('include_history', False),

@@ -2,7 +2,7 @@ import textwrap
 from typing import Optional
 
 from core.agent.internal_models import AgentPromptName
-from core.public_models import AgentPromptStatus
+from core.public_models import AgentPromptStatus, OwnerType
 
 from .add import add_prompt
 from .query import list_prompts
@@ -19,18 +19,32 @@ def add_chat_prompt(
     if prompt_name not in AgentPromptName:
         raise ValueError('prompt_name must be a valid AgentPromptName constant')
 
-    result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
-
-    if result.prompts:
-        return
+    result = list_prompts(name=prompt_name, owner_type=OwnerType.SYSTEM)
 
     if system_message:
         system_message = textwrap.dedent(system_message)
     if human_message:
         human_message = textwrap.dedent(human_message)
+
+    exact = any(
+        prompt.system_message == system_message
+        and prompt.human_message == human_message
+        and prompt.include_history == include_history
+        for prompt in result.prompts
+    )
+
+    if exact:
+        return
+
+    is_active = any(
+        prompt.status == AgentPromptStatus.ACTIVE
+        for prompt in result.prompts
+    )
+
     add_prompt(
         name=prompt_name,
-        status=AgentPromptStatus.ACTIVE,
+        status=AgentPromptStatus.ACTIVE if is_active else AgentPromptStatus.DEACTIVATED,
+        owner_type=OwnerType.SYSTEM,
         human_message=human_message,
         system_message=system_message,
         include_history=include_history,

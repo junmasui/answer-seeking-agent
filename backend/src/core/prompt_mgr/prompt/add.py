@@ -3,7 +3,7 @@ import uuid
 
 from sqlalchemy import and_, select, update
 
-from core.public_models.prompt import AgentPromptStatus
+from core.public_models.prompt import AgentPromptStatus, OwnerType
 
 from ...db_models import DbAgentPrompt
 from ...providers.sql_database import DataDomain, get_sessionmaker
@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def add_prompt(
     name: str,
+    owner_type: OwnerType,
     status: AgentPromptStatus,
     system_message: str | None,
     human_message: str | None,
@@ -27,6 +28,7 @@ def add_prompt(
     """
     _add_or_update_agent_prompt(
         name=name,
+        owner_type=owner_type,
         status=status,
         system_message=system_message,
         human_message=human_message,
@@ -37,6 +39,7 @@ def add_prompt(
 
 def _add_or_update_agent_prompt(
     name: str,
+    owner_type: OwnerType,
     status: AgentPromptStatus,
     system_message: str | None,
     human_message: str | None,
@@ -69,6 +72,7 @@ def _add_or_update_agent_prompt(
             new_obj = DbAgentPrompt(
                 id=prompt_uuid,
                 name=name,
+                owner_type=owner_type,
                 status=status,
                 system_message=system_message,
                 human_message=human_message,
@@ -79,7 +83,7 @@ def _add_or_update_agent_prompt(
             session.add(new_obj)
 
         # Only one version can be active
-        if status == AgentPromptStatus.ACTIVE and version > 1:
+        if status == AgentPromptStatus.ACTIVE:
             with session.begin():
                 stmt = (
                     update(DbAgentPrompt)

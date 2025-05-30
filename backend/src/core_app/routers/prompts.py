@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, Depends, Path, Query
 
 from core.prompt_mgr import add_prompt, delete_prompt, get_prompt_statistics, list_prompts, update_prompt
 from core.public_models import AgentPromptAddRequest, AgentPromptList, AgentPromptStats, AgentPromptUpdateRequest
-from core.public_models.prompt import AgentPromptStatus
+from core.public_models.prompt import AgentPromptStatus, OwnerType
 from global_config import get_global_config
 from simple_auth import Scope, User, get_scoped_current_user
 
@@ -51,6 +51,7 @@ async def handle_single_insert(
 
     add_prompt(
         name=body.name,
+        owner_type=OwnerType.USER,
         status=status,
         system_message=body.system_message,
         human_message=body.human_message,
