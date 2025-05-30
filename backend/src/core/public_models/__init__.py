@@ -1,6 +1,7 @@
 import enum
 
 from .agent import Answer, AnswerRequestBody, Citation
+from .base import OwnerType
 from .doc import (
     BulkDeleteRequestBody,
     Document,
@@ -53,6 +54,7 @@ __all__ = [
     'AgentPromptStats',
     'AgentPromptStatus',
     'AgentPromptUpdateRequest',
+    'OwnerType',
     'SortDirection',
 ]
 

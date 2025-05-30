@@ -20,7 +20,10 @@ class DocumentSetStatus(str, enum.Enum):
 
 
 class DocumentSet(CamelModel):
-    """Represents a set of documents, including its status and properties like default status for new documents and public visibility."""
+    """
+    Represents a set of documents, including its status and properties like
+    default status for new documents and public visibility.
+    """
 
     id: UUID
     name: str = Field(description='Name of document set.')

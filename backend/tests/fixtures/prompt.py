@@ -75,6 +75,7 @@ async def populated_prompt_table(prompt_table, api_server, sql_engine, sql_sessi
                 'name': f'prompt {index}',
                 'humanMessage': f'placeholder human message {index}',
                 'systemMessage': f'placeholder system message {index}',
+                'includeHistory': index % 2 == 0,
             }
             await api_server.post(path=path, content_type='json', data=data)
 

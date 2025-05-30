@@ -68,13 +68,19 @@ class DocumentUpdateRequest(CamelModel):
 
 
 class BulkDeleteRequestBody(CamelModel):
-    """Represents the request body for bulk deleting documents, containing a list of document UUIDs."""
+    """
+    Represents the request body for bulk deleting documents which are specified
+    with a list of document UUIDs.
+    """
 
     doc_uuids: list[UUID]
 
 
 class DocumentUploadFormData(CamelModel):
-    """Represents the form data for uploading a document, including details about the document set, chunks, and source."""
+    """
+    Represents the form data for uploading a document, including details about the document set,
+    chunks, and source.
+    """
 
     document_set_id: UUID
     total_chunks: int

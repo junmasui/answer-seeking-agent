@@ -33,12 +33,12 @@ def downgrade():
 def schema_upgrade():
     """Upgrade schema.
     """
-    ${upgrades if upgrades}
+    ${upgrades if upgrades else "# no auto-generatable ops found"}
 
 def schema_downgrade():
     """Downgrade schema.
     """
-    ${downgrades if downgrades}
+    ${downgrades if downgrades else "# no auto-generatable ops found"}
 
 def data_upgrade():
     """Migrate existing data upward.

@@ -10,7 +10,7 @@ import logging
 from langchain_core.output_parsers import StrOutputParser
 
 from ..providers.chat_llm import get_chat_llm
-from .internal_models import AgentPrompt
+from .internal_models import AgentPromptName
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def get_question_rewriter():
     # LLM
     llm = get_chat_llm()
 
-    rewrite_prompt = get_chat_prompt(prompt_name=AgentPrompt.REWRITE_QUERY)
+    rewrite_prompt = get_chat_prompt(prompt_name=AgentPromptName.REWRITE_QUERY)
 
     chain = rewrite_prompt | llm | StrOutputParser()
 
