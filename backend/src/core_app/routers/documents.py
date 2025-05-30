@@ -154,7 +154,7 @@ async def handle_single_delete(
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-    _user_id = _current_user.userid if _current_user is not None else None
+    _user_id = current_user.userid if current_user is not None else None
 
     delete_document(doc_uuid)
 
