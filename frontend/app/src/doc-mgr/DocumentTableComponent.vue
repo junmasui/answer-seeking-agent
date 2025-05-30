@@ -273,7 +273,7 @@ async function applyEditDoc() {
  */
 async function editDocument(doc_uuid) {
   // Simulate the delay from a real call to the API Server.
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100))
 }
 
 /**
