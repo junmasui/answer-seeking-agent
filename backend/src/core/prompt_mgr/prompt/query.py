@@ -33,6 +33,8 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPr
             stmt = select(DbAgentPrompt).where(and_(*where))
         elif len(where) == 1:
             stmt = select(DbAgentPrompt).where(where[0])
+        else:
+            stmt = select(DbAgentPrompt)
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
