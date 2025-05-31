@@ -424,7 +424,7 @@ async function loadItems() {
         .map((item) => {
           let key = item.key
           if (item.order === 'desc') {
-            key = '-' + key
+            key = `-${key}`
           }
           return key
         })
