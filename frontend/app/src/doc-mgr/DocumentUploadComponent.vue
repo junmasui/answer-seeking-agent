@@ -146,7 +146,7 @@ onMounted(async () => {
   }, 30000)
 })
 
-onBeforeUnmount(async () => {
+onBeforeUnmount(() => {
   clearInterval(intervalId)
   intervalId = null
 })
