@@ -101,7 +101,7 @@ const tableHeaders = ref([
 
 const sortBy = ref([])
 
-watch(sortBy, async (newValue, _oldValue) => {
+watch(sortBy, (newValue, _oldValue) => {
   logger.debug('Sort criteria changed', {
     newSort: newValue,
     oldSort: _oldValue
@@ -362,7 +362,7 @@ onMounted(async () => {
   }, 30000)
 })
 
-onBeforeUnmount(async () => {
+onBeforeUnmount(() => {
   clearInterval(intervalId)
   intervalId = null
 })
