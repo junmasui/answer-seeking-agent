@@ -15,8 +15,6 @@ from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
 
-### Question Re-writer
-
 
 def get_question_rewriter():
     """

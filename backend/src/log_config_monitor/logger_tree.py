@@ -18,6 +18,7 @@ def dump_logger_tree(logger=None, include_all=False):
     """
 
     def _dump_handler(_handler: logging.Handler):
+        """Extract handler information into a structured dictionary format."""
         node = {
             'name': _handler.get_name(),
             'type': type(_handler).__qualname__,
@@ -29,6 +30,7 @@ def dump_logger_tree(logger=None, include_all=False):
         return node
 
     def _dump_logger(_logger, include_all=include_all):
+        """Extract logger information into a structured dictionary format recursively."""
         node = {
             'name': _logger.name,
             'level': logging.getLevelName(_logger.getEffectiveLevel()),

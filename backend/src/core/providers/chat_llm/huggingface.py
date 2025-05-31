@@ -19,7 +19,6 @@ def get_chat_llm() -> BaseChatModel:
     model_id = 'microsoft/Phi-3.5-mini-instruct'
 
     base_llm = HuggingFaceEndpoint(
-        # endpoint_url=endpoint_url,
         repo_id=model_id,
         max_new_tokens=2048,
         top_k=10,

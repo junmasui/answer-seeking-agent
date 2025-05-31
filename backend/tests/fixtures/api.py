@@ -46,6 +46,7 @@ class ApiClient:
         """Send HTTP GET request to API Server."""
 
         async def _get(client, url):
+            """Execute HTTP GET request using the provided client."""
             return await client.get(url)
 
         return await self._send(path=path, action=_get)
@@ -54,6 +55,7 @@ class ApiClient:
         """Send HTTP DELETE request to API Server."""
 
         async def _delete(client, url):
+            """Execute HTTP DELETE request using the provided client."""
             return await client.delete(url)
 
         return await self._send(path=path, action=_delete)
@@ -62,6 +64,7 @@ class ApiClient:
         """Send HTTP PATCH request to API Server."""
 
         async def _patch(client, url):
+            """Execute HTTP PATCH request with JSON or multipart data using the provided client."""
             kwargs = {}
             match content_type:
                 case 'json':
@@ -82,6 +85,7 @@ class ApiClient:
         """Send HTTP POST request to API Server."""
 
         async def _post(client, url):
+            """Execute HTTP POST request with JSON or multipart data using the provided client."""
             kwargs = {}
             if timeout is not None:
                 kwargs['timeout'] = timeout

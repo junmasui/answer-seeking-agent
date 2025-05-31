@@ -92,8 +92,8 @@ ignore = [
   "D212"  # Suppress the rule that multi-line docstring summary should start at the first line
 ]
 
-##[tool.ruff.rules]
-##E501 = { line-length = 120 }
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 100
 
 [tool.uv]
 # Explicit declaration that the "cpu" and "cuda12" extras are in conflict

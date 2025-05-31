@@ -12,7 +12,9 @@
           class="mb-2"
         >
           <ul>
-            <li>Do not expose to beyond local system before replacing with a real OAuth2 service.</li>
+            <li>
+              Do not expose to beyond local system before replacing with a real OAuth2 service.
+            </li>
             <li>Email/username and password are not validated.</li>
             <li>Password field must have minimum 3 characters.</li>
           </ul>

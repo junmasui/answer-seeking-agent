@@ -118,7 +118,7 @@ async function submit() {
 
     const response = await fetch('/api/answer/', {
       method: 'POST',
-      headers: headers,
+      headers,
       body: JSON.stringify(queryParams, null, 2)
     })
 
@@ -151,7 +151,7 @@ async function submit() {
       })
     }
 
-    messages.value.push({ type: 'system', message: message })
+    messages.value.push({ type: 'system', message })
 
     logger.apiSuccess('Conversational query completed', {
       threadId: threadId.value,

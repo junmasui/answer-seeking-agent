@@ -18,6 +18,7 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPr
     """Return tracking records when matched to specified prommpt UUID."""
 
     def _ensure_uuid(item):
+        """Convert string to UUID if needed, otherwise return the UUID as-is."""
         return uuid.UUID(hex=item) if isinstance(item, str) else item
 
     prompt_uuid_list = [_ensure_uuid(item) for item in prompt_uuid_list]
@@ -58,6 +59,7 @@ def list_prompts(
     table_stats = get_prompt_statistics()
 
     def _to_dict(_x: DbAgentPrompt):
+        """Convert database agent prompt record to API response AgentPrompt model."""
         return AgentPrompt(
             id=_x.id,
             name=_x.name,
@@ -188,6 +190,7 @@ def _build_order_by(sort_by: Optional[list] = None):
         raise ValueError('sort_by cannot be empty')
 
     def _to_col(x):
+        """Convert sort field name and direction to SQLAlchemy column expression."""
         name, direction = x
         expr = None
         match name:

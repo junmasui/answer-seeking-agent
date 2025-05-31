@@ -13,6 +13,7 @@ def parse_sort_by(str_val):
     """
 
     def _to_sort(x):
+        """Parse sort field specification into field name and direction tuple."""
         direction = SortDirection.ASC
         if x.startswith('-'):
             direction = SortDirection.DESC
