@@ -21,43 +21,31 @@ test_patterns = [
 
 [[analyzers]]
 name = "python"
+enabled = true
+dependency_file_paths = [
+  "backend/pyproject.toml",
+  "backend/uv.lock"
+]
 
   [analyzers.meta]
   runtime_version = "3.x.x"
   max_line_length = 120
-  dependency_file_paths = [
-    "backend/pyproject.toml",
-    "backend/uv.lock"
-  ]
-  lockfile_path = "backend/uv.lock"
-  config_path = "backend/pyproject.toml"
-  include_paths = ["backend/**"]
 
 # Frontend Configuration (JavaScript/Vue3)
 
 [[analyzers]]
 name = "javascript"
+enabled = true
+dependency_file_paths = [
+  "frontend/app/package.json",
+  "frontend/app/package-lock.json"
+]
 
   [analyzers.meta]
   plugins = ["vue"]
   environment = ["browser", "vitest"]
-  dependency_file_paths = [
-    "frontend/app/package.json",
-    "frontend/app/package-lock.json"
-  ]
-  config_path = "frontend/app/eslint.config.js"
-  include_paths = ["frontend/app/**"]
 
 
 [[analyzers]]
 name = "shell"
-
-# Security Scanning
-[[analyzers]]
-name = "dependency-scanner"
 enabled = true
-targets = [
-  { path = "frontend/app/package.json" },
-  { path = "frontend/package-lock.json" }, # Enhances precision
-  { path = "backend/uv.lock" }
-]
