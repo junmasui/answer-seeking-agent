@@ -466,7 +466,7 @@ async function ingestAllUploadedDocuments() {
 
     const response = await fetch('/api/documents/ingest', {
       method: 'POST',
-      headers: headers,
+      headers,
       body: JSON.stringify(body, null, 2)
     })
 

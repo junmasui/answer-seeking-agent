@@ -253,7 +253,7 @@ async function editDocumentSet(doc_set_uuid) {
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
       method: 'PATCH',
-      headers: headers,
+      headers,
       body: JSON.stringify(body, null, 2)
     })
 
@@ -321,7 +321,7 @@ async function deleteDocumentSet(doc_set_uuid) {
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
       method: 'DELETE',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
@@ -382,7 +382,7 @@ async function loadTableStats() {
 
     const response = await fetch('/api/document-sets/stats', {
       method: 'GET',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
@@ -442,7 +442,7 @@ async function loadItems() {
 
     const response = await fetch(`/api/document-sets/?${params}`, {
       method: 'GET',
-      headers: headers
+      headers
     })
 
     if (!response.ok) {
