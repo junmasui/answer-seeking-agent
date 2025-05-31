@@ -1,11 +1,43 @@
 version = 1
 
+# Exclude generated artifacts from analysis.
+# These should never be in the code repository but they
+# could show up in a CI environment.
+
+exclude_patterns = [
+  "frontend/node_modules/**",
+  "backend/.venv/**",
+  "**/__pycache__/",
+]
+
+test_patterns = [
+  "frontend/app/tests/**/*.{js,ts,vue}",
+  "backend/tests/**/*.py",
+  "**/test_*.py",
+  "**/*.spec.{js,ts}"
+]
+
+# Backend Configuration (Python with ruff)
+
 [[analyzers]]
 name = "python"
 
   [analyzers.meta]
   runtime_version = "3.x.x"
   max_line_length = 120
+  dependency_file_paths = [
+    "backend/pyproject.toml",
+    "backend/uv.lock"
+  ]
+  lockfile_path = "backend/uv.lock"
+  include_paths = ["backend/**"]
+
+[[transformers]]
+name = "ruff"
+enabled = true
+include_paths = ["backend/**/*.py"]
+
+# Frontend Configuration (JavaScript/Vue3)
 
 [[analyzers]]
 name = "javascript"
@@ -13,6 +45,27 @@ name = "javascript"
   [analyzers.meta]
   plugins = ["vue"]
   environment = ["browser", "vitest"]
+  dependency_file_paths = [
+    "frontend/app/package.json",
+    "frontend/app/package-lock.json"
+  ]
+  include_paths = ["frontend/app/**"]
+
+[[transformers]]
+name = "prettier"
+enabled = true
+include_paths = ["frontend/app/**/*.{js,vue}"]
+
 
 [[analyzers]]
 name = "shell"
+
+# Security Scanning
+[[analyzers]]
+name = "dependency-scanner"
+enabled = true
+targets = [
+  { path = "frontend/app/package.json" },
+  { path = "frontend/package-lock.json" }, # Enhances precision
+  { path = "backend/uv.lock" }
+]
