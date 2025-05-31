@@ -30,12 +30,8 @@ name = "python"
     "backend/uv.lock"
   ]
   lockfile_path = "backend/uv.lock"
+  config_path = "backend/pyproject.toml"
   include_paths = ["backend/**"]
-
-[[transformers]]
-name = "ruff"
-enabled = true
-include_paths = ["backend/**/*.py"]
 
 # Frontend Configuration (JavaScript/Vue3)
 
@@ -49,12 +45,8 @@ name = "javascript"
     "frontend/app/package.json",
     "frontend/app/package-lock.json"
   ]
+  config_path = "frontend/app/eslint.config.js"
   include_paths = ["frontend/app/**"]
-
-[[transformers]]
-name = "prettier"
-enabled = true
-include_paths = ["frontend/app/**/*.{js,vue}"]
 
 
 [[analyzers]]
