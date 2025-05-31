@@ -65,6 +65,7 @@ def query_documents(state):
     # Remove irrelevant metadata. It's stuff that we don't need for processing
     # or evaluation.
     def _clean_up_retrieved(x: Document):
+        """Remove irrelevant metadata and ensure document ID is properly set."""
         if 'orig_elements' in x.metadata:
             del x.metadata['orig_elements']
 

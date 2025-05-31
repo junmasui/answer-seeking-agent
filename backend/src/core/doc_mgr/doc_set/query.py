@@ -17,6 +17,7 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     """Return tracking records when matched to specified document UUID."""
 
     def _ensure_uuid(item):
+        """Convert string to UUID if needed, otherwise return the UUID as-is."""
         return uuid.UUID(hex=item) if isinstance(item, str) else item
 
     doc_set_uuid_list = [_ensure_uuid(item) for item in doc_set_uuid_list]
@@ -48,6 +49,7 @@ def list_document_sets(
     table_stats = get_document_set_statistics()
 
     def _to_dict(_x: DbTrackedDocumentSet):
+        """Convert database document set record to API response DocumentSet model."""
         return DocumentSet(
             id=_x.id,
             name=_x.name,
@@ -180,6 +182,7 @@ def _build_order_by(sort_by: Optional[list] = None):
         raise ValueError('sort_by cannot be empty')
 
     def _to_col(x):
+        """Convert sort field name and direction to SQLAlchemy column expression."""
         name, direction = x
         expr = None
         match name:

@@ -19,6 +19,7 @@ def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[DbTrackedDoc
     """Return tracking records when matched to specified document UUID."""
 
     def _ensure_uuid(item):
+        """Convert string to UUID if needed, otherwise return the UUID as-is."""
         return uuid.UUID(hex=item) if isinstance(item, str) else item
 
     doc_uuid_list = [_ensure_uuid(item) for item in doc_uuid_list]
@@ -50,6 +51,7 @@ def list_documents(
     table_stats = get_document_statistics()
 
     def _to_dict(_x: DbTrackedDocument):
+        """Convert database document record to API response Document model."""
         return Document(
             id=_x.id,
             status=_x.status,
@@ -212,6 +214,7 @@ def _build_order_by(sort_by: Optional[list] = None):
         raise ValueError('sort_by cannot be empty')
 
     def _to_col(x):
+        """Convert sort field name and direction to SQLAlchemy column expression."""
         name, direction = x
         expr = None
         match name:

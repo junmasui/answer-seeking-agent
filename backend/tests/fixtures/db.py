@@ -100,7 +100,7 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
 
 
 @pytest.fixture(scope='module')
-def auto_mapped_classes(sql_engine, reflected_metadata) -> Generator[dict[str, type], None, None]:
+def auto_mapped_classes(reflected_metadata) -> Generator[dict[str, type], None, None]:
     """Returns the default automap base class for an automap schema."""
     # produce a set of mappings from this MetaData.
     Base = automap_base(metadata=reflected_metadata)

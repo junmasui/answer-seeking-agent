@@ -121,7 +121,7 @@ watch(
   (newPath) => {
     // Redirect to sign-in if accessing admin without authentication
     if (newPath === '/admin' && !signedIn.value) {
-      router.push('/?returnTo=' + encodeURIComponent(newPath))
+      router.push(`/?returnTo=${encodeURIComponent(newPath)}`)
       performSignIn.value = true
     }
   }

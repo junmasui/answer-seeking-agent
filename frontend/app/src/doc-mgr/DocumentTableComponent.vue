@@ -466,7 +466,7 @@ async function ingestAllUploadedDocuments() {
 
     const response = await fetch('/api/documents/ingest', {
       method: 'POST',
-      headers: headers,
+      headers,
       body: JSON.stringify(body, null, 2)
     })
 
@@ -633,7 +633,7 @@ async function loadItems() {
         .map((item) => {
           let key = item.key
           if (item.order === 'desc') {
-            key = '-' + key
+            key = `-${key}`
           }
           return key
         })

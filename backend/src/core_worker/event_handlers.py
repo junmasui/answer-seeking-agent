@@ -29,18 +29,19 @@ def setup_monitoring(app):
     state = app.events.State()
 
     def announce_worker_online(event):
-        #
+        """Log when a Celery worker comes online and update state tracking."""
         state.event(event)
 
         logger.info('Worker is online: %s', event['name'])
 
     def announce_worker_offline(event):
-        #
+        """Log when a Celery worker goes offline and update state tracking."""
         state.event(event)
 
         logger.info('Worker is offline: %s', event['name'])
 
     def announce_sent_tasks(event):
+        """Log when a task is sent and update document status to QUEUED."""
         state.event(event)
 
         # task name is sent only with -received event, and state

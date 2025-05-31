@@ -149,12 +149,12 @@ async def handle_single_update(
 @router.delete('/{doc_uuid}')
 async def handle_single_delete(
     doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-    _current_user: Annotated[
+    current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
-    # _user_id = _current_user.userid if _current_user is not None else None
+    _user_id = current_user.userid if current_user is not None else None
 
     delete_document(doc_uuid)
 
@@ -215,12 +215,12 @@ async def handle_ingest(
 @router.post('/delete')
 async def handle_delete(
     body: Optional[BulkDeleteRequestBody] = None,
-    _current_user: Annotated[
+    current_user: Annotated[
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
     """Delete the files specified in the list of document UUIDs"""
-    # _user_id = _current_user.userid if _current_user is not None else None
+    _user_id = current_user.userid if current_user is not None else None
 
     doc_uuids = body.doc_uuids if body.doc_uuids else []
 
