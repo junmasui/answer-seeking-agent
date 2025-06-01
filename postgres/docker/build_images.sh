@@ -13,7 +13,7 @@ set -eu
 # DOCKER=podman
 DOCKER="docker buildx"
 
-"$DOCKER" build \
+$DOCKER build \
   --build-context parent-dir=.. \
   --file Dockerfile \
   --tag localhost/localhost/postgres:17.2-with-pgvector \

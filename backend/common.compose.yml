@@ -323,14 +323,24 @@ services:
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     # command: null
 
-    # healthcheck:
-    #   test: ['CMD', 'curl', '-f', 'http://localhost:9808/health']
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 5
-    #   start_period: 5s
+    healthcheck:
+      # The danihodovic/celery-exporter image is based on python:3.13-slim-bookworm,
+      # which does not have curl or wget installed.
+      # To support the health check, we use a Python one-liner that uses the standard
+      # library's urllib.request module. This script will attempt to connect to
+      # the /health endpoint on port 9808 and exit with a status code
+      # indicating success (0) or failure (1).
+      test: [
+        'CMD',
+        'python3',
+        '-c',
+        "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://localhost:9808/health').getcode() == 200 else sys.exit(1)"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
       
-
 #
 # Named volumes are not created until the dependent service
 # is started.
