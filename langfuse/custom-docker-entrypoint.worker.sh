@@ -50,7 +50,7 @@ do
     # The $((...)) syntax is for shell arithematic operations.
     ELAPSED=$(( ELAPSED + WAIT_INTERVAL ))
     ( wget -qS -O - http://langfuse-web:3000/api/public/ready 2>&1 ) \
-            | grep -q \'HTTP/1.1 200 OK\'
+            | grep -q 'HTTP/1.1 200 OK'
     if [ "$?" -eq 0 ]
     then
         echo "Langfuse web server started."
