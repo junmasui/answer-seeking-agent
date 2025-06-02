@@ -1,4 +1,4 @@
-FROM docker.io/python:3.12.8-slim-bookworm
+FROM docker.io/python:3.12.10-slim-bookworm
 
 #
 # https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/base/Dockerfile
