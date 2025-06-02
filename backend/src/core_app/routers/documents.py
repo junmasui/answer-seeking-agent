@@ -65,7 +65,9 @@ async def handle_list_files(
     sort_by: Annotated[
         str,
         Query(
-            ..., alias='sortBy', description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending'
+            ...,
+            alias='sortBy',
+            description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
@@ -73,7 +75,9 @@ async def handle_list_files(
     """Returns a list of documents."""
     parsed_sort_by = parse_sort_by(sort_by)
 
-    return list_documents(doc_set_id=doc_set_uuid, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by)
+    return list_documents(
+        doc_set_id=doc_set_uuid, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by
+    )
 
 
 @router.get('/stats', response_model=DocumentStats)

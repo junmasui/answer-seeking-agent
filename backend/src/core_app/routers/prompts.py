@@ -28,7 +28,9 @@ async def handle_list_prompts(
     sort_by: Annotated[
         str,
         Query(
-            ..., alias='sortBy', description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending'
+            ...,
+            alias='sortBy',
+            description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
