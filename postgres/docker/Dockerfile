@@ -1,11 +1,14 @@
-FROM docker.io/postgres:17.2-bookworm
+FROM docker.io/postgres:17.5-bookworm
 
-RUN apt-get update \
-  && apt-get install -y ca-certificates curl gettext-base
-
-# Install pgvector
-RUN curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-17-pgvector \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN \
+  apt-get update \
+  && apt-get install -y ca-certificates curl gettext-base \
+  #
+  # Install pgvector
+  #
+  && curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+  && apt-get install -y postgresql-17-pgvector \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
