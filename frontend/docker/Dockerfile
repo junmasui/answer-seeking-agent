@@ -4,18 +4,19 @@ FROM docker.io/node:22-bookworm-slim
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-# Install Debian packages
-RUN apt-get update \
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN \
+  apt-get update \
+  # Install Debian packages
   && apt-get install -y \
      curl \
      wget \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-
-# Create a custom group with GROUP_ID
-# Then create a custom user with USER_ID and GROUP_ID
-RUN set -eux ; \
+  && rm -rf /var/lib/apt/lists/* \
+  # Create a custom group with GROUP_ID
+  # Then create a custom user with USER_ID and GROUP_ID
+  && set -eux ; \
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
     ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
  

@@ -16,9 +16,12 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # DOCKER=podman
 DOCKER="docker buildx"
 
+#
+# Build an image with CUDA12 installed on Python 3.12 on Debian 12
+#
 $DOCKER build \
   --file python_bookworm_cuda12.Dockerfile \
-  --tag localhost/localhost/python:3.12.8-bookworm-cuda12-cudnn9 \
+  --tag localhost/localhost/python:3.12.10-bookworm-cuda12-cudnn9 \
   . 2>&1 \
 | tee build-python-bookworm-cuda12-cudnn9.log
 
@@ -32,6 +35,7 @@ $DOCKER build \
   --tag localhost/localhost/answers-backend:python-3.12-cpu \
   . 2>&1 \
 | tee build-backend-python-cpu.log
+
 
 #
 # Build a backend image with Python 3.12 on Debian 12 with CUDA 12

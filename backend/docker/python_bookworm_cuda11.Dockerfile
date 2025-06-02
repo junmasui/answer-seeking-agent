@@ -1,41 +1,8 @@
-FROM docker.io/python:3.12.8-slim-bookworm
+FROM docker.io/python:3.12.10-slim-bookworm
 
 #
 # https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/base/Dockerfile
 #
-
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        gnupg2 \
-    && apt-get clean \
-    && curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/3bf863cc.pub \
-        | apt-key add - \
-    && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
-    && rm -rf /var/lib/apt/lists/*
-##    && apt-get purge --autoremove -y curl \
-
-
-# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
-
-#
-# Install the CUDA libraries installed in the base NVIDIA image.
-#
-
-ENV NV_CUDA_CUDART_VERSION=11.8.89-1
-
-RUN apt-get update \
-   && apt-get install -y --no-install-recommends \
-      cuda-compat-11-8 \
-      cuda-cudart-11-8=${NV_CUDA_CUDART_VERSION} \
-   && apt-get clean \
-   && rm -rf /var/lib/apt/lists/*
-
-# Required for nvidia-docker v1
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
-    && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 ENV PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
@@ -45,10 +12,38 @@ ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
+# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
+ENV NV_CUDA_CUDART_VERSION=11.8.89-1
 
 
 # ENV NV_CUDA_DRIVERS_VERSION=565.57.01-1
 # ENV NV_CUDA_TOOLKIT_VERSION=12.6.3-1
+
+RUN \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg2 \
+    && apt-get clean \
+    && curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/3bf863cc.pub \
+        | apt-key add - \
+    && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    #
+    # Install the CUDA libraries installed in the base NVIDIA image.
+    #
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        cuda-compat-11-8 \
+        cuda-cudart-11-8=${NV_CUDA_CUDART_VERSION} \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # Required for nvidia-docker v1
+    echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+    && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
 
 
 # RUN apt-get update \
@@ -109,31 +104,32 @@ ENV NV_LIBCUSPARSE_VERSION=11.7.5.86-1
 ENV NV_LIBCUBLAS_VERSION=11.11.3.6-1
 ENV NV_LIBNCCL_PACKAGE_VERSION=2.15.5-1+cuda11.8
 
+# Install the CUDNN libraries installed in the runtime NVIDIA image.
+#
+# See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/cudnn/Dockerfile
+ENV NV_CUDNN_VERSION=8.9.6.50-1+cuda11.8
+
 RUN apt-get update \
+    #
+    # Install the CUDA libraries installed in the runtime NVIDIA image.
+    #
     && apt-get install -y --no-install-recommends \
         cuda-libraries-11-8=${NV_CUDA_LIB_VERSION} \
         cuda-nvtx-11-8=${NV_NVTX_VERSION} \
         libcublas-11-8=${NV_LIBCUBLAS_VERSION} \
         libcusparse-11-8=${NV_LIBCUSPARSE_VERSION} \
         libnpp-11-8=${NV_LIBNPP_VERSION} \
-   && apt-get clean \
-   && apt-mark hold libcublas-11-8 \
-   && rm -rf /var/lib/apt/lists/*
-#        libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
-#   && apt-mark hold libcublas-11-8 libnccl2 \
-
-
-#
-# Install the CUDNN libraries installed in the runtime NVIDIA image.
-#
-# See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/cudnn/Dockerfile
-#
-ENV NV_CUDNN_VERSION=8.9.6.50-1+cuda11.8
-
-RUN apt-get update \
-   && apt-get install -y --no-install-recommends \
+    #
+    # Install the CUDNN libraries installed in the runtime NVIDIA image.
+    #
+    # See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/cudnn/Dockerfile
+    #
         libcudnn8=${NV_CUDNN_VERSION} \
    && apt-get clean \
    && apt-mark hold \
+        libcublas-11-8 \
         libcudnn8 \
    && rm -rf /var/lib/apt/lists/*
+#        libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
+#   && apt-mark hold libcublas-11-8 libnccl2 \
+#

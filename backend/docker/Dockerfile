@@ -1,21 +1,22 @@
-FROM docker.io/python:3.12.8-slim-bookworm
+FROM docker.io/python:3.12.10-slim-bookworm
 
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-# Create a custom group with GROUP_ID
-# Then create a custom user with USER_ID and GROUP_ID
-RUN set -eux ; \
+RUN \
+    set -eux ; \
+    \
+    # Create a custom group with GROUP_ID
+    # Then create a custom user with USER_ID and GROUP_ID
+    #
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
-    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
- 
-#
-# Locally required Debian packages
-#
-
-RUN apt-get update \
-    && apt-get install -y \
+    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ; \
+    #
+    # Locally required Debian packages
+    #
+    apt-get update && \
+    apt-get install -y \
         bind9-dnsutils \
         curl \
         libgl1 \
@@ -26,14 +27,13 @@ RUN apt-get update \
         libx11-6 \
         libxext6 \
         poppler-utils \
-        tesseract-ocr \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-#
-# Install uv package manager
-#
-RUN pip install uv
+        tesseract-ocr && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* ; \
+    #
+    # Install uv package manager
+    #
+    pip install uv
 
 #
 # This script lives in the parent of the current directory, so we must define
