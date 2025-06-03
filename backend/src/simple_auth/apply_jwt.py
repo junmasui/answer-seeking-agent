@@ -94,9 +94,9 @@ def get_scoped_current_user(scope: str, missing_ok: bool = False):
     auto_error = not missing_ok
     # When auto_error=False: if HTTP Authorization header is not available,
     # the dependency will return None instead of throwing a 401.
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=auto_error)
+    scoped_oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=auto_error)
 
-    async def scoped_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    async def scoped_user(token: Annotated[str, Depends(scoped_oauth2_scheme)]):
         user = await get_current_user_from_token(token)
         if not user:
             return None
