@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(fastapi_app: FastAPI):
     """
     Manage the application's lifespan events.
     Starts the logging configuration monitor and exposes Prometheus metrics on startup.
@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     logger.info('Logging config watcher starting')
     get_logging_conf_monitor().start()
 
-    instrumentator.expose(app, include_in_schema=False, should_gzip=False)
+    instrumentator.expose(fastapi_app, include_in_schema=False, should_gzip=False)
 
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)

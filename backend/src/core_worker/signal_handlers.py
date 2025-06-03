@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 @after_setup_task_logger.connect
-def setup_task_logger(logger, *_args, **_kwargs):
+def setup_task_logger(task_logger, *_args, **_kwargs):
     """See: https://celery.school/custom-celery-task-logger"""
-    for handler in logger.handlers:
+    for handler in task_logger.handlers:
         handler.setFormatter(
             TaskFormatter('%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s')
         )
@@ -86,7 +86,7 @@ def handle_worker_shutting_down(sig, how, exitcode, **_kwargs):
 
 
 @worker_process_shutdown.connect
-def handle_worker_shutting_down(pid, exitcode, **_kwargs):
+def handle_worker_process_shutting_down(pid, exitcode, **_kwargs):
     """
     Handle worker process shutdown signal.
 
