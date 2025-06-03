@@ -11,6 +11,7 @@ services:
     volumes:
       - frontend-home-1:/home/node/home-1
       - frontend-node-modules-1:/home/node/node-modules-1
+      - traefik-acme-1:/home/node/acme-1
 
     entrypoint: 'bash'
     command:
@@ -28,6 +29,14 @@ services:
           touch /home/node/$$VOL/.initialized
           chown -R 1000:1000 /home/node/$$VOL
           chmod -R 755 /home/node/$$VOL
+          ls -ld /home/node/$$VOL
+        done
+
+        for VOL in 'acme-1'
+        do
+          touch /home/node/$$VOL/.initialized
+          chown -R 1000:1000 /home/node/$$VOL
+          chmod -R 600 /home/node/$$VOL
           ls -ld /home/node/$$VOL
         done
 
@@ -88,13 +97,61 @@ services:
     command: [ '/run_dev_server.sh' ]
     user: '1000:1000'
 
+  traefik:
+    image: 'docker.io/traefik:v3.4'
+    profiles: [ former-frontend, former-all ]
+
+    ports:
+      - '15170:15170'
+      - '15173:15173'
+    networks:
+      - agent-poc
+    volumes:
+      # To populate HOST_USER_ID dynamically, use one of these methods:
+      # 1. Export before running: export HOST_USER_ID=$(id -u) && docker compose up
+      # 2. Inline: HOST_USER_ID=$(id -u) docker compose up  
+      - /run/user/${HOST_USER_ID:-1000}/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.dev.yml:/etc/traefik/traefik.yml  
+      - ./traefik/dynamic-dev:/etc/traefik/dynamic
+      - ./traefik/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - traefik-acme-1:/acme
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+
+    entrypoint: ['/custom-docker-entrypoint.sh']
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: ['traefik']
+
+    healthcheck:
+      test:
+        # The langfuse/langfuse image does not have curl installed. And since the image is based on
+        # busybox, curl is not available.
+        # wget: -q    Turns off wget output, specifically the progress bar.
+        #       -S    Shows the server response, which includes the HTTP status code.
+        #       -O -  Writes the content to stdout.
+        # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use
+        # the IPv6 ::1 address where there is no listening port.
+        # grep: -q    Quiet. Exit code 0 if PATTERN is found, 1 otherwise
+        - CMD-SHELL
+        - >-
+          wget -qS -O - http://127.0.0.1:8082/ping 2>&1
+          | grep -q 'HTTP/1.1 200 OK'
+
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
   proxy:
     depends_on:
       frontend-dependency-gate:
         condition: service_completed_successfully
 
     image: 'docker.io/nginx:1.27.3-bookworm'
-    profiles: [ frontend, all ]
+    profiles: [ former-frontend, former-all ]
 
     ports:
       # Expose the vite server to the host machine
@@ -104,11 +161,11 @@ services:
     volumes:
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - frontend-init-signal-1:/init-signal/
-      - ./custom-docker-entrypoint.nginx.sh:/custom-docker-entrypoint.nginx.sh
+      - ./nginx/custom-docker-entrypoint.sh:/custom-docker-entrypoint.nginx.sh
       # Mount the Nginx configuration file.
-      - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx_default.conf:/etc/nginx/conf.d/default.conf
 
-    entrypoint: ['/custom-docker-entrypoint.nginx.sh']
+    entrypoint: ['/custom-docker-entrypoint.sh']
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: ['nginx', '-g', "daemon off;" ]
@@ -126,4 +183,6 @@ volumes:
   frontend-node-modules-1:
     driver: local
   frontend-init-signal-1:
+    driver: local
+  traefik-acme-1:
     driver: local
