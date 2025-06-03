@@ -66,6 +66,7 @@ then
     exit "$?"
 fi
 
+export HOST_USER_ID=$(id -u)
 docker compose up -d
 if [ $? -ne 0 ]
 then
