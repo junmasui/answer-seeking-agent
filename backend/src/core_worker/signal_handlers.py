@@ -86,7 +86,7 @@ def handle_worker_shutting_down(sig, how, exitcode, **_kwargs):
 
 
 @worker_process_shutdown.connect
-def handle_worker_shutting_down(pid, exitcode, **_kwargs):
+def handle_worker_process_shutting_down(pid, exitcode, **_kwargs):
     """
     Handle worker process shutdown signal.
 
