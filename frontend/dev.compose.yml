@@ -99,7 +99,7 @@ services:
 
   traefik:
     image: 'docker.io/traefik:v3.4'
-    profiles: [ former-frontend, former-all ]
+    profiles: [ frontend, all ]
 
     ports:
       - '15170:15170'
@@ -144,38 +144,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 15s
-
-  proxy:
-    depends_on:
-      frontend-dependency-gate:
-        condition: service_completed_successfully
-
-    image: 'docker.io/nginx:1.27.3-bookworm'
-    profiles: [ former-frontend, former-all ]
-
-    ports:
-      # Expose the vite server to the host machine
-      - '15173:15173'
-    networks:
-      - agent-poc
-    volumes:
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - frontend-init-signal-1:/init-signal/
-      - ./nginx/custom-docker-entrypoint.sh:/custom-docker-entrypoint.nginx.sh
-      # Mount the Nginx configuration file.
-      - ./nginx/nginx_default.conf:/etc/nginx/conf.d/default.conf
-
-    entrypoint: ['/custom-docker-entrypoint.sh']
-    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    command: ['nginx', '-g', "daemon off;" ]
-
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:15173']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
 
 volumes:
   frontend-home-1:

@@ -4,11 +4,9 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 docker pull python:3.12.8-slim-bookworm
 
-docker tag clickhouse:24.12.3
+docker pull clickhouse:24.12.3
 
 docker pull node:22-bookworm-slim
-docker pull nginx:1.27.3-bookworm
-
 
 docker pull grafana/grafana
 
@@ -21,5 +19,7 @@ docker pull postgres:17.2-bookworm
 docker pull prom/prometheus
 docker pull prom/alertmanager
 docker pull redis
+
+docker pull traefik:3.4
 
 docker pull cr.weaviate.io/semitechnologies/weaviate:1.30.3
