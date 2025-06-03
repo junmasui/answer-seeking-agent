@@ -17,6 +17,12 @@ entryPoints:
       tls:
         certResolver: le
 
+  ping:
+    address: ":8082"
+
+ping:
+  entryPoint: "ping"
+
 providers:
   file:
     directory: "/etc/traefik/dynamic"

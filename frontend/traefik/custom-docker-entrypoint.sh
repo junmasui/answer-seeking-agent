@@ -8,6 +8,8 @@ set -u  # Unbound variables are errors.
 touch /acme/acme.json
 chmod 600 /acme/acme.json
 
+echo exec /entrypoint.sh "$@"
+
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker inspect traefik:v3.4 | jq '.[0].Config.Entrypoint'
