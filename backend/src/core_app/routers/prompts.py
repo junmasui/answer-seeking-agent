@@ -24,19 +24,21 @@ jwt_write_claim_missing_ok = get_global_config().jwt_write_claim_missing_ok
 async def handle_list_prompts(
     name: Annotated[str, Query(..., description='Prompt name')] = None,
     page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
-    itemsPerPage: Annotated[int, Query(..., description='Item count per page', ge=1)] = 10,
-    sortBy: Annotated[
+    items_per_page: Annotated[int, Query(..., alias='itemsPerPage', description='Item count per page', ge=1)] = 10,
+    sort_by: Annotated[
         str,
         Query(
-            ..., description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending'
+            ...,
+            alias='sortBy',
+            description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
 ):
     """Returns a list of document sets."""
-    sort_by = parse_sort_by(sortBy)
+    parsed_sort_by = parse_sort_by(sort_by)
 
-    return list_prompts(name=name, start=page * itemsPerPage, length=itemsPerPage, sort_by=sort_by)
+    return list_prompts(name=name, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by)
 
 
 @router.post('/')
