@@ -3,10 +3,10 @@ This is a small stand-alone module that
 provides a global configuration object.
 """
 
+import os
 from functools import cache
 from pathlib import Path
 from typing import Union
-import os
 
 from pydantic import AnyHttpUrl, DirectoryPath, Field, FilePath, NewPath, PostgresDsn, RedisDsn, StringConstraints
 
@@ -48,9 +48,7 @@ class LibrarySettings(BaseSettings):
         # on an earlier step.
 
         toml_file_path = (
-            Path(env_var_value) 
-            if (env_var_value := os.environ.get('CONFIG_TOML_FILE')) 
-            else Path('./config.toml')
+            Path(env_var_value) if (env_var_value := os.environ.get('CONFIG_TOML_FILE')) else Path('./config.toml')
         )
 
         # init_settings: setting values provided as keyword arguments when initialization
