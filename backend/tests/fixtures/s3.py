@@ -4,7 +4,7 @@ from typing import Generator
 import pytest
 from cloudpathlib.s3 import S3Client, S3Path
 
-from ..test_config import get_test_config
+from ..runtime_config import get_test_config
 
 logger = logging.getLogger(__name__)
 

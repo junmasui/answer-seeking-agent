@@ -7,7 +7,7 @@ from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 
-from ..test_config import get_test_config
+from ..runtime_config import get_test_config
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
