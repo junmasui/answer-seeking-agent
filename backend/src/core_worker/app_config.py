@@ -1,6 +1,21 @@
 """
-This is a small stand-alone module that
-provides a global configuration object.
+Celery Worker Application Configuration Module.
+
+This module provides centralized configuration management for Celery worker components
+through a Pydantic-based settings system. It handles loading configuration values from
+multiple sources including environment variables, TOML configuration files, and secrets.
+
+The module defines type constraints for common configuration values like JWT secrets,
+passwords, and strings, and provides a singleton pattern for accessing application
+configuration throughout the Celery worker application.
+
+Key Features:
+    - Multi-source configuration loading (environment, TOML, secrets)
+    - Type validation and constraints using Pydantic
+    - Cached singleton configuration access
+    - Redis and Celery-specific configuration management
+    - Prometheus metrics directory configuration
+
 """
 
 import os

@@ -1,6 +1,23 @@
 """
-This is a small stand-alone module that
-provides a global configuration object.
+Test Configuration Module
+
+This module provides a centralized configuration management system for testing environments.
+It defines configuration classes and utilities that handle loading application settings
+from multiple sources including environment variables, TOML configuration files, and secrets.
+
+The module is designed to support integration testing by providing access to database
+connection strings, API credentials, and other infrastructure settings needed for
+comprehensive test execution.
+
+Key Components:
+    - RuntimeSettings: Main configuration class with Pydantic validation
+    - Custom type annotations for secure string handling
+    - Cached configuration retrieval for optimal performance
+    - Multi-source configuration loading with precedence handling
+
+Usage:
+    config = get_test_config()
+    db_url = config.postgres_answers_connection_url
 """
 
 import os
@@ -21,7 +38,7 @@ LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 
-class TestingSettings(BaseSettings):
+class RuntimeSettings(BaseSettings):
     """
     Application-wide configuration settings loaded from environment variables and TOML files.
 
@@ -90,4 +107,4 @@ def get_test_config():
     Returns:
         Settings: The singleton configuration object containing all application settings.
     """
-    return TestingSettings()
+    return RuntimeSettings()

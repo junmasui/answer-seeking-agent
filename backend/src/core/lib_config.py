@@ -1,6 +1,20 @@
 """
-This is a small stand-alone module that
-provides a global configuration object.
+Library Configuration Management Module
+
+This module provides centralized configuration management for the application using Pydantic settings.
+It handles loading configuration from multiple sources including environment variables, TOML files,
+and secrets, with a hierarchical precedence system.
+
+The module defines:
+- Custom string types with validation constraints for various configuration values
+- LibrarySettings class that encapsulates all application configuration
+- A cached factory function for accessing the global configuration instance
+
+Configuration sources are processed in order of precedence:
+1. Initialization parameters (highest precedence)
+2. Environment variables
+3. Secret files
+4. TOML configuration files (lowest precedence)
 """
 
 import os
