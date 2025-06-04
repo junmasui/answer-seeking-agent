@@ -8,16 +8,16 @@ from core.prompt_mgr import add_prompt, delete_prompt, get_prompt_statistics, li
 from core.public_models import AgentPromptAddRequest, AgentPromptList, AgentPromptStats, AgentPromptUpdateRequest
 from core.public_models.base import OwnerType
 from core.public_models.prompt import AgentPromptStatus
-from global_config import get_global_config
 from simple_auth import Scope, User, get_scoped_current_user
 
+from ..app_config import get_app_config
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-jwt_write_claim_missing_ok = get_global_config().jwt_write_claim_missing_ok
+jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 
 @router.get('/', response_model=AgentPromptList)

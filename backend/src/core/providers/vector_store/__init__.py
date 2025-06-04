@@ -1,12 +1,12 @@
 """This provides the vector store used by this application."""
 
-from global_config import get_global_config
+from ...lib_config import get_lib_config
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
 __all__ = ['get_vector_store', 'find_vectors_by_document_id', 'delete_vectors_by_document_id']
 
-vector_store_type = get_global_config().vector_store_type
+vector_store_type = get_lib_config().vector_store_type
 
 match vector_store_type:
     case 'pgvector':

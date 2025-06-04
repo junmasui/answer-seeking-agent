@@ -1,12 +1,12 @@
 """This provides the chat LLM used by this application."""
 
-from global_config import get_global_config
+from ...lib_config import get_lib_config
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
 __all__ = ['get_chat_llm']
 
-llm_type = get_global_config().chat_llm_type
+llm_type = get_lib_config().chat_llm_type
 
 match llm_type:
     case 'openai':

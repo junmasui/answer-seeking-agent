@@ -11,8 +11,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
-from global_config import get_global_config
-
+from .lib_config import get_lib_config
 from .models import TokenData
 from .users import retrieve_user
 
@@ -42,7 +41,7 @@ def _decode_token_data(token: str):
     Raises credentials error for invalid or malformed tokens.
     """
     try:
-        secret_key = get_global_config().application_jwt_secret
+        secret_key = get_lib_config().application_jwt_secret
         payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
 
         userid: str = payload.get('sub')

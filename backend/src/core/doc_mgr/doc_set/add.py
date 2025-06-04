@@ -3,9 +3,8 @@ import uuid
 
 from sqlalchemy import select
 
-from global_config import get_global_config
-
 from ...db_models import DbTrackedDocumentSet
+from ...lib_config import get_lib_config
 from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ def _add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_v
             else:
                 doc_set_uuid = uuid.uuid4()
 
-                doc_root_dir = get_global_config().doc_manager.doc_root_dir
+                doc_root_dir = get_lib_config().doc_root_dir
 
                 rel_path = doc_root_dir + '/' + name
 

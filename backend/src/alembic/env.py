@@ -12,12 +12,12 @@ from sqlalchemy import inspect
 from alembic import context
 
 # Access to our configuration .. which includes the Postgres connection string
-from global_config import get_global_config
+from core.lib_config import get_lib_config
 
 # This import will load our declared schema
 import core.db_models
 
-db_url = get_global_config().postgres_answers_connection_url
+db_url = get_lib_config().postgres_answers_connection_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

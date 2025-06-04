@@ -13,8 +13,8 @@ from .doc_mgr import (
     upload_chunk,
     upload_document,
 )
+from .health import status_check
 from .ingest import ingest_documents, reset_worker_data
-from .status import status_check
 
 # Explicitly define the exported names: these names are the contract of this module.
 __all__ = [

@@ -7,7 +7,7 @@ from pathlib import Path
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from global_config import get_global_config
+from .lib_config import get_lib_config
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
 
         Applies incremental logging configuration when the target file is modified.
         """
-        log_config_path = get_global_config().logging_config_path
+        log_config_path = get_lib_config().logging_config_path
 
         # Exit if the logging config file does not exist.
         if not log_config_path.exists():
@@ -103,7 +103,7 @@ class LogConfigMonitor:
         if self.observer is not None:
             return
 
-        log_config_path = get_global_config().logging_config_path
+        log_config_path = get_lib_config().logging_config_path
 
         # Beware! Watchdog's PatternMatchingEventHandler's patterns is a collection of
         # strings. So be sure to cast the Path object to string object.

@@ -13,8 +13,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from global_config import get_global_config
-
+from .lib_config import get_lib_config
 from .models import Scope, Token
 from .users import authenticate_user
 
@@ -54,7 +53,7 @@ def _create_access_token(
     if additional_claims:
         to_encode.update(additional_claims)
 
-    secret_key = get_global_config().application_jwt_secret
+    secret_key = get_lib_config().application_jwt_secret
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=ALGORITHM)
 
     # Round down so that the information we give back to the client
