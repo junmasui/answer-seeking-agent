@@ -8,7 +8,6 @@ from langchain_postgres import PGVector
 from sqlalchemy import MetaData, select
 
 from ...lib_config import get_lib_config
-
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
 from ..sql_database import DataDomain, get_engine, get_sessionmaker

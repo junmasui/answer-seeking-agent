@@ -5,19 +5,9 @@ provides a global configuration object.
 
 from functools import cache
 from pathlib import Path
-from typing import Union
+import os
 
-from pydantic import (
-    AnyHttpUrl,
-    BaseModel,
-    DirectoryPath,
-    Field,
-    FilePath,
-    NewPath,
-    PostgresDsn,
-    RedisDsn,
-    StringConstraints,
-)
+from pydantic import Field, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -31,9 +21,9 @@ LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 
-class Settings(BaseSettings):
+class AuthLibrarySettings(BaseSettings):
     """
-    Application-wide configuration settings loaded from environment variables and TOML files.
+    Library-wide configuration settings loaded from environment variables and TOML files.
 
     Provides centralized configuration management with support for multiple sources including
     environment variables, TOML configuration files, and secrets.
@@ -56,7 +46,11 @@ class Settings(BaseSettings):
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
 
-        toml_file_path = Path('./config_data/app_data.toml')
+        toml_file_path = (
+            Path(env_var_value) 
+            if (env_var_value := os.environ.get('CONFIG_TOML_FILE')) 
+            else Path('./config.toml')
+        )
 
         # init_settings: setting values provided as keyword arguments when initialization
         #     an instance of this Settings class.
@@ -73,29 +67,21 @@ class Settings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
-
-    celery_task_queue: str = Field(default='', validation_alias='CELERY_TASK_QUEUE')
-    celery_result_key_prefix: str = Field(default='', validation_alias='CELERY_RESULT_KEY_PREFIX')
-
-    prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
+    application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
 
 @cache
-def get_app_config():
+def get_lib_config():
     """
-    Get the cached global application configuration instance for Celery worker operations.
+    Get the cached global authentication configuration instance.
 
-    This function provides access to the singleton Settings object that contains all
-    application configuration values loaded from environment variables, TOML files,
-    and other configuration sources. It's specifically used by the Celery worker
-    components to access database connections, Redis settings, task queue configurations,
-    file storage paths, and other runtime settings required for background task processing.
+    Returns the singleton AuthSettings object that contains authentication-related
+    configuration loaded from environment variables, TOML files, and other sources.
+    Uses functools.cache to ensure the configuration is loaded only once per
+    application lifecycle for optimal performance.
 
     Returns:
-        Settings: The singleton configuration object containing Celery worker settings,
-                 database connections, Redis DSN, task queues, file paths, and other
-                 application configuration parameters.
-
+        AuthSettings: The authentication configuration object containing JWT secrets
+                     and other authentication-related settings.
     """
-    return Settings()
+    return AuthLibrarySettings()

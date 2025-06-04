@@ -4,7 +4,6 @@ from functools import cache
 from cloudpathlib.s3 import S3Client, S3Path
 
 from ...lib_config import get_lib_config
-
 from ...signals import reset_data_handler, start_up_handler
 
 logger = logging.getLogger(__name__)

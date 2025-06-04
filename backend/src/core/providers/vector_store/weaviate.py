@@ -11,7 +11,6 @@ from weaviate.classes.init import AdditionalConfig, Auth, Timeout
 from weaviate.classes.query import Filter
 
 from ...lib_config import get_lib_config
-
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
 

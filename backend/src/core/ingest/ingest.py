@@ -9,10 +9,9 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
 
-from ..lib_config import get_lib_config
-
 from ..db_models import DbTrackedDocument
 from ..doc_mgr import get_documents, update_tracking_record
+from ..lib_config import get_lib_config
 from ..providers.doc_loader import get_doc_loader
 from ..providers.file_store import get_s3_bucket
 from ..providers.vector_store import delete_vectors_by_document_id, get_vector_store

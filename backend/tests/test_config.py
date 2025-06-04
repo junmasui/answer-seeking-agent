@@ -5,19 +5,9 @@ provides a global configuration object.
 
 from functools import cache
 from pathlib import Path
-from typing import Union
+import os
 
-from pydantic import (
-    AnyHttpUrl,
-    BaseModel,
-    DirectoryPath,
-    Field,
-    FilePath,
-    NewPath,
-    PostgresDsn,
-    RedisDsn,
-    StringConstraints,
-)
+from pydantic import AnyHttpUrl, Field, PostgresDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -31,7 +21,7 @@ LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 
-class Settings(BaseSettings):
+class TestingSettings(BaseSettings):
     """
     Application-wide configuration settings loaded from environment variables and TOML files.
 
@@ -56,7 +46,11 @@ class Settings(BaseSettings):
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
 
-        toml_file_path = Path('./config_data/app_data.toml')
+        toml_file_path = (
+            Path(env_var_value) 
+            if (env_var_value := os.environ.get('CONFIG_TOML_FILE')) 
+            else Path('./config.toml')
+        )
 
         # init_settings: setting values provided as keyword arguments when initialization
         #     an instance of this Settings class.
@@ -73,18 +67,29 @@ class Settings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
+    postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
 
-    application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
-
+    minio_endpoint_url: AnyHttpUrl = Field(default='', validation_alias='MINIO_ENDPOINT_URL')
+    minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
+    minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
+    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
 
 
 @cache
-def get_app_config():
+def get_test_config():
     """
-    Get the cached global application configuration.
+    Get the cached global application configuration instance for testing.
 
-    Returns a Settings instance loaded from environment variables and TOML files.
-    Configuration is cached for performance.
+    This function provides access to the singleton Settings object that contains all
+    application configuration values loaded from environment variables, TOML files,
+    and other configuration sources. It's primarily used by test fixtures to access
+    database connection strings, API credentials, and other infrastructure settings
+    needed for integration testing.
+
+    The configuration is cached using functools.cache to ensure it's loaded only once
+    per test session, improving performance and ensuring consistency across all tests.
+
+    Returns:
+        Settings: The singleton configuration object containing all application settings.
     """
-    return Settings()
+    return TestingSettings()

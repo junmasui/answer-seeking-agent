@@ -7,7 +7,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ...lib_config import get_lib_config
-
 from .base import DataDomain
 
 # Explicitly define the exported symbols: the exported symbols

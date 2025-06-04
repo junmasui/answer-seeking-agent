@@ -6,18 +6,9 @@ provides a global configuration object.
 from functools import cache
 from pathlib import Path
 from typing import Union
+import os
 
-from pydantic import (
-    AnyHttpUrl,
-    BaseModel,
-    DirectoryPath,
-    Field,
-    FilePath,
-    NewPath,
-    PostgresDsn,
-    RedisDsn,
-    StringConstraints,
-)
+from pydantic import AnyHttpUrl, DirectoryPath, Field, FilePath, NewPath, PostgresDsn, RedisDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -31,9 +22,9 @@ LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 
-class Settings(BaseSettings):
+class LibrarySettings(BaseSettings):
     """
-    Application-wide configuration settings loaded from environment variables and TOML files.
+    Library-wide configuration settings loaded from environment variables and TOML files.
 
     Provides centralized configuration management with support for multiple sources including
     environment variables, TOML configuration files, and secrets.
@@ -56,7 +47,11 @@ class Settings(BaseSettings):
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
 
-        toml_file_path = Path('./config_data/app_data.toml')
+        toml_file_path = (
+            Path(env_var_value) 
+            if (env_var_value := os.environ.get('CONFIG_TOML_FILE')) 
+            else Path('./config.toml')
+        )
 
         # init_settings: setting values provided as keyword arguments when initialization
         #     an instance of this Settings class.
@@ -72,10 +67,6 @@ class Settings(BaseSettings):
             file_secret_settings,
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
-
-    logging_config_path: Union[FilePath, NewPath] = Field(
-        default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH'
-    )
 
     staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
@@ -124,8 +115,8 @@ def get_lib_config():
     This serves as the central configuration access point used throughout
     the library for database connections, provider settings, worker
     configuration, and other runtime parameters.
-    
+
     Returns:
         Settings: The global configuration instance containing all app settings.
     """
-    return Settings()
+    return LibrarySettings()

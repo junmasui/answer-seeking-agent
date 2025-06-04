@@ -9,8 +9,8 @@ from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from ..lib_config import get_lib_config
 
+from ..lib_config import get_lib_config
 from ..providers.sql_database import DataDomain, get_engine
 from .base import DECLARED_METADATA
 

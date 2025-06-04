@@ -7,9 +7,9 @@ from fastapi import APIRouter, Body, Depends, Path, Query
 from core import list_document_sets
 from core.doc_mgr import add_document_set, delete_document_set, get_document_set_statistics, update_document_set
 from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
-from ..app_config import get_app_config
 from simple_auth import Scope, User, get_scoped_current_user
 
+from ..app_config import get_app_config
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)

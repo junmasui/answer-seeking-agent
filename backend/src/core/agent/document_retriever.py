@@ -12,7 +12,6 @@ from langchain_core.documents import Document
 from weaviate.classes.query import Filter
 
 from ..lib_config import get_lib_config
-
 from ..providers.retriever import get_retriever
 
 logger = logging.getLogger(__name__)

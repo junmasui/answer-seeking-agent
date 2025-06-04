@@ -3,9 +3,8 @@ import uuid
 
 from sqlalchemy import select
 
-from ...lib_config import get_lib_config
-
 from ...db_models import DbTrackedDocumentSet
+from ...lib_config import get_lib_config
 from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)

@@ -2,7 +2,6 @@ from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel
 
 from ..lib_config import get_lib_config
-
 from ..providers.chat_llm import get_chat_llm
 
 

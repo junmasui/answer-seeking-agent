@@ -7,7 +7,7 @@ from pathlib import Path
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 
-from core.lib_config import get_lib_config
+from .lib_config import get_lib_config
 
 logger = logging.getLogger(__name__)
 
