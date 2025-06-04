@@ -7,7 +7,7 @@ from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 
-from global_config import get_global_config
+from ..test_config import get_test_config
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
@@ -19,7 +19,7 @@ pp = pprint.PrettyPrinter(indent=2, width=120)
 
 def get_connection_str():
     """Return the connection string for the PostgreSQL database from the global configuration."""
-    config = get_global_config()
+    config = get_test_config()
 
     connection_url = config.postgres_answers_connection_url
 

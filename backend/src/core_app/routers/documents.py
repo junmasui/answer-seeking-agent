@@ -25,7 +25,7 @@ from core.public_models import (
     IngestRequestBody,
 )
 from core_worker import ingest_task
-from global_config import get_global_config
+from ..app_config import get_app_config
 from simple_auth import Scope, User, get_scoped_current_user
 
 from .util import parse_sort_by
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-jwt_write_claim_missing_ok = get_global_config().jwt_write_claim_missing_ok
+jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 
 # Dependency function to gather form data into the Pydantic model

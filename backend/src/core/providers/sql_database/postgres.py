@@ -6,7 +6,7 @@ from psycopg_pool import ConnectionPool
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from global_config import get_global_config
+from ...lib_config import get_lib_config
 
 from .base import DataDomain
 
@@ -23,7 +23,7 @@ def get_connection_str(db_schema: DataDomain):
     Maps the DataDomain enum to the appropriate connection URL from configuration
     and validates that it uses the psycopg3 driver format.
     """
-    config = get_global_config()
+    config = get_lib_config()
 
     match db_schema:
         case DataDomain.ANSWERS:

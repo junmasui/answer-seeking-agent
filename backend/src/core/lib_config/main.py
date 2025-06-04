@@ -31,19 +31,6 @@ LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
 
-class DocManagerConfig(BaseModel):
-    """Configuration settings for document management operations."""
-
-    chunk_root_dir: str = Field(default='upload_chunks')
-    doc_root_dir: str = Field(default='documents')
-
-
-class CeleryWorkerConfig(BaseModel):
-    """Configuration settings for Celery worker operations and monitoring."""
-
-    prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
-
-
 class Settings(BaseSettings):
     """
     Application-wide configuration settings loaded from environment variables and TOML files.
@@ -86,8 +73,6 @@ class Settings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
-
     logging_config_path: Union[FilePath, NewPath] = Field(
         default='./logging.toml', validation_alias='LOGGING_CONFIG_PATH'
     )
@@ -98,9 +83,6 @@ class Settings(BaseSettings):
 
     redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
 
-    celery_task_queue: str = Field(default='', validation_alias='CELERY_TASK_QUEUE')
-    celery_result_key_prefix: str = Field(default='', validation_alias='CELERY_RESULT_KEY_PREFIX')
-
     postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
     postgres_vectors_schema: str = Field(default='vectors', validation_alias='POSTGRES_VECTORS_SCHEMA')
     postgres_vectors_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_VECTORS_CONNECTION_URL')
@@ -108,8 +90,6 @@ class Settings(BaseSettings):
     postgres_checkpoints_connection_url: PostgresDsn = Field(
         default='', validation_alias='POSTGRES_CHECKPOINTS_CONNECTION_URL'
     )
-
-    application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
     use_unstructured_cloud_api: bool = Field(default=False, validation_alias='USE_UNSTRUCTURED_API')
 
@@ -130,18 +110,22 @@ class Settings(BaseSettings):
     minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
     minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
 
-    doc_manager: DocManagerConfig = DocManagerConfig()
-
-    celery_worker: CeleryWorkerConfig = CeleryWorkerConfig()
+    chunk_root_dir: str = Field(default='upload_chunks')
+    doc_root_dir: str = Field(default='documents')
 
 
 @cache
-def get_global_config():
+def get_lib_config():
     """
-    Get the cached global application configuration instance.
+    Get the cached global library configuration instance.
 
-    Returns the singleton GlobalConfig object that contains all application
-    settings loaded from environment variables and configuration files.
-    Uses functools.cache to ensure the configuration is loaded only once.
+    Returns the singleton Settings object that contains all library
+    configuration loaded from environment variables, TOML files, and secrets.
+    This serves as the central configuration access point used throughout
+    the library for database connections, provider settings, worker
+    configuration, and other runtime parameters.
+    
+    Returns:
+        Settings: The global configuration instance containing all app settings.
     """
     return Settings()

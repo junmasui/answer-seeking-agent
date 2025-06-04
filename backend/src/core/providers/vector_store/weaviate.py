@@ -10,7 +10,7 @@ from weaviate.classes.config import Configure, DataType, Property, Tokenization,
 from weaviate.classes.init import AdditionalConfig, Auth, Timeout
 from weaviate.classes.query import Filter
 
-from global_config import get_global_config
+from ...lib_config import get_lib_config
 
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
@@ -33,7 +33,7 @@ def _get_client():
     This function is cached to ensure only one client is created.
     It also ensures the 'DocEmbeddings' collection exists.
     """
-    config = get_global_config()
+    config = get_lib_config()
 
     client_secret = Auth.api_key(config.weaviate_api_key)
 

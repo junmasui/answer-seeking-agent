@@ -7,7 +7,7 @@ from functools import cache
 from langchain_postgres import PGVector
 from sqlalchemy import MetaData, select
 
-from global_config import get_global_config
+from ...lib_config import get_lib_config
 
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
@@ -47,7 +47,7 @@ def _get_reflected_metadata():
     Returns a MetaData object containing the langchain_pg_embedding and
     langchain_pg_collection tables reflected from the vectors database schema.
     """
-    schema_name = get_global_config().postgres_vectors_schema
+    schema_name = get_lib_config().postgres_vectors_schema
     engine = get_engine(DataDomain.VECTORS)
 
     # Initialize metadata with schema context
@@ -66,7 +66,7 @@ def _get_reflected_embedding_table():
     Returns the SQLAlchemy Table object for the langchain_pg_embedding table
     using schema-qualified name resolution from the reflected metadata.
     """
-    schema_name = get_global_config().postgres_vectors_schema
+    schema_name = get_lib_config().postgres_vectors_schema
     metadata = _get_reflected_metadata()
 
     # Get table references using schema-qualified names

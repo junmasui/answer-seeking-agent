@@ -9,7 +9,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from global_config import get_global_config
+from ..lib_config import get_lib_config
 
 from ..providers.sql_database import DataDomain, get_engine
 from .base import DECLARED_METADATA
@@ -91,7 +91,7 @@ def get_current_version(engine):
 
 def get_head_revision():
     """Return the head Alembic version of the defined migration steps."""
-    alembic_ini = get_global_config().alembic_ini_path
+    alembic_ini = get_lib_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
     script = ScriptDirectory.from_config(alembic_cfg)
     head_revision = script.get_current_head()
@@ -156,7 +156,7 @@ def _create_tables_if_new(engine):
         logger.info('database is not empty. use formal migration tools.')
         return
 
-    alembic_ini = get_global_config().alembic_ini_path
+    alembic_ini = get_lib_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
 
     logger.info('initializing database tables.')
@@ -179,7 +179,7 @@ def _run_migrations(engine):
     Executes all pending migrations from the current database version to the head revision.
     Logs warnings if migration errors occur but allows the process to continue.
     """
-    alembic_ini = get_global_config().alembic_ini_path
+    alembic_ini = get_lib_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
 
     # Upgrade to latest version

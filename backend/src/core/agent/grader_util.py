@@ -1,7 +1,7 @@
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel
 
-from global_config import get_global_config
+from ..lib_config import get_lib_config
 
 from ..providers.chat_llm import get_chat_llm
 
@@ -12,7 +12,7 @@ def build_grader(chat_prompt, output_cls: BaseModel, run_name):
     It supports both models with native structured output and models requiring custom parsing instructions.
     The resulting chain is configured with a specific run name.
     """
-    config = get_global_config()
+    config = get_lib_config()
     # LLM
     llm = get_chat_llm()
 

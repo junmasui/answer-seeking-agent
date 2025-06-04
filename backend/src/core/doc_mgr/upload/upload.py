@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from global_config import get_global_config
+from ...lib_config import get_lib_config
 
 from ...providers.file_store import get_s3_bucket, get_s3_directory
 from ..doc.add import add_document
@@ -26,7 +26,7 @@ def _get_doc_set(doc_set_uuid):
 
 def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
     """Generate the file path for a document chunk based on the document set, partial path, and chunk index."""
-    chunk_root_dir = get_global_config().doc_manager.chunk_root_dir
+    chunk_root_dir = get_lib_config().chunk_root_dir
     chunk_root_dir = Path(chunk_root_dir)
     if chunk_root_dir.is_absolute():
         raise ValueError
@@ -45,7 +45,7 @@ def _get_doc_file_path(doc_set, partial_doc_path):
     Combines the document root directory, document set name, and partial path
     to create the complete cloud storage path for a document.
     """
-    doc_root_dir = get_global_config().doc_manager.doc_root_dir
+    doc_root_dir = get_lib_config().doc_root_dir
     doc_root_dir = Path(doc_root_dir)
     if doc_root_dir.is_absolute():
         raise ValueError

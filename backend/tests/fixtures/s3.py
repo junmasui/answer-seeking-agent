@@ -4,7 +4,7 @@ from typing import Generator
 import pytest
 from cloudpathlib.s3 import S3Client, S3Path
 
-from global_config import get_global_config
+from ..test_config import get_test_config
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope='module')
 def s3_client() -> Generator[S3Client, None, None]:
     """Returns S3 client."""
-    config = get_global_config()
+    config = get_test_config()
     client = S3Client(
         aws_access_key_id=config.minio_user_name,
         aws_secret_access_key=config.minio_user_password,
@@ -24,7 +24,7 @@ def s3_client() -> Generator[S3Client, None, None]:
 @pytest.fixture(scope='module')
 def s3_bucket(s3_client) -> Generator[S3Path, None, None]:
     """Returns S3 bucket used by this application."""
-    config = get_global_config()
+    config = get_test_config()
     bucket = S3Path(f's3://{config.minio_bucket_name}/', client=s3_client)
 
     yield bucket
