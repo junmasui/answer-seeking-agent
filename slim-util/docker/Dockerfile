@@ -1,4 +1,4 @@
-FROM docker.io/debian:12.9-slim
+FROM docker.io/debian:12.10-slim
 
 #
 # Locally required Debian packages

@@ -15,7 +15,16 @@ set -eu
 DOCKER="docker buildx"
 
 $DOCKER build \
+  --no-cache \
+  --file Dockerfile \
   --build-context parent-dir=.. \
   --tag localhost/localhost/answers-frontend:node-22-bookworm \
   .
 
+
+$DOCKER build \
+  --no-cache \
+  --file dev.Dockerfile \
+  --build-context parent-dir=.. \
+  --tag localhost/localhost/answers-frontend:node-22-bookworm-dev \
+  .

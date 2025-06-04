@@ -7,18 +7,18 @@ ARG GROUP_ID=1000
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN \
-  apt-get update \
-  # Install Debian packages
-  && apt-get install -y \
-     curl \
-     wget \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  # Create a custom group with GROUP_ID
-  # Then create a custom user with USER_ID and GROUP_ID
-  && set -eux ; \
-    ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
-    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
+    apt-get update \
+    # Install Debian packages
+    && apt-get install -y \
+        curl \
+        wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # Create a custom group with GROUP_ID
+    # Then create a custom user with USER_ID and GROUP_ID
+    && set -eux ; \
+        ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
+        ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
  
 # Copy the build-and-run script.
 #
@@ -30,7 +30,8 @@ RUN \
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 COPY --from=parent-dir run_dev_server.sh /
 
-RUN chmod +x /run_dev_server.sh \
+RUN \
+    chmod +x /run_dev_server.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_dev_server.sh
 
 # Switch to the custom user

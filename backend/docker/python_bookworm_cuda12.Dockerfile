@@ -5,16 +5,17 @@ FROM docker.io/python:3.12.10-slim-bookworm
 #
 
 
-RUN apt-get update \
+RUN \
+    apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         gnupg2 \
     && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
        | apt-key add - \
-    && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
-    && rm -rf /var/lib/apt/lists/*
+    && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list
 ##    && apt-get purge --autoremove -y curl \
 
 
@@ -26,15 +27,15 @@ RUN apt-get update \
 
 ENV NV_CUDA_CUDART_VERSION=12.6.77-1
 
-RUN apt-get update \
-   && apt-get install -y --no-install-recommends \
-      cuda-compat-12-6 \
-      cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
-   && apt-get clean \
-   && rm -rf /var/lib/apt/lists/*
-
-# Required for nvidia-docker v1
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+RUN \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        cuda-compat-12-6 \
+        cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # Required for nvidia-docker v1
+    && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
     && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
 
 ENV PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
@@ -112,7 +113,8 @@ ENV NV_LIBCUSPARSE_VERSION=12.5.4.2-1
 ENV NV_LIBCUBLAS_VERSION=12.6.4.1-1
 ENV NV_LIBNCCL_PACKAGE_VERSION=2.23.4-1+cuda12.6
 
-RUN apt-get update \
+RUN \
+    apt-get update \
     && apt-get install -y --no-install-recommends \
         cuda-libraries-12-6=${NV_CUDA_LIB_VERSION} \
         cuda-nvtx-12-6=${NV_NVTX_VERSION} \
@@ -122,8 +124,8 @@ RUN apt-get update \
     && apt-get clean \
     && apt-mark hold libcublas-12-6 \
     && rm -rf /var/lib/apt/lists/*
-#         libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
-#    && apt-mark hold libcublas-12-6 libnccl2 \
+    #         libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
+    #    && apt-mark hold libcublas-12-6 libnccl2 \
 
 
 #
@@ -133,10 +135,11 @@ RUN apt-get update \
 #
 ENV NV_CUDNN_VERSION=9.5.1.17-1
 
-RUN apt-get update \
-   && apt-get install -y --no-install-recommends \
-      libcudnn9-cuda-12=${NV_CUDNN_VERSION} \
-   && apt-get clean \
-   && apt-mark hold \
-      libcudnn9-cuda-12 \
-   && rm -rf /var/lib/apt/lists/*
+RUN \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libcudnn9-cuda-12=${NV_CUDNN_VERSION} \
+    && apt-get clean \
+    && apt-mark hold \
+        libcudnn9-cuda-12 \
+    && rm -rf /var/lib/apt/lists/*

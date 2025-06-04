@@ -36,6 +36,14 @@ $DOCKER build \
   . 2>&1 \
 | tee build-backend-python-cpu.log
 
+$DOCKER build \
+  --no-cache \
+  --file dev.Dockerfile \
+  --build-context parent-dir=.. \
+  --tag localhost/localhost/answers-backend:python-3.12-cpu-dev \
+  . 2>&1 \
+| tee build-backend-python-cpu-dev.log
+
 
 #
 # Build a backend image with Python 3.12 on Debian 12 with CUDA 12
@@ -47,3 +55,11 @@ $DOCKER build \
   --tag localhost/localhost/answers-backend:python-3.12-cuda12 \
   . 2>&1 \
 | tee build-backend-python-cuda12.log
+
+$DOCKER build \
+  --no-cache \
+  --file dev_cuda12.Dockerfile \
+  --build-context parent-dir=.. \
+  --tag localhost/localhost/answers-backend:python-3.12-cuda12-dev \
+  . 2>&1 \
+| tee build-backend-python-cuda12-dev.log

@@ -109,7 +109,8 @@ ENV NV_LIBNCCL_PACKAGE_VERSION=2.15.5-1+cuda11.8
 # See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/cudnn/Dockerfile
 ENV NV_CUDNN_VERSION=8.9.6.50-1+cuda11.8
 
-RUN apt-get update \
+RUN \
+    apt-get update \
     #
     # Install the CUDA libraries installed in the runtime NVIDIA image.
     #

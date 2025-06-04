@@ -68,7 +68,7 @@ services:
       init-frontend-test-volumes:
         condition: service_completed_successfully
 
-    image: 'localhost/localhost/answers-frontend:node-22-bookworm'
+    image: 'localhost/localhost/answers-frontend:node-22-bookworm-dev'
     profiles: [ frontend-test, all ]
 
     environment:

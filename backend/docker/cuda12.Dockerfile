@@ -29,11 +29,11 @@ RUN \
         poppler-utils \
         tesseract-ocr \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* ; \
+    && rm -rf /var/lib/apt/lists/* \
     #
     # Install uv package manager
     #
-    pip install uv
+    && pip install uv
 
 #
 # This script lives in the parent of the current directory, so we must define
