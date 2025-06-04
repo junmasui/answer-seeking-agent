@@ -5,8 +5,7 @@ from pathlib import Path
 import nltk
 from langchain_unstructured import UnstructuredLoader
 
-from global_config import get_global_config
-
+from ...lib_config import get_lib_config
 from ...signals import start_up_handler
 
 
@@ -54,7 +53,7 @@ def get_doc_loader(file_path: Path | list[Path]):
     Configures the loader based on global settings, including whether to use the Unstructured cloud API.
     It uses a 'hi_res' strategy and 'by_title' chunking.
     """
-    config = get_global_config()
+    config = get_lib_config()
 
     # When false, process locally and not thru cloud API.
     use_unstructured_cloud_api = config.use_unstructured_cloud_api

@@ -7,8 +7,7 @@ from langchain_core.prompts import (
     SystemMessagePromptTemplate,
 )
 
-from global_config import get_global_config
-
+from ..lib_config import get_lib_config
 from ..prompt_mgr import list_prompts
 from ..public_models import AgentPromptStatus
 from .internal_models import AgentPromptName
@@ -38,7 +37,7 @@ def get_chat_prompt(prompt_name: str):
         # Thus we support two modes:
         # - structured output
         # - custom instructions and parsing
-        has_structured_output = get_global_config().llm_has_structured_output
+        has_structured_output = get_lib_config().llm_has_structured_output
 
         if not has_structured_output:
             system_message = system_message + '\n\n{format_instructions}'

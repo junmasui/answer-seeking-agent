@@ -9,10 +9,9 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
 
-from global_config import get_global_config
-
 from ..db_models import DbTrackedDocument
 from ..doc_mgr import get_documents, update_tracking_record
+from ..lib_config import get_lib_config
 from ..providers.doc_loader import get_doc_loader
 from ..providers.file_store import get_s3_bucket
 from ..providers.vector_store import delete_vectors_by_document_id, get_vector_store
@@ -229,7 +228,7 @@ def ingest_documents(doc_ids):
     if not doc_ids:
         raise NotImplementedError()
 
-    config = get_global_config()
+    config = get_lib_config()
 
     bucket = get_s3_bucket()
     vector_store = get_vector_store()
@@ -249,7 +248,7 @@ def ingest_documents(doc_ids):
 
 def reset_worker_data():
     """Cleanse the staging area."""
-    config = get_global_config()
+    config = get_lib_config()
 
     staging_dir = config.staging_dir / 'ingest'
 

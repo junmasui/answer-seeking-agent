@@ -11,8 +11,7 @@ import pprint
 from langchain_core.documents import Document
 from weaviate.classes.query import Filter
 
-from global_config import get_global_config
-
+from ..lib_config import get_lib_config
 from ..providers.retriever import get_retriever
 
 logger = logging.getLogger(__name__)
@@ -36,7 +35,7 @@ def query_documents(state):
     kwargs = {}
 
     doc_set_ids = state['document_set_ids']
-    vector_store_type = get_global_config().vector_store_type
+    vector_store_type = get_lib_config().vector_store_type
 
     match vector_store_type:
         case 'pgvector':
