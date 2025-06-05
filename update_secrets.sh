@@ -225,7 +225,7 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 
 SECRETS_FILE=./secrets/answers-dev.postgres.secrets.env
-VAR_NAME=BACKEND_ANSWERS_POSTGRES_USER_PASSWORD
+VAR_NAME=ANSWERS_POSTGRES_USER_PASSWORD
 VALUE_PREFIX=answers_postgres_
 DESCR="backend's Answers Postgres account's password."
 
@@ -239,7 +239,7 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 
 SECRETS_FILE=./secrets/checkpoints-dev.postgres.secrets.env
-VAR_NAME=BACKEND_CHECKPOINTS_POSTGRES_USER_PASSWORD
+VAR_NAME=CHECKPOINTS_POSTGRES_USER_PASSWORD
 VALUE_PREFIX=checkpoints_postgres_
 DESCR="backend's checkpoints Postgres account's password."
 
@@ -253,7 +253,7 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 
 SECRETS_FILE=./secrets/vectors-dev.postgres.secrets.env
-VAR_NAME=BACKEND_VECTORS_POSTGRES_USER_PASSWORD
+VAR_NAME=VECTORS_POSTGRES_USER_PASSWORD
 VALUE_PREFIX=vectors_postgres_
 DESCR="backend's vectors Postgres account's password."
 
