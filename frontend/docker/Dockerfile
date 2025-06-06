@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN \
   apt-get update \
   # Install Debian packages
-  && apt-get install -y \
+  && apt-get install -y --no-install-recommends \
      curl \
      wget \
   && apt-get clean \
