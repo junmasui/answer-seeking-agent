@@ -7,7 +7,7 @@ RUN \
   #
   # Install pgvector
   #
-  && curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+  && curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail --proto "=https" https://www.postgresql.org/media/keys/ACCC4CF8.asc \
   && apt-get install -y postgresql-17-pgvector \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
