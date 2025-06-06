@@ -44,7 +44,7 @@ dependencies = [
   "python-magic>=0.4.27",
   "redis>=5.2.1",
   "transformers>=4.48.0",
-  "unstructured[pdf]>=0.16.13",
+  "unstructured[all-docs,docx,pdf]>=0.16.13",
   "watchdog[watchmedo]>=6.0.0",
 ]
 requires-python = "==3.12.*"
