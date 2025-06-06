@@ -83,6 +83,7 @@ services:
 
     environment:
       DEBUGGER_LISTEN: true
+      JWT_WRITE_CLAIM_MISSING_OK: true
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
@@ -105,10 +106,10 @@ services:
       ##- .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      ## - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
       - backend-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - backend-home-1:/home/python
       - backend-venv-1:/app/.venv
       - backend-staging-1:/staging
@@ -130,6 +131,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5' # 50% of available CPU resources
           memory: 4G # Give enough to run local model
         reservations:
           devices:
@@ -184,10 +186,10 @@ services:
       ##- .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_celery_worker.sh:/run_celery_worker.sh
+      ## - ./run_celery_worker.sh:/run_celery_worker.sh
       - backend-init-signal-1:/init-signal
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - backend-home-2:/home/python
       - backend-venv-2:/app/.venv
       - backend-staging-2:/staging
@@ -210,6 +212,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5' # 50% of available CPU resources
           memory: 8G # Give enough to run Tesseract and local model
         reservations:
           devices:
@@ -261,10 +264,10 @@ services:
       ##- .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_celery_flower.sh:/run_celery_flower.sh
+      ## - ./run_celery_flower.sh:/run_celery_flower.sh
       - backend-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - backend-home-3:/home/python
       - backend-venv-3:/app/.venv
     secrets:

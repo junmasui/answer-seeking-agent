@@ -32,9 +32,18 @@ $DOCKER build \
   --no-cache \
   --file Dockerfile \
   --build-context parent-dir=.. \
+  --build-context dependency-gate-dir=../../dependency-gate \
   --tag localhost/localhost/answers-backend:python-3.12-cpu \
   . 2>&1 \
 | tee build-backend-python-cpu.log
+
+$DOCKER build \
+  --no-cache \
+  --file dev.Dockerfile \
+  --build-context parent-dir=.. \
+  --tag localhost/localhost/answers-backend-dev:python-3.12-cpu \
+  . 2>&1 \
+| tee build-backend-dev-python-cpu.log
 
 
 #
@@ -44,6 +53,15 @@ $DOCKER build \
   --no-cache \
   --file cuda12.Dockerfile \
   --build-context parent-dir=.. \
+  --build-context dependency-gate-dir=../../dependency-gate \
   --tag localhost/localhost/answers-backend:python-3.12-cuda12 \
   . 2>&1 \
 | tee build-backend-python-cuda12.log
+
+$DOCKER build \
+  --no-cache \
+  --file dev_cuda12.Dockerfile \
+  --build-context parent-dir=.. \
+  --tag localhost/localhost/answers-backend-dev:python-3.12-cuda12 \
+  . 2>&1 \
+| tee build-backend-dev-python-cuda12.log

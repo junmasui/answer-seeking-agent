@@ -22,22 +22,43 @@ RUN \
  
 # Copy the build-and-run script.
 #
-# This script lives in the parent of the current directory, so we must define
+# These script live in the parent of this dockerfile's directory, so we must define
 # the parent as a named build-context on the command line.
 #
 # Copy in Dockerfile has a slightly different syntax. When copying a file to
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
-COPY --from=parent-dir run_dev_server.sh /
+COPY --from=parent-dir ./custom-docker-entrypoint.sh /
+COPY --from=parent-dir ./run_dev_server.sh /
 
-RUN chmod +x /run_dev_server.sh \
+COPY --from=dependency-gate-dir ./wait_for_resource.sh /
+
+
+
+## RUN chmod a+x /custom-docker-entrypoint.sh \
+##     && chmod a+x /run_dev_server.sh \
+##     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
+##     && chown ${USER_ID}:${GROUP_ID} /run_dev_server.sh
+RUN chmod a+x /run_dev_server.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_dev_server.sh
+
+# Set the working directory inside the container
+WORKDIR /app
+
+COPY --from=parent-dir ./app/index.html /app/index.html
+COPY --from=parent-dir ./app/jsconfig.json /app/jsconfig.json
+COPY --from=parent-dir ./app/package-lock.json /app/package-lock.json
+COPY --from=parent-dir ./app/package.json /app/package.json
+COPY --from=parent-dir ./app/vite.config.js /app/vite.config.js
+
+COPY --from=parent-dir ./app/src/ /app/src/
+
+RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
-# Set the working directory inside the container
-WORKDIR /app
+ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the Vue.js development server
 CMD ["run_dev_server.sh"]
