@@ -16,7 +16,7 @@ RUN \
     # Locally required Debian packages
     #
     apt-get update \
-    && apt-get install -y \
+    && apt-get install -y --no-install-recommends \
         curl \
         dnsutils \
         libgl1 \
@@ -30,7 +30,7 @@ RUN \
     #
     # See: https://docs.unstructured.io/open-source/introduction/quick-start
     #
-    && apt-get install -y \
+    && apt-get install -y --no-install-recommends \
         libmagic1 \
         libreoffice \
         poppler-utils \
@@ -42,7 +42,8 @@ RUN \
     #
     # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
     #
-    && curl -L -O https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
+    && curl -L -O --proto-redir https \
+        https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
     && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
     && cd pandoc-3.7.0.2 \
     && cp bin/pandoc /usr/local/bin/ \
