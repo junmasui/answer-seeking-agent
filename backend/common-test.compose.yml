@@ -80,7 +80,7 @@ services:
       init-backend-test-volumes:
         condition: service_completed_successfully
 
-    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-test, all ]
 
     environment:
@@ -160,7 +160,7 @@ services:
       init-backend-test-volumes:
         condition: service_completed_successfully
 
-    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-test, all ]
 
     environment:
@@ -240,7 +240,7 @@ services:
       init-backend-test-volumes:
         condition: service_completed_successfully
 
-    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
     profiles: [ backend-test, all ]
 
     environment:
@@ -307,7 +307,7 @@ services:
       init-backend-test-volumes:
         condition: service_completed_successfully
 
-    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
     profiles: [ backend-test, all ]
 
     environment:

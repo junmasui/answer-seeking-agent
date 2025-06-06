@@ -23,20 +23,38 @@ RUN \
         libgl1-mesa-dri \
         libglu1-mesa \
         libglx-mesa0 \
-        libmagic1 \
         libx11-6 \
         libxext6 \
+    #
+    # Install unstructured dependencies
+    #
+    # See: https://docs.unstructured.io/open-source/introduction/quick-start
+    #
+    && apt-get install -y \
+        libmagic1 \
+        libreoffice \
         poppler-utils \
         tesseract-ocr \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* ; \
+    && rm -rf /var/lib/apt/lists/* \
+    #
+    # Install pandoc 3
+    #
+    # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
+    #
+    && curl -L -O https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
+    && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
+    && cd pandoc-3.7.0.2 \
+    && cp bin/pandoc /usr/local/bin/ \
+    && cd .. \
+    && rm -rf pandoc-3.7.0* \
     #
     # Install uv package manager
     #
-    pip install uv
+    && pip install uv
 
 #
-# This script lives in the parent of the current directory, so we must define
+# These script live in the parent of this dockerfile's directory, so we must define
 # the parent as a named build-context on the command line.
 #
 # Copy in Dockerfile has a slightly different syntax. When copying a file to
@@ -48,6 +66,9 @@ COPY --from=parent-dir ./run_celery_worker.sh /
 COPY --from=parent-dir ./run_celery_flower.sh /
 COPY --from=parent-dir ./run_fastapi_dev_server.sh /
 
+COPY --from=dependency-gate-dir ./wait_for_gate.sh /
+COPY --from=dependency-gate-dir ./wait_for_resource.sh /
+
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /run_celery_worker.sh \
     && chmod a+x /run_celery_flower.sh \
@@ -56,11 +77,6 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_worker.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_flower.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_fastapi_dev_server.sh
-
-RUN ls -l /
-
-# Switch to the custom user
-USER ${USER_ID}:${GROUP_ID}
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -71,6 +87,11 @@ COPY --from=parent-dir ./alembic.ini /app/alembic.ini
 COPY --from=parent-dir ./logging.toml /app/logging.toml
 COPY --from=parent-dir ./uv.lock /app/uv.lock
 COPY --from=parent-dir ./src/ /app/src/
+
+RUN chown -R ${USER_ID}:${GROUP_ID} /app/
+
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}
 
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
