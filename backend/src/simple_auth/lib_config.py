@@ -63,7 +63,7 @@ class AuthLibrarySettings(BaseSettings):
         - Custom source ordering via settings_customise_sources
 
     Example:
-        >>> settings = AuthLibrarySettings(application_jwt_secret="a" * 32)
+        >>> settings = AuthLibrarySettings(application_jwt_secret='a' * 32)
         >>> print(settings.application_jwt_secret)
     """
 

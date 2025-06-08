@@ -7,6 +7,8 @@ See: Hallucination Grader in https://langchain-ai.github.io/langgraph/tutorials/
 import logging
 from functools import cache
 
+from core.agent.agent_state import GraphState
+
 from .grader_util import build_grader
 from .internal_models import AgentPromptName, GradeHallucinations
 from .prompt_util import get_chat_prompt
@@ -30,7 +32,7 @@ def get_hallucination_grader():
     return hallucination_grader
 
 
-def grade_hallucination(state):
+def grade_hallucination(state: GraphState):
     """
     Determines whether the generation is grounded in the document and answers question.
 
@@ -41,12 +43,13 @@ def grade_hallucination(state):
         str: Decision for next node to call
     """
     logger.info('---CHECK HALLUCINATIONS---')
-    documents = state['documents']
-    generation = state['answer']
+
+    documents = state.documents
+    generation = state.answer
 
     hallucination_grader = get_hallucination_grader()
 
-    score = hallucination_grader.invoke({'documents': documents, 'generation': generation})
+    score = hallucination_grader.ainvoke({'documents': documents, 'generation': generation})
     grade = score.binary_score if score is not None else 'no'
 
     return {'grounded_in_facts': grade}

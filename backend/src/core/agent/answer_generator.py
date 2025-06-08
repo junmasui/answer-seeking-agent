@@ -6,6 +6,8 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 
 import logging
 
+from core.agent.agent_state import GraphState
+
 from ..providers.chat_llm import get_chat_llm
 from .answer_citation_parser import AnswerCitationParser
 from .internal_models import AgentPromptName
@@ -38,25 +40,25 @@ def answer_generator():
     return rag_chain
 
 
-def generate_answer(state):
+def generate_answer(state: GraphState):
     """
-    Generate answer
+    Generate an answer using the RAG agent.
 
     Args:
         state (dict): The current graph state
 
     Returns:
-        state (dict): New key added to state, generation, that contains LLM generation
+        dict: Updates to the graph state with the generated answer and citations
     """
-    logger.info('---GENERATE---')
-    question = state['question']
-    documents = state['documents']
-    history = state['messages']
+    logger.info('---GENERATE ANSWER---')
+    question = state.question
+    documents = state.documents
+    history = state.messages
 
-    rag_chain = answer_generator()
+    chain = answer_generator()
 
     # RAG generation
-    result = rag_chain.invoke(
+    result = chain.ainvoke(
         input={'documents': documents, 'chat_history': history, 'question': question},
         config={'configurable': {'documents': documents}},
     )

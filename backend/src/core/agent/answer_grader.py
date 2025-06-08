@@ -7,6 +7,8 @@ See: Answer Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/lan
 import logging
 from functools import cache
 
+from core.agent.agent_state import GraphState
+
 from .grader_util import build_grader
 from .internal_models import AgentPromptName, GradeAnswer
 from .prompt_util import get_chat_prompt
@@ -30,7 +32,7 @@ def get_answer_grader():
     return answer_grader
 
 
-def grade_answer(state):
+def grade_answer(state: GraphState):
     """
     Determines whether the generation is grounded in the document and answers question.
 
@@ -42,8 +44,8 @@ def grade_answer(state):
     """
     logger.info('---CHECK ANSWER---')
 
-    question = state['question']
-    generation = state['generation']
+    question = state.question
+    generation = state.generation
 
     answer_grader = get_answer_grader()
 

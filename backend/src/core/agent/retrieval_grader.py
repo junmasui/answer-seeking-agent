@@ -8,6 +8,8 @@ See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/
 import logging
 from functools import cache
 
+from core.agent.agent_state import GraphState
+
 from .grader_util import build_grader
 from .internal_models import AgentPromptName, GradeDocuments
 from .prompt_util import get_chat_prompt
@@ -31,7 +33,7 @@ def get_retrieval_grader():
     return retrieval_grader
 
 
-def grade_documents(state):
+def grade_document_relevancies(state: GraphState):
     """
     Determines whether the retrieved documents are relevant to the question.
 
@@ -43,22 +45,23 @@ def grade_documents(state):
     """
     logger.info('---CHECK DOCUMENT RELEVANCE TO QUESTION---')
 
-    question = state['question']
-    documents = state['documents']
+    question = state.question
+    documents = state.documents
 
     retrieval_grader = get_retrieval_grader()
 
     # Score each doc
-    filtered_docs = []
+    document_relevancy = []
     for doc in documents:
         score = retrieval_grader.invoke({'question': question, 'document': doc.page_content})
         grade = score.binary_score if score is not None else 'no'
+
         if grade == 'yes':
             logger.info('---GRADE: DOCUMENT RELEVANT---')
-            filtered_docs.append(doc)
         else:
             logger.info('---GRADE: DOCUMENT NOT RELEVANT---')
-            continue
+
+        document_relevancy.append(10 if grade == 'yes' else 0)
 
     # Keep only the relevant documents
-    return {'documents': filtered_docs}
+    return {'document_relevancy': document_relevancy}
