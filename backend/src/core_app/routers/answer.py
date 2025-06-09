@@ -21,7 +21,7 @@ async def handle_question(
     """Handle a question submitted via GET request and return an answer."""
     user_id = current_user.user_id if current_user is not None else None
 
-    answer = await seek_answer(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
+    answer = seek_answer(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
 
     logger.info('returning %s', answer)
 
@@ -36,7 +36,7 @@ async def handler_question(
     """Handle a question submitted via POST request and return an answer."""
     user_id = current_user.user_id if current_user is not None else None
 
-    answer = await seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
+    answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
 
     logger.info('returning %s', answer)
 

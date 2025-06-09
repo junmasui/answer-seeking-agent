@@ -20,8 +20,8 @@ def answer_generator():
     """
     Create an answer generation chain for RAG (Retrieval-Augmented Generation).
 
-    Combines a chat prompt, language model, and answer citation parser to generate
-    answers from retrieved documents with proper citation extraction.
+    Combines a chat prompt, language model, and answer citation parser to generate answers from
+    retrieved documents with proper citation extraction.
     """
     prompt = get_chat_prompt(prompt_name=AgentPromptName.GENERATE_ANSWER)
 
@@ -58,7 +58,7 @@ def generate_answer(state: GraphState):
     chain = answer_generator()
 
     # RAG generation
-    result = chain.ainvoke(
+    result = chain.invoke(
         input={'documents': documents, 'chat_history': history, 'question': question},
         config={'configurable': {'documents': documents}},
     )

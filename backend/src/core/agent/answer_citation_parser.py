@@ -42,8 +42,8 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
         self, input: Union[str, BaseMessage], config: Optional[RunnableConfig] = None, **kwargs: Any
     ) -> dict[str, str]:
         """
-        Critical override to bypass an internal lambda function that is preventing
-        the parse_result method from seeing the config object.
+        Critical override to bypass an internal lambda function that is preventing the
+        parse_result method from seeing the config object.
 
         See v0.3.41 codebase: https://github.com/langchain-ai/langchain/blob/langchain-core%3D%3D0.3.41/libs/core/langchain_core/output_parsers/base.py#L90
         Monitor the latest to see if the internal lambda function is removed:

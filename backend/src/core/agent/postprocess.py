@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def add_response_to_history(state: GraphState):
     """
-    Capture generated response
+    Capture generated response.
 
     Args:
         state (dict): The current graph state
@@ -25,7 +25,7 @@ def add_response_to_history(state: GraphState):
 
     # Update agent state with new AI-generation entries in the message histories.
 
-    next_message_id = state.get('next_message_id', 0)
+    next_message_id = x if (x := state.next_message_id) is not None else 0
     message_id = str(next_message_id)
     next_message_id += 1
 

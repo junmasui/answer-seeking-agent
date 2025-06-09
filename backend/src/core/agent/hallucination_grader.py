@@ -21,9 +21,8 @@ def get_hallucination_grader():
     """
     Initializes and returns a hallucination grading chain.
 
-    This function builds a grader that uses a chat prompt (GRADE_HALLUCINATION)
-    and a Pydantic model (GradeHallucination) for structured output.
-    The grader is cached to avoid reinitialization.
+    This function builds a grader that uses a chat prompt (GRADE_HALLUCINATION) and a Pydantic model
+    (GradeHallucination) for structured output. The grader is cached to avoid reinitialization.
     """
     prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_HALLUCINATION)
 
@@ -49,7 +48,7 @@ def grade_hallucination(state: GraphState):
 
     hallucination_grader = get_hallucination_grader()
 
-    score = hallucination_grader.ainvoke({'documents': documents, 'generation': generation})
+    score = hallucination_grader.invoke({'documents': documents, 'generation': generation})
     grade = score.binary_score if score is not None else 'no'
 
     return {'grounded_in_facts': grade}

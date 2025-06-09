@@ -21,9 +21,8 @@ def get_answer_grader():
     """
     Initializes and returns an answer grading chain.
 
-    This function builds a grader that uses a chat prompt (GRADE_ANSWER)
-    and a Pydantic model (GradeAnswer) for structured output.
-    The grader is cached to avoid reinitialization.
+    This function builds a grader that uses a chat prompt (GRADE_ANSWER) and a Pydantic model
+    (GradeAnswer) for structured output. The grader is cached to avoid reinitialization.
     """
     prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_ANSWER)
 

@@ -1,6 +1,5 @@
 """
-This module provides the node that retreives documents
-for answering an user question.
+This module provides the node that retreives documents for answering an user question.
 
 See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state
 """
@@ -23,7 +22,7 @@ pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 def query_documents(state: GraphState):
     """
-    Retrieve documents
+    Retrieve documents.
 
     Args:
         state (dict): The current graph state
@@ -81,6 +80,8 @@ def query_documents(state: GraphState):
         return x
 
     documents = [_clean_up_retrieved(x) for x in documents]
+
+    logger.info('---RETRIEVED %d DOCUMENTS---', len(documents))
 
     # Update agent state with retrieved documents
     state_updates = {'documents': documents}

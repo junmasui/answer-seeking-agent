@@ -1,6 +1,6 @@
 """
-This module provides the node that rewrites the user questions
-so that the document retrieval returns with better relevancy.
+This module provides the node that rewrites the user questions so that the document retrieval
+returns with better relevancy.
 
 See: Question Re-writer in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
@@ -22,8 +22,8 @@ def get_question_rewriter():
     """
     Initializes and returns a question rewriting chain.
 
-    The chain consists of a language model, a prompt for rewriting questions,
-    and an output parser. It's configured to run with the name 'question_rewriter'.
+    The chain consists of a language model, a prompt for rewriting questions, and an output parser.
+    It's configured to run with the name 'question_rewriter'.
     """
     # LLM
     llm = get_chat_llm()
@@ -53,7 +53,7 @@ def rewrite_question(state: GraphState):
     question_rewriter = get_question_rewriter()
 
     # Re-write question
-    better_question = question_rewriter.ainvoke({'question': question})
+    better_question = question_rewriter.invoke({'question': question})
 
     # Update agent state with rewritten question.
     messages = [msg for msg in state.messages if msg.type == 'human']

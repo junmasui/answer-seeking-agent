@@ -18,7 +18,12 @@ from .answer_generator import generate_answer
 from .answer_grader import grade_answer
 from .checkpointer import get_checkpointer
 from .constants import NodeName, ResponseOverallGrade, RetrievalOverallGrade, UserInputGrade
-from .deciders import filter_documents
+from .deciders import (
+    check_for_relevant_documents,
+    check_if_safe_input,
+    check_response_quality,
+    gather_relevant_documents,
+)
 from .document_guards import detect_toxic_content
 from .document_retriever import query_documents
 from .hallucination_grader import grade_hallucination
@@ -35,12 +40,16 @@ pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
 def redo_document_retrieval(_state: GraphState):
-    """Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should be redone."""
+    """
+    Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should
+    be redone."""
     return {'answer_grade': ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL}
 
 
 def redo_answer_generation(_state: GraphState):
-    """Set the answer_grade to 'redo answer generation' to indicate that answer generation should be redone."""
+    """
+    Set the answer_grade to 'redo answer generation' to indicate that answer generation should be
+    redone."""
     return {'answer_grade': ResponseOverallGrade.REDO_ANSWER_GENERATION}
 
 
@@ -50,135 +59,64 @@ def accept_answer(_state: GraphState):
 
 
 def no_op(_state: GraphState):
-    """Does nothing. This is useful for defining a fan-out or a fan-in node."""
+    """
+    Does nothing.
+
+    This is useful for defining a fan-out or a fan-in node.
+    """
+    logger.info('---No Op---')
     return {}
 
 
 def get_input_grade(state: GraphState):
+    logger.info('---Extracting Input Grade: %s---', state.input_overall_grade)
     return state.input_overall_grade
 
 
+def get_retrieval_grade_in_subgraph(state: GraphState):
+    logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
+    if state.retrieval_grade in [RetrievalOverallGrade.NO_RELEVANT_DOCS]:
+        return state.retrieval_grade
+    return '__default__'
+
+
 def get_retrieval_grade(state: GraphState):
-    return state.retrieval_grade
+    logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
+    if state.retrieval_grade in [RetrievalOverallGrade.REJECT_RETRIEVAL, RetrievalOverallGrade.RELEVANT_DOCS_FOUND]:
+        return state.retrieval_grade
+    return '__default__'
+
+
+def get_answer_grade_in_subgraph(state: GraphState):
+    logger.info('---Extracting Response Grade: %s---', state.answer_grade)
+    if state.answer_grade in [ResponseOverallGrade.REDO_ANSWER_GENERATION]:
+        return state.answer_grade
+    return '__default__'
 
 
 def get_answer_grade(state: GraphState):
-    return state.answer_grade
+    logger.info('---Extracting Response Grade: %s---', state.answer_grade)
+    if state.answer_grade in [
+        ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL,
+        ResponseOverallGrade.ACCEPT_ANSWER,
+        ResponseOverallGrade.REJECT_ANSWER,
+    ]:
+        return state.answer_grade
+    return '__default__'
 
 
 def _get_uncompiled_agent_graph() -> StateGraph:
     """Define and return the uncompiled LangGraph agent graph structure."""
     # Build subgraph for input guards.
-    input_guard_subgraph = StateGraph(GraphState)
-
-    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op)
-    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_DECISION, no_op)
-
-    input_guard_subgraph.add_node(NodeName.DETECT_PROMPT_INJECTION, detect_prompt_injection)
-    input_guard_subgraph.add_node(NodeName.DETECT_PRIVACY_VIOLATION, detect_privacy_violation)
-    input_guard_subgraph.add_node(NodeName.DETECT_TOXIC_INPUT, detect_toxic_input)
-
-    input_guard_subgraph.set_entry_point(NodeName.INPUT_GUARD_START)
-
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_PROMPT_INJECTION)
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_PRIVACY_VIOLATION)
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_TOXIC_INPUT)
-
-    input_guard_subgraph.add_edge(
-        [NodeName.DETECT_PROMPT_INJECTION, NodeName.DETECT_PRIVACY_VIOLATION, NodeName.DETECT_TOXIC_INPUT],
-        NodeName.INPUT_GUARD_DECISION,
-    )
-
-    input_guard_subgraph.set_finish_point(NodeName.INPUT_GUARD_DECISION)
-
-    # Build subgraph for retrieved document guards.
-    retrieval_guard_subgraph = StateGraph(GraphState)
-
-    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op)
-    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, no_op)
-
-    retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)  # grade documents
-    retrieval_guard_subgraph.add_node(NodeName.DETECT_TOXIC_CONTENT, detect_toxic_content)
-
-    retrieval_guard_subgraph.set_entry_point(NodeName.RETRIEVAL_GUARD_START)
-
-    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.GRADE_RELEVANCIES)
-    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.DETECT_TOXIC_CONTENT)
-
-    retrieval_guard_subgraph.add_edge(
-        [NodeName.GRADE_RELEVANCIES, NodeName.DETECT_TOXIC_CONTENT], NodeName.RETRIEVAL_GUARD_DECISION
-    )
-
-    retrieval_guard_subgraph.set_finish_point(NodeName.RETRIEVAL_GUARD_DECISION)
-
-    # Build subgraph for response guards.
-    response_guard_subgraph = StateGraph(GraphState)
-
-    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op)
-    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_DECISION, no_op)
-
-    response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)  # grade answers
-    response_guard_subgraph.add_node(NodeName.GRADE_HALLUCINATION, grade_hallucination)  # grade hallucination
-    response_guard_subgraph.add_node(NodeName.DETECT_SENSITIVE_INFO, detect_sensitive_info)
-    response_guard_subgraph.add_node(NodeName.DETECT_TOXIC_RESPONSE, detect_toxic_response)
-
-    response_guard_subgraph.set_entry_point(NodeName.RESPONSE_GUARD_START)
-
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_ANSWER)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_HALLUCINATION)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.DETECT_SENSITIVE_INFO)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.DETECT_TOXIC_RESPONSE)
-
-    response_guard_subgraph.add_edge(
-        [
-            NodeName.GRADE_ANSWER,
-            NodeName.GRADE_HALLUCINATION,
-            NodeName.DETECT_SENSITIVE_INFO,
-            NodeName.DETECT_TOXIC_RESPONSE,
-        ],
-        NodeName.RESPONSE_GUARD_DECISION,
-    )
-
-    response_guard_subgraph.set_finish_point(NodeName.RESPONSE_GUARD_DECISION)
+    input_guard_subgraph = _build_input_guard_subgraph()
 
     # Build subgraph for document retrieval.
 
-    retrieval_subgraph = StateGraph(GraphState)
-
-    retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)  # retrieve
-    retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile())
-    retrieval_subgraph.add_node(NodeName.FILTER_DOCUMENTS, filter_documents)
-    retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)  # rewrite_query
-    retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op)
-
-    retrieval_subgraph.set_entry_point(NodeName.QUERY_DOCUMENTS)
-    retrieval_subgraph.add_edge(NodeName.QUERY_DOCUMENTS, NodeName.RETRIEVAL_GUARD)
-    retrieval_subgraph.add_edge(NodeName.RETRIEVAL_GUARD, NodeName.FILTER_DOCUMENTS)
-    retrieval_subgraph.add_conditional_edges(
-        NodeName.FILTER_DOCUMENTS,
-        get_retrieval_grade,
-        {RetrievalOverallGrade.NO_RELEVANT_DOCS: NodeName.REWRITE_QUERY, '__default__': NodeName.RETRIEVAL_EXIT},
-    )
-    retrieval_subgraph.add_edge(NodeName.REWRITE_QUERY, NodeName.QUERY_DOCUMENTS)
-    retrieval_subgraph.set_finish_point(NodeName.RETRIEVAL_EXIT)
+    retrieval_subgraph = _build_retrieval_subgraph()
 
     # Build subgraph for answer generation.
 
-    response_subgraph = StateGraph(GraphState)
-    response_subgraph.add_node(NodeName.GENERATE_ANSWER, generate_answer)
-    response_subgraph.add_node(NodeName.RESPONSE_GUARD, response_guard_subgraph.compile())
-    response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op)
-
-    response_subgraph.set_entry_point(NodeName.GENERATE_ANSWER)
-
-    response_subgraph.add_edge(NodeName.GENERATE_ANSWER, NodeName.RESPONSE_GUARD)
-
-    response_subgraph.add_conditional_edges(
-        NodeName.RESPONSE_GUARD,
-        get_answer_grade,
-        {ResponseOverallGrade.REDO_ANSWER_GENERATION: NodeName.GENERATE_ANSWER, '__default__': NodeName.RESPONSE_EXIT},
-    )
-    response_subgraph.set_finish_point(NodeName.RESPONSE_EXIT)
+    response_subgraph = _build_response_subgraph()
 
     # Build graph
 
@@ -236,6 +174,134 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     return graph
 
 
+def _build_input_guard_subgraph():
+    input_guard_subgraph = StateGraph(GraphState)
+
+    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op)
+    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_DECISION, check_if_safe_input)
+
+    input_guard_subgraph.add_node(NodeName.DETECT_PROMPT_INJECTION, detect_prompt_injection)
+    input_guard_subgraph.add_node(NodeName.DETECT_PRIVACY_VIOLATION, detect_privacy_violation)
+    input_guard_subgraph.add_node(NodeName.DETECT_TOXIC_INPUT, detect_toxic_input)
+
+    input_guard_subgraph.set_entry_point(NodeName.INPUT_GUARD_START)
+
+    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_PROMPT_INJECTION)
+    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_PRIVACY_VIOLATION)
+    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_TOXIC_INPUT)
+
+    input_guard_subgraph.add_edge(
+        [NodeName.DETECT_PROMPT_INJECTION, NodeName.DETECT_PRIVACY_VIOLATION, NodeName.DETECT_TOXIC_INPUT],
+        NodeName.INPUT_GUARD_DECISION,
+    )
+
+    input_guard_subgraph.set_finish_point(NodeName.INPUT_GUARD_DECISION)
+    return input_guard_subgraph
+
+
+def _build_retrieval_guard_subgraph():
+    retrieval_guard_subgraph = StateGraph(GraphState)
+
+    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op)
+    retrieval_guard_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
+    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, check_for_relevant_documents)
+
+    retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)  # grade documents
+    retrieval_guard_subgraph.add_node(NodeName.DETECT_TOXIC_CONTENT, detect_toxic_content)
+
+    retrieval_guard_subgraph.set_entry_point(NodeName.RETRIEVAL_GUARD_START)
+
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.GRADE_RELEVANCIES)
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.DETECT_TOXIC_CONTENT)
+
+    retrieval_guard_subgraph.add_edge(
+        [NodeName.GRADE_RELEVANCIES, NodeName.DETECT_TOXIC_CONTENT], NodeName.GATHER_RELEVANT_DOCUMENTS
+    )
+    retrieval_guard_subgraph.add_edge(NodeName.GATHER_RELEVANT_DOCUMENTS, NodeName.RETRIEVAL_GUARD_DECISION)
+
+    retrieval_guard_subgraph.set_finish_point(NodeName.RETRIEVAL_GUARD_DECISION)
+    return retrieval_guard_subgraph
+
+
+def _build_retrieval_subgraph():
+    # Build subgraph for retrieved document guards.
+    retrieval_guard_subgraph = _build_retrieval_guard_subgraph()
+
+    retrieval_subgraph = StateGraph(GraphState)
+
+    retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)  # retrieve
+    retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile())
+    retrieval_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
+    retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)  # rewrite_query
+    retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op)
+
+    retrieval_subgraph.set_entry_point(NodeName.QUERY_DOCUMENTS)
+    retrieval_subgraph.add_edge(NodeName.QUERY_DOCUMENTS, NodeName.RETRIEVAL_GUARD)
+    retrieval_subgraph.add_edge(NodeName.RETRIEVAL_GUARD, NodeName.GATHER_RELEVANT_DOCUMENTS)
+    retrieval_subgraph.add_conditional_edges(
+        NodeName.GATHER_RELEVANT_DOCUMENTS,
+        get_retrieval_grade_in_subgraph,
+        {RetrievalOverallGrade.NO_RELEVANT_DOCS: NodeName.REWRITE_QUERY, '__default__': NodeName.RETRIEVAL_EXIT},
+    )
+    retrieval_subgraph.add_edge(NodeName.REWRITE_QUERY, NodeName.QUERY_DOCUMENTS)
+    retrieval_subgraph.set_finish_point(NodeName.RETRIEVAL_EXIT)
+    return retrieval_subgraph
+
+
+def _build_response_guard_subgraph():
+    response_guard_subgraph = StateGraph(GraphState)
+
+    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op)
+    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_DECISION, check_response_quality)
+
+    response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)  # grade answers
+    response_guard_subgraph.add_node(NodeName.GRADE_HALLUCINATION, grade_hallucination)  # grade hallucination
+    response_guard_subgraph.add_node(NodeName.DETECT_SENSITIVE_INFO, detect_sensitive_info)
+    response_guard_subgraph.add_node(NodeName.DETECT_TOXIC_RESPONSE, detect_toxic_response)
+
+    response_guard_subgraph.set_entry_point(NodeName.RESPONSE_GUARD_START)
+
+    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_ANSWER)
+    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_HALLUCINATION)
+    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.DETECT_SENSITIVE_INFO)
+    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.DETECT_TOXIC_RESPONSE)
+
+    response_guard_subgraph.add_edge(
+        [
+            NodeName.GRADE_ANSWER,
+            NodeName.GRADE_HALLUCINATION,
+            NodeName.DETECT_SENSITIVE_INFO,
+            NodeName.DETECT_TOXIC_RESPONSE,
+        ],
+        NodeName.RESPONSE_GUARD_DECISION,
+    )
+
+    response_guard_subgraph.set_finish_point(NodeName.RESPONSE_GUARD_DECISION)
+    return response_guard_subgraph
+
+
+def _build_response_subgraph():
+    # Build subgraph for response guards.
+    response_guard_subgraph = _build_response_guard_subgraph()
+
+    response_subgraph = StateGraph(GraphState)
+    response_subgraph.add_node(NodeName.GENERATE_ANSWER, generate_answer)
+    response_subgraph.add_node(NodeName.RESPONSE_GUARD, response_guard_subgraph.compile())
+    response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op)
+
+    response_subgraph.set_entry_point(NodeName.GENERATE_ANSWER)
+
+    response_subgraph.add_edge(NodeName.GENERATE_ANSWER, NodeName.RESPONSE_GUARD)
+
+    response_subgraph.add_conditional_edges(
+        NodeName.RESPONSE_GUARD,
+        get_answer_grade_in_subgraph,
+        {ResponseOverallGrade.REDO_ANSWER_GENERATION: NodeName.GENERATE_ANSWER, '__default__': NodeName.RESPONSE_EXIT},
+    )
+    response_subgraph.set_finish_point(NodeName.RESPONSE_EXIT)
+    return response_subgraph
+
+
 @cache
 def get_agent_graph() -> Pregel:
     uncompiled_graph = _get_uncompiled_agent_graph()
@@ -265,9 +331,10 @@ def get_mermaid_graph():
     return mermaid_graph
 
 
-async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
+def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
     """
     Seek an answer to the user's input using the agent graph.
+
     This involves retrieving documents, generating an answer, and applying guardrails.
     """
     logger.info('user input: %s  thread_id: %s', user_input, thread_id)

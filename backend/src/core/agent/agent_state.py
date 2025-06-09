@@ -1,6 +1,7 @@
 from typing import Annotated, Dict, List, Optional
 from uuid import UUID
 
+from langchain_core.documents import Document
 from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, ConfigDict, Field
@@ -28,9 +29,11 @@ class GraphState(BaseModel):
         Optional[List[UUID]], Field(default=None, description='IDs of document sets relevant to the question.')
     ]
 
-    documents: Annotated[Optional[List[str]], Field(default=None, description='List of retrieved document contents.')]
+    documents: Annotated[
+        Optional[List[Document]], Field(default=None, description='List of retrieved document contents.')
+    ]
     original_documents: Annotated[
-        Optional[List[str]], Field(default=None, description='List of retrieved document contents.')
+        Optional[List[Document]], Field(default=None, description='List of retrieved document contents.')
     ]
 
     generation: Annotated[Optional[str], Field(default=None, description='The raw LLM generation.')]
@@ -58,11 +61,12 @@ class GraphState(BaseModel):
         Field(default=None, description='Grade assessing the quality of the retrieval.'),
     ]
     document_relevancy: Annotated[
-        Optional[List[int]], Field(default=None, ge=0, le=10, description='Score indicating document relevancy (0-10).')
+        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
+        Field(default=None, description='Score indicating document relevancy (0-10).'),
     ]
     toxic_content_detected: Annotated[
-        Optional[List[int]],
-        Field(default=None, ge=0, le=10, description='Score indicating likelihood of toxic LLM generation (0-10).'),
+        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
+        Field(default=None, description='Score indicating likelihood of toxic LLM generation (0-10).'),
     ]
 
     answer_grade: Annotated[

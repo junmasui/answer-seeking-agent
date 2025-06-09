@@ -1,6 +1,6 @@
 """
-This module provides the node that evaluates whether the retrieved documents are relevent
-to addressing the user question.
+This module provides the node that evaluates whether the retrieved documents are relevent to
+addressing the user question.
 
 See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
@@ -22,9 +22,8 @@ def get_retrieval_grader():
     """
     Initializes and returns a retrieval grading chain.
 
-    This function builds a grader that uses a chat prompt (GRADE_RETRIEVED_DOCUMENTS)
-    and a Pydantic model (GradeDocuments) for structured output.
-    The grader is cached to avoid reinitialization.
+    This function builds a grader that uses a chat prompt (GRADE_RETRIEVED_DOCUMENTS) and a Pydantic
+    model (GradeDocuments) for structured output. The grader is cached to avoid reinitialization.
     """
     prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_RETRIEVED_DOCUMENTS)
 

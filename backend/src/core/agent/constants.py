@@ -36,7 +36,7 @@ class NodeName(StrEnum):
     RETRIEVAL_GUARD_START = 'document_guard_start'
     DETECT_TOXIC_CONTENT = 'detect_toxic_content'
     ##    RETRIEVAL_GUARD_EXIT = 'document_guard_exit'
-    FILTER_DOCUMENTS = 'filter_documents'
+    GATHER_RELEVANT_DOCUMENTS = 'gather_documents'
     RETRIEVAL_GUARD_DECISION = 'document_guard_decision'
 
     RESPONSE_GUARD_START = 'response_guard_start'
