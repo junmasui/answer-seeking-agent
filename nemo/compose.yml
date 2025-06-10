@@ -1,0 +1,21 @@
+name: nemo
+
+services:
+  nemo:
+    restart: unless-stopped
+
+    image: nemoguardrails
+    profiles: [ nemo, infrastructure, all ]
+
+    ports:
+      - '27500:8000'
+    networks:
+      - agent-poc
+    volumes:
+      - ./config:/config
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - answers_dev_env
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    command: ["server", "--config=/config"]

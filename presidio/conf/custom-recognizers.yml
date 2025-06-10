@@ -1,0 +1,12 @@
+recognizers:
+  - name: MedicalRecordRecognizer
+    supported_entities:
+      - MEDICAL_RECORD
+    patterns:
+      - name: medical_record_pattern
+        regex: "\\b[A-Z]{2}\\d{6}\\b"
+        score: 0.9
+    context:
+      - patient
+      - medical
+      - history
