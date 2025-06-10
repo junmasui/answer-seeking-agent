@@ -2,11 +2,13 @@ from enum import StrEnum
 
 
 class NodeName(StrEnum):
-    """Defines standardized names for nodes within the agent graph.
-
-    This ensures consistency and avoids typos when referring to nodes
-    in graph definitions and logic.
     """
+    Defines standardized names for nodes within the agent graph.
+
+    This ensures consistency and avoids typos when referring to nodes in graph definitions and
+    logic.
+    """
+
     QUERY_DOCUMENTS = 'query_documents'
     GRADE_RELEVANCIES = 'grade_relevancies'
     REWRITE_QUERY = 'rewrite_query'
@@ -49,32 +51,37 @@ class NodeName(StrEnum):
 
 
 class UserInputGrade(StrEnum):
-    """Represents the possible overall grades for user input.
-
-    These grades are used to determine the next step in the agent graph
-    after input validation.
     """
+    Represents the possible overall grades for user input.
+
+    These grades are used to determine the next step in the agent graph after input validation.
+    """
+
     REJECT_USER_INPUT = 'reject user input'
     ACCEPT_USER_INPUT = 'accept user input'
 
 
 class RetrievalOverallGrade(StrEnum):
-    """Represents the possible overall grades for document retrieval.
-
-    These grades guide the agent on whether to proceed with answer generation,
-    retry retrieval, or reject the retrieval attempt.
     """
+    Represents the possible overall grades for document retrieval.
+
+    These grades guide the agent on whether to proceed with answer generation, retry retrieval, or
+    reject the retrieval attempt.
+    """
+
     RELEVANT_DOCS_FOUND = 'relevant docs found'
     NO_RELEVANT_DOCS = 'no relevant docs'
     REJECT_RETRIEVAL = 'reject retrieval'
 
 
 class ResponseOverallGrade(StrEnum):
-    """Represents the possible overall grades for the generated response.
-
-    These grades determine whether the answer is accepted, rejected, or if
-    parts of the process need to be redone.
     """
+    Represents the possible overall grades for the generated response.
+
+    These grades determine whether the answer is accepted, rejected, or if parts of the process need
+    to be redone.
+    """
+
     REDO_DOCUMENT_RETRIEVAL = 'redo document retrieval'
     REDO_ANSWER_GENERATION = 'redo answer generation'
     ACCEPT_ANSWER = 'accept answer'
