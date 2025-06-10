@@ -39,7 +39,7 @@ onMounted(async () => {
  */
 async function checkStatus() {
   try {
-    const response = await fetch('/api/status', {
+    const response = await fetch('/api/live/status', {
       method: 'GET'
     })
 
