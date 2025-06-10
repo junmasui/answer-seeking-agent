@@ -69,11 +69,32 @@ def no_op(_state: GraphState):
 
 
 def get_input_grade(state: GraphState):
+    """
+    Extract and return the input overall grade from the current state.
+
+    Args:
+        state: The current graph state.
+
+    Returns:
+        The input overall grade.
+    """
     logger.info('---Extracting Input Grade: %s---', state.input_overall_grade)
     return state.input_overall_grade
 
 
 def get_retrieval_grade_in_subgraph(state: GraphState):
+    """
+    Extract and return the retrieval grade from the current state, for use within a subgraph.
+
+    It returns the specific grade if it indicates no relevant documents were found,
+    otherwise defaults to a general value.
+
+    Args:
+        state: The current graph state.
+
+    Returns:
+        The retrieval grade or a default value.
+    """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
     if state.retrieval_grade in [RetrievalOverallGrade.NO_RELEVANT_DOCS]:
         return state.retrieval_grade
@@ -81,6 +102,18 @@ def get_retrieval_grade_in_subgraph(state: GraphState):
 
 
 def get_retrieval_grade(state: GraphState):
+    """
+    Extract and return the retrieval grade from the current state.
+
+    It returns specific grades for rejection or successful finding of relevant documents,
+    otherwise defaults to a general value.
+
+    Args:
+        state: The current graph state.
+
+    Returns:
+        The retrieval grade or a default value.
+    """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
     if state.retrieval_grade in [RetrievalOverallGrade.REJECT_RETRIEVAL, RetrievalOverallGrade.RELEVANT_DOCS_FOUND]:
         return state.retrieval_grade
@@ -88,6 +121,18 @@ def get_retrieval_grade(state: GraphState):
 
 
 def get_answer_grade_in_subgraph(state: GraphState):
+    """
+    Extract and return the answer grade from the current state, for use within a subgraph.
+
+    It returns the specific grade if it indicates answer generation needs to be redone,
+    otherwise defaults to a general value.
+
+    Args:
+        state: The current graph state.
+
+    Returns:
+        The answer grade or a default value.
+    """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
     if state.answer_grade in [ResponseOverallGrade.REDO_ANSWER_GENERATION]:
         return state.answer_grade
@@ -95,6 +140,18 @@ def get_answer_grade_in_subgraph(state: GraphState):
 
 
 def get_answer_grade(state: GraphState):
+    """
+    Extract and return the answer grade from the current state.
+
+    It returns specific grades for redoing document retrieval, accepting the answer,
+    or rejecting the answer, otherwise defaults to a general value.
+
+    Args:
+        state: The current graph state.
+
+    Returns:
+        The answer grade or a default value.
+    """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
     if state.answer_grade in [
         ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL,
@@ -175,6 +232,15 @@ def _get_uncompiled_agent_graph() -> StateGraph:
 
 
 def _build_input_guard_subgraph():
+    """
+    Build and return a StateGraph for the input guard subgraph.
+
+    This subgraph handles input validation tasks like prompt injection,
+    privacy violation, and toxic input detection.
+
+    Returns:
+        A StateGraph instance for the input guard subgraph.
+    """
     input_guard_subgraph = StateGraph(GraphState)
 
     input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op)
@@ -200,6 +266,15 @@ def _build_input_guard_subgraph():
 
 
 def _build_retrieval_guard_subgraph():
+    """
+    Build and return a StateGraph for the retrieval guard subgraph.
+
+    This subgraph handles tasks related to document retrieval, such as
+    grading relevancies and detecting toxic content.
+
+    Returns:
+        A StateGraph instance for the retrieval guard subgraph.
+    """
     retrieval_guard_subgraph = StateGraph(GraphState)
 
     retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op)
@@ -224,6 +299,15 @@ def _build_retrieval_guard_subgraph():
 
 
 def _build_retrieval_subgraph():
+    """
+    Build and return a StateGraph for the document retrieval subgraph.
+
+    This subgraph manages the process of querying documents, applying
+    retrieval guards, and rewriting queries if necessary.
+
+    Returns:
+        A StateGraph instance for the retrieval subgraph.
+    """
     # Build subgraph for retrieved document guards.
     retrieval_guard_subgraph = _build_retrieval_guard_subgraph()
 
@@ -249,6 +333,16 @@ def _build_retrieval_subgraph():
 
 
 def _build_response_guard_subgraph():
+    """
+    Build and return a StateGraph for the response guard subgraph.
+
+    This subgraph is responsible for ensuring the quality and safety of the
+    generated response by grading the answer, checking for hallucinations,
+    and detecting sensitive or toxic content.
+
+    Returns:
+        A StateGraph instance for the response guard subgraph.
+    """
     response_guard_subgraph = StateGraph(GraphState)
 
     response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op)
@@ -281,6 +375,15 @@ def _build_response_guard_subgraph():
 
 
 def _build_response_subgraph():
+    """
+    Build and return a StateGraph for the response generation subgraph.
+
+    This subgraph handles generating an answer and applying response guards
+    to ensure its quality.
+
+    Returns:
+        A StateGraph instance for the response generation subgraph.
+    """
     # Build subgraph for response guards.
     response_guard_subgraph = _build_response_guard_subgraph()
 
@@ -304,6 +407,16 @@ def _build_response_subgraph():
 
 @cache
 def get_agent_graph() -> Pregel:
+    """
+    Return a compiled Pregel agent graph.
+
+    The graph is built using _get_uncompiled_agent_graph and compiled
+    with a checkpointer. The result is cached to avoid recompilation
+    on subsequent calls.
+
+    Returns:
+        A compiled Pregel agent graph.
+    """
     uncompiled_graph = _get_uncompiled_agent_graph()
 
     # Create a checkpointer

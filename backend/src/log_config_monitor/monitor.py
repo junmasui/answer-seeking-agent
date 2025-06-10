@@ -46,7 +46,13 @@ def _apply_incremental_configuration(log_config_path):
 
 
 class _ConfigFileChangeEventHandler(PatternMatchingEventHandler):
-    """Watches for changes to logging configuration TOML file."""
+    """
+    Watch for changes to the logging configuration TOML file.
+
+    This handler monitors the specified logging configuration file for creation,
+    modification, or move events. When such an event occurs, it triggers
+    an incremental update of the logging configuration.
+    """
 
     def _handle(self, event: FileSystemEvent, use_target_path: bool = False) -> None:
         """
@@ -97,8 +103,11 @@ class LogConfigMonitor:
         """
         Start monitoring the logging configuration file for changes.
 
-        Sets up a file system observer to watch for changes to the logging
-        configuration file and applies incremental updates when detected.
+        This method initializes and starts a file system observer if one is not
+        already running. The observer watches the logging configuration file
+        specified in the application's settings. If the file is created,
+        modified, or moved, the `_ConfigFileChangeEventHandler` will apply
+        the changes incrementally to the current logging setup.
         """
         if self.observer is not None:
             return
