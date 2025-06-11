@@ -58,5 +58,3 @@ app.mount('/sim_auth', sim_auth_app.app)
 async def handle_root():
     """Handle requests to the root path. Returns a simple tag line."""
     return {'Tag': 'Seeking answers'}
-
-

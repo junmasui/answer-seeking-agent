@@ -1,0 +1,11 @@
+models:
+  - type: main
+    engine: openai
+    model: gpt-4o-mini
+
+rails:
+  output:
+    flows:
+      # - self check hallucination
+      - self check output
+      # - check output sensitive data

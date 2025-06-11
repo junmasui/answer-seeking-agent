@@ -20,9 +20,19 @@ Configuration sources are processed in order of precedence:
 import os
 from functools import cache
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
-from pydantic import AnyHttpUrl, DirectoryPath, Field, FilePath, NewPath, PostgresDsn, RedisDsn, StringConstraints
+from pydantic import (
+    AnyHttpUrl,
+    DirectoryPath,
+    Field,
+    FilePath,
+    HttpUrl,
+    NewPath,
+    PostgresDsn,
+    RedisDsn,
+    StringConstraints,
+)
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -97,6 +107,16 @@ class LibrarySettings(BaseSettings):
     use_unstructured_cloud_api: bool = Field(default=False, validation_alias='USE_UNSTRUCTURED_API')
 
     unstructured_api_key: str = Field(default='', validation_alias='UNSTRUCTURED_API_KEY')
+
+    open_api_key: Optional[str] = Field(default='', validation_alias='OPENAI_API_KEY')
+
+    presidio_analyzer_url: HttpUrl = Field(
+        default='http://presidio-analyzer:3000/analyze', validation_alias='PRESIDIO_ANALYZER_URL'
+    )
+
+    nemo_guardrails_url: HttpUrl = Field(
+        default='http://nemo-guardrails:8000/v1/chat/completions', validation_alias='NEMO_GUARDRAILS_URL'
+    )
 
     vector_store_type: str = Field(default='weaviate', validation_alias='VECTOR_STORE_TYPE')
 

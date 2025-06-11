@@ -73,7 +73,7 @@ class ApplicationSettings(BaseSettings):
         jwt_write_claim_missing_ok (bool): Flag indicating whether missing JWT write claims
             are acceptable. Defaults to False. Loaded from JWT_WRITE_CLAIM_MISSING_OK.
         application_jwt_secret (JwtSecretStr): JWT secret key for token signing and
-            verification. Must be 32-160 hexadecimal characters. Loaded from 
+            verification. Must be 32-160 hexadecimal characters. Loaded from
             APPLICATION_JWT_SECRET environment variable.
 
     Configuration:
@@ -117,7 +117,7 @@ class ApplicationSettings(BaseSettings):
             tuple[PydanticBaseSettingsSource, ...]: Ordered tuple of configuration
                 sources in priority order (highest to lowest priority):
                 1. init_settings
-                2. env_settings  
+                2. env_settings
                 3. file_secret_settings
                 4. TomlConfigSettingsSource
 

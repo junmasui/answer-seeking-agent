@@ -1,12 +1,14 @@
 """
-This module provides the node that evaluates whether the retrieved documents are relevent
-to addressing the user question.
+This module provides the node that evaluates whether the retrieved documents are relevent to
+addressing the user question.
 
 See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
 
 import logging
 from functools import cache
+
+from core.agent.agent_state import GraphState
 
 from .grader_util import build_grader
 from .internal_models import AgentPromptName, GradeDocuments
@@ -20,9 +22,8 @@ def get_retrieval_grader():
     """
     Initializes and returns a retrieval grading chain.
 
-    This function builds a grader that uses a chat prompt (GRADE_RETRIEVED_DOCUMENTS)
-    and a Pydantic model (GradeDocuments) for structured output.
-    The grader is cached to avoid reinitialization.
+    This function builds a grader that uses a chat prompt (GRADE_RETRIEVED_DOCUMENTS) and a Pydantic
+    model (GradeDocuments) for structured output. The grader is cached to avoid reinitialization.
     """
     prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_RETRIEVED_DOCUMENTS)
 
@@ -31,7 +32,7 @@ def get_retrieval_grader():
     return retrieval_grader
 
 
-def grade_documents(state):
+def grade_document_relevancies(state: GraphState):
     """
     Determines whether the retrieved documents are relevant to the question.
 
@@ -43,22 +44,23 @@ def grade_documents(state):
     """
     logger.info('---CHECK DOCUMENT RELEVANCE TO QUESTION---')
 
-    question = state['question']
-    documents = state['documents']
+    question = state.question
+    documents = state.documents
 
     retrieval_grader = get_retrieval_grader()
 
     # Score each doc
-    filtered_docs = []
+    document_relevancy = []
     for doc in documents:
         score = retrieval_grader.invoke({'question': question, 'document': doc.page_content})
         grade = score.binary_score if score is not None else 'no'
+
         if grade == 'yes':
             logger.info('---GRADE: DOCUMENT RELEVANT---')
-            filtered_docs.append(doc)
         else:
             logger.info('---GRADE: DOCUMENT NOT RELEVANT---')
-            continue
+
+        document_relevancy.append(10 if grade == 'yes' else 0)
 
     # Keep only the relevant documents
-    return {'documents': filtered_docs}
+    return {'document_relevancy': document_relevancy}
