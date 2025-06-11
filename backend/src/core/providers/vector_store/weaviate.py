@@ -13,6 +13,7 @@ from weaviate.classes.query import Filter
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
+from ..status_models import PingResult, PingStatus
 
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/
@@ -216,6 +217,37 @@ def delete_vectors_by_document_id(doc_id: uuid.UUID):
 
     if len(vector_ids) > 0:
         vector_store.delete(ids=vector_ids)
+
+
+def ping_vector_store() -> PingResult:
+    """
+    Pings the Weaviate vector store to check its health and connectivity.
+
+    This function attempts to connect to the Weaviate instance and performs a health check.
+    It verifies if the server is live and if the designated collection exists.
+
+    Returns:
+        PingResult: An object containing the ping status (GOOD or BAD),
+                    a descriptive message, and an optional error message if the ping failed.
+    """
+    try:
+        client = _get_client()
+        if client.is_live():
+            # Additionally, check if the collection exists as a more thorough check
+            if client.collections.exists(_COLLECTION_NAME):
+                return PingResult(status=PingStatus.GOOD, message='Weaviate server is live and collection exists.')
+            else:
+                return PingResult(
+                    status=PingStatus.BAD,
+                    message=f"Weaviate server is live but collection '{_COLLECTION_NAME}' does not exist.",
+                )
+        else:
+            return PingResult(status=PingStatus.BAD, message='Weaviate server is not live.')
+    except Exception as e:
+        logger.error('Weaviate ping failed', exc_info=e)
+        return PingResult(
+            status=PingStatus.BAD, message='Failed to connect to Weaviate or perform check.', error=str(e)
+        )
 
 
 @start_up_handler

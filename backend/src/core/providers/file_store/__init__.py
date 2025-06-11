@@ -1,6 +1,7 @@
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
-__all__ = ['get_s3_client', 'get_s3_bucket', 'get_s3_directory']
+__all__ = ['get_s3_client', 'get_s3_bucket', 'get_s3_directory', 'ping_file_store']
 
 # For now, there is only one file store provider.
-from .minio import get_s3_bucket, get_s3_client, get_s3_directory
+from ..status_models import PingResult, PingStatus
+from .minio import get_s3_bucket, get_s3_client, get_s3_directory, ping_file_store

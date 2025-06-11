@@ -2,7 +2,55 @@ import logging
 
 import torch
 
+from ..providers.file_store import ping_file_store
+from ..providers.sql_database import DataDomain, ping_sql_database
+from ..providers.status_models import PingResult, PingStatus
+from ..providers.vector_store import ping_vector_store
+
 logger = logging.getLogger(__name__)
+
+
+def deeper_status_check():
+    """Perform a comprehensive health check of the system, including database connectivity."""
+    # Initialize with a default bad status, to be updated upon successful checks
+    system_health = {
+        'sql_database': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
+        'file_store': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
+        'vector_store': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
+    }
+
+    # Ping PostgreSQL 'answers' schema
+    try:
+        pg_answers_status = ping_sql_database(DataDomain.ANSWERS)
+        system_health['sql_database'] = pg_answers_status.model_dump()
+    except Exception as e:
+        logger.error("Error during PostgreSQL 'answers' schema health check", exc_info=e)
+        # Ensure the error is captured in the health status
+        system_health['sql_database'] = PingResult(
+            status=PingStatus.BAD, message="PostgreSQL 'answers' schema check failed unexpectedly.", error=str(e)
+        ).model_dump()
+
+    # Ping MinIO file store
+    try:
+        minio_status = ping_file_store()
+        system_health['file_store'] = minio_status.model_dump()
+    except Exception as e:
+        logger.error('Error during MinIO file store health check', exc_info=e)
+        system_health['file_store'] = PingResult(
+            status=PingStatus.BAD, message='MinIO file store check failed unexpectedly.', error=str(e)
+        ).model_dump()
+
+    # Ping Vector Store
+    try:
+        vector_store_status = ping_vector_store()
+        system_health['vector_store'] = vector_store_status.model_dump()
+    except Exception as e:
+        logger.error('Error during vector store health check', exc_info=e)
+        system_health['vector_store'] = PingResult(
+            status=PingStatus.BAD, message='Vector store check failed unexpectedly.', error=str(e)
+        ).model_dump()
+
+    return system_health
 
 
 def status_check():
@@ -21,9 +69,9 @@ def status_check():
             device_name = torch.cuda.get_device_name(0)
             status['CUDA device'] = device_name
 
-        # TODO ping redis
-        # TODO ping postgres
-        # TODO ping minio
+        system_health = deeper_status_check()
+
+        status.update(system_health)
 
         status['status'] = 'good'
 

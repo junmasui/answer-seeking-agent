@@ -5,6 +5,7 @@ from cloudpathlib.s3 import S3Client, S3Path
 
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
+from ..status_models import PingResult, PingStatus
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,22 @@ def get_s3_directory(dir_name: str) -> S3Path:
     if not dir_path.exists():
         dir_path.mkdir(parents=True)
     return dir_path
+
+
+def ping_file_store() -> PingResult:
+    """
+    Pings the MinIO file store to check its availability and permissions.
+
+    Tries to list objects in the root of the bucket to verify connectivity and permissions.
+    """
+    try:
+        bucket = get_s3_bucket()
+        # Attempt to list objects in the bucket root as a basic check
+        list(bucket.iterdir())
+        return PingResult(status=PingStatus.GOOD, message='MinIO connection successful.')
+    except Exception as e:
+        logger.error('Error pinging MinIO', exc_info=e)
+        return PingResult(status=PingStatus.BAD, message='MinIO connection failed.', error=str(e))
 
 
 @start_up_handler
