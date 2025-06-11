@@ -11,7 +11,7 @@ from core.public_models.doc import DocumentStatus
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
-    """Return count of recods in 'tracked_documents'"""
+    """Return count of recods in 'tracked_documents'."""
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()

@@ -1,10 +1,9 @@
 """
-add prompt table
+Add prompt table.
 
 Revision ID: 8137477f7563
 Revises: efd59824ec9f
 Create Date: 2025-03-30 01:39:13.173766
-
 """
 
 from typing import Sequence, Union

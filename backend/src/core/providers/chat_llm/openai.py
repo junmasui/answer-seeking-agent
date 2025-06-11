@@ -11,7 +11,7 @@ from langchain_openai import ChatOpenAI
 #
 @cache
 def get_chat_llm() -> BaseChatModel:
-    """ """
+    """"""
 
     llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)
 

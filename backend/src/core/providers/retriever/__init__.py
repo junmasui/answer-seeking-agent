@@ -1,9 +1,8 @@
 """
 This provides the retriever used by this application.
 
-Retrievers support many types of systems,
-including text search engines (commonly BM25), vectorstores (commonly HNSW),
-graph databases, and relational databases.
+Retrievers support many types of systems, including text search engines (commonly BM25),
+vectorstores (commonly HNSW), graph databases, and relational databases.
 """
 
 from functools import cache
@@ -20,8 +19,8 @@ def get_retriever():
     """
     Get the cached document retriever instance.
 
-    Returns a retriever interface for the vector store that can be used
-    to search and retrieve relevant document chunks based on queries.
+    Returns a retriever interface for the vector store that can be used to search and retrieve
+    relevant document chunks based on queries.
     """
     vector_store = get_vector_store()
 

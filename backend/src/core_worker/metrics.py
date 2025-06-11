@@ -14,8 +14,8 @@ def start_metrics(is_main_worker: bool):
     """
     Start the Prometheus metrics collection system for the Celery worker.
 
-    Sets up collectors for garbage collection, process, and platform metrics.
-    If this is the main worker, also starts a WSGI server to expose metrics.
+    Sets up collectors for garbage collection, process, and platform metrics. If this is the main
+    worker, also starts a WSGI server to expose metrics.
     """
     prometheus_multiproc_dir = get_app_config().prometheus_multiproc_dir
     prometheus_multiproc_dir.mkdir(exist_ok=True)

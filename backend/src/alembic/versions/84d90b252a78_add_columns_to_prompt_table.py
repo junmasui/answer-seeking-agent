@@ -1,10 +1,9 @@
 """
-add columns to prompt table
+Add columns to prompt table.
 
 Revision ID: 84d90b252a78
 Revises: 5c6bb5056269
 Create Date: 2025-05-29 21:02:07.180693
-
 """
 
 from typing import Sequence, Union

@@ -21,9 +21,8 @@ class DocumentSetStatus(str, enum.Enum):
 
 class DocumentSet(CamelModel):
     """
-    Represents a set of documents, including its status and properties like
-    default status for new documents and public visibility.
-    """
+    Represents a set of documents, including its status and properties like default status for
+    new documents and public visibility."""
 
     id: UUID
     name: str = Field(description='Name of document set.')
@@ -66,7 +65,9 @@ class DocumentSetAddRequest(CamelModel):
 
 
 class DocumentSetUpdateRequest(CamelModel):
-    """Represents a request to update an existing document set, allowing modification of its name and properties."""
+    """
+    Represents a request to update an existing document set, allowing modification of its name
+    and properties."""
 
     name: Optional[str] = Field(description='Name of document set.', default=None)
     is_new_doc_default: Optional[bool] = Field(

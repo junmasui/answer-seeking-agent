@@ -4,7 +4,7 @@ from sqlalchemy import func, select, text
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
-    """Return count of recods in 'tracked_document_sets'"""
+    """Return count of recods in 'tracked_document_sets'."""
     with sql_sessionmaker() as session:
         stmt = select(func.count()).select_from(auto_mapped_table)
         result = session.execute(stmt).first()

@@ -22,7 +22,7 @@ def update_prompt(
     include_history: Optional[bool] = None,
     last_user_id=None,
 ):
-    """Updates status field with option to update"""
+    """Updates status field with option to update."""
     with update_prompt_record(prompt_uuid=prompt_uuid) as record:
         if status is not None:
             record.status = status

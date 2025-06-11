@@ -20,7 +20,11 @@ jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 @router.get('/status')
 async def handle_status_check():
-    """Handle requests to the status path. Returns the application status."""
+    """
+    Handle requests to the status path.
+
+    Returns the application status.
+    """
     return status_check()
 
 
@@ -28,6 +32,7 @@ async def handle_status_check():
 async def dump_loggers(include_all: Union[bool, None] = False, worker: bool = False):
     """
     Dump the current logger tree for the main application or a Celery worker.
+
     If 'worker' is true, it retrieves the logger tree from a Celery worker asynchronously.
     'include_all' determines if non-default loggers are included.
     """

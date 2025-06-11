@@ -21,11 +21,10 @@ def create_tables_if_not_exists():
     """
     Create database tables if they do not already exist.
 
-    This function checks the current state of the database. If the database
-    has not been initialized, it creates all tables. If the database has been
-    initialized but the schema version differs from the expected version, it
-    runs Alembic migrations to update the schema. It also logs any detected
-    differences between the declared SQLAlchemy models and the actual database schema.
+    This function checks the current state of the database. If the database has not been
+    initialized, it creates all tables. If the database has been initialized but the schema version
+    differs from the expected version, it runs Alembic migrations to update the schema. It also logs
+    any detected differences between the declared SQLAlchemy models and the actual database schema.
     """
     logger.info('creating tables that are absent')
 
@@ -110,9 +109,8 @@ def get_schema_differences(engine):
     """
     Compare the declared database schema with the actual database schema.
 
-    Uses Alembic's autogenerate functionality to detect differences between
-    the SQLAlchemy metadata and the actual database schema, including
-    table structure, columns, and server defaults.
+    Uses Alembic's autogenerate functionality to detect differences between the SQLAlchemy metadata
+    and the actual database schema, including table structure, columns, and server defaults.
     """
     # Declared metadata.
     metadata = DECLARED_METADATA
@@ -146,8 +144,8 @@ def _create_tables_if_new(engine):
     """
     Create database tables for a new/empty database and initialize Alembic tracking.
 
-    Only creates tables if the database is empty (no reflected tables except alembic_version).
-    After creating tables, stamps the database with the current Alembic head revision.
+    Only creates tables if the database is empty (no reflected tables except alembic_version). After
+    creating tables, stamps the database with the current Alembic head revision.
     """
     reflected_metadata = MetaData(schema='answers')
     reflected_metadata.reflect(bind=engine)
@@ -184,8 +182,8 @@ def _run_migrations(engine):
     """
     Run Alembic database migrations to upgrade to the latest schema version.
 
-    Executes all pending migrations from the current database version to the head revision.
-    Logs warnings if migration errors occur but allows the process to continue.
+    Executes all pending migrations from the current database version to the head revision. Logs
+    warnings if migration errors occur but allows the process to continue.
     """
     alembic_ini = get_lib_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))

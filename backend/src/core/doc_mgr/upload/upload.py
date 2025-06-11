@@ -24,7 +24,9 @@ def _get_doc_set(doc_set_uuid):
 
 
 def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
-    """Generate the file path for a document chunk based on the document set, partial path, and chunk index."""
+    """
+    Generate the file path for a document chunk based on the document set, partial path, and
+    chunk index."""
     chunk_root_dir = get_lib_config().chunk_root_dir
     chunk_root_dir = Path(chunk_root_dir)
     if chunk_root_dir.is_absolute():
@@ -41,8 +43,8 @@ def _get_doc_file_path(doc_set, partial_doc_path):
     """
     Generate the full cloud file path for a document.
 
-    Combines the document root directory, document set name, and partial path
-    to create the complete cloud storage path for a document.
+    Combines the document root directory, document set name, and partial path to create the complete
+    cloud storage path for a document.
     """
     doc_root_dir = get_lib_config().doc_root_dir
     doc_root_dir = Path(doc_root_dir)
@@ -59,8 +61,8 @@ def _get_doc_file_path(doc_set, partial_doc_path):
 def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, content_type, download_time_utc, user_id):
     """
     Upload a complete document into our document system.
-    This involves storing the document in our cloud file store
-    and adding a tracking record.
+
+    This involves storing the document in our cloud file store and adding a tracking record.
     """
     doc_set = _get_doc_set(doc_set_uuid)
 
@@ -114,8 +116,8 @@ def merge_chunked_document(
 ):
     """
     Merge then upload a chunked document into our document system.
-    This involves storing the document in our cloud file store
-    and adding a tracking record.
+
+    This involves storing the document in our cloud file store and adding a tracking record.
     """
     logger.info('merging file %s to cloud file store', partial_doc_path)
 

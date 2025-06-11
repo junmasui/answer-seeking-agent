@@ -19,8 +19,8 @@ def ingest_task(doc_ids=None):
     """
     Celery task to ingest documents by their IDs.
 
-    Processes document ingestion asynchronously, converting uploaded documents
-    into searchable content in the vector store.
+    Processes document ingestion asynchronously, converting uploaded documents into searchable
+    content in the vector store.
     """
     return ingest_documents(doc_ids)
 
@@ -30,8 +30,8 @@ def get_worker_logger_tree(include_all=False):
     """
     Celery task to retrieve the logger tree from the worker process.
 
-    Returns the hierarchical structure of loggers configured in the worker,
-    optionally including all loggers or just the configured ones.
+    Returns the hierarchical structure of loggers configured in the worker, optionally including all
+    loggers or just the configured ones.
     """
     return dump_logger_tree(include_all=include_all)
 
@@ -41,7 +41,7 @@ def reset_data_task():
     """
     Celery task to reset worker data and clean up staging areas.
 
-    Handles the reset-data event by clearing temporary files and resetting
-    worker-specific data structures to their initial state.
+    Handles the reset-data event by clearing temporary files and resetting worker-specific data
+    structures to their initial state.
     """
     return reset_worker_data()
