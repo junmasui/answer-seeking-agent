@@ -68,9 +68,9 @@ def update_prompt_record(prompt_uuid):
 
             # IMPORTANT!!
             # We should always access SQLAlchemy object properties inside a transaction. Its ORM
-            # has subtle lazy-loading behaviors, including when expire_on_commit=True (which is important
-            # for data consistency checking). Doing this will prevent auto-transactions from
-            # interferring with the next transaction.
+            # has subtle lazy-loading behaviors, including when expire_on_commit=True (which is
+            # important for data consistency checking). Doing this will prevent auto-transactions
+            # from interferring with the next transaction.
             status = existing_obj.status
             name = existing_obj.name
             version = existing_obj.version

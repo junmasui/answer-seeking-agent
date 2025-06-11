@@ -195,7 +195,8 @@ def _build_order_by(sort_by: Optional[list] = None):
     Args:
         sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
                 If None, defaults to [('name', SortDirection.ASC)].
-                Supported field names: 'name', 'size_bytes', 'modification_time', 'ingestion_time', 'status'
+                Supported field names: 'name', 'size_bytes', 'modification_time',
+                                       'ingestion_time', 'status'
                 Direction should be SortDirection.ASC or SortDirection.DESC
 
     Returns:

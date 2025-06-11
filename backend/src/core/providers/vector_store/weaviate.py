@@ -63,8 +63,6 @@ def _create_collection(client):
         client.collections.create(
             _COLLECTION_NAME,
             properties=[
-                # Property(name='id', data_type=DataType.UUID,
-                #          index_filterable=True, index_range_filters=False, index_searchable=False),
                 Property(
                     name=_TEXT_KEY,
                     data_type=DataType.TEXT,

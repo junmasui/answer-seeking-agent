@@ -9,7 +9,8 @@ The module defines type annotations for various string constraints used througho
 authentication system and provides a singleton pattern for accessing configuration.
 
 Classes:
-    AuthLibrarySettings: Main configuration class that handles loading settings from multiple sources.
+    AuthLibrarySettings: Main configuration class that handles loading settings
+                         from multiple sources.
 
 Functions:
     get_lib_config: Factory function that returns a cached configuration instance.
@@ -43,28 +44,8 @@ class AuthLibrarySettings(BaseSettings):
     """
     Configuration settings for the simple authentication library.
 
-    This class manages configuration loading from multiple sources with a defined precedence:
-    1. Initialization arguments (highest priority)
-    2. Environment variables
-    3. Secret files
-    4. TOML configuration files (lowest priority)
-
-    The class uses Pydantic's BaseSettings to provide validation, type conversion,
-    and automatic loading from various sources. Configuration files are expected
-    to be loaded into environment variables in an earlier initialization step.
-
-    Attributes:
-        application_jwt_secret (JwtSecretStr): The JWT secret key for token signing and verification.
-                                             Must be 32-160 hexadecimal characters.
-
-    Configuration:
-        - Disables automatic .env file loading (assumes pre-loaded environment)
-        - Supports nested model partial updates
-        - Custom source ordering via settings_customise_sources
-
-    Example:
-        >>> settings = AuthLibrarySettings(application_jwt_secret='a' * 32)
-        >>> print(settings.application_jwt_secret)
+    Provides centralized configuration management with support for multiple sources including
+    environment variables, TOML configuration files, and secrets.
     """
 
     # We assume that the .env files were loaded into the environment
@@ -116,8 +97,8 @@ class AuthLibrarySettings(BaseSettings):
         # init_settings: setting values provided as keyword arguments when initialization
         #     an instance of this Settings class.
         # env_settings: settings values loaded from environment variables.
-        # dotenv_settings: settings values loaded from env files, whose paths are specified in `env_file`
-        #     config value.
+        # dotenv_settings: settings values loaded from env files, whose paths are specified
+        #     in `env_file` config value.
         # file_secret_settings: settings values loaded from secret files, which are files in the
         #     directories specified in the `secrets_dir` config value.
 
