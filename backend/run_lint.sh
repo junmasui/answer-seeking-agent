@@ -14,14 +14,14 @@
 uvx autopep8 \
   --max-line-length=120 \
   --select=E402,E501,E502,W503,W504,W605 \
-  --in-place --recursive src tests
-  # src tests
+  --in-place --recursive \
+  src tests
 
 # Fix doc line length (W505) - wrap docstrings at 100 characters to match ruff config
 uvx docformatter \
   --wrap-summaries 100 --wrap-descriptions 100 \
-  --in-place --recursive  src tests
-  # src tests
+  --in-place --recursive \
+  src tests
 
 # Sort the import statement
 uvx ruff check --select I --fix src tests

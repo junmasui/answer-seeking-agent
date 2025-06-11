@@ -34,8 +34,8 @@ def doc_set_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
     if auto_mapped_table is None:
         raise RuntimeError(f'Table {full_name} is absent')
 
-    # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
-    # errors where clean-up did not occur.
+    # Clean up table before we start: there are rare error scenarios like power outages
+    # or out-of-memory errors where clean-up did not occur.
     _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker)
 
     try:
@@ -49,8 +49,8 @@ def doc_set_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 @pytest.fixture(scope='function')
 def empty_doc_set_table(doc_set_table, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'tracked_document_sets'."""
-    # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
-    # errors where clean-up did not occur.
+    # Clean up table before we start: there are rare error scenarios like power outages
+    # or out-of-memory errors where clean-up did not occur.
     _truncate_table(doc_set_table, sql_engine, sql_sessionmaker)
 
     try:
@@ -63,8 +63,8 @@ def empty_doc_set_table(doc_set_table, sql_engine, sql_sessionmaker):
 
 async def _populate_doc_set_table(doc_set_table, api_server, sql_engine, sql_sessionmaker):
     """Helper function to populate the 'tracked_document_sets' table with sample data."""
-    # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
-    # errors where clean-up did not occur.
+    # Clean up table before we start: there are rare error scenarios like power outages
+    # or out-of-memory errors where clean-up did not occur.
     _truncate_table(doc_set_table, sql_engine, sql_sessionmaker)
 
     path = '/document-sets/'

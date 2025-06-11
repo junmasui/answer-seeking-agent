@@ -117,9 +117,10 @@ async def get_current_user(
     Tries JWT Bearer token first. If not present or invalid, tries X-API-Key header.
     """
     if bearer_token:
-        # get_current_user_from_token will raise HTTPException if token is invalid or user not found.
-        # It returns None only if the input `token` string itself is None/empty,
-        # but oauth2_scheme (with auto_error=False) handles making bearer_token None if no header.
+        # get_current_user_from_token will raise HTTPException if token is invalid or user
+        # not found. It returns None only if the input `token` string itself is None/empty,
+        # but oauth2_scheme (with auto_error=False) handles making bearer_token None if no
+        # header.
         user_via_jwt = await get_current_user_from_token(bearer_token)
         if user_via_jwt:
             return user_via_jwt
@@ -171,11 +172,11 @@ def get_scoped_current_user(scope: str, missing_ok: bool = False):
         user = await get_current_user(bearer_token=bearer_token, x_api_key=x_api_key)
 
         if not user:
-            # No valid user was retrieved by get_current_user.
-            # This implies no valid credentials were provided (or get_current_user already raised an error).
+            # No valid user was retrieved by get_current_user. This implies no valid
+            # credentials were provided (or get_current_user already raised an error).
             if not missing_ok:
-                # If user is None (no auth provided or invalid auth that get_current_user handled by returning None)
-                # and missing is NOT ok, raise a 401 error.
+                # If user is None (no auth provided or invalid auth that get_current_user
+                # handled by returning None) and missing is NOT ok, raise a 401 error.
                 raise_credentials_error()
             return None  # missing_ok is True, so return None as no auth was found
 

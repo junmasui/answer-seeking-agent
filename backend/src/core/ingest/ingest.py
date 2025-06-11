@@ -130,7 +130,8 @@ def _ingest_one_document(
             # Something was unexpected. Maybe a broken clean up. Let's log it and move on.
             logger.debug('unexpected actual local path: %s, expected: %s', actual_local_path, local_path)
 
-        # From the tracking record, get metadata useful for search-time pre-filtering, such as the document-set ID.
+        # From the tracking record, get metadata useful for search-time pre-filtering, such as
+        # the document-set ID.
         doc_set_id = detached_record.document_set_id
 
         # Process the file.
