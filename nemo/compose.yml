@@ -1,0 +1,28 @@
+name: nemo
+
+services:
+  nemo-guardrails:
+    restart: unless-stopped
+
+    image: nemoguardrails
+    profiles: [ nemo, infrastructure, all ]
+
+    ports:
+      - '27500:8000'
+    networks:
+      - agent-poc
+    volumes:
+      - ./config:/config
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+    secrets:
+      - answers_dev_env
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    command: ["server", "--config=/config"]
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

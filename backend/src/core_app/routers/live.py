@@ -2,9 +2,9 @@ import asyncio
 import logging
 from typing import Union
 
+from celery.result import AsyncResult
 from fastapi import APIRouter
 
-from celery.result import AsyncResult
 from core import status_check
 from core_worker import get_worker_logger_tree
 from log_config_monitor import dump_logger_tree
@@ -17,11 +17,11 @@ router = APIRouter()
 
 jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
+
 @router.get('/status')
 async def handle_status_check():
     """Handle requests to the status path. Returns the application status."""
     return status_check()
-
 
 
 @router.get('/loggers')

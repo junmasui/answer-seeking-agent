@@ -1,0 +1,41 @@
+name: presidio
+
+services:
+  presidio-analyzer:
+    restart: unless-stopped
+
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    profiles: [ presidio, infrastructure, all ]
+
+    ports:
+      - '27600:3000'
+    networks:
+      - agent-poc
+    environment:
+      - NLP_CONF_FILE=/conf/transformers.yaml
+      - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
+
+    volumes:
+      - ./conf:/conf
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health?check=full"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  presidio-anonymizer:
+    restart: unless-stopped
+
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    profiles: [ presidio, infrastructure, all ]
+
+    ports:
+      - '27601:5001'
+    networks:
+      - agent-poc
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s

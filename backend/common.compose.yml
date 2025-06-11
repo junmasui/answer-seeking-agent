@@ -212,7 +212,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5' # 50% of available CPU resources
+          cpus: '0.1' # 10% of available CPU resources
           memory: 8G # Give enough to run Tesseract and local model
         reservations:
           devices:
@@ -325,6 +325,10 @@ services:
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     # command: null
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1' # 10% of available CPU resources
 
     healthcheck:
       # The danihodovic/celery-exporter image is based on python:3.13-slim-bookworm,

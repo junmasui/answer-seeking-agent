@@ -18,7 +18,15 @@ logger = logging.getLogger(__name__)
 
 
 def create_tables_if_not_exists():
-    """Creates tables for model objects defined with this module's `Base`."""
+    """
+    Create database tables if they do not already exist.
+
+    This function checks the current state of the database. If the database
+    has not been initialized, it creates all tables. If the database has been
+    initialized but the schema version differs from the expected version, it
+    runs Alembic migrations to update the schema. It also logs any detected
+    differences between the declared SQLAlchemy models and the actual database schema.
+    """
     logger.info('creating tables that are absent')
 
     engine = get_engine(DataDomain.ANSWERS)

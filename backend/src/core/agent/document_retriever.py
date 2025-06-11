@@ -1,6 +1,5 @@
 """
-This module provides the node that retreives documents
-for answering an user question.
+This module provides the node that retreives documents for answering an user question.
 
 See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state
 """
@@ -11,6 +10,8 @@ import pprint
 from langchain_core.documents import Document
 from weaviate.classes.query import Filter
 
+from core.agent.agent_state import GraphState
+
 from ..lib_config import get_lib_config
 from ..providers.retriever import get_retriever
 
@@ -19,9 +20,9 @@ logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
-def query_documents(state):
+def query_documents(state: GraphState):
     """
-    Retrieve documents
+    Retrieve documents.
 
     Args:
         state (dict): The current graph state
@@ -30,11 +31,11 @@ def query_documents(state):
         state updates (dict): Updates with retrieved documents
     """
     logger.info('---RETRIEVE---')
-    question = state['question']
+    question = state.question
 
     kwargs = {}
 
-    doc_set_ids = state['document_set_ids']
+    doc_set_ids = state.document_set_ids
     vector_store_type = get_lib_config().vector_store_type
 
     match vector_store_type:
@@ -79,6 +80,8 @@ def query_documents(state):
         return x
 
     documents = [_clean_up_retrieved(x) for x in documents]
+
+    logger.info('---RETRIEVED %d DOCUMENTS---', len(documents))
 
     # Update agent state with retrieved documents
     state_updates = {'documents': documents}

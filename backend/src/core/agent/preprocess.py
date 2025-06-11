@@ -2,12 +2,14 @@ import logging
 
 from langchain_core.messages import HumanMessage
 
+from core.agent.agent_state import GraphState
+
 logger = logging.getLogger(__name__)
 
 
-def add_input_to_history(state):
+def add_input_to_history(state: GraphState):
     """
-    Capture raw question
+    Capture raw question.
 
     Args:
         state (dict): The current graph state
@@ -17,11 +19,11 @@ def add_input_to_history(state):
     """
     logger.info('---ADD INPUT TO CHAT HISTORY---')
 
-    question = state['question']
+    question = state.question
 
     # Update agent state with new user-input entries in the message histories.
 
-    next_message_id = state.get('next_message_id', 0)
+    next_message_id = x if (x := state.next_message_id) is not None else 0
     message_id = str(next_message_id)
     next_message_id += 1
 
