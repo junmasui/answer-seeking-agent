@@ -1,7 +1,7 @@
 name: nemo
 
 services:
-  nemo:
+  nemo-guardrails:
     restart: unless-stopped
 
     image: nemoguardrails
@@ -19,3 +19,10 @@ services:
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: ["server", "--config=/config"]
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

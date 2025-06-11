@@ -24,14 +24,14 @@ from .deciders import (
     check_response_quality,
     gather_relevant_documents,
 )
-from .document_guards import detect_toxic_content
+from .document_guards import check_retrieval_with_nemo, check_retrieval_with_presidio
 from .document_retriever import query_documents
 from .hallucination_grader import grade_hallucination
-from .input_guards import detect_privacy_violation, detect_prompt_injection, detect_toxic_input
+from .input_guards import check_input_with_nemo, check_input_with_presidio
 from .postprocess import add_response_to_history
 from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
-from .response_guards import detect_sensitive_info, detect_toxic_response
+from .response_guards import check_output_with_nemo, check_output_with_presidio
 from .retrieval_grader import grade_document_relevancies
 
 logger = logging.getLogger(__name__)
@@ -246,19 +246,16 @@ def _build_input_guard_subgraph():
     input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op)
     input_guard_subgraph.add_node(NodeName.INPUT_GUARD_DECISION, check_if_safe_input)
 
-    input_guard_subgraph.add_node(NodeName.DETECT_PROMPT_INJECTION, detect_prompt_injection)
-    input_guard_subgraph.add_node(NodeName.DETECT_PRIVACY_VIOLATION, detect_privacy_violation)
-    input_guard_subgraph.add_node(NodeName.DETECT_TOXIC_INPUT, detect_toxic_input)
+    input_guard_subgraph.add_node(NodeName.CHECK_INPUT_WITH_NEMO, check_input_with_nemo)
+    input_guard_subgraph.add_node(NodeName.CHECK_INPUT_WITH_PRESIDIO, check_input_with_presidio)
 
     input_guard_subgraph.set_entry_point(NodeName.INPUT_GUARD_START)
 
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_PROMPT_INJECTION)
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_PRIVACY_VIOLATION)
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.DETECT_TOXIC_INPUT)
+    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.CHECK_INPUT_WITH_NEMO)
+    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.CHECK_INPUT_WITH_PRESIDIO)
 
     input_guard_subgraph.add_edge(
-        [NodeName.DETECT_PROMPT_INJECTION, NodeName.DETECT_PRIVACY_VIOLATION, NodeName.DETECT_TOXIC_INPUT],
-        NodeName.INPUT_GUARD_DECISION,
+        [NodeName.CHECK_INPUT_WITH_NEMO, NodeName.CHECK_INPUT_WITH_PRESIDIO], NodeName.INPUT_GUARD_DECISION
     )
 
     input_guard_subgraph.set_finish_point(NodeName.INPUT_GUARD_DECISION)
@@ -282,15 +279,18 @@ def _build_retrieval_guard_subgraph():
     retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, check_for_relevant_documents)
 
     retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)  # grade documents
-    retrieval_guard_subgraph.add_node(NodeName.DETECT_TOXIC_CONTENT, detect_toxic_content)
+    retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_NEMO, check_retrieval_with_nemo)
+    retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO, check_retrieval_with_presidio)
 
     retrieval_guard_subgraph.set_entry_point(NodeName.RETRIEVAL_GUARD_START)
 
     retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.GRADE_RELEVANCIES)
-    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.DETECT_TOXIC_CONTENT)
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.CHECK_RETRIEVAL_WITH_NEMO)
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO)
 
     retrieval_guard_subgraph.add_edge(
-        [NodeName.GRADE_RELEVANCIES, NodeName.DETECT_TOXIC_CONTENT], NodeName.GATHER_RELEVANT_DOCUMENTS
+        [NodeName.GRADE_RELEVANCIES, NodeName.CHECK_RETRIEVAL_WITH_NEMO, NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO],
+        NodeName.GATHER_RELEVANT_DOCUMENTS,
     )
     retrieval_guard_subgraph.add_edge(NodeName.GATHER_RELEVANT_DOCUMENTS, NodeName.RETRIEVAL_GUARD_DECISION)
 
@@ -350,22 +350,22 @@ def _build_response_guard_subgraph():
 
     response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)  # grade answers
     response_guard_subgraph.add_node(NodeName.GRADE_HALLUCINATION, grade_hallucination)  # grade hallucination
-    response_guard_subgraph.add_node(NodeName.DETECT_SENSITIVE_INFO, detect_sensitive_info)
-    response_guard_subgraph.add_node(NodeName.DETECT_TOXIC_RESPONSE, detect_toxic_response)
+    response_guard_subgraph.add_node(NodeName.CHECK_RESPONSE_WITH_NEMO, check_output_with_nemo)
+    response_guard_subgraph.add_node(NodeName.CHECK_RESPONSE_WITH_PRESIDIO, check_output_with_presidio)
 
     response_guard_subgraph.set_entry_point(NodeName.RESPONSE_GUARD_START)
 
     response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_ANSWER)
     response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_HALLUCINATION)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.DETECT_SENSITIVE_INFO)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.DETECT_TOXIC_RESPONSE)
+    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.CHECK_RESPONSE_WITH_PRESIDIO)
+    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.CHECK_RESPONSE_WITH_NEMO)
 
     response_guard_subgraph.add_edge(
         [
             NodeName.GRADE_ANSWER,
             NodeName.GRADE_HALLUCINATION,
-            NodeName.DETECT_SENSITIVE_INFO,
-            NodeName.DETECT_TOXIC_RESPONSE,
+            NodeName.CHECK_RESPONSE_WITH_NEMO,
+            NodeName.CHECK_RESPONSE_WITH_PRESIDIO,
         ],
         NodeName.RESPONSE_GUARD_DECISION,
     )

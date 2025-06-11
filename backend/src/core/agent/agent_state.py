@@ -43,52 +43,70 @@ class GraphState(BaseModel):
     ]
 
     input_overall_grade: Annotated[Optional[UserInputGrade], Field(default=None, description='Overall grade.')]
-    injection_detected: Annotated[
-        Optional[int],
-        Field(default=None, ge=0, le=10, description='Score indicating likelihood of prompt injection (0-10).'),
+    nemo_input_check: Annotated[
+        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Field(default=None, description='Score indicating likelihood of toxic LLM generation (0-10).'),
     ]
-    privacy_violation_detected: Annotated[
-        Optional[int],
-        Field(default=None, ge=0, le=10, description='Score indicating likelihood of privacy violation (0-10).'),
-    ]
-    toxic_input_detected: Annotated[
-        Optional[int],
-        Field(default=None, ge=0, le=10, description='Score indicating likelihood of toxic user input (0-10).'),
+    presidio_input_check: Annotated[
+        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Field(default=None, description='Score indicating likelihood of toxic LLM generation (0-10).'),
     ]
 
     retrieval_grade: Annotated[
         Optional[RetrievalOverallGrade],
-        Field(default=None, description='Grade assessing the quality of the retrieval.'),
+        Field(default=None, description='Overall grade assessing the quality of the retrieved documents.'),
     ]
     document_relevancy: Annotated[
         Optional[List[Annotated[int, Field(ge=0, le=10)]]],
-        Field(default=None, description='Score indicating document relevancy (0-10).'),
+        Field(
+            default=None,
+            description='List of scores (0-10) indicating the relevancy of each retrieved document to the question.',
+        ),
     ]
-    toxic_content_detected: Annotated[
-        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
-        Field(default=None, description='Score indicating likelihood of toxic LLM generation (0-10).'),
+    nemo_retrieval_check: Annotated[
+        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Field(
+            default=None,
+            description='Score (0-10) from NeMo Guardrails indicating the likelihood of toxic content in each retrieved document.',
+        ),
+    ]
+    presidio_retrieval_check: Annotated[
+        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Field(
+            default=None,
+            description='Score (0-10) from Presidio indicating the likelihood of PII/sensitive data in each retrieved document.',
+        ),
     ]
 
     answer_grade: Annotated[
-        Optional[ResponseOverallGrade], Field(default=None, description='Grade assessing the quality of the answer.')
+        Optional[ResponseOverallGrade],
+        Field(default=None, description='Overall grade assessing the quality of the generated answer.'),
     ]
     grounded_in_facts: Annotated[
-        Optional[str], Field(default=None, description='Assessment of whether the answer is factually grounded.')
+        Optional[str],
+        Field(
+            default=None,
+            description='Assessment of whether the generated answer is factually grounded in the provided documents.',
+        ),
     ]
     answer_addresses_question: Annotated[
         Optional[str],
-        Field(default=None, description="Assessment of whether the answer addresses the user's question."),
-    ]
-    sensitive_info_exposure_detected: Annotated[
-        Optional[int],
         Field(
             default=None,
-            ge=0,
-            le=10,
-            description='Score indicating likelihood of sensitive information exposure (0-10).',
+            description="Assessment of whether the generated answer directly addresses the user's question.",
         ),
     ]
-    toxic_response_detected: Annotated[
-        Optional[int],
-        Field(default=None, ge=0, le=10, description='Score indicating likelihood of overall toxic response (0-10).'),
+    nemo_output_check: Annotated[
+        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Field(
+            default=None,
+            description='List of scores (0-10) from NeMo Guardrails indicating the likelihood of toxic content in the generated answer.',
+        ),
+    ]
+    presidio_output_check: Annotated[
+        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Field(
+            default=None,
+            description='List of scores (0-10) from Presidio indicating the likelihood of PII/sensitive data in the generated answer.',
+        ),
     ]

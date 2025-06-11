@@ -34,19 +34,19 @@ class NodeName(StrEnum):
     RESPONSE_GUARD = 'response_guard'
 
     INPUT_GUARD_START = 'input_guard_start'
-    DETECT_PROMPT_INJECTION = 'detect_prompt_injection'
-    DETECT_PRIVACY_VIOLATION = 'detect_privacy_violation'
-    DETECT_TOXIC_INPUT = 'detect_toxic_input'
+    CHECK_INPUT_WITH_NEMO = 'check_input_with_nemo'
+    CHECK_INPUT_WITH_PRESIDIO = 'check_input_with_presidio'
     INPUT_GUARD_DECISION = 'input_guard_decision'
 
     RETRIEVAL_GUARD_START = 'document_guard_start'
-    DETECT_TOXIC_CONTENT = 'detect_toxic_content'
+    CHECK_RETRIEVAL_WITH_NEMO = 'check_retrieval_with_nemo'
+    CHECK_RETRIEVAL_WITH_PRESIDIO = 'check_retrieval_with_presidio'
     GATHER_RELEVANT_DOCUMENTS = 'gather_documents'
     RETRIEVAL_GUARD_DECISION = 'document_guard_decision'
 
     RESPONSE_GUARD_START = 'response_guard_start'
-    DETECT_SENSITIVE_INFO = 'detect_sensitive_info'
-    DETECT_TOXIC_RESPONSE = 'detect_toxic_response'
+    CHECK_RESPONSE_WITH_NEMO = 'check_response_with_nemo'
+    CHECK_RESPONSE_WITH_PRESIDIO = 'check_response_with_presidio'
     RESPONSE_GUARD_DECISION = 'response_guard_decision'
 
 

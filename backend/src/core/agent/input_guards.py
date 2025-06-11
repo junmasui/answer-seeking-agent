@@ -1,11 +1,13 @@
 import logging
 
-from core.agent.agent_state import GraphState
+from .agent_state import GraphState
+from .nemo_guards import execute_nemo_guardrails_check
+from .presidio_guard import execute_presidio_check
 
 logger = logging.getLogger(__name__)
 
 
-def detect_prompt_injection(state: GraphState):
+def check_input_with_nemo(state: GraphState):
     """
     Determines .
 
@@ -15,15 +17,17 @@ def detect_prompt_injection(state: GraphState):
     Returns:
         dict: Decision for next node to call
     """
-    logger.info('---CHECK PROMPT INJECTIONS---')
-    _question = state.question
+    logger.info('---CHECK INPUT WITH NEMO GUARDRAILS---')
+    question = state.question
 
-    return {
-        'injection_detected': 0  # "techniques_found": [],  "confidence": 100
-    }
+    result = execute_nemo_guardrails_check('input_check', [{'role': 'user', 'content': question}])
+
+    triggered_rail = result['output_data']['triggered_input_rail']
+
+    return {'nemo_input_check': 100 if triggered_rail else 0}
 
 
-def detect_privacy_violation(state: GraphState):
+def check_input_with_presidio(state: GraphState):
     """
     Determines .
 
@@ -33,27 +37,11 @@ def detect_privacy_violation(state: GraphState):
     Returns:
         dict: Decision for next node to call
     """
-    logger.info('---CHECK PRIVACY VIOLATION---')
-    _question = state.question
+    logger.info('---CHECK INPUT WITH PRESIDIO---')
+    question = state.question
 
-    return {
-        'privacy_violation_detected': 0  #  "pii_types_detected": [],  "confidence": 100
-    }
+    result = execute_presidio_check(question)
 
+    violation_score = len(result)
 
-def detect_toxic_input(state: GraphState):
-    """
-    Determines .
-
-    Args:
-        state (dict): The current graph state
-
-    Returns:
-        dict: Decision for next node to call
-    """
-    logger.info('---CHECK TOXIC INPUT---')
-    _question = state.question
-
-    return {
-        'toxic_input_detected': 0  # "categories_found": [],  "confidence": 100
-    }
+    return {'presidio_input_check': 100 if violation_score else 0}

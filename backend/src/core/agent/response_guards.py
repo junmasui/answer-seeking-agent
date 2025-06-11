@@ -1,11 +1,13 @@
 import logging
 
-from core.agent.agent_state import GraphState  # Add this import
+from .agent_state import GraphState
+from .nemo_guards import execute_nemo_guardrails_check
+from .presidio_guard import execute_presidio_check
 
 logger = logging.getLogger(__name__)
 
 
-def detect_sensitive_info(state: GraphState):
+def check_output_with_nemo(state: GraphState):
     """
     Determines .
 
@@ -15,17 +17,21 @@ def detect_sensitive_info(state: GraphState):
     Returns:
         dict: Decision for next node to call
     """
-    logger.info('---CHECK SENSITIVE INFORMATION EXPOSURE---')
-    _generation = state.answer
+    logger.info('---CHECK RESPONSE WITH NEMO GUARDRAILS---')
+    question = state.question
+    generation = state.generation
 
-    return {
-        'sensitive_info_exposure_detected': 0  #  "pii_fields_detected": [],  "confidence": 100
-    }
+    messages = [{'role': 'user', 'content': question}, {'role': 'assistant', 'content': generation}]
+    result = execute_nemo_guardrails_check('output_check', messages)
+
+    triggered_rail = result['output_data']['triggered_output_rail']
+
+    return {'nemo_output_check': 100 if triggered_rail else 0}
 
 
-def detect_toxic_response(state: GraphState):
+def check_output_with_presidio(state: GraphState):
     """
-    Scan for harmful, biased, discriminatory, or inappropriate content in the response.
+    Determines .
 
     Args:
         state (dict): The current graph state
@@ -33,11 +39,11 @@ def detect_toxic_response(state: GraphState):
     Returns:
         dict: Decision for next node to call
     """
-    logger.info('---CHECK TOXIC INPUT---')
-    _documents = state.documents
-    _generation = state.answer
+    logger.info('---CHECK RESPONSE WITH PRESIDIO---')
+    generation = state.answer
 
-    return {
-        'toxic_response_detected': 0
-        #  "categories_found": [],  "confidence": 100
-    }
+    result = execute_presidio_check(generation)
+
+    violation_score = len(result)
+
+    return {'presidio_output_check': 100 if violation_score else 0}

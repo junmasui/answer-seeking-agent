@@ -21,9 +21,7 @@ def check_if_safe_input(state: GraphState):
     """
     logger.info('---ASSESS USER INPUT---')
 
-    accept_input = (
-        state.injection_detected < 5 and state.privacy_violation_detected < 5 or state.toxic_input_detected < 5
-    )
+    accept_input = state.nemo_input_check < 5 and state.presidio_input_check < 5
 
     if not accept_input:
         # All documents have been filtered check_relevance
@@ -52,10 +50,14 @@ def gather_relevant_documents(state: GraphState):
 
     documents = state.documents
 
-    # Score each doc
     filtered_docs = []
+    # Score each doc
     for index, doc in enumerate(documents):
-        keep = state.document_relevancy[index] > 5 and state.toxic_content_detected[index] < 2
+        keep = (
+            state.document_relevancy[index] > 5
+            and state.presidio_retrieval_check[index] < 4
+            and state.nemo_retrieval_check[index] < 4
+        )
 
         if keep:
             logger.info('---FILTER: DOCUMENT %d ACCEPT---', index)
