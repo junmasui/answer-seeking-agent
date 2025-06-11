@@ -2,21 +2,23 @@ import logging
 
 import torch
 
-from ..providers.file_store import ping_file_store
-from ..providers.sql_database import DataDomain, ping_sql_database
 from ..providers.status_models import PingResult, PingStatus
-from ..providers.vector_store import ping_vector_store
+from ..providers.file_store import ping_file_store
+from ..providers.sql_database import DataDomain,   ping_sql_database
+from ..providers.vector_store import   ping_vector_store
 
 logger = logging.getLogger(__name__)
 
 
 def deeper_status_check():
-    """Perform a comprehensive health check of the system, including database connectivity."""
+    """Perform a comprehensive status check of the system, including database connectivity."""
     # Initialize with a default bad status, to be updated upon successful checks
     system_health = {
         'sql_database': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
         'file_store': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
-        'vector_store': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
+        'vector_store': PingResult(
+            status=PingStatus.BAD, message='Check not performed'
+        ).model_dump(),
     }
 
     # Ping PostgreSQL 'answers' schema
@@ -27,7 +29,9 @@ def deeper_status_check():
         logger.error("Error during PostgreSQL 'answers' schema health check", exc_info=e)
         # Ensure the error is captured in the health status
         system_health['sql_database'] = PingResult(
-            status=PingStatus.BAD, message="PostgreSQL 'answers' schema check failed unexpectedly.", error=str(e)
+            status=PingStatus.BAD,
+            message="PostgreSQL 'answers' schema check failed unexpectedly.",
+            error=str(e),
         ).model_dump()
 
     # Ping MinIO file store
