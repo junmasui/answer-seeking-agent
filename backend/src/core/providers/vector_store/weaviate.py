@@ -29,8 +29,9 @@ _TEXT_KEY = 'content'
 def _get_client():
     """
     Return a Weaviate client instance, creating it if necessary.
-    This function is cached to ensure only one client is created.
-    It also ensures the 'DocEmbeddings' collection exists.
+
+    This function is cached to ensure only one client is created. It also ensures the
+    'DocEmbeddings' collection exists.
     """
     config = get_lib_config()
 
@@ -54,6 +55,7 @@ def _get_client():
 def _create_collection(client):
     """
     Create the 'DocEmbeddings' collection in Weaviate if it doesn't already exist.
+
     Defines the schema for the collection, including properties and vector index configuration.
     """
     if not client.collections.exists(_COLLECTION_NAME):
@@ -148,6 +150,7 @@ def _create_collection(client):
 def _get_collection():
     """
     Return the Weaviate 'Agent' collection instance.
+
     This function is cached to ensure only one collection reference is created.
     """
     client = _get_client()
@@ -161,6 +164,7 @@ def _get_collection():
 def get_vector_store():
     """
     Return a WeaviateVectorStore instance, configured with embeddings and the Weaviate client.
+
     This function is cached to ensure only one vector store is created.
     """
     embeddings = get_embeddings()
@@ -178,8 +182,8 @@ def find_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Find vector embedding UUIDs associated with a specific document ID.
 
-    Returns a list of vector embedding UUID strings that belong to the specified
-    parent document by querying the custom metadata field 'parent_document_id'.
+    Returns a list of vector embedding UUID strings that belong to the specified parent document by
+    querying the custom metadata field 'parent_document_id'.
     """
     collection = _get_collection()
 
@@ -205,8 +209,8 @@ def delete_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Delete all vector embeddings associated with a specific document ID.
 
-    Finds and removes all vector embeddings that belong to the specified parent
-    document from the vector store by first querying for their IDs.
+    Finds and removes all vector embeddings that belong to the specified parent document from the
+    vector store by first querying for their IDs.
     """
     vector_ids = find_vectors_by_document_id(doc_id)
 

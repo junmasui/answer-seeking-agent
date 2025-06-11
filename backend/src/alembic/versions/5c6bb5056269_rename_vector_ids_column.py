@@ -1,10 +1,9 @@
 """
-rename vector_ids column
+Rename vector_ids column.
 
 Revision ID: 5c6bb5056269
 Revises: 8137477f7563
 Create Date: 2025-05-27 01:05:31.154576
-
 """
 
 from typing import Sequence, Union

@@ -86,10 +86,12 @@ def _ingest_one_document(
     detached_record: DbTrackedDocument, bucket: S3Path, vector_store: VectorStore, staging_dir: Path
 ) -> None:
     """
-    Ingest a single tracked document by downloading, processing, and storing it in the vector store.
+    Ingest a single tracked document by downloading, processing, and storing it in the vector
+    store.
 
     Downloads the document from cloud storage to local staging, extracts text chunks using document
-    loaders, generates and stores semantic vectors, and updates the tracking record with ingestion status.
+    loaders, generates and stores semantic vectors, and updates the tracking record with ingestion
+    status.
     """
     with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
         if updateable_record is None:
@@ -222,8 +224,10 @@ def _ingest_one_document(
 
 def ingest_documents(doc_ids):
     """
-    Ingest cloud files. Ingesting is the process of extracting textual data
-    from PDF, HTML, etc and generating and storing searchable semantic vectors.
+    Ingest cloud files.
+
+    Ingesting is the process of extracting textual data from PDF, HTML, etc and generating and
+    storing searchable semantic vectors.
     """
     if not doc_ids:
         raise NotImplementedError()

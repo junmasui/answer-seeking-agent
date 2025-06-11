@@ -1,5 +1,5 @@
 """
-Application Configuration Module
+Application Configuration Module.
 
 This module provides centralized configuration management for the core application.
 It defines the ApplicationSettings class that handles loading configuration values

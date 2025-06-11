@@ -96,7 +96,11 @@ async def handle_upload(
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
-    """Upload a file. Chunked upload of large files is supported."""
+    """
+    Upload a file.
+
+    Chunked upload of large files is supported.
+    """
     user_id = current_user.userid if current_user is not None else None
     # Convert string to datetime from the form_data model
     download_time_utc = datetime.fromisoformat(form_data.download_time_utc_str)
@@ -191,7 +195,7 @@ async def handle_ingest(
         User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
-    """Ingest the files specified in the list of document UUIDs"""
+    """Ingest the files specified in the list of document UUIDs."""
     user_id = current_user.userid if current_user is not None else None
 
     doc_uuids = set()
@@ -223,7 +227,7 @@ async def handle_delete(
         User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
     ] = None,
 ):
-    """Delete the files specified in the list of document UUIDs"""
+    """Delete the files specified in the list of document UUIDs."""
     _user_id = current_user.userid if current_user is not None else None
 
     doc_uuids = body.doc_uuids if body.doc_uuids else []

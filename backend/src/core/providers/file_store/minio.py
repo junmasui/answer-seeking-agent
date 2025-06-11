@@ -30,7 +30,11 @@ def get_s3_bucket() -> S3Path:
 
 @cache
 def get_s3_directory(dir_name: str) -> S3Path:
-    """Returns S3 directory within the application S3 bucket. If the directory does not exist, it is created."""
+    """
+    Returns S3 directory within the application S3 bucket.
+
+    If the directory does not exist, it is created.
+    """
     bucket = get_s3_bucket()
     dir_path = bucket / dir_name
     if not dir_path.exists():
@@ -52,6 +56,7 @@ def startup(_sender):
 def reset(sender):
     """
     Handle the reset_data signal to clear the S3 bucket if not a worker process.
+
     It recursively deletes all files and subdirectories within the configured S3 bucket.
     """
     if sender.is_worker:

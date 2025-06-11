@@ -24,8 +24,8 @@ def add_prompt(
     """
     Add a new agent prompt with the specified configuration.
 
-    Creates a new prompt entry with automatic version incrementing. If the status
-    is ACTIVE, deactivates all other versions of the same prompt name.
+    Creates a new prompt entry with automatic version incrementing. If the status is ACTIVE,
+    deactivates all other versions of the same prompt name.
     """
     _add_or_update_agent_prompt(
         name=name,

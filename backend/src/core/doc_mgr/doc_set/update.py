@@ -15,8 +15,8 @@ def update_document_set(doc_set_uuid, is_new_doc_default=None, is_public_viewabl
     """
     Update specific fields of a document set record.
 
-    Updates the document set with the provided field values. Only non-None
-    parameters will be updated in the database record.
+    Updates the document set with the provided field values. Only non-None parameters will be
+    updated in the database record.
     """
     with update_doc_set_record(doc_set_uuid=doc_set_uuid) as record:
         if is_new_doc_default is not None:
@@ -34,8 +34,8 @@ def update_doc_set_record(doc_set_uuid):
     """
     Context manager for updating a document set record in the database.
 
-    Yields the document set record object for modification within a database transaction.
-    Handles conversion of string UUIDs and logs warnings for missing or duplicate records.
+    Yields the document set record object for modification within a database transaction. Handles
+    conversion of string UUIDs and logs warnings for missing or duplicate records.
     """
     if isinstance(doc_set_uuid, str):
         doc_set_uuid = uuid.UUID(hex=doc_set_uuid)

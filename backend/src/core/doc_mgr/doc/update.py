@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def update_document_status(doc_uuid, status, last_user_id=None):
-    """Updates status field with option to update"""
+    """Updates status field with option to update."""
     with update_tracking_record(doc_uuid=doc_uuid) as record:
         if record is None:
             return
@@ -23,7 +23,7 @@ def update_document_status(doc_uuid, status, last_user_id=None):
 
 
 def update_document(doc_uuid, doc_set_uuid=None, last_user_id=None):
-    """Updates status field with option to update"""
+    """Updates status field with option to update."""
     with update_tracking_record(doc_uuid=doc_uuid) as record:
         if record is None:
             return

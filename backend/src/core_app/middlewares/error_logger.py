@@ -12,8 +12,8 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
     """
     Middleware that logs HTTP requests and responses for error status codes.
 
-    Captures and logs request/response details when HTTP status codes are >= 400,
-    helping with debugging and monitoring of API errors.
+    Captures and logs request/response details when HTTP status codes are >= 400, helping with
+    debugging and monitoring of API errors.
     """
 
     def __init__(self, app: ASGIApp):
@@ -24,8 +24,8 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
         """
         Handle HTTP requests and log errors for responses with status codes >= 400.
 
-        Captures request and response bodies for logging purposes while preserving
-        the original request body for downstream handlers.
+        Captures request and response bodies for logging purposes while preserving the original
+        request body for downstream handlers.
         """
         try:
             # Read the request body

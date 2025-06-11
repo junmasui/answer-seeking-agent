@@ -13,8 +13,8 @@ def get_document_statistics():
     """
     Get statistics about the tracked documents table.
 
-    Returns a DocumentStats object containing the total count of documents
-    and the last update time from the tracking table.
+    Returns a DocumentStats object containing the total count of documents and the last update time
+    from the tracking table.
     """
     table_stats = _get_tracking_stats()
 
@@ -22,10 +22,7 @@ def get_document_statistics():
 
 
 def _get_tracking_stats():
-    """
-    Return the count of records and maximum updated_date time
-    in the tracking table.
-    """
+    """Return the count of records and maximum updated_date time in the tracking table."""
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

@@ -1,14 +1,13 @@
 """
 This module implements application-specific signalling.
 
-Each component should be responsible for knowing it is should
-do processing upon start-up or reset-all-data event. This knowledge should not
-be centralized since it depends on each component's internals.
-Decentralization then requires broadcasting those important events.
+Each component should be responsible for knowing it is should do processing upon start-up or reset-
+all-data event. This knowledge should not be centralized since it depends on each component's
+internals. Decentralization then requires broadcasting those important events.
 
-This module also acts to insulate our application-specific signals
-from already existing framework-specific signals. Both FastAPI and Celery
-also have signals, but those frameworks are not in every node.
+This module also acts to insulate our application-specific signals from already existing framework-
+specific signals. Both FastAPI and Celery also have signals, but those frameworks are not in every
+node.
 """
 
 import logging
@@ -28,8 +27,8 @@ def start_up_handler(receiver):
     """
     Register a receiver function as a start-up signal handler.
 
-    This decorator registers the receiver to be called when the application
-    sends a start-up signal. Can be used as a decorator for better readability.
+    This decorator registers the receiver to be called when the application sends a start-up signal.
+    Can be used as a decorator for better readability.
     """
     return _START_UP.connect(receiver=receiver)
 
@@ -38,8 +37,8 @@ def db_predefined_data_handler(receiver):
     """
     Register a receiver function as a database predefined data handler.
 
-    This decorator registers the receiver to be called when the database
-    is ready to accept predefined data after schema initialization.
+    This decorator registers the receiver to be called when the database is ready to accept
+    predefined data after schema initialization.
     """
     return _DB_READY_FOR_PREDEFINED_DATA.connect(receiver=receiver)
 
@@ -48,14 +47,16 @@ def reset_data_handler(receiver):
     """
     Register a receiver function as a reset data signal handler.
 
-    This decorator registers the receiver to be called when the application
-    sends a reset-data signal to clean up and reinitialize data stores.
+    This decorator registers the receiver to be called when the application sends a reset-data
+    signal to clean up and reinitialize data stores.
     """
     return _RESET_DATA.connect(receiver=receiver)
 
 
 class Sender(BaseModel):
-    """Represents the sender of application signals, tracking whether it originates from a worker process."""
+    """
+    Represents the sender of application signals, tracking whether it originates from a worker
+    process."""
 
     is_worker: bool = False
 
@@ -74,7 +75,7 @@ def configure_sender(*, is_worker: bool):
 
 
 def send_start_up():
-    """Send the start-up signal"""
+    """Send the start-up signal."""
     logger.info('Sending start-up signal')
 
     sender = _get_sender()
@@ -85,8 +86,8 @@ def send_db_predefined_data():
     """
     Send the db-predefined-data signal.
 
-    This signal is sent after the database schema is updated or created
-    and the database is ready to accept predefined data like initial prompts.
+    This signal is sent after the database schema is updated or created and the database is ready to
+    accept predefined data like initial prompts.
     """
     logger.info('Sending db-predefined-data signal')
 
@@ -101,7 +102,7 @@ def send_db_predefined_data():
 
 
 def send_reset_data():
-    """Send the reset-data signal"""
+    """Send the reset-data signal."""
     logger.info('Sending reset-data signal')
 
     sender = _get_sender()

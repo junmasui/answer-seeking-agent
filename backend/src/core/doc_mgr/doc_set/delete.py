@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def delete_document_set(document_set_id):
-    """Delete document set"""
+    """Delete document set."""
     # Retrieve tracking record.
 
     doc_set_records = get_document_sets(doc_set_uuid_list=[document_set_id])

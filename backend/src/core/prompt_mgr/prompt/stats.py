@@ -13,8 +13,8 @@ def get_prompt_statistics():
     """
     Get statistics about the agent prompts table.
 
-    Returns an AgentPromptStats object containing the total count of prompts
-    and the last update time from the tracking table.
+    Returns an AgentPromptStats object containing the total count of prompts and the last update
+    time from the tracking table.
     """
     table_stats = _get_agent_prompt_stats()
 
@@ -22,10 +22,7 @@ def get_prompt_statistics():
 
 
 def _get_agent_prompt_stats():
-    """
-    Return the count of records and maximum updated_date time
-    in the prompt table.
-    """
+    """Return the count of records and maximum updated_date time in the prompt table."""
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

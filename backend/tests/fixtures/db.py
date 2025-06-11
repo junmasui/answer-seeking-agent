@@ -36,8 +36,8 @@ def sql_engine() -> Generator[Engine, None, None]:
     """
     Returns the SQLAlchemy engine for the database.
 
-    The engine is a global object created just once for a particular database server.
-    It creates and holds connections to the database server
+    The engine is a global object created just once for a particular database server. It creates and
+    holds connections to the database server
     """
     connection_str = get_connection_str()
 
@@ -54,9 +54,9 @@ def sql_sessionmaker(sql_engine) -> Generator[sessionmaker, None, None]:
     """
     Returns a SQLAlchemy sessionmaker object for the database.
 
-    A sessionmaker is a factory for creating new Session objects.
-    A Session object is like a connection with enhanced functionality for using
-    the ORM paradigm (for examle, holding mappings between Python objects and database rows)
+    A sessionmaker is a factory for creating new Session objects. A Session object is like a
+    connection with enhanced functionality for using the ORM paradigm (for examle, holding mappings
+    between Python objects and database rows)
     """
     maker = sessionmaker(bind=sql_engine)
 

@@ -24,8 +24,8 @@ def get_vector_store():
     """
     Get the cached PGVector vector store instance.
 
-    Creates and returns a PGVector instance configured with embeddings and
-    connected to the vectors database for storing and retrieving document embeddings.
+    Creates and returns a PGVector instance configured with embeddings and connected to the vectors
+    database for storing and retrieving document embeddings.
     """
     engine = get_engine(DataDomain.VECTORS)
 
@@ -43,8 +43,8 @@ def _get_reflected_metadata():
     """
     Get reflected metadata for vector store tables from the custom schema.
 
-    Returns a MetaData object containing the langchain_pg_embedding and
-    langchain_pg_collection tables reflected from the vectors database schema.
+    Returns a MetaData object containing the langchain_pg_embedding and langchain_pg_collection
+    tables reflected from the vectors database schema.
     """
     schema_name = get_lib_config().postgres_vectors_schema
     engine = get_engine(DataDomain.VECTORS)
@@ -62,8 +62,8 @@ def _get_reflected_embedding_table():
     """
     Get the reflected langchain_pg_embedding table from the custom schema.
 
-    Returns the SQLAlchemy Table object for the langchain_pg_embedding table
-    using schema-qualified name resolution from the reflected metadata.
+    Returns the SQLAlchemy Table object for the langchain_pg_embedding table using schema-qualified
+    name resolution from the reflected metadata.
     """
     schema_name = get_lib_config().postgres_vectors_schema
     metadata = _get_reflected_metadata()
@@ -77,8 +77,8 @@ def find_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Find vector embedding UUIDs associated with a specific document ID.
 
-    Returns a list of vector embedding UUID strings that belong to the specified
-    parent document by querying the custom metadata field 'parent_document_id'.
+    Returns a list of vector embedding UUID strings that belong to the specified parent document by
+    querying the custom metadata field 'parent_document_id'.
     """
     embedding_table = _get_reflected_embedding_table()
 
@@ -101,8 +101,8 @@ def delete_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Delete all vector embeddings associated with a specific document ID.
 
-    Finds and removes all vector embeddings that belong to the specified parent
-    document from the vector store by first querying for their IDs.
+    Finds and removes all vector embeddings that belong to the specified parent document from the
+    vector store by first querying for their IDs.
     """
     vector_ids = find_vectors_by_document_id(doc_id)
 
@@ -117,8 +117,8 @@ def startup(sender):
     """
     Initialize the vector store database schema on application startup.
 
-    Creates the vector extension, tables, and collection if they don't exist.
-    Only runs on non-worker processes to avoid duplicate initialization.
+    Creates the vector extension, tables, and collection if they don't exist. Only runs on non-
+    worker processes to avoid duplicate initialization.
     """
     if sender.is_worker:
         return
@@ -135,8 +135,8 @@ def reset(sender):
     """
     Reset the vector store by dropping and recreating all tables and collections.
 
-    Called during data reset operations to clean up all vector store data.
-    Only runs on non-worker processes to avoid conflicts.
+    Called during data reset operations to clean up all vector store data. Only runs on non-worker
+    processes to avoid conflicts.
     """
     if sender.is_worker:
         return
