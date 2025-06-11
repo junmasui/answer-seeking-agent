@@ -135,8 +135,8 @@ class ApplicationSettings(BaseSettings):
         # init_settings: setting values provided as keyword arguments when initialization
         #     an instance of this Settings class.
         # env_settings: settings values loaded from environment variables.
-        # dotenv_settings: settings values loaded from env files, whose paths are specified in `env_file`
-        #     config value.
+        # dotenv_settings: settings values loaded from env files, whose paths are specified
+        #     in `env_file` config value.
         # file_secret_settings: settings values loaded from secret files, which are files in the
         #     directories specified in the `secrets_dir` config value.
 

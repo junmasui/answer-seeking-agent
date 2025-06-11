@@ -34,8 +34,8 @@ def prompt_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
     if auto_mapped_table is None:
         raise RuntimeError(f'Table {full_name} is absent')
 
-    # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
-    # errors where clean-up did not occur.
+    # Clean up table before we start: there are rare error scenarios like power outages
+    # or out-of-memory errors where clean-up did not occur.
     _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker)
 
     try:
@@ -49,8 +49,8 @@ def prompt_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 @pytest.fixture(scope='function')
 def empty_prompt_table(prompt_table, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'agent_prompt'."""
-    # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
-    # errors where clean-up did not occur.
+    # Clean up table before we start: there are rare error scenarios like power outages
+    # or out-of-memory errors where clean-up did not occur.
     _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
 
     try:
@@ -64,8 +64,8 @@ def empty_prompt_table(prompt_table, sql_engine, sql_sessionmaker):
 @pytest_asyncio.fixture(scope='function', loop_scope='function')
 async def populated_prompt_table(prompt_table, api_server, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'agent_prompt'."""
-    # Clean up table before we start: there are rare error scenarios like power outages or out-of-memory
-    # errors where clean-up did not occur.
+    # Clean up table before we start: there are rare error scenarios like power outages
+    # or out-of-memory errors where clean-up did not occur.
     _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
 
     try:

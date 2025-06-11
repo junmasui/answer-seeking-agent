@@ -62,9 +62,9 @@ def _add_or_update_agent_prompt(
 
             # IMPORTANT!!
             # We should always access SQLAlchemy object properties inside a transaction. Its ORM
-            # has subtle lazy-loading behaviors, including when expire_on_commit=True (which is important
-            # for data consistency checking). Doing this will prevent auto-transactions from
-            # interferring with the next transaction.
+            # has subtle lazy-loading behaviors, including when expire_on_commit=True (which is
+            # important for data consistency checking). Doing this will prevent auto-transactions
+            # from interferring with the next transaction.
             version = 1 if existing_obj is None else (existing_obj.version + 1)
 
         with session.begin():

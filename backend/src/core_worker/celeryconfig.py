@@ -34,7 +34,8 @@ broker_url = str(_get_app_config().redis_dsn)
 # See: https://docs.celeryq.dev/en/stable/userguide/configuration.html#message-routing
 #
 
-# The name of the default queue used by .apply_async if the message has no route or no custom queue has been specified.
+# The name of the default queue used by .apply_async if the message has no route or no
+# custom queue has been specified.
 # See https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-default-queue
 task_default_queue = _get_app_config().celery_task_queue
 
@@ -61,7 +62,8 @@ worker_concurrency = 2
 # Maximum number of tasks a pool worker process can execute before it’s replaced with a new one.
 worker_max_tasks_per_child = 100
 
-# Maximum amount of resident memory, in kilobytes, that may be consumed by a worker before it will be replaced by a new worker.
+# Maximum amount of resident memory, in kilobytes, that may be consumed by a worker before it will
+# be replaced by a new worker.
 # worker_max_memory_per_child=4_096_000 # 4 Gb
 worker_max_memory_per_child = 8_192_000  # 8 Gb
 

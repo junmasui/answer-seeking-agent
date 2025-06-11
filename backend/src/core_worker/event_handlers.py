@@ -7,8 +7,9 @@ logger = logging.getLogger(__name__)
 
 # Real-time monitoring with Celery events.
 #
-# Our use case is monitoring. We are not customizing additional processing on the task or worker lifecycles,
-# which would be the use cases for Celery signals. Hence we use Celery events.
+# Our use case is monitoring. We are not customizing additional processing on the task
+# or worker lifecycles, which would be the use cases for Celery signals. Hence we
+# use Celery events.
 #
 # See: https://github.com/celery/celery/blob/main/docs/userguide/monitoring.rst#real-time-processing
 #
