@@ -93,11 +93,10 @@ def _list_tracking_records(
     """
     Return a page of tracking records.
 
-    The implementation is an older known-performance technique. The technique
-    creates a CTE (alternatively, a subquery could have been used) where each
-    row is augmented with the windowing function ROW_NUMBER. Then the rows whose
-    ROW_NUMBER values fall into the page range are choosen. Finally, the row
-    data minus the ROW_NUMBER values are returned.
+    The implementation is an older known-performance technique. The technique creates a CTE
+    (alternatively, a subquery could have been used) where each row is augmented with the windowing
+    function ROW_NUMBER. Then the rows whose ROW_NUMBER values fall into the page range are choosen.
+    Finally, the row data minus the ROW_NUMBER values are returned.
     """
     order_by = _build_order_by(sort_by)
 

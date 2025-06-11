@@ -18,12 +18,11 @@ def setup_monitoring(app):
     """
     Set up monitoring and metrics collection for the Celery application.
 
-    Configures application-level monitoring infrastructure when the Celery
-    worker application is initialized. This is typically called during
-    the worker startup process.
+    Configures application-level monitoring infrastructure when the Celery worker application is
+    initialized. This is typically called during the worker startup process.
 
-    Monitors worker online/offline events and task state changes, updating document
-    status when tasks are sent to the queue.
+    Monitors worker online/offline events and task state changes, updating document status when
+    tasks are sent to the queue.
     """
     # A State builds an In-memory representation of cluster state from the event stream.
     state = app.events.State()

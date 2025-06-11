@@ -19,8 +19,8 @@ def get_connection_str(db_schema: DataDomain):
     """
     Get the PostgreSQL connection string for the specified database schema.
 
-    Maps the DataDomain enum to the appropriate connection URL from configuration
-    and validates that it uses the psycopg3 driver format.
+    Maps the DataDomain enum to the appropriate connection URL from configuration and validates that
+    it uses the psycopg3 driver format.
     """
     config = get_lib_config()
 
@@ -47,8 +47,8 @@ def get_engine(db_schema: DataDomain):
     """
     Returns a SQLAlchemy engine for the database.
 
-    The engine is a global object created just once for a particular database server.
-    It creates and holds connections to the database server
+    The engine is a global object created just once for a particular database server. It creates and
+    holds connections to the database server
     """
     connection_str = get_connection_str(db_schema)
 
@@ -61,9 +61,9 @@ def get_sessionmaker(db_schema: DataDomain):
     """
     Returns a SQLAlchemy sessionmaker object for the database.
 
-    A sessionmaker is a factory for creating new Session objects.
-    A Session object is like a connection with enhanced functionality for using
-    the ORM paradigm (for examle, holding mappings between Python objects and database rows)
+    A sessionmaker is a factory for creating new Session objects. A Session object is like a
+    connection with enhanced functionality for using the ORM paradigm (for examle, holding mappings
+    between Python objects and database rows)
     """
     engine = get_engine(db_schema)
 
@@ -74,8 +74,9 @@ def get_sessionmaker(db_schema: DataDomain):
 @cache
 def get_connection_pool(db_schema: DataDomain):
     """
-    Return a database connection pool. This pool will be different from
-    the one used by SQLAlchemy
+    Return a database connection pool.
+
+    This pool will be different from the one used by SQLAlchemy
     """
     connection_str = get_connection_str(db_schema)
     connection_str = connection_str.replace('+psycopg', '')

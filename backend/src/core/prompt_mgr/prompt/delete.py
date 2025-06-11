@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def delete_prompt(prompt_uuid):
-    """Delete prompt"""
+    """Delete prompt."""
     # Retrieve prompt record.
 
     prompt_records = get_prompt(prompt_uuid_list=[prompt_uuid])

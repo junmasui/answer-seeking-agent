@@ -37,8 +37,8 @@ def _decode_token_data(token: str):
     """
     Decode JWT token and extract user data.
 
-    Validates the token signature and extracts userid, username, and scope claims.
-    Raises credentials error for invalid or malformed tokens.
+    Validates the token signature and extracts userid, username, and scope claims. Raises
+    credentials error for invalid or malformed tokens.
     """
     try:
         secret_key = get_lib_config().application_jwt_secret
@@ -58,9 +58,9 @@ def _decode_token_data(token: str):
 async def _get_user_from_api_key(api_key: str, config) -> TokenData | None:
     """
     Validates an API key and returns TokenData if valid.
-    This is a simplified example. In a real application, API keys should be
-    securely stored and managed, likely in a database, and associated with
-    specific user entities and permissions.
+
+    This is a simplified example. In a real application, API keys should be securely stored and
+    managed, likely in a database, and associated with specific user entities and permissions.
     """
     # Example: Check against a statically configured API key.
     # This would ideally come from a secure configuration or database.
@@ -88,8 +88,8 @@ async def get_current_user_from_token(token: str):
     """
     Extract and validate user information from a JWT token.
 
-    Returns the authenticated user object or None if no token is provided.
-    Raises credentials error for invalid tokens.
+    Returns the authenticated user object or None if no token is provided. Raises credentials error
+    for invalid tokens.
     """
     if not token:
         return None
@@ -113,6 +113,7 @@ async def get_current_user(
 ):
     """
     FastAPI dependency to get the current authenticated user.
+
     Tries JWT Bearer token first. If not present or invalid, tries X-API-Key header.
     """
     if bearer_token:
@@ -153,11 +154,10 @@ def get_scoped_current_user(scope: str, missing_ok: bool = False):
     Create a FastAPI dependency that validates user authentication and authorization scope.
     Supports both JWT Bearer tokens and X-API-Key header.
 
-    Returns a dependency function that checks if the user has the required scope.
-    If missing_ok is True, returns None when no valid authentication is provided
-    instead of raising an error. If missing_ok is False and no valid authentication
-    is provided, a 401 error is raised. If authentication is successful but the
-    required scope is missing, a 403 error is raised.
+    Returns a dependency function that checks if the user has the required scope. If missing_ok is
+    True, returns None when no valid authentication is provided instead of raising an error. If
+    missing_ok is False and no valid authentication is provided, a 401 error is raised. If
+    authentication is successful but the required scope is missing, a 403 error is raised.
     """
 
     async def scoped_user(

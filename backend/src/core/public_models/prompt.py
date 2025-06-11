@@ -14,8 +14,8 @@ class AgentPromptStatus(enum.StrEnum):
     """
     Defines the lifecycle status of agent prompt templates.
 
-    Controls whether a prompt version is currently active for use or has been
-    deactivated in favor of a newer version.
+    Controls whether a prompt version is currently active for use or has been deactivated in favor
+    of a newer version.
     """
 
     ACTIVE = 'active'
@@ -70,7 +70,9 @@ class AgentPromptAddRequest(CamelModel):
 
 
 class AgentPromptUpdateRequest(CamelModel):
-    """Represents a request to update an existing agent prompt, allowing modification of its name and messages."""
+    """
+    Represents a request to update an existing agent prompt, allowing modification of its name
+    and messages."""
 
     name: Optional[str] = Field(description='Name of prompt.', default=None)
     system_message: str = Field(description='Prompt')

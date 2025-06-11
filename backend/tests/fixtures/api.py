@@ -15,8 +15,8 @@ class ApiClient:
     """
     HTTP client for testing API endpoints with support for various request types.
 
-    Provides async methods for GET, POST, PATCH, and DELETE requests with
-    JSON and multipart form data support for integration testing.
+    Provides async methods for GET, POST, PATCH, and DELETE requests with JSON and multipart form
+    data support for integration testing.
     """
 
     def __init__(self, base_url):
@@ -110,8 +110,8 @@ async def api_server() -> AsyncGenerator[ApiClient, None]:
     """
     Provide an ApiClient instance for testing API endpoints.
 
-    Waits for the FastAPI server to come online and complete startup processing
-    (including database migrations and ML model downloads) before yielding the client.
+    Waits for the FastAPI server to come online and complete startup processing (including database
+    migrations and ML model downloads) before yielding the client.
     """
     # Wait (poll) for FastAPI to come on-line. "On-line" is later than the
     # process starting: it also means that start-up processing has completed.
@@ -141,8 +141,8 @@ async def global_reset(api_server) -> AsyncGenerator[None, None]:
     """
     Reset the global application state before and after tests.
 
-    This fixture automatically resets the database, vector store, and file store
-    at the beginning and end of the test module to ensure test isolation.
+    This fixture automatically resets the database, vector store, and file store at the beginning
+    and end of the test module to ensure test isolation.
     """
     path = '/admin/reset-database'
     logger.info('Resetting global state')

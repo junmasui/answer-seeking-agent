@@ -13,8 +13,8 @@ def get_document_set_statistics():
     """
     Get statistics about the document sets table.
 
-    Returns a DocumentSetStats object containing the total count of document sets
-    and the last update time from the tracking table.
+    Returns a DocumentSetStats object containing the total count of document sets and the last
+    update time from the tracking table.
     """
     table_stats = _get_document_set_stats()
 
@@ -24,10 +24,7 @@ def get_document_set_statistics():
 
 
 def _get_document_set_stats():
-    """
-    Return the count of records and maximum updated_date time
-    in the document set table.
-    """
+    """Return the count of records and maximum updated_date time in the document set table."""
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:

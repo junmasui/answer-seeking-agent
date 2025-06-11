@@ -9,8 +9,8 @@ def status_check():
     """
     Perform a system status check and return health information.
 
-    Checks CUDA availability and device information, with placeholders for
-    additional health checks like Redis, PostgreSQL, and MinIO connectivity.
+    Checks CUDA availability and device information, with placeholders for additional health checks
+    like Redis, PostgreSQL, and MinIO connectivity.
     """
     status = {'status': 'not good'}
     try:

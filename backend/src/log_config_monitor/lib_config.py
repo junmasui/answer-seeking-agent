@@ -1,7 +1,4 @@
-"""
-This is a small stand-alone module that
-provides a global configuration object.
-"""
+"""This is a small stand-alone module that provides a global configuration object."""
 
 import os
 from functools import cache

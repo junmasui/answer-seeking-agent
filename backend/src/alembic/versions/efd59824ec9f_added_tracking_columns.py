@@ -1,10 +1,9 @@
 """
-Added tracking columns
+Added tracking columns.
 
 Revision ID: efd59824ec9f
 Revises:
 Create Date: 2025-03-21 03:07:25.075060
-
 """
 
 from typing import Sequence, Union

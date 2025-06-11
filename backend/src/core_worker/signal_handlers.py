@@ -32,8 +32,8 @@ def handle_worker_init(**_kwargs):
     """
     Handle worker initialization signal.
 
-    Sets up logging monitor, metrics collection, configures sender as worker,
-    and sends startup signal when the main worker process initializes.
+    Sets up logging monitor, metrics collection, configures sender as worker, and sends startup
+    signal when the main worker process initializes.
     """
     logger.info('worker init')
 
@@ -51,8 +51,8 @@ def handle_worker_ready(**_kwargs):
     """
     Handle worker ready signal.
 
-    Called when the worker is ready to receive tasks. Logs the worker
-    ready status for monitoring purposes.
+    Called when the worker is ready to receive tasks. Logs the worker ready status for monitoring
+    purposes.
     """
     logger.info('worker ready')
 
@@ -62,8 +62,8 @@ def handle_worker_process_init(**_kwargs):
     """
     Handle worker process initialization signal.
 
-    Sets up logging monitor and metrics collection for child worker processes.
-    Called when a new worker process is spawned in a multiprocessing setup.
+    Sets up logging monitor and metrics collection for child worker processes. Called when a new
+    worker process is spawned in a multiprocessing setup.
     """
     logger.info('worker process init')
 
@@ -77,8 +77,8 @@ def handle_worker_shutting_down(sig, how, exitcode, **_kwargs):
     """
     Handle worker shutdown signal.
 
-    Called when the main worker is shutting down. Stops the logging configuration
-    monitor and logs shutdown details including signal, method, and exit code.
+    Called when the main worker is shutting down. Stops the logging configuration monitor and logs
+    shutdown details including signal, method, and exit code.
     """
     logger.info('worker process shutting down %s %s %s', sig, how, exitcode)
 
@@ -90,8 +90,8 @@ def handle_worker_process_shutting_down(pid, exitcode, **_kwargs):
     """
     Handle worker process shutdown signal.
 
-    Called when a child worker process shuts down. Marks the process as dead
-    in metrics collection and stops the logging configuration monitor.
+    Called when a child worker process shuts down. Marks the process as dead in metrics collection
+    and stops the logging configuration monitor.
     """
     logger.info('worker process shutting down %s %s', pid, exitcode)
 

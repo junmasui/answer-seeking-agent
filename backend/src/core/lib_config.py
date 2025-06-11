@@ -1,5 +1,5 @@
 """
-Library Configuration Management Module
+Library Configuration Management Module.
 
 This module provides centralized configuration management for the application using Pydantic settings.
 It handles loading configuration from multiple sources including environment variables, TOML files,

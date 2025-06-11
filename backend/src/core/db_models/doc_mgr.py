@@ -61,7 +61,8 @@ class DbTrackedDocument(Base):
     """
     SQLAlchemy model representing a tracked document in the database.
 
-    Stores document metadata, processing status, and relationships to document sets and vector store IDs.
+    Stores document metadata, processing status, and relationships to document sets and vector store
+    IDs.
     """
 
     __tablename__ = 'tracked_documents'

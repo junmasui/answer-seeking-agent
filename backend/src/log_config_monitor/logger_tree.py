@@ -9,12 +9,11 @@ def dump_logger_tree(logger=None, include_all=False):
     """
     Returns the logger hierarchy.
 
-    Knowledge of the actual logger hierarchy in the running process
-    is very helpful.
+    Knowledge of the actual logger hierarchy in the running process is very helpful.
 
-    While python's standard logging framework is powerful, there is often some questions
-    about the actual logger hierarchy. The actual logger hierarchy is needed for
-    properly targetting and setting logging levels.
+    While python's standard logging framework is powerful, there is often some questions about the
+    actual logger hierarchy. The actual logger hierarchy is needed for properly targetting and
+    setting logging levels.
     """
 
     def _dump_handler(_handler: logging.Handler):

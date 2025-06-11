@@ -7,8 +7,8 @@ def generate_uuid_from_username(name):
     """
     Generate a deterministic UUID from a username using UUID5.
 
-    Uses a custom namespace to ensure consistent UUID generation
-    for the same username across application restarts.
+    Uses a custom namespace to ensure consistent UUID generation for the same username across
+    application restarts.
     """
     # Custom namespace
     namespace = uuid.UUID(hex='cdff7507b56c4c81a5cb29bf6aaa9de1')
@@ -38,8 +38,9 @@ def get_user_by_id(*, userid: str = None):
 
 def authenticate_user(username: str, password: str):
     """
-    Returns the user object specified by username only when
-    the password check passed. Otherwise None is returned.
+    Returns the user object specified by username only when the password check passed.
+
+    Otherwise None is returned.
     """
     user = get_user_by_name(username=username)
 
