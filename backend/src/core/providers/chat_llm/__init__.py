@@ -12,16 +12,8 @@ match llm_type:
     case 'openai':
         from .openai import get_chat_llm, ping_chat_llm
     case 'huggingface':
-        from .huggingface import get_chat_llm
-
-        # Add a ping function for huggingface if/when available
-        def ping_chat_llm():
-            raise NotImplementedError('Ping not implemented for HuggingFace')
+        from .huggingface import get_chat_llm, ping_chat_llm
     case 'google-genai':
-        from .google_genai import get_chat_llm
-
-        # Add a ping function for google-genai if/when available
-        def ping_chat_llm():
-            raise NotImplementedError('Ping not implemented for Google GenAI')
+        from .google_genai import get_chat_llm, ping_chat_llm
     case _:
         raise ValueError(f'Unknown LLM type: {llm_type}')
