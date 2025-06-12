@@ -9,7 +9,7 @@ from core.signals import configure_sender, send_start_up
 from log_config_monitor import get_logging_conf_monitor
 
 from .middlewares import ErrorLoggingMiddleware
-from .routers import admin, answer, document_sets, documents, live, prompts, tasks
+from .routers import admin, answer, document_sets, documents, health, prompts, status, tasks
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,8 @@ app.include_router(router=admin.router, prefix='/admin')
 app.include_router(router=answer.router, prefix='/answer')
 app.include_router(router=document_sets.router, prefix='/document-sets')
 app.include_router(router=documents.router, prefix='/documents')
-app.include_router(router=live.router, prefix='/live')
+app.include_router(router=health.router, prefix='/health')
+app.include_router(router=status.router, prefix='/status')
 app.include_router(router=prompts.router, prefix='/prompts')
 app.include_router(router=tasks.router, prefix='/tasks')
 

@@ -61,3 +61,7 @@ def get_chat_llm() -> BaseChatModel:
     llm = ChatHuggingFace(llm=base_llm, cache=True, streaming=False, disable_streaming=True, verbose=True)
 
     return llm
+
+
+def ping_chat_llm():
+    raise NotImplementedError('Ping not implemented for HuggingFace')

@@ -10,7 +10,8 @@ from sqlalchemy import MetaData, select
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
-from ..sql_database import DataDomain, get_engine, get_sessionmaker
+from ..sql_database import DataDomain, get_engine, get_sessionmaker, ping_sql_database
+from ..status_models import PingResult
 
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/
@@ -148,3 +149,9 @@ def reset(sender):
     vector_store.create_vector_extension()
     vector_store.create_tables_if_not_exists()
     vector_store.create_collection()
+
+
+def ping_vector_store():
+    """Pings the vector store to check its health."""
+    ping_result: PingResult = ping_sql_database(DataDomain.VECTORS)
+    return ping_result

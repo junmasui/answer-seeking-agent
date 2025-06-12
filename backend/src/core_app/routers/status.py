@@ -18,7 +18,8 @@ router = APIRouter()
 jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 
-@router.get('/status')
+@router.get('')  # Empty path handles no trailing slash without using 307 redirect.
+@router.get('/')
 async def handle_status_check():
     """
     Handle requests to the status path.

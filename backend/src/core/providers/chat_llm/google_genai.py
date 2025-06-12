@@ -17,3 +17,7 @@ def get_chat_llm() -> BaseChatModel:
     llm = ChatGoogleGenerativeAI(model='gemini-1.5-flash', temperature=0, max_tokens=None, max_retries=2, stop=None)
 
     return llm
+
+
+def ping_chat_llm():
+    raise NotImplementedError('Ping not implemented for Google GenAI')
