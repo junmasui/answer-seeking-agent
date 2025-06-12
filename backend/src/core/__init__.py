@@ -13,7 +13,7 @@ from .doc_mgr import (
     upload_chunk,
     upload_document,
 )
-from .health import status_check
+from .health import health_check, status_check
 from .ingest import ingest_documents, reset_worker_data
 
 # Explicitly define the exported names: these names are the contract of this module.
@@ -24,6 +24,7 @@ __all__ = [
     'delete_document',
     'get_document_set_statistics',
     'get_document_statistics',
+    'health_check',
     'list_document_sets',
     'list_documents',
     'merge_chunked_document',

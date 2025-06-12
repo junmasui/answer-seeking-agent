@@ -3,15 +3,17 @@
 from functools import cache
 
 from psycopg_pool import ConnectionPool
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+from ...db_models.doc_mgr import DbTrackedDocument
 from ...lib_config import get_lib_config
+from ..status_models import PingResult, PingStatus
 from .base import DataDomain
 
 # Explicitly define the exported symbols: the exported symbols
 # is part of the contract of this provider module.
-__all__ = ['get_connection_str', 'get_engine', 'get_sessionmaker', 'get_connection_pool']
+__all__ = ['get_connection_str', 'get_engine', 'get_sessionmaker', 'get_connection_pool', 'ping_sql_database']
 
 
 @cache
@@ -85,3 +87,62 @@ def get_connection_pool(db_schema: DataDomain):
     pool.open()
 
     return pool
+
+
+def ping_sql_database(db_schema: DataDomain) -> PingResult:
+    """
+    Pings the specified SQL database schema to check its health and connectivity.
+
+    This function attempts to connect to the database and execute a simple query
+    against the specified schema. For the 'ANSWERS' schema, it specifically checks
+    for the existence of the 'answers' schema and the count of records in the
+    tracked_documents table. For other schemas, a simple 'SELECT 1'
+    is used as a basic connectivity test.
+
+    Args:
+        db_schema: The DataDomain schema to ping (e.g., ANSWERS, VECTORS, CHECKPOINTS).
+
+    Returns:
+        PingResult: An object containing the ping status (GOOD or BAD),
+                    a descriptive message, and an optional error message if the ping failed.
+    """
+    try:
+        engine = get_engine(db_schema)
+        with engine.connect() as connection:
+            if db_schema == DataDomain.ANSWERS:
+                # Check if the 'answers' schema exists
+                schema_check_result = connection.execute(
+                    text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'answers';")
+                )
+                if not schema_check_result.fetchone():
+                    # If the schema doesn't exist, we can't connect to it in a meaningful
+                    # way for this check.
+                    return PingResult(
+                        status=PingStatus.BAD,
+                        message=f"Schema '{db_schema.value}' does not exist.",
+                        error=RuntimeError(f"Schema '{db_schema.value}' does not exist."),
+                    )
+                # If the schema exists, query for the count of records in the
+                # tracked_documents table.
+                table_name = DbTrackedDocument.__tablename__
+                count_query = text(f'SELECT COUNT(*) FROM answers.{table_name}')
+                record_count_result = connection.execute(count_query)
+                record_count = record_count_result.scalar_one_or_none()
+
+                return PingResult(
+                    status=PingStatus.GOOD,
+                    message=f'Successfully connected to {db_schema.value} schema.',
+                    statistics={'document_record_count': record_count if record_count is not None else 0},
+                )
+            else:
+                # For other schemas, a simple SELECT 1 can be used as a basic check.
+                connection.execute(text('SELECT 1'))
+        return PingResult(status=PingStatus.GOOD, message=f'Successfully connected to {db_schema.value} schema.')
+    except Exception as e:
+        # Log the exception for debugging purposes if a logger is available
+        # logger.error(f"Error pinging database schema {db_schema.value}: {e}", exc_info=True)
+        return PingResult(
+            status=PingStatus.BAD,
+            message=f'Failed to connect to {db_schema.value} schema due to an unexpected error.',
+            error=str(e),
+        )

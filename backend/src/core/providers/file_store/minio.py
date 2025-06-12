@@ -5,6 +5,7 @@ from cloudpathlib.s3 import S3Client, S3Path
 
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
+from ..status_models import PingResult, PingStatus
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,50 @@ def get_s3_directory(dir_name: str) -> S3Path:
     if not dir_path.exists():
         dir_path.mkdir(parents=True)
     return dir_path
+
+
+def _count_files_in_tree(dir_name: str) -> int:
+    """
+    Counts the total number of files in a given S3 directory and its subdirectories.
+
+    Args:
+        dir_name: The name of the S3 directory.
+
+    Returns:
+        The total count of files.
+    """
+    s3_dir = get_s3_directory(dir_name)
+    file_count = 0
+    for _root, _dirs, files in s3_dir.walk():
+        file_count += len(files)
+    return file_count
+
+
+def ping_file_store() -> PingResult:
+    """
+    Pings the MinIO file store to check its availability and permissions.
+
+    Tries to list objects in the root of the bucket to verify connectivity and permissions.
+    """
+    try:
+        bucket = get_s3_bucket()
+        # Attempt to list objects in the bucket root as a basic check
+        list(bucket.iterdir())
+
+        chunk_root_dir = get_lib_config().chunk_root_dir
+        chunk_file_count = _count_files_in_tree(chunk_root_dir)
+
+        doc_root_dir = get_lib_config().doc_root_dir
+        doc_file_count = _count_files_in_tree(doc_root_dir)
+
+        return PingResult(
+            status=PingStatus.GOOD,
+            message='MinIO connection successful.',
+            statistics={'chunk_file_count': chunk_file_count, 'document_file_count': doc_file_count},
+        )
+    except Exception as e:
+        logger.error('Error pinging MinIO', exc_info=e)
+        return PingResult(status=PingStatus.BAD, message='MinIO connection failed.', error=str(e))
 
 
 @start_up_handler
