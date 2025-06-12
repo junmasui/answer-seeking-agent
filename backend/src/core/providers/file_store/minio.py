@@ -52,6 +52,7 @@ def _count_files_in_tree(dir_name: str) -> int:
 
     Returns:
         The total count of files.
+
     """
     s3_dir = get_s3_directory(dir_name)
     file_count = 0

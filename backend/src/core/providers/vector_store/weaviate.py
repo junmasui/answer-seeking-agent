@@ -229,6 +229,7 @@ def ping_vector_store() -> PingResult:
     Returns:
         PingResult: An object containing the ping status (GOOD or BAD),
                     a descriptive message, and an optional error message if the ping failed.
+
     """
     try:
         client = _get_client()

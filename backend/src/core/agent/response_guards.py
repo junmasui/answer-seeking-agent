@@ -16,6 +16,7 @@ def check_output_with_nemo(state: GraphState):
 
     Returns:
         dict: Decision for next node to call
+
     """
     logger.info('---CHECK RESPONSE WITH NEMO GUARDRAILS---')
     question = state.question
@@ -38,6 +39,7 @@ def check_output_with_presidio(state: GraphState):
 
     Returns:
         dict: Decision for next node to call
+
     """
     logger.info('---CHECK RESPONSE WITH PRESIDIO---')
     generation = state.answer

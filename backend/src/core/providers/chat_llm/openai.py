@@ -24,6 +24,7 @@ def get_chat_llm() -> BaseChatModel:
 
     Returns:
         BaseChatModel: A cached instance of the ChatOpenAI model.
+
     """
     llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)
 
@@ -40,6 +41,7 @@ def ping_chat_llm() -> PingResult:
     Returns:
         PingResult: An object containing the status (good/bad), a message,
                     and an optional error if the ping failed.
+
     """
     try:
         llm = get_chat_llm()

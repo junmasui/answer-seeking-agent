@@ -1,4 +1,6 @@
 """
+Defines Pydantic models for authentication and user representation.
+
 See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """

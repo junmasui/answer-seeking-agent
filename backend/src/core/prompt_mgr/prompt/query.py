@@ -154,6 +154,7 @@ def _build_query_filter(name: Optional[str], status: Optional[AgentPromptStatus]
         list: List of SQLAlchemy WHERE clause conditions that can be combined
               with AND operator for filtering DbAgentPrompt records.
               Returns empty list if no filters are specified.
+
     """
     where = []
     if name is not None:
@@ -181,6 +182,7 @@ def _build_order_by(sort_by: Optional[list] = None):
     Raises:
         TypeError: If sort_by is not a list or tuple
         ValueError: If sort_by is empty or contains unknown field names
+
     """
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]

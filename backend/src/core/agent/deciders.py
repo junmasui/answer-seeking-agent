@@ -1,5 +1,3 @@
-"""See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state"""
-
 import logging
 
 from core.agent.agent_state import GraphState
@@ -18,6 +16,7 @@ def check_if_safe_input(state: GraphState):
 
     Returns:
         str: Binary decision for next node to call
+
     """
     logger.info('---ASSESS USER INPUT---')
 
@@ -45,6 +44,7 @@ def gather_relevant_documents(state: GraphState):
 
     Returns:
         state updates (dict): Updates with relevant documents
+
     """
     logger.info('---CHECK DOCUMENT RELEVANCE TO QUESTION---')
 
@@ -79,6 +79,7 @@ def check_for_relevant_documents(state: GraphState):
 
     Returns:
         str: Binary decision for next node to call
+
     """
     logger.info('---ASSESS GRADED DOCUMENTS---')
 
@@ -105,6 +106,7 @@ def check_response_quality(state: GraphState):
 
     Returns:
         str: Decision for next node to call
+
     """
     grade = state.answer_addresses_question
 

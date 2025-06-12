@@ -86,6 +86,7 @@ class AuthLibrarySettings(BaseSettings):
         Note:
             The TOML file path is determined by the CONFIG_TOML_FILE environment
             variable, defaulting to './config.toml' if not specified.
+
         """
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
@@ -144,5 +145,6 @@ def get_lib_config():
         after the first call. Changes to environment variables or configuration
         files after the first call will not be reflected unless the application
         is restarted.
+
     """
     return AuthLibrarySettings()

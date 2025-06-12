@@ -16,6 +16,7 @@ def check_input_with_nemo(state: GraphState):
 
     Returns:
         dict: Decision for next node to call
+
     """
     logger.info('---CHECK INPUT WITH NEMO GUARDRAILS---')
     question = state.question
@@ -36,6 +37,7 @@ def check_input_with_presidio(state: GraphState):
 
     Returns:
         dict: Decision for next node to call
+
     """
     logger.info('---CHECK INPUT WITH PRESIDIO---')
     question = state.question

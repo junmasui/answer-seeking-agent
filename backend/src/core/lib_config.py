@@ -150,5 +150,6 @@ def get_lib_config():
 
     Returns:
         Settings: The global configuration instance containing all app settings.
+
     """
     return LibrarySettings()

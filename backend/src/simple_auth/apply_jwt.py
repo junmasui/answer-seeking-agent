@@ -1,4 +1,6 @@
 """
+Provides JWT (JSON Web Token) authentication and authorization for FastAPI applications.
+
 See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
@@ -153,6 +155,7 @@ async def get_current_user(
 def get_scoped_current_user(scope: str, missing_ok: bool = False):
     """
     Create a FastAPI dependency that validates user authentication and authorization scope.
+
     Supports both JWT Bearer tokens and X-API-Key header.
 
     Returns a dependency function that checks if the user has the required scope. If missing_ok is

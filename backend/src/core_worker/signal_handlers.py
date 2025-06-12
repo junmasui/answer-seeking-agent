@@ -20,7 +20,11 @@ logger = logging.getLogger(__name__)
 
 @after_setup_task_logger.connect
 def setup_task_logger(task_logger, *_args, **_kwargs):
-    """See: https://celery.school/custom-celery-task-logger"""
+    """
+    Configures the task logger format.
+
+    See: https://celery.school/custom-celery-task-logger
+    """
     for handler in task_logger.handlers:
         handler.setFormatter(
             TaskFormatter('%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,7 +34,7 @@ def setup_task_logger(task_logger, *_args, **_kwargs):
 @worker_init.connect
 def handle_worker_init(**_kwargs):
     """
-    Handle worker initialization signal.
+    Handles worker initialization.
 
     Sets up logging monitor, metrics collection, configures sender as worker, and sends startup
     signal when the main worker process initializes.
@@ -49,7 +53,7 @@ def handle_worker_init(**_kwargs):
 @worker_ready.connect
 def handle_worker_ready(**_kwargs):
     """
-    Handle worker ready signal.
+    Handles worker ready signal.
 
     Called when the worker is ready to receive tasks. Logs the worker ready status for monitoring
     purposes.

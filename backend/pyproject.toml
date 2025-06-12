@@ -89,9 +89,15 @@ docstring-code-format = true
 skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "C"]
+select = ["E", "F", "W", "C", "D"]
 ignore = [
-  "D212"  # Suppress the rule that multi-line docstring summary should start at the first line
+  "D100", # Suppress D100 Missing docstring in public module
+  "D103", # Suppress D103 Missing docstring in public function
+  "D104", # Suppress D104 Missing docstring in public package
+  "D203", # Suppress D203 Use a blank line to separate the docstring from the class definition
+  "D212", # Supress D212 Multi-line docstring summary should start at the first line
+  "D401", # Suppres D401 First line of docstring should be in imperative mood
+  "D404" # Suppress D404 First word of the docstring should not be "This"
 ]
 
 [tool.ruff.lint.pycodestyle]
