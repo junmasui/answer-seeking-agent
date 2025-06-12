@@ -41,6 +41,7 @@ def grade_document_relevancies(state: GraphState):
 
     Returns:
         state updates (dict): Updates with relevant documents
+
     """
     logger.info('---CHECK DOCUMENT RELEVANCE TO QUESTION---')
 

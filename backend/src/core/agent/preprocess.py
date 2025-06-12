@@ -16,6 +16,7 @@ def add_input_to_history(state: GraphState):
 
     Returns:
         state updates (dict)
+
     """
     logger.info('---ADD INPUT TO CHAT HISTORY---')
 

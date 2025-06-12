@@ -1,4 +1,6 @@
 """
+Handles the creation of JWT access tokens for a simulated authentication service.
+
 See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """

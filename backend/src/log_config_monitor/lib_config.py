@@ -81,5 +81,6 @@ def get_lib_config():
     Returns:
         Settings: The application configuration object containing JWT secrets,
                  database connections, API keys, and other runtime settings.
+
     """
     return LibrarySettings()

@@ -42,14 +42,16 @@ pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 def redo_document_retrieval(_state: GraphState):
     """
     Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should
-    be redone."""
+    be redone.
+    """
     return {'answer_grade': ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL}
 
 
 def redo_answer_generation(_state: GraphState):
     """
     Set the answer_grade to 'redo answer generation' to indicate that answer generation should be
-    redone."""
+    redone.
+    """
     return {'answer_grade': ResponseOverallGrade.REDO_ANSWER_GENERATION}
 
 
@@ -77,6 +79,7 @@ def get_input_grade(state: GraphState):
 
     Returns:
         The input overall grade.
+
     """
     logger.info('---Extracting Input Grade: %s---', state.input_overall_grade)
     return state.input_overall_grade
@@ -94,6 +97,7 @@ def get_retrieval_grade_in_subgraph(state: GraphState):
 
     Returns:
         The retrieval grade or a default value.
+
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
     if state.retrieval_grade in [RetrievalOverallGrade.NO_RELEVANT_DOCS]:
@@ -113,6 +117,7 @@ def get_retrieval_grade(state: GraphState):
 
     Returns:
         The retrieval grade or a default value.
+
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
     if state.retrieval_grade in [RetrievalOverallGrade.REJECT_RETRIEVAL, RetrievalOverallGrade.RELEVANT_DOCS_FOUND]:
@@ -132,6 +137,7 @@ def get_answer_grade_in_subgraph(state: GraphState):
 
     Returns:
         The answer grade or a default value.
+
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
     if state.answer_grade in [ResponseOverallGrade.REDO_ANSWER_GENERATION]:
@@ -151,6 +157,7 @@ def get_answer_grade(state: GraphState):
 
     Returns:
         The answer grade or a default value.
+
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
     if state.answer_grade in [
@@ -240,6 +247,7 @@ def _build_input_guard_subgraph():
 
     Returns:
         A StateGraph instance for the input guard subgraph.
+
     """
     input_guard_subgraph = StateGraph(GraphState)
 
@@ -271,6 +279,7 @@ def _build_retrieval_guard_subgraph():
 
     Returns:
         A StateGraph instance for the retrieval guard subgraph.
+
     """
     retrieval_guard_subgraph = StateGraph(GraphState)
 
@@ -307,6 +316,7 @@ def _build_retrieval_subgraph():
 
     Returns:
         A StateGraph instance for the retrieval subgraph.
+
     """
     # Build subgraph for retrieved document guards.
     retrieval_guard_subgraph = _build_retrieval_guard_subgraph()
@@ -342,6 +352,7 @@ def _build_response_guard_subgraph():
 
     Returns:
         A StateGraph instance for the response guard subgraph.
+
     """
     response_guard_subgraph = StateGraph(GraphState)
 
@@ -383,6 +394,7 @@ def _build_response_subgraph():
 
     Returns:
         A StateGraph instance for the response generation subgraph.
+
     """
     # Build subgraph for response guards.
     response_guard_subgraph = _build_response_guard_subgraph()
@@ -416,6 +428,7 @@ def get_agent_graph() -> Pregel:
 
     Returns:
         A compiled Pregel agent graph.
+
     """
     uncompiled_graph = _get_uncompiled_agent_graph()
 

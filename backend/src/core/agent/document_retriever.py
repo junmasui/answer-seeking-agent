@@ -29,6 +29,7 @@ def query_documents(state: GraphState):
 
     Returns:
         state updates (dict): Updates with retrieved documents
+
     """
     logger.info('---RETRIEVE---')
     question = state.question

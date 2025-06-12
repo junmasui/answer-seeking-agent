@@ -1,4 +1,6 @@
 """
+Defines a simple FastAPI application for user authentication and token management.
+
 See: https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
 and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """

@@ -21,7 +21,8 @@ def documents_startup(sender):
 def documents_reset(sender):
     """
     Drop and recreate document-related database tables and predefined data when a reset event is
-    triggered."""
+    triggered.
+    """
     if sender.is_worker:
         return
 

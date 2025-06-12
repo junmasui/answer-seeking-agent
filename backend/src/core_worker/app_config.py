@@ -103,5 +103,6 @@ def get_app_config():
         Settings: The singleton configuration object containing Celery worker settings,
                  database connections, Redis DSN, task queues, file paths, and other
                  application configuration parameters.
+
     """
     return ApplicationSettings()

@@ -49,6 +49,7 @@ def generate_answer(state: GraphState):
 
     Returns:
         dict: Updates to the graph state with the generated answer and citations
+
     """
     logger.info('---GENERATE ANSWER---')
     question = state.question

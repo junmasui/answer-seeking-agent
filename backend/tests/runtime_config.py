@@ -106,5 +106,6 @@ def get_test_config():
 
     Returns:
         Settings: The singleton configuration object containing all application settings.
+
     """
     return RuntimeSettings()

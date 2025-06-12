@@ -26,7 +26,8 @@ def _get_doc_set(doc_set_uuid):
 def _get_chunk_file_path(doc_set, partial_doc_path, chunk_index):
     """
     Generate the file path for a document chunk based on the document set, partial path, and
-    chunk index."""
+    chunk index.
+    """
     chunk_root_dir = get_lib_config().chunk_root_dir
     chunk_root_dir = Path(chunk_root_dir)
     if chunk_root_dir.is_absolute():

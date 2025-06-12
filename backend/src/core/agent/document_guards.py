@@ -16,6 +16,7 @@ def check_retrieval_with_nemo(state: GraphState):
 
     Returns:
         dict: Decision for next node to call
+
     """
     logger.info('---CHECK RETRIEVED DOCUMENTS WITH NEMO GUARDRAILS---')
     documents = state.documents
@@ -50,6 +51,7 @@ def check_retrieval_with_presidio(state: GraphState):
 
     Returns:
         dict: Decision for next node to call
+
     """
     logger.info('---CHECK RETRIEVED DOCUMENTS WITH PRESIDIO---')
     documents = state.documents
