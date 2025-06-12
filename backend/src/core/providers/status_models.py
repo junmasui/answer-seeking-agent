@@ -1,5 +1,5 @@
 import enum
-from typing import Annotated, Optional
+from typing import Annotated, Dict, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -19,6 +19,10 @@ class PingResult(BaseModel):
 
     status: Annotated[PingStatus, Field(description='The status of the ping attempt.')]
     message: Annotated[str, Field(description='A message describing the ping result.')]
+    statistics: Annotated[
+        Optional[Dict[str, Union[int, float]]],
+        Field(default=None, description='Optional statistics about the ping attempt.'),
+    ]
     error: Annotated[
         Optional[Exception], Field(default=None, description='An optional exception if an error occurred.')
     ]

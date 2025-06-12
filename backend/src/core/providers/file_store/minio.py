@@ -43,6 +43,23 @@ def get_s3_directory(dir_name: str) -> S3Path:
     return dir_path
 
 
+def _count_files_in_tree(dir_name: str) -> int:
+    """
+    Counts the total number of files in a given S3 directory and its subdirectories.
+
+    Args:
+        dir_name: The name of the S3 directory.
+
+    Returns:
+        The total count of files.
+    """
+    s3_dir = get_s3_directory(dir_name)
+    file_count = 0
+    for _root, _dirs, files in s3_dir.walk():
+        file_count += len(files)
+    return file_count
+
+
 def ping_file_store() -> PingResult:
     """
     Pings the MinIO file store to check its availability and permissions.
@@ -53,7 +70,18 @@ def ping_file_store() -> PingResult:
         bucket = get_s3_bucket()
         # Attempt to list objects in the bucket root as a basic check
         list(bucket.iterdir())
-        return PingResult(status=PingStatus.GOOD, message='MinIO connection successful.')
+
+        chunk_root_dir = get_lib_config().chunk_root_dir
+        chunk_file_count = _count_files_in_tree(chunk_root_dir)
+
+        doc_root_dir = get_lib_config().doc_root_dir
+        doc_file_count = _count_files_in_tree(doc_root_dir)
+
+        return PingResult(
+            status=PingStatus.GOOD,
+            message='MinIO connection successful.',
+            statistics={'chunk_file_count': chunk_file_count, 'document_file_count': doc_file_count},
+        )
     except Exception as e:
         logger.error('Error pinging MinIO', exc_info=e)
         return PingResult(status=PingStatus.BAD, message='MinIO connection failed.', error=str(e))

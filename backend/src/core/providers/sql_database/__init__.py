@@ -12,6 +12,5 @@ __all__ = [
 ]
 
 # For now, there is only one database provider
-from ..status_models import PingResult, PingStatus
 from .base import DataDomain
 from .postgres import get_connection_pool, get_connection_str, get_engine, get_sessionmaker, ping_sql_database

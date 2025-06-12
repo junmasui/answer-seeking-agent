@@ -235,7 +235,14 @@ def ping_vector_store() -> PingResult:
         if client.is_live():
             # Additionally, check if the collection exists as a more thorough check
             if client.collections.exists(_COLLECTION_NAME):
-                return PingResult(status=PingStatus.GOOD, message='Weaviate server is live and collection exists.')
+                collection = client.collections.get(_COLLECTION_NAME)
+                count_response = collection.aggregate.over_all(total_count=True)
+                count = count_response.total_count
+                return PingResult(
+                    status=PingStatus.GOOD,
+                    message=f"Weaviate server is live and collection '{_COLLECTION_NAME}' exists with {count} records.",
+                    statistics={'vector_count': count},
+                )
             else:
                 return PingResult(
                     status=PingStatus.BAD,

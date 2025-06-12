@@ -2,6 +2,7 @@ import logging
 
 import torch
 
+from ..providers.chat_llm import ping_chat_llm  # Added import
 from ..providers.file_store import ping_file_store
 from ..providers.sql_database import DataDomain, ping_sql_database
 from ..providers.status_models import PingResult, PingStatus
@@ -17,6 +18,7 @@ def deeper_status_check():
         'sql_database': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
         'file_store': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
         'vector_store': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),
+        'chat_llm': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),  # Added chat_llm
     }
 
     # Ping PostgreSQL 'answers' schema
@@ -48,6 +50,16 @@ def deeper_status_check():
         logger.error('Error during vector store health check', exc_info=e)
         system_health['vector_store'] = PingResult(
             status=PingStatus.BAD, message='Vector store check failed unexpectedly.', error=str(e)
+        ).model_dump()
+
+    # Ping Chat LLM Provider
+    try:
+        chat_llm_status = ping_chat_llm()
+        system_health['chat_llm'] = chat_llm_status.model_dump()
+    except Exception as e:
+        logger.error('Error during Chat LLM provider health check', exc_info=e)
+        system_health['chat_llm'] = PingResult(
+            status=PingStatus.BAD, message='Chat LLM provider check failed unexpectedly.', error=str(e)
         ).model_dump()
 
     return system_health
