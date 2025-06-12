@@ -15,8 +15,16 @@ from ..status_models import PingResult, PingStatus
 #
 @cache
 def get_chat_llm() -> BaseChatModel:
-    """"""
+    """
+    Initializes and returns a cached instance of the ChatOpenAI model.
 
+    This function configures the ChatOpenAI model with 'gpt-4o-mini' and
+    a temperature of 0 for deterministic outputs. The instance is cached
+    to avoid reinitialization on subsequent calls.
+
+    Returns:
+        BaseChatModel: A cached instance of the ChatOpenAI model.
+    """
     llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)
 
     return llm
