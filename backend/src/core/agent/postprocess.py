@@ -16,6 +16,7 @@ def add_response_to_history(state: GraphState):
 
     Returns:
         state updates (dict)
+
     """
     logger.info('---ADD RESPONSE TO HISTORY---')
     answer = state.answer

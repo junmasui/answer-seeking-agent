@@ -13,6 +13,8 @@ from .base import CamelModel
 
 
 class DocumentStatus(str, enum.Enum):
+    """Enumeration for the status of a document."""
+
     UPLOADING = 'uploading'
     UPLOADED = 'uploaded'
     QUEUING = 'queuing'
@@ -62,23 +64,23 @@ class DocumentList(CamelModel):
 # Operator Models
 #
 class DocumentUpdateRequest(CamelModel):
-    """Represents a request to update a document, typically to change its document set."""
+    """Represents a request to update a document."""
 
     document_set_id: Optional[UUID] = Field(description='Document set UUID.')
 
 
 class BulkDeleteRequestBody(CamelModel):
-    """
-    Represents the request body for bulk deleting documents which are specified with a list of
-    document UUIDs."""
+    """Represents a request to delete multiple documents."""
 
     doc_uuids: list[UUID]
 
 
 class DocumentUploadFormData(CamelModel):
     """
-    Represents the form data for uploading a document, including details about the document set,
-    chunks, and source."""
+    Represents the form data for uploading a document.
+
+    The form data includes details about the document set, chunks, and source.
+    """
 
     document_set_id: UUID
     total_chunks: int

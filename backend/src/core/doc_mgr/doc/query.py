@@ -169,6 +169,7 @@ def _build_query_filter(
     Returns:
         list: List of SQLAlchemy WHERE clause conditions that can be used
               with and_() or applied individually to a query.
+
     """
     where = []
     if doc_set_id is not None:
@@ -205,6 +206,7 @@ def _build_order_by(sort_by: Optional[list] = None):
     Raises:
         TypeError: If sort_by is not a list or tuple
         ValueError: If sort_by is empty or contains unknown field names
+
     """
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]

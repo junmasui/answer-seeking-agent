@@ -35,6 +35,7 @@ Environment Variables:
 Dependencies:
     - pydantic: For data validation and settings management
     - pydantic-settings: For configuration source management
+
 """
 
 import os
@@ -79,6 +80,7 @@ class ApplicationSettings(BaseSettings):
     Configuration:
         The class uses SettingsConfigDict with env_file=None and toml_file=None since
         environment files are assumed to be loaded in an earlier initialization step.
+
     """
 
     # We assume that the .env files were loaded into the environment
@@ -124,6 +126,7 @@ class ApplicationSettings(BaseSettings):
         Note:
             The dotenv_settings source is not included in the returned tuple since
             .env files are assumed to be pre-loaded into the environment.
+
         """
         # We assume that the .env files were loaded into the environment
         # on an earlier step.
@@ -177,5 +180,6 @@ def get_app_config():
         Due to caching, configuration changes made after the first call to this
         function will not be reflected until the cache is cleared or the
         application is restarted.
+
     """
     return ApplicationSettings()

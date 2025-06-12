@@ -46,6 +46,7 @@ def rewrite_question(state: GraphState):
 
     Returns:
         dict: Updates to the graph state with the rewritten question
+
     """
     logger.info('---TRANSFORM QUERY---')
     question = state.question

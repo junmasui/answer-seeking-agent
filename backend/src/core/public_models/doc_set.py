@@ -13,6 +13,8 @@ from .base import CamelModel
 
 
 class DocumentSetStatus(str, enum.Enum):
+    """Enumeration for the status of a document set."""
+
     ACTIVE = 'active'
     CLOSED = 'closed'
     FROZEN = 'frozen'
@@ -21,8 +23,11 @@ class DocumentSetStatus(str, enum.Enum):
 
 class DocumentSet(CamelModel):
     """
-    Represents a set of documents, including its status and properties like default status for
-    new documents and public visibility."""
+    Represent metadata regarding a set of documents.
+
+    The metadata includes its status and properties like default status for new documents and public
+    visibility.
+    """
 
     id: UUID
     name: str = Field(description='Name of document set.')
@@ -32,7 +37,11 @@ class DocumentSet(CamelModel):
 
 
 class DocumentSetStats(CamelModel):
-    """Provides statistics about document sets, such as the total count and last update time."""
+    """
+    Provides statistics about document sets.
+
+    The statistics include the total count and last update time.
+    """
 
     document_set_count: int = None
     table_updated_time: Optional[datetime] = None
@@ -44,7 +53,11 @@ class DocumentSetStats(CamelModel):
 
 
 class DocumentSetList(CamelModel):
-    """Represents a list of document sets, along with optional count and update time information."""
+    """
+    Represents list of document sets.
+
+    Additional information is the optional total count and update time information.
+    """
 
     document_sets: list[DocumentSet]
     document_set_count: Optional[int] = None
@@ -57,7 +70,7 @@ class DocumentSetList(CamelModel):
 
 
 class DocumentSetAddRequest(CamelModel):
-    """Represents a request to add a new document set, specifying its name and properties."""
+    """Represents a request to add a new document set."""
 
     name: str = Field(description='Name of document set.')
     is_new_doc_default: bool = Field(description='True if default document set for new documents')
@@ -65,9 +78,7 @@ class DocumentSetAddRequest(CamelModel):
 
 
 class DocumentSetUpdateRequest(CamelModel):
-    """
-    Represents a request to update an existing document set, allowing modification of its name
-    and properties."""
+    """Represents a request to update an existing document set."""
 
     name: Optional[str] = Field(description='Name of document set.', default=None)
     is_new_doc_default: Optional[bool] = Field(

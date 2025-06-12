@@ -40,6 +40,7 @@ def grade_hallucination(state: GraphState):
 
     Returns:
         str: Decision for next node to call
+
     """
     logger.info('---CHECK HALLUCINATIONS---')
 

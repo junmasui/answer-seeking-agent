@@ -64,4 +64,11 @@ def get_chat_llm() -> BaseChatModel:
 
 
 def ping_chat_llm():
+    """
+    Ping the HuggingFace chat model.
+
+    Raises:
+        NotImplementedError: This function is not yet implemented.
+
+    """
     raise NotImplementedError('Ping not implemented for HuggingFace')

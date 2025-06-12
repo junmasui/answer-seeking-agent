@@ -55,8 +55,13 @@ def reset_data_handler(receiver):
 
 class Sender(BaseModel):
     """
-    Represents the sender of application signals, tracking whether it originates from a worker
-    process."""
+    Represents the sender of application signals.
+
+    Attributes:
+        is_worker: A boolean indicating whether the signal originates from a worker process.
+                   Defaults to False.
+
+    """
 
     is_worker: bool = False
 
