@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 def _get_api_keys():
+    """
+    Retrieves and constructs a dictionary of static API keys and associated users.
+
+    This function reads API key configurations and creates User objects for each valid key,
+    storing them in a dictionary where keys are the API keys and values are User objects.
+
+    Returns:
+        dict: A dictionary mapping API keys (str) to User objects.
+              Returns an empty dictionary if no valid API keys are configured.
+    """
     config = get_app_config()
 
     static_api_keys = {}
