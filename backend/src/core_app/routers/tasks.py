@@ -4,9 +4,8 @@ from typing import Annotated
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 
-from simple_auth import Scope, User, get_scoped_current_user
-
 from ..app_config import get_app_config
+from ..auth import Scope, User, get_scoped_current_user
 
 logger = logging.getLogger(__name__)
 

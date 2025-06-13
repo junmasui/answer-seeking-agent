@@ -41,6 +41,7 @@ Dependencies:
 import os
 from functools import cache
 from pathlib import Path
+from typing import Optional
 
 from pydantic import Field, StringConstraints
 
@@ -154,6 +155,11 @@ class ApplicationSettings(BaseSettings):
 
     application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
 
+
+    static_api_key: Optional[str] = Field(default='12345', validation_alias='APPLICATION_API_KEY')
+    static_api_key_user_id: Optional[str] = Field(default='api@example.com', validation_alias='APPLICATION_API_USER_ID')
+    static_api_key_username: Optional[str] = Field(default='api@example.com', validation_alias='APPLICATION_API_USER_NAME')
+    static_api_key_scope: Optional[str] = Field(default='admin', validation_alias='APPLICATION_API_USER_SCOPE')
 
 @cache
 def get_app_config():

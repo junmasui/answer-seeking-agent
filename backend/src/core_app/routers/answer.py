@@ -6,7 +6,8 @@ from fastapi.responses import Response
 
 from core import get_mermaid_graph, seek_answer
 from core.public_models import Answer, AnswerRequestBody
-from simple_auth import Scope, User, get_current_user, get_scoped_current_user
+
+from ..auth import Scope, User, get_scoped_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,9 @@ async def handler_question(
 
 
 @router.get('/mermaid')
-async def handle_mermaid_graph(_current_user: Annotated[User, Depends(get_current_user)] = None):
+async def handle_mermaid_graph(
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN, missing_ok=True))] = None,
+):
     """
     Generate and return a Mermaid diagram representation of the agent graph.
 

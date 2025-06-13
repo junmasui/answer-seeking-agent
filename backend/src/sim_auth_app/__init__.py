@@ -11,7 +11,9 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
-from simple_auth import Token, User, create_token_from_login, get_current_user
+from .apply_jwt import get_current_user
+from .models import Token, User
+from .sim_create_jwt import create_token_from_login
 
 logger = logging.getLogger(__name__)
 

@@ -25,9 +25,9 @@ from core.public_models import (
     IngestRequestBody,
 )
 from core_worker import ingest_task
-from simple_auth import Scope, User, get_scoped_current_user
 
 from ..app_config import get_app_config
+from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)

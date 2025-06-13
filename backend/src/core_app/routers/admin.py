@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, Query
 
 from core.signals import send_reset_data
 from core_worker import reset_data_task
-from simple_auth import Scope, User, get_scoped_current_user
 
 from ..app_config import get_app_config
+from ..auth import Scope, User, get_scoped_current_user
 
 logger = logging.getLogger(__name__)
 
