@@ -56,6 +56,8 @@ secrets:
 
   answers_dev_env:
     file: ./secrets-dev.env
+  answers_api_key_dev_env:
+    file: ./secrets/answers-dev.api-key.secrets.env
   answers_jwt_dev_env:
     file: ./secrets/answers-dev.jwt.secrets.env
   answers_minio_dev_env:
@@ -69,6 +71,8 @@ secrets:
 
   answers_test_env:
     file: ./secrets-test.env
+  answers_api_key_test_env:
+    file: ./secrets/answers-test.api-key.secrets.env
   answers_jwt_test_env:
     file: ./secrets/answers-test.jwt.secrets.env
   answers_minio_test_env:

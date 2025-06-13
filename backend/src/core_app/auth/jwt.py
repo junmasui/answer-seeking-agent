@@ -40,7 +40,7 @@ def _decode_token_data(token: str):
         #   sub (subject): An identifier for the resource owner, or for the client in the case
         #     of a client credentials grant.
         # Claims that SHOULD be in the token:
-        #   scope: If the `scope` parameter was present in the authorization request. 
+        #   scope: If the `scope` parameter was present in the authorization request.
         userid: str = payload.get('sub')
         scope: str = payload.get('scope')
         if userid is None:

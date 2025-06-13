@@ -117,6 +117,7 @@ services:
       - backend-test-staging-1:/staging
     secrets:
       - answers_test_env
+      - answers_api_key_test_env
       - answers_jwt_test_env
       - answers_minio_test_env
       - answers_postgres_test_env

@@ -39,10 +39,10 @@ Dependencies:
 """
 
 import os
+import uuid
 from functools import cache
 from pathlib import Path
 from typing import Optional
-import uuid
 
 from pydantic import Field, StringConstraints
 
@@ -167,7 +167,6 @@ class ApplicationSettings(BaseSettings):
     static_api_key_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_3')
     static_api_key_user_id_3: Optional[uuid.UUID] = Field(default='', validation_alias='APPLICATION_API_KEY_USER_ID_3')
     static_api_key_scope_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_3')
-
 
 
 @cache

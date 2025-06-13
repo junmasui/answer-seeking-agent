@@ -8,13 +8,13 @@ from core import list_document_sets
 from core.doc_mgr import add_document_set, delete_document_set, get_document_set_statistics, update_document_set
 from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
 
-from ..app_config import get_app_config
 from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.get('/', response_model=DocumentSetList)
 async def handle_list_doc_sets(
@@ -40,9 +40,7 @@ async def handle_list_doc_sets(
 @router.post('/')
 async def handle_single_insert(
     body: Annotated[DocumentSetAddRequest, Body(...)],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None,
 ):
     """Add document set."""
     user_id = current_user.userid if current_user is not None else None
@@ -58,9 +56,7 @@ async def handle_single_insert(
 
 
 @router.get('/stats', response_model=DocumentSetStats)
-async def handle_table_stats(
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None,
-):
+async def handle_table_stats(_current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None):
     """Returns statistics about tracking table."""
     return get_document_set_statistics()
 
@@ -69,9 +65,7 @@ async def handle_table_stats(
 async def handle_single_update(
     body: Annotated[DocumentSetUpdateRequest, Body(...)],
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
@@ -89,9 +83,7 @@ async def handle_single_update(
 @router.delete('/{doc_set_uuid}')
 async def handle_single_delete(
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
-    _current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE))
-    ] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     _user_id = _current_user.userid if _current_user is not None else None

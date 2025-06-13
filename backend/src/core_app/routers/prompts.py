@@ -9,13 +9,13 @@ from core.public_models import AgentPromptAddRequest, AgentPromptList, AgentProm
 from core.public_models.base import OwnerType
 from core.public_models.prompt import AgentPromptStatus
 
-from ..app_config import get_app_config
 from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.get('/', response_model=AgentPromptList)
 async def handle_list_prompts(
@@ -41,9 +41,7 @@ async def handle_list_prompts(
 @router.post('/')
 async def handle_single_insert(
     body: Annotated[AgentPromptAddRequest, Body(...)],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Add document set."""
     status = AgentPromptStatus.ACTIVE
@@ -74,9 +72,7 @@ async def handle_table_stats(
 async def handle_single_update(
     body: Annotated[AgentPromptUpdateRequest, Body(...)],
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
@@ -96,9 +92,7 @@ async def handle_single_update(
 @router.delete('/{prompt_uuid}')
 async def handle_single_delete(
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
-    _current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))
-    ] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     _user_id = _current_user.userid if _current_user is not None else None
