@@ -9,7 +9,6 @@ from core import status_check
 from core_worker import get_worker_logger_tree
 from log_config_monitor import dump_logger_tree
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
