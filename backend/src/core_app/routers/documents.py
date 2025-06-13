@@ -25,16 +25,13 @@ from core.public_models import (
     IngestRequestBody,
 )
 from core_worker import ingest_task
-from simple_auth import Scope, User, get_scoped_current_user
 
-from ..app_config import get_app_config
+from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 
 # Dependency function to gather form data into the Pydantic model
@@ -70,7 +67,7 @@ async def handle_list_files(
             description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None,
 ):
     """Returns a list of documents."""
     parsed_sort_by = parse_sort_by(sort_by)
@@ -81,9 +78,7 @@ async def handle_list_files(
 
 
 @router.get('/stats', response_model=DocumentStats)
-async def handle_table_stats(
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
-):
+async def handle_table_stats(_current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None):
     """Returns statistics about tracking table."""
     return get_document_statistics()
 
@@ -92,9 +87,7 @@ async def handle_table_stats(
 async def handle_upload(
     file: UploadFile,
     form_data: Annotated[DocumentUploadFormData, Depends(get_upload_form_data)],  # Use the dependency
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None,
 ):
     """
     Upload a file.
@@ -142,9 +135,7 @@ async def handle_upload(
 async def handle_single_update(
     doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
     body: Annotated[Optional[DocumentUpdateRequest], Body()] = None,
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None,
 ):
     """Update the file specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
@@ -157,9 +148,7 @@ async def handle_single_update(
 @router.delete('/{doc_uuid}')
 async def handle_single_delete(
     doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     _user_id = current_user.userid if current_user is not None else None
@@ -174,9 +163,7 @@ async def handle_single_delete(
 @router.post('/{doc_uuid}/ingest')
 async def handle_single_ingest(
     doc_uuid: Annotated[uuid.UUID, Path(..., discription='Document UUID')],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None,
 ):
     """Ingest the file specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
@@ -191,9 +178,7 @@ async def handle_single_ingest(
 @router.post('/ingest')
 async def handle_ingest(
     body: Annotated[Union[IngestRequestBody, None], Body()] = None,
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_INGEST, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_INGEST))] = None,
 ):
     """Ingest the files specified in the list of document UUIDs."""
     user_id = current_user.userid if current_user is not None else None
@@ -223,9 +208,7 @@ async def handle_ingest(
 @router.post('/delete')
 async def handle_delete(
     body: Optional[BulkDeleteRequestBody] = None,
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_WRITE))] = None,
 ):
     """Delete the files specified in the list of document UUIDs."""
     _user_id = current_user.userid if current_user is not None else None

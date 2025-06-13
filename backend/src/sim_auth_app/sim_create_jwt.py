@@ -15,7 +15,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .lib_config import get_lib_config
+from .app_config import get_lib_config
 from .models import Scope, Token
 from .users import authenticate_user
 

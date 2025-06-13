@@ -115,6 +115,7 @@ services:
       - backend-staging-1:/staging
     secrets:
       - answers_dev_env
+      - answers_api_key_dev_env
       - answers_jwt_dev_env
       - answers_minio_dev_env
       - answers_postgres_dev_env

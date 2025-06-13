@@ -9,13 +9,9 @@ from core import status_check
 from core_worker import get_worker_logger_tree
 from log_config_monitor import dump_logger_tree
 
-from ..app_config import get_app_config
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 
 @router.get('')  # Empty path handles no trailing slash without using 307 redirect.
