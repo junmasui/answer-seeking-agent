@@ -17,6 +17,7 @@ def _get_api_keys():
     Returns:
         dict: A dictionary mapping API keys (str) to User objects.
               Returns an empty dictionary if no valid API keys are configured.
+
     """
     config = get_app_config()
 
