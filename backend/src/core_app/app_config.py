@@ -39,8 +39,10 @@ Dependencies:
 """
 
 import os
+import uuid
 from functools import cache
 from pathlib import Path
+from typing import Optional
 
 from pydantic import Field, StringConstraints
 
@@ -150,9 +152,21 @@ class ApplicationSettings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    jwt_write_claim_missing_ok: bool = Field(default=False, validation_alias='JWT_WRITE_CLAIM_MISSING_OK')
-
     application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
+
+    disable_static_api_keys: bool = Field(default=False, validation_alias='DISABLE_APPLICATION_API_KEYS')
+
+    static_api_key_1: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_1')
+    static_api_key_user_id_1: Optional[uuid.UUID] = Field(default='', validation_alias='APPLICATION_API_KEY_USER_ID_1')
+    static_api_key_scope_1: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_1')
+
+    static_api_key_2: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_2')
+    static_api_key_user_id_2: Optional[uuid.UUID] = Field(default='', validation_alias='APPLICATION_API_KEY_USER_ID_2')
+    static_api_key_scope_2: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_2')
+
+    static_api_key_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_3')
+    static_api_key_user_id_3: Optional[uuid.UUID] = Field(default='', validation_alias='APPLICATION_API_KEY_USER_ID_3')
+    static_api_key_scope_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_3')
 
 
 @cache

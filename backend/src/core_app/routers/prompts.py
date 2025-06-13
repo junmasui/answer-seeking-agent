@@ -8,16 +8,13 @@ from core.prompt_mgr import add_prompt, delete_prompt, get_prompt_statistics, li
 from core.public_models import AgentPromptAddRequest, AgentPromptList, AgentPromptStats, AgentPromptUpdateRequest
 from core.public_models.base import OwnerType
 from core.public_models.prompt import AgentPromptStatus
-from simple_auth import Scope, User, get_scoped_current_user
 
-from ..app_config import get_app_config
+from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
 
 
 @router.get('/', response_model=AgentPromptList)
@@ -33,7 +30,7 @@ async def handle_list_prompts(
             description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ))] = None,
 ):
     """Returns a list of document sets."""
     parsed_sort_by = parse_sort_by(sort_by)
@@ -44,9 +41,7 @@ async def handle_list_prompts(
 @router.post('/')
 async def handle_single_insert(
     body: Annotated[AgentPromptAddRequest, Body(...)],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Add document set."""
     status = AgentPromptStatus.ACTIVE
@@ -67,7 +62,7 @@ async def handle_single_insert(
 
 @router.get('/stats', response_model=AgentPromptStats)
 async def handle_table_stats(
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_prompt_statistics()
@@ -77,9 +72,7 @@ async def handle_table_stats(
 async def handle_single_update(
     body: Annotated[AgentPromptUpdateRequest, Body(...)],
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
-    current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
@@ -99,9 +92,7 @@ async def handle_single_update(
 @router.delete('/{prompt_uuid}')
 async def handle_single_delete(
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
-    _current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
-    ] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
     _user_id = _current_user.userid if _current_user is not None else None

@@ -13,7 +13,7 @@ from fastapi import Depends, Header, HTTPException, status  # Modified import
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
-from .lib_config import get_lib_config
+from .app_config import get_lib_config
 from .models import TokenData
 from .users import retrieve_user
 
