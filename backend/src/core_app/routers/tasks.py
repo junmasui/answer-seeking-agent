@@ -11,19 +11,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
-
-
 @router.get('/')
 async def handle_status(
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None,
 ):
     return {}
 
 
 @router.get('/{task_id}')
 def get_status(
-    task_id, _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN, missing_ok=True))] = None
+    task_id, _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None
 ):
     """Return the status of specified task."""
     task_result = AsyncResult(task_id)

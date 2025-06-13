@@ -6,17 +6,13 @@ and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 """
 
 import logging
-from typing import Annotated
 
 import jwt
-from fastapi import Depends, Header, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
-from core_app.auth.api_key import get_current_user_from_api_key
-
 from ..app_config import get_app_config
-from .models import TokenData, User
+from .error import raise_credentials_error
+from .models import User
 
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -26,13 +22,6 @@ logger = logging.getLogger(__name__)
 #
 # Use token
 #
-def raise_credentials_error():
-    """Raise an HTTP 401 Unauthorized error for invalid credentials."""
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Could not validate credentials',
-        headers={'WWW-Authenticate': 'Bearer'},
-    )
 
 
 def _decode_token_data(token: str):
@@ -46,15 +35,22 @@ def _decode_token_data(token: str):
         secret_key = get_app_config().application_jwt_secret
         payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
 
+        # JWT for OAuth 2 (RFC 7523)
+        # Claims that MUST be in the token:
+        #   sub (subject): An identifier for the resource owner, or for the client in the case
+        #     of a client credentials grant.
+        # Claims that SHOULD be in the token:
+        #   scope: If the `scope` parameter was present in the authorization request. 
         userid: str = payload.get('sub')
-        username: str = payload.get('email')
         scope: str = payload.get('scope')
-        if username is None:
-            raise_credentials_error()
-        token_data = TokenData(userid=userid, username=username, scope=scope)
+        if userid is None:
+            raise_credentials_error('Bearer')
+        scopes = scope.split(' ')
+
+        user = User(userid=userid, scope=scopes)
     except InvalidTokenError:
-        raise_credentials_error()
-    return token_data
+        raise_credentials_error('Bearer')
+    return user
 
 
 async def get_current_user_from_token(token: str):
@@ -67,13 +63,8 @@ async def get_current_user_from_token(token: str):
     if not token:
         return None
 
-    token_data = _decode_token_data(token)
-
-    user = User(userid=token_data.userid)
-
-    user.username = token_data.username
-    user.scopes = token_data.scope.split(' ')
+    user = _decode_token_data(token)
 
     if user is None:
-        raise_credentials_error()
+        raise_credentials_error('Bearer')
     return user

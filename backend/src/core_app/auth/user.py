@@ -8,13 +8,12 @@ and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 import logging
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 
 from .api_key import get_current_user_from_api_key
+from .error import raise_credentials_error
 from .jwt import get_current_user_from_token
-
-from ..app_config import get_app_config
 
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -30,7 +29,8 @@ api_key_header = APIKeyHeader(name='X-API-Key', auto_error=False)
 
 async def _get_current_user(
     bearer_token: Annotated[str | None, Depends(oauth2_scheme)] = None,
-    x_api_key: Annotated[str | None, api_key_header] = None, missing_ok: bool = False
+    x_api_key: Annotated[str | None, api_key_header] = None,
+    missing_ok: bool = False,
 ):
     """
     FastAPI dependency to get the current authenticated user.
@@ -56,15 +56,12 @@ async def _get_current_user(
     if not missing_ok:
         # If user is None (no auth provided or invalid auth that get_current_user
         # handled by returning None) and missing is NOT ok, raise a 401 error.
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Could not validate credentials',
-            headers={'WWW-Authenticate': 'Bearer, X-API-Key'},
-        )
+        raise_credentials_error('Bearer, X-API-Key')
+
     return None
 
 
-def get_scoped_current_user(scope: str, missing_ok: bool = False):
+def get_scoped_current_user(scope: str | list[str], missing_ok: bool = False):
     """
     Create a FastAPI dependency that validates user authentication and authorization scope.
 
@@ -95,5 +92,3 @@ def get_scoped_current_user(scope: str, missing_ok: bool = False):
         return user
 
     return scoped_user
-
-

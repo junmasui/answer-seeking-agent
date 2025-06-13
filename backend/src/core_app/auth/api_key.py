@@ -1,22 +1,27 @@
-import hashlib
 import logging
-import uuid
 
-from fastapi import HTTPException, status
-
-from .models import TokenData, User
 from ..app_config import get_app_config
+from .error import raise_credentials_error
+from .models import User
 
 logger = logging.getLogger(__name__)
 
-def raise_credentials_error():
-    """Raise an HTTP 401 Unauthorized error for invalid credentials."""
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Could not validate credentials',
-        headers={'WWW-Authenticate': 'X-API-Key'},
-    )
 
+def _get_api_keys():
+    config = get_app_config()
+
+    static_api_keys = {}
+    def _add_user(api_key, user_id, scope):
+        user = None
+        if api_key and user_id and scope:
+            user = User(userid= user_id)
+            user.scopes = scope.split(' ')
+
+        static_api_keys[api_key] = user
+
+    _add_user(config.static_api_key_1, config.static_api_key_user_id_1, config.static_api_key_scope_1)
+    _add_user(config.static_api_key_2, config.static_api_key_user_id_2, config.static_api_key_scope_2)
+    _add_user(config.static_api_key_3, config.static_api_key_user_id_3, config.static_api_key_scope_3)
 
 async def get_current_user_from_api_key(api_key: str) -> User | None:
     """
@@ -30,47 +35,29 @@ async def get_current_user_from_api_key(api_key: str) -> User | None:
 
     config = get_app_config()
 
-    static_key = config.static_api_key
+    if config.disable_static_api_keys:
+        return None
 
-    if static_key and api_key == static_key:
+    static_api_keys = _get_api_keys()
 
-        static_user_id = config.static_api_key_user_id
-        static_username = config.static_api_key_username
-        static_scope = config.static_api_key_scope
+    if api_key in static_api_keys:
 
-        hex_string = hashlib.md5(static_user_id.encode("utf-8")).hexdigest()
-        static_user_id = uuid.UUID(hex=hex_string)        
+        user = static_api_keys[api_key]
 
-        logger.info(f"Authenticated user '{static_username}' using static API key.")
+        logger.debug(f"Authenticated user '{user.user_id}' using static API key.")
 
-        if static_user_id and static_username:
-            user = User(userid=static_user_id)
-
-            user.username = static_username
-            user.scopes = static_scope.split(' ')
-
+        if user:
             return user
-        else:
-            # This case implies the API key was valid and produced TokenData,
-            # but retrieve_user failed to find/construct a user from that TokenData.
-            # This might indicate an inconsistency or an issue with retrieve_user
-            # for API key-derived TokenData.
-            logger.error(
-                f'API key valid for {static_username}, but failed with incomplete configuration.'
-            )
-            raise_credentials_error()  # Treat as overall credential failure
-    else:
-        # _get_user_from_api_key returned None, meaning the API key itself was invalid.
+
+        # This case implies the API key was valid but the user does not exist.
+        # This might indicate an inconsistency in the configuration.
+        logger.warning(f'API key valid for {user.user_id}, but failed with incomplete configuration.')
+        raise_credentials_error('X-API-Key')  # Treat as overall credential failure
+
+    if api_key:
+        # The API key itself was invalid.
         # We raise an error because an auth attempt was made with a bad key.
-        raise_credentials_error()
+        logger.warning(f'Invalid API key provided: {api_key[:5]}...')
+        raise_credentials_error('X-API-Key')
 
-
-
-    # Add more sophisticated API key validation here (e.g., database lookup)
-    # Example:
-    # db_user = await query_db_for_api_key_user(api_key)
-    # if db_user:
-    #     return TokenData(userid=db_user.id, username=db_user.email, scope=db_user.scopes)
-
-    logger.warning(f'Invalid API key provided: {api_key[:5]}...')
     return None

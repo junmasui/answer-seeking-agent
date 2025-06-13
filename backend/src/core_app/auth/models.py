@@ -35,27 +35,8 @@ class Scope(StrEnum):
 #
 
 
-class Token(BaseModel):
-    """Represents an authentication token with expiration and optional refresh token."""
-
-    access_token: str
-    token_type: str
-    # Number of seconds until access token expires.
-    expires_in: int
-    refresh_token: Optional[str] = None
-
-
-class TokenData(BaseModel):
-    """Contains decoded JWT token data including user identity and authorization scope."""
-
-    userid: uuid.UUID
-    username: str
-    scope: str | None
-
-
 class User(BaseModel):
     """Represents a user with identification and authorization scopes."""
 
     userid: uuid.UUID
-    username: Optional[str] = None
     scopes: Optional[list[str]] = None

@@ -91,6 +91,30 @@ SECRETS_FILE=./secrets/answers-test.jwt.secrets.env
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
 
+# Answers API keys
+
+SECRETS_FILE=./secrets/answers-dev.api-key.secrets.env
+VAR_NAME=APPLICATION_API_KEY_1
+VALUE_PREFIX=answers_dev_1_
+DESCR="Answers API key."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+SECRETS_FILE=./secrets/answers-test.api-key.secrets.env
+VALUE_PREFIX=answers_test_1_
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+VAR_NAME=APPLICATION_API_KEY_2
+VALUE_PREFIX=answers_test_2_
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+VAR_NAME=APPLICATION_API_KEY_3
+VALUE_PREFIX=answers_test_3_
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
 # Celery Flower
 
 SECRETS_FILE=./secrets/celery-flower-dev.secrets.env

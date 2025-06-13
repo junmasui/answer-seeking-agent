@@ -16,9 +16,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
-
-
 @router.get('/', response_model=DocumentSetList)
 async def handle_list_doc_sets(
     name: Annotated[str, Query(..., description='Document set name')] = None,
@@ -32,7 +29,7 @@ async def handle_list_doc_sets(
             description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None,
 ):
     """Returns a list of document sets."""
     parsed_sort_by = parse_sort_by(sort_by)
@@ -44,7 +41,7 @@ async def handle_list_doc_sets(
 async def handle_single_insert(
     body: Annotated[DocumentSetAddRequest, Body(...)],
     current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.DOC_WRITE))
     ] = None,
 ):
     """Add document set."""
@@ -62,7 +59,7 @@ async def handle_single_insert(
 
 @router.get('/stats', response_model=DocumentSetStats)
 async def handle_table_stats(
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_document_set_statistics()
@@ -73,7 +70,7 @@ async def handle_single_update(
     body: Annotated[DocumentSetUpdateRequest, Body(...)],
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
     current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.DOC_WRITE))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
@@ -93,7 +90,7 @@ async def handle_single_update(
 async def handle_single_delete(
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')],
     _current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.DOC_WRITE, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.DOC_WRITE))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""

@@ -13,14 +13,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
-
-
 @router.post('/reset-database')
 def reset_database(
     include_workers: Annotated[bool, Query(alias='includeWorkers')] = None,
     _current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.ADMIN, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.ADMIN))
     ] = None,
 ):
     """Reset database, vector store, and file store."""

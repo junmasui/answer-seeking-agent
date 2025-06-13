@@ -17,9 +17,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-jwt_write_claim_missing_ok = get_app_config().jwt_write_claim_missing_ok
-
-
 @router.get('/', response_model=AgentPromptList)
 async def handle_list_prompts(
     name: Annotated[str, Query(..., description='Prompt name')] = None,
@@ -33,7 +30,7 @@ async def handle_list_prompts(
             description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ))] = None,
 ):
     """Returns a list of document sets."""
     parsed_sort_by = parse_sort_by(sort_by)
@@ -45,7 +42,7 @@ async def handle_list_prompts(
 async def handle_single_insert(
     body: Annotated[AgentPromptAddRequest, Body(...)],
     current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))
     ] = None,
 ):
     """Add document set."""
@@ -67,7 +64,7 @@ async def handle_single_insert(
 
 @router.get('/stats', response_model=AgentPromptStats)
 async def handle_table_stats(
-    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ, missing_ok=True))] = None,
+    _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ))] = None,
 ):
     """Returns statistics about tracking table."""
     return get_prompt_statistics()
@@ -78,7 +75,7 @@ async def handle_single_update(
     body: Annotated[AgentPromptUpdateRequest, Body(...)],
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
     current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
@@ -100,7 +97,7 @@ async def handle_single_update(
 async def handle_single_delete(
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
     _current_user: Annotated[
-        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE, missing_ok=jwt_write_claim_missing_ok))
+        User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))
     ] = None,
 ):
     """Delete the file and associated embeddings specified by the document UUID."""
