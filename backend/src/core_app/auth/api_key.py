@@ -58,20 +58,20 @@ async def get_current_user_from_api_key(api_key: str) -> User | None:
     if api_key in static_api_keys:
         user = static_api_keys[api_key]
 
-        logger.debug(f"Authenticated user '{user.userid}' using static API key.")
+        logger.debug("Authenticated user '%s' using static API key.", user.userid)
 
         if user:
             return user
 
         # This case implies the API key was valid but the user does not exist.
         # This might indicate an inconsistency in the configuration.
-        logger.warning(f'API key valid for {user.userid}, but failed with incomplete configuration.')
+        logger.warning('API key valid for %s, but failed with incomplete configuration.', user.userid)
         raise_credentials_error('X-API-Key')  # Treat as overall credential failure
 
     if api_key:
         # The API key itself was invalid.
         # We raise an error because an auth attempt was made with a bad key.
-        logger.warning(f'Invalid API key provided: {api_key[:5]}...')
+        logger.warning('Invalid API key provided: %s...', api_key[:5])
         raise_credentials_error('X-API-Key')
 
     return None
