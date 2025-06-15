@@ -52,10 +52,9 @@ def _delete_tracking_record(doc_uuid):
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
-        with session.begin():
-            stmt = delete(DbTrackedDocument).where(DbTrackedDocument.id == doc_uuid)
-            result = session.execute(stmt)
+    with sessionmaker() as session, session.begin():
+        stmt = delete(DbTrackedDocument).where(DbTrackedDocument.id == doc_uuid)
+        result = session.execute(stmt)
 
     if result.rowcount == 0:
         logger.warning('No tracking record found with UUID %s', doc_uuid)

@@ -34,10 +34,9 @@ def _delete_tracking_record(doc_set_uuid):
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
-        with session.begin():
-            stmt = delete(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id == doc_set_uuid)
-            result = session.execute(stmt)
+    with sessionmaker() as session, session.begin():
+        stmt = delete(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id == doc_set_uuid)
+        result = session.execute(stmt)
 
     if result.rowcount == 0:
         logger.warning('No document set found with UUID %s', doc_set_uuid)
