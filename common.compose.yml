@@ -12,6 +12,7 @@ include:
   - prometheus/compose.yml
   - redis/compose.yml
   - weaviate/compose.yml
+  - opensearch/compose.yml
 
 networks:
   agent-poc:
@@ -35,6 +36,8 @@ secrets:
     file: ./secrets/redis.secrets.env
   weaviate_env:
     file: ./secrets/weaviate.secrets.env
+  opensearch_secrets_env:
+    file: ./secrets/opensearch.secrets.env
 
   redis_conf:
     file: ./secrets/redis.conf
