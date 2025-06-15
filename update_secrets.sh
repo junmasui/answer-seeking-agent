@@ -319,6 +319,15 @@ DESCR="Weaviate's default account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
+# OpenSearch
+SECRETS_FILE=./secrets/opensearch.secrets.env
+VAR_NAME=OPENSEARCH_INITIAL_ADMIN_PASSWORD
+VALUE_PREFIX=opensearch_admin_
+DESCR="OpenSearch's initial admin password."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
 #=======
 
 #
