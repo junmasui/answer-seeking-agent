@@ -34,10 +34,9 @@ def _delete_agent_prompt(prompt_uuid):
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
-        with session.begin():
-            stmt = delete(DbAgentPrompt).where(DbAgentPrompt.id == prompt_uuid)
-            result = session.execute(stmt)
+    with sessionmaker() as session, session.begin():
+        stmt = delete(DbAgentPrompt).where(DbAgentPrompt.id == prompt_uuid)
+        result = session.execute(stmt)
 
     if result.rowcount == 0:
         logger.warning('No prompt found with UUID %s', prompt_uuid)

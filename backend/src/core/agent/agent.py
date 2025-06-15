@@ -28,6 +28,7 @@ from .document_guards import check_retrieval_with_nemo, check_retrieval_with_pre
 from .document_retriever import query_documents
 from .hallucination_grader import grade_hallucination
 from .input_guards import check_input_with_nemo, check_input_with_presidio
+from .lib_config import get_lib_config
 from .postprocess import add_response_to_history
 from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
@@ -465,6 +466,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     """
     logger.info('user input: %s  thread_id: %s', user_input, thread_id)
 
+    config = get_lib_config()
+
     if not thread_id:
         thread_id = uuid.uuid4()
     elif isinstance(thread_id, str):
@@ -477,7 +480,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     logger.info('streaming_mode: %s', graph.stream_mode)
 
     # Initialize Langfuse CallbackHandler for Langchain (tracing)
-    langfuse_handler = CallbackHandler(session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
+    if config.enable_langfuse_tracing:
+        langfuse_handler = CallbackHandler(session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
@@ -491,7 +495,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         if user_id:
             extra_data['user_id'] = user_id
         run_config = {'recursion_limit': 30, 'configurable': extra_data}
-        run_config['callbacks'] = [langfuse_handler]
+        if langfuse_handler is not None:
+            run_config['callbacks'] = [langfuse_handler]
         for output in graph.stream(input=graph_input, config=run_config):
             for key, value in output.items():
                 # Node
@@ -504,27 +509,25 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # If we haven't assigned the answer yet, then pull it from the
     # generated output.
-    answer = latest_value.get('answer', None)
+    answer = latest_value.get('answer', '')
     citations = []
-    if answer is not None:
+
+    if answer:
         citations = latest_value.get('citations', [])
-
-    # If there was no generate output (for example, because there was an error),
-    # then set it to a hard-wired generic answer.
-    if answer is None:
+        citations = [
+            Citation(
+                doc_uuid=citation['doc_id'],
+                text=citation['text'],
+                source_url=citation.get('source_url'),
+                page_number=citation.get('page_number'),
+                file_name=citation.get('file_name'),
+            )
+            for citation in citations
+        ]
+    else:
+        # If there was no generate output (for example, because there was an error),
+        # then set it to a hard-wired generic answer.
         answer = 'I cannot find the answer to this question at this moment'
-        citations = []
-
-    citations = [
-        Citation(
-            doc_uuid=citation['doc_id'],
-            text=citation['text'],
-            source_url=citation.get('source_url'),
-            page_number=citation.get('page_number'),
-            file_name=citation.get('file_name'),
-        )
-        for citation in citations
-    ]
 
     logger.info('answer: %s', answer)
     return Answer(question=user_input, answer=answer, citations=citations, thread_id=thread_id, user_id=user_id)
