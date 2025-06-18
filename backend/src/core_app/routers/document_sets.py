@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get('', response_model=DocumentSetList)  # Empty path handles no trailing slash without using 307 redirect.
 @router.get('/', response_model=DocumentSetList)
 async def handle_list_doc_sets(
     name: Annotated[str, Query(..., description='Document set name')] = None,
@@ -37,6 +38,7 @@ async def handle_list_doc_sets(
     return list_document_sets(name=name, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by)
 
 
+@router.post('')  # Empty path handles no trailing slash without using 307 redirect.
 @router.post('/')
 async def handle_single_insert(
     body: Annotated[DocumentSetAddRequest, Body(...)],

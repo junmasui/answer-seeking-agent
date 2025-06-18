@@ -8,6 +8,8 @@ import httpx
 import pytest
 import pytest_asyncio
 
+from ..runtime_config import get_test_config
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,6 +27,16 @@ class ApiClient:
 
     async def _send(self, *, path: str, action, **kwargs):
         """Send an HTTP request and handle the response."""
+        config = get_test_config()
+
+        if config.static_api_key_scope_1 != 'admin':
+            raise RuntimeError('API key must have admin scope')
+
+        if isinstance(kwargs.get('headers'), dict):
+            kwargs['headers']['X-API-Key'] = config.static_api_key_1
+        else:
+            kwargs['headers'] = {'X-API-Key': config.static_api_key_1}
+
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 url = self.base_url
@@ -45,27 +57,26 @@ class ApiClient:
     async def get(self, *, path: str):
         """Send HTTP GET request to API Server."""
 
-        async def _get(client, url):
+        async def _get(client, url, **kwargs):
             """Execute HTTP GET request using the provided client."""
-            return await client.get(url)
+            return await client.get(url, **kwargs)
 
         return await self._send(path=path, action=_get)
 
     async def delete(self, *, path: str):
         """Send HTTP DELETE request to API Server."""
 
-        async def _delete(client, url):
+        async def _delete(client, url, **kwargs):
             """Execute HTTP DELETE request using the provided client."""
-            return await client.delete(url)
+            return await client.delete(url, **kwargs)
 
         return await self._send(path=path, action=_delete)
 
     async def patch(self, *, path: str, content_type: str, data: dict | list | str = None, files: dict = None):
         """Send HTTP PATCH request to API Server."""
 
-        async def _patch(client, url):
+        async def _patch(client, url, **kwargs):
             """Execute HTTP PATCH request with JSON or multipart data using the provided client."""
-            kwargs = {}
             match content_type:
                 case 'json':
                     kwargs['json'] = data
@@ -84,9 +95,8 @@ class ApiClient:
     ):
         """Send HTTP POST request to API Server."""
 
-        async def _post(client, url):
+        async def _post(client, url, **kwargs):
             """Execute HTTP POST request with JSON or multipart data using the provided client."""
-            kwargs = {}
             if timeout is not None:
                 kwargs['timeout'] = timeout
             match content_type:

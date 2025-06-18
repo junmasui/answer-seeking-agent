@@ -23,6 +23,7 @@ Usage:
 import os
 from functools import cache
 from pathlib import Path
+from typing import Optional
 
 from pydantic import AnyHttpUrl, Field, PostgresDsn, StringConstraints
 
@@ -88,6 +89,15 @@ class RuntimeSettings(BaseSettings):
     minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
     minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
     minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
+
+    static_api_key_1: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_1')
+    static_api_key_scope_1: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_1')
+
+    static_api_key_2: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_2')
+    static_api_key_scope_2: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_2')
+
+    static_api_key_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_3')
+    # static_api_key_scope_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_3')
 
 
 @cache

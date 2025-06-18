@@ -12,6 +12,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.pregel import Pregel
 
 from ..doc_mgr import list_document_sets
+from ..lib_config import get_lib_config
 from ..public_models import Answer, Citation
 from .agent_state import GraphState
 from .answer_generator import generate_answer
@@ -28,7 +29,6 @@ from .document_guards import check_retrieval_with_nemo, check_retrieval_with_pre
 from .document_retriever import query_documents
 from .hallucination_grader import grade_hallucination
 from .input_guards import check_input_with_nemo, check_input_with_presidio
-from .lib_config import get_lib_config
 from .postprocess import add_response_to_history
 from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
