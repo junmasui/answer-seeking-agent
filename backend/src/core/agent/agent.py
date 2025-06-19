@@ -458,7 +458,7 @@ def get_mermaid_graph():
     return mermaid_graph
 
 
-def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
+def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[uuid.UUID | str]):
     """
     Seek an answer to the user's input using the agent graph.
 
@@ -481,7 +481,10 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # Initialize Langfuse CallbackHandler for Langchain (tracing)
     if config.enable_langfuse_tracing:
-        langfuse_handler = CallbackHandler(session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
+        callback_kwargs = {'session_id': thread_id.hex, 'sample_rate': 1.0}
+        if user_id is not None:
+            callback_kwargs['user_id'] = user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+        langfuse_handler = CallbackHandler(**callback_kwargs)
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
@@ -493,7 +496,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     try:
         extra_data = {'thread_id': thread_id.hex}
         if user_id:
-            extra_data['user_id'] = user_id
+            extra_data['user_id'] = user_id.hex
         run_config = {'recursion_limit': 30, 'configurable': extra_data}
         if langfuse_handler is not None:
             run_config['callbacks'] = [langfuse_handler]

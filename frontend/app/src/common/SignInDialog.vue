@@ -64,7 +64,7 @@ const signedIn = defineModel('signedIn', {
   type: Boolean,
   default: false
 })
-const accessToken = defineModel('acccessToken', {
+const accessToken = defineModel('accessToken', {
   type: String,
   default: ''
 })
@@ -129,6 +129,7 @@ async function onConfirm() {
     const data = await response.json()
 
     signedIn.value = true
+
     accessToken.value = data.access_token
     emit('onSuccess')
   } catch (error) {

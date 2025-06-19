@@ -44,12 +44,12 @@ async def _get_current_user(
         # but oauth2_scheme (with auto_error=False) handles making bearer_token None if no
         # header.
         user = await get_current_user_from_token(bearer_token)
-        if user:
+        if user is not None:
             return user
 
     if x_api_key:
         user = await get_current_user_from_api_key(x_api_key)
-        if user:
+        if user is not None:
             return user
 
     # No valid user was retrieved by get_current_user. This implies no valid

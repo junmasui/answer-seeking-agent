@@ -26,8 +26,8 @@ def _get_api_keys():
     def _add_user(api_key, user_id, scope):
         user = None
         if api_key and user_id and scope:
-            user = User(userid=user_id)
-            user.scopes = scope.split(' ')
+            scopes = scope.split(' ')
+            user = User(userid=user_id, scopes=scopes)
 
         static_api_keys[api_key] = user
 

@@ -349,3 +349,14 @@ set -o history # turn it back on
 
 RELPATH=redis/redis.conf
 envsubst < "${RELPATH}.template" > "secrets/redis.conf"
+
+
+#
+set +o history # temporarily turn off history
+# shellcheck disable=SC2046
+export $( grep -h -v "^#" "./secrets/langfuse-web.secrets.env" | xargs -n1 )
+
+set -o history # turn it back on
+
+RELPATH=backend/langfuse-client.secrets.env
+envsubst < "${RELPATH}.template" > "secrets/langfuse-client.secrets.env"
