@@ -34,6 +34,8 @@ def register_initial_prompts(sender):
             logger.warning("Skipping prompt missing 'prompt_name' key: %s", prompt)
             continue
 
+        logger.info('adding predefined prompt %s', prompt_name)
+
         add_chat_prompt(
             prompt_name=prompt_name,
             owner_type=OwnerType.SYSTEM,

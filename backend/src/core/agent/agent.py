@@ -102,6 +102,10 @@ def get_retrieval_grade_in_subgraph(state: GraphState):
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
     if state.retrieval_grade in [RetrievalOverallGrade.NO_RELEVANT_DOCS]:
+        config = get_lib_config()
+        if state.query_rewrite_count >= config.max_query_rewrites:
+            logger.warning('Maximum rewrite attempts reached. Exiting retrieval subgraph.')
+            return '__default__'
         return state.retrieval_grade
     return '__default__'
 
@@ -142,6 +146,10 @@ def get_answer_grade_in_subgraph(state: GraphState):
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
     if state.answer_grade in [ResponseOverallGrade.REDO_ANSWER_GENERATION]:
+        config = get_lib_config()
+        if state.response_regeneration_count >= config.max_response_regeneration:
+            logger.warning('Maximum generate attempts reached. Exiting retrieval subgraph.')
+            return '__default__'
         return state.answer_grade
     return '__default__'
 
@@ -161,11 +169,13 @@ def get_answer_grade(state: GraphState):
 
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
-    if state.answer_grade in [
-        ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL,
-        ResponseOverallGrade.ACCEPT_ANSWER,
-        ResponseOverallGrade.REJECT_ANSWER,
-    ]:
+    if state.answer_grade in [ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL]:
+        config = get_lib_config()
+        if state.query_rewrite_count >= config.max_query_rewrites:
+            logger.warning('Maximum rewrite attempts reached. Exiting graph.')
+            return '__default__'
+        return state.answer_grade
+    if state.answer_grade in [ResponseOverallGrade.ACCEPT_ANSWER, ResponseOverallGrade.REJECT_ANSWER]:
         return state.answer_grade
     return '__default__'
 
@@ -288,7 +298,7 @@ def _build_retrieval_guard_subgraph():
     retrieval_guard_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
     retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, check_for_relevant_documents)
 
-    retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)  # grade documents
+    retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)
     retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_NEMO, check_retrieval_with_nemo)
     retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO, check_retrieval_with_presidio)
 
@@ -324,10 +334,10 @@ def _build_retrieval_subgraph():
 
     retrieval_subgraph = StateGraph(GraphState)
 
-    retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)  # retrieve
+    retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)
     retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile())
     retrieval_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
-    retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)  # rewrite_query
+    retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)
     retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op)
 
     retrieval_subgraph.set_entry_point(NodeName.QUERY_DOCUMENTS)
@@ -360,8 +370,8 @@ def _build_response_guard_subgraph():
     response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op)
     response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_DECISION, check_response_quality)
 
-    response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)  # grade answers
-    response_guard_subgraph.add_node(NodeName.GRADE_HALLUCINATION, grade_hallucination)  # grade hallucination
+    response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)
+    response_guard_subgraph.add_node(NodeName.GRADE_HALLUCINATION, grade_hallucination)
     response_guard_subgraph.add_node(NodeName.CHECK_RESPONSE_WITH_NEMO, check_output_with_nemo)
     response_guard_subgraph.add_node(NodeName.CHECK_RESPONSE_WITH_PRESIDIO, check_output_with_presidio)
 

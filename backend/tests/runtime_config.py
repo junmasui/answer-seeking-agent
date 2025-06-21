@@ -83,6 +83,8 @@ class RuntimeSettings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
+    skip_tear_down: bool = Field(default=False, validation_alias='SKIP_TEAR_DOWN')
+
     postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
 
     minio_endpoint_url: AnyHttpUrl = Field(default='', validation_alias='MINIO_ENDPOINT_URL')

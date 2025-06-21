@@ -25,6 +25,9 @@ class GraphState(BaseModel):
     ]
 
     question: Annotated[str, Field(description="The user's current question.")]
+    query_rewrite_count: Annotated[
+        int, Field(default=0, description='The number of times the question has been rewritten.')
+    ]
     document_set_ids: Annotated[
         Optional[List[UUID]], Field(default=None, description='IDs of document sets relevant to the question.')
     ]
@@ -40,6 +43,9 @@ class GraphState(BaseModel):
     answer: Annotated[Optional[str], Field(default=None, description='The final answer to be presented.')]
     citations: Annotated[
         Optional[List[Dict[str, str]]], Field(default=None, description='List of citations supporting the answer.')
+    ]
+    response_generation_count: Annotated[
+        int, Field(default=2, description='The number of times the answer has been generated.')
     ]
 
     input_overall_grade: Annotated[
@@ -63,11 +69,11 @@ class GraphState(BaseModel):
         Field(default=None, description='Relevancy scores (0-10) for each retrieved document.'),
     ]
     nemo_retrieval_check: Annotated[
-        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
         Field(default=None, description='NeMo Guardrails score for retrieved doc safety (0-10).'),
     ]
     presidio_retrieval_check: Annotated[
-        Optional[Annotated[int, Field(ge=0, le=10)]],
+        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
         Field(default=None, description='Presidio score for PII in retrieved docs (0-10).'),
     ]
 

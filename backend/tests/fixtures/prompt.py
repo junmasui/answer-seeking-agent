@@ -1,6 +1,12 @@
+import logging
+
 import pytest
 import pytest_asyncio
 from sqlalchemy import func, select, text
+
+from ..runtime_config import get_test_config
+
+logger = logging.getLogger(__name__)
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
@@ -13,8 +19,14 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
     return count
 
 
-def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker):
+def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker, force: bool = False):
     """Truncate 'agent_prompt'."""
+    if not force:
+        config = get_test_config()
+        if config.skip_tear_down:
+            logger.info('Skipping prompt table truncation')
+            return
+
     with sql_engine.connect() as conn:
         conn.execute(text(f'TRUNCATE TABLE "{auto_mapped_table.__table__.name}" RESTART IDENTITY CASCADE'))
         conn.commit()
@@ -36,7 +48,7 @@ def prompt_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
-    _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker)
+    _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker, force=True)
 
     try:
         yield auto_mapped_table
@@ -51,7 +63,7 @@ def empty_prompt_table(prompt_table, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'agent_prompt'."""
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
-    _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
+    _truncate_table(prompt_table, sql_engine, sql_sessionmaker, force=True)
 
     try:
         yield prompt_table
@@ -66,7 +78,7 @@ async def populated_prompt_table(prompt_table, api_server, sql_engine, sql_sessi
     """Return the SQLAlchemy reflected table 'agent_prompt'."""
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
-    _truncate_table(prompt_table, sql_engine, sql_sessionmaker)
+    _truncate_table(prompt_table, sql_engine, sql_sessionmaker, force=True)
 
     try:
         path = '/prompts/'

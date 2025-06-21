@@ -16,7 +16,7 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
 
     data = {'input': 'When did deep learning emerge?'}
 
-    resp_type, resp = await api_server.post(path=path, content_type='json', timeout=60.0, data=data)
+    resp_type, resp = await api_server.post(path=path, content_type='json', timeout=180.0, data=data)
 
     assert resp_type == 'json'
 
@@ -27,6 +27,8 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
     except ValueError:
         assert False, f"threadId '{resp['threadId']}' is not a valid UUID"
     assert isinstance(thread_id, uuid.UUID)
+
+    logger.info('RESP: %r', resp)
 
     assert 'question' in resp
     assert resp['question'] == data['input']

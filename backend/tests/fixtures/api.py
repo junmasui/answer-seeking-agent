@@ -154,20 +154,23 @@ async def global_reset(api_server) -> AsyncGenerator[None, None]:
     This fixture automatically resets the database, vector store, and file store at the beginning
     and end of the test module to ensure test isolation.
     """
-    path = '/admin/reset-database'
-    logger.info('Resetting global state')
-    resp_type, resp = await api_server.post(path=path, content_type=None)
-    if resp_type != 'json':
-        if resp_type == 'exception':
-            logger.info('data reset failed', exc_info=resp)
-        else:
-            logger.info('data reset failed:\n%s', resp)
-        pytest.fail('data reset failed')
+    await _reset_api_server(api_server, force=True)
 
     yield
 
+    await _reset_api_server(api_server)
+
+
+async def _reset_api_server(api_server, force: bool = False):
+    if not force:
+        config = get_test_config()
+        if config.skip_tear_down:
+            logger.info('Skipping global state reset')
+            return
+
+    path = '/admin/reset-database'
     logger.info('Resetting global state')
-    resp_type, _ = await api_server.post(path=path, content_type=None)
+    resp_type, resp = await api_server.post(path=path, content_type=None, timeout=300.0)
     if resp_type != 'json':
         if resp_type == 'exception':
             logger.info('data reset failed', exc_info=resp)

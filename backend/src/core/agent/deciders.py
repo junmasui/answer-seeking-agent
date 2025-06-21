@@ -50,6 +50,10 @@ def gather_relevant_documents(state: GraphState):
 
     documents = state.documents
 
+    logger.info('---Document relevancy %r---', state.document_relevancy)
+    logger.info('---Presidio check %r---', state.presidio_retrieval_check)
+    logger.info('---Nemo check %r---', state.nemo_retrieval_check)
+
     filtered_docs = []
     # Score each doc
     for index, doc in enumerate(documents):

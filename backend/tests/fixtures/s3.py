@@ -27,7 +27,19 @@ def s3_bucket(s3_client) -> Generator[S3Path, None, None]:
     config = get_test_config()
     bucket = S3Path(f's3://{config.minio_bucket_name}/', client=s3_client)
 
+    purge_s3_bucket(bucket, force=True)
+
     yield bucket
+
+    return purge_s3_bucket(bucket)
+
+
+def purge_s3_bucket(bucket, force: bool = False):
+    if not force:
+        config = get_test_config()
+        if config.skip_tear_down:
+            logger.info('Skipping s3 bucket clean up')
+            return
 
     # Walk the bucket and clean out subdirectories and files added during the test(s).
     for dirpath, dirnames, filenames in bucket.walk(top_down=False):

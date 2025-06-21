@@ -138,6 +138,17 @@ class LibrarySettings(BaseSettings):
     chunk_root_dir: str = Field(default='upload_chunks')
     doc_root_dir: str = Field(default='documents')
 
+    max_query_rewrites: int = Field(
+        default=2,
+        description='The maximum number of times a query can be rewritten.',
+        validation_alias='MAX_QUERY_REWRITES',
+    )
+    max_response_generation_attempts: int = Field(
+        default=2,
+        description='The maximum number of times a response can be regenerated.',
+        validation_alias='MAX_RESPONSE_GENERATION_TRIES',
+    )
+
 
 @cache
 def get_lib_config():

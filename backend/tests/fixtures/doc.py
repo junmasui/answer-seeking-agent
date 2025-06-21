@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -8,6 +9,10 @@ import pytest_asyncio
 from sqlalchemy import func, select, text
 
 from core.public_models.doc import DocumentStatus
+
+from ..runtime_config import get_test_config
+
+logger = logging.getLogger(__name__)
 
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
@@ -20,8 +25,14 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
     return count
 
 
-def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker):
+def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker, force: bool = False):
     """Truncate 'tracked_documents'."""
+    if not force:
+        config = get_test_config()
+        if config.skip_tear_down:
+            logger.info('Skipping document table truncation')
+            return
+
     with sql_engine.connect() as conn:
         conn.execute(text(f'TRUNCATE TABLE "{auto_mapped_table.__table__.name}" RESTART IDENTITY CASCADE'))
         conn.commit()
@@ -43,7 +54,7 @@ def doc_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
 
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
-    _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker)
+    _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker, force=True)
 
     try:
         yield auto_mapped_table
@@ -58,7 +69,7 @@ def empty_doc_table(doc_table, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'tracked_documents'."""
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
-    _truncate_table(doc_table, sql_engine, sql_sessionmaker)
+    _truncate_table(doc_table, sql_engine, sql_sessionmaker, force=True)
 
     try:
         yield doc_table
@@ -72,7 +83,7 @@ async def populate_doc_table(doc_table, populated_doc_set_table, api_server, sql
     """Populate the 'tracked_documents' table with sample data."""
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
-    _truncate_table(doc_table, sql_engine, sql_sessionmaker)
+    _truncate_table(doc_table, sql_engine, sql_sessionmaker, force=True)
 
     with sql_sessionmaker() as session:
         stmt = select(populated_doc_set_table.id, populated_doc_set_table.name).select_from(populated_doc_set_table)

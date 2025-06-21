@@ -16,6 +16,19 @@ from .sim_create_jwt import create_token_from_login
 app = FastAPI()
 
 
+@app.get('')
+@app.get('/')
+@app.get('/status')
+@app.get('/api/status')
+async def handle_root():
+    """
+    Handle requests to the root path.
+
+    Returns a simple tag line.
+    """
+    return {'Description': 'Simulates OAuth Service'}
+
+
 @app.post('/token', response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     """Return a JWT token for the user specified in the OAuth2 FormData."""

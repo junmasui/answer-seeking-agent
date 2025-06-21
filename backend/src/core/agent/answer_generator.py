@@ -55,6 +55,7 @@ def generate_answer(state: GraphState):
     question = state.question
     documents = state.documents
     history = state.messages
+    response_generation_count = state.response_generation_count
 
     chain = answer_generator()
 
@@ -65,5 +66,10 @@ def generate_answer(state: GraphState):
     )
 
     # Update state with generated output
-    state_updates = {'generation': result['generation'], 'answer': result['answer'], 'citations': result['citations']}
+    state_updates = {
+        'generation': result['generation'],
+        'answer': result['answer'],
+        'citations': result['citations'],
+        'response_generation_count': response_generation_count + 1,
+    }
     return state_updates
