@@ -52,12 +52,12 @@ class GraphState(BaseModel):
         Optional[UserInputGrade], Field(default=None, description='Overall grade for the user input.')
     ]
     nemo_input_check: Annotated[
-        Optional[Annotated[int, Field(ge=0, le=10)]],
-        Field(default=None, description='NeMo Guardrails score for input safety (0-10).'),
+        Optional[Annotated[int, Field(ge=0, le=100)]],
+        Field(default=None, description='NeMo Guardrails score for input safety (0-100).'),
     ]
     presidio_input_check: Annotated[
-        Optional[Annotated[int, Field(ge=0, le=10)]],
-        Field(default=None, description='Presidio score for PII in input (0-10).'),
+        Optional[Annotated[int, Field(ge=0, le=100)]],
+        Field(default=None, description='Presidio score for PII in input (0-100).'),
     ]
 
     retrieval_grade: Annotated[
@@ -69,12 +69,12 @@ class GraphState(BaseModel):
         Field(default=None, description='Relevancy scores (0-10) for each retrieved document.'),
     ]
     nemo_retrieval_check: Annotated[
-        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
-        Field(default=None, description='NeMo Guardrails score for retrieved doc safety (0-10).'),
+        Optional[List[Annotated[int, Field(ge=0, le=100)]]],
+        Field(default=None, description='NeMo Guardrails score for retrieved doc safety (0-100).'),
     ]
     presidio_retrieval_check: Annotated[
-        Optional[List[Annotated[int, Field(ge=0, le=10)]]],
-        Field(default=None, description='Presidio score for PII in retrieved docs (0-10).'),
+        Optional[List[Annotated[int, Field(ge=0, le=100)]]],
+        Field(default=None, description='Presidio score for PII in retrieved docs (0-100).'),
     ]
 
     answer_grade: Annotated[
@@ -87,10 +87,10 @@ class GraphState(BaseModel):
         Optional[str], Field(default=None, description="Does the answer address the user's question?")
     ]
     nemo_output_check: Annotated[
-        Optional[Annotated[int, Field(ge=0, le=10)]],
-        Field(default=None, description='NeMo Guardrails score for answer safety (0-10).'),
+        Optional[Annotated[int, Field(ge=0, le=100)]],
+        Field(default=None, description='NeMo Guardrails score for answer safety (0-100).'),
     ]
     presidio_output_check: Annotated[
-        Optional[Annotated[int, Field(ge=0, le=10)]],
-        Field(default=None, description='Presidio score for PII in the answer (0-10).'),
+        Optional[Annotated[int, Field(ge=0, le=100)]],
+        Field(default=None, description='Presidio score for PII in the answer (0-100).'),
     ]

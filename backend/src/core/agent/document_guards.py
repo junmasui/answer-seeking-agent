@@ -68,6 +68,9 @@ def check_retrieval_with_presidio(state: GraphState):
 
         result = execute_presidio_check(docs_content)
 
+        result = [x for x in result if x.get('score',0.) < 0.2 ]
+        result = [x for x in result if x.get('entity_type') not in ['PERSON', 'LOCATION', 'DATE_TIME']]
+
         violation_score = len(result)
         scores[index] = 100 if violation_score else 0
 

@@ -59,8 +59,8 @@ def gather_relevant_documents(state: GraphState):
     for index, doc in enumerate(documents):
         keep = (
             state.document_relevancy[index] > 5
-            and state.presidio_retrieval_check[index] < 4
-            and state.nemo_retrieval_check[index] < 4
+            and state.presidio_retrieval_check[index] < 40
+            and state.nemo_retrieval_check[index] < 40
         )
 
         if keep:

@@ -162,6 +162,8 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
 
         start = time.time()
         delta = 0.0
+        log_after = 0
+
         while delta < 3600.0:  # Allow ingestion to take up to 60 minutes
             await asyncio.sleep(1)
 
@@ -180,11 +182,32 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
                 break
 
             delta = time.time() - start
+            if delta > log_after:
+                logger.info('waiting for test doc ingestion: %s', [str(x) for x in statuses])
+                log_after = log_after + 60.0
 
         if not all(status == DocumentStatus.INGESTED for status in statuses):
             raise RuntimeError(f'Unexpected document status: {statuses}. Expected statuses are INGESTED or ERROR.')
 
         yield doc_table
+
+
+        with sql_sessionmaker() as session:
+            stmt = select(doc_table).where(doc_table.id.in_(doc_ids))
+            result = session.execute(stmt).fetchall()
+
+            statuses = [row[0].status for row in result]
+
+            # Convert statuses to DocumentStatus enum if possible
+            statuses = [
+                DocumentStatus[status] if status in DocumentStatus.__members__ else status for status in statuses
+            ]
+
+        logger.info('doc statuses after test: %s', [str(x) for x in statuses])
+
+        import os
+        os._exit(1)
+
 
     finally:
         # Clean up table after we are done.

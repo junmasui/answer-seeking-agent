@@ -40,35 +40,19 @@ logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
-def redo_document_retrieval(_state: GraphState):
+def no_op(banner_msg):
     """
-    Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should
-    be redone.
-    """
-    return {'answer_grade': ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL}
-
-
-def redo_answer_generation(_state: GraphState):
-    """
-    Set the answer_grade to 'redo answer generation' to indicate that answer generation should be
-    redone.
-    """
-    return {'answer_grade': ResponseOverallGrade.REDO_ANSWER_GENERATION}
-
-
-def accept_answer(_state: GraphState):
-    """Set the answer_grade to 'accept answer' to indicate that the current answer is acceptable."""
-    return {'answer_grade': ResponseOverallGrade.ACCEPT_ANSWER}
-
-
-def no_op(_state: GraphState):
-    """
-    Does nothing.
+    Create a logging only node.
 
     This is useful for defining a fan-out or a fan-in node.
     """
-    logger.info('---No Op---')
-    return {}
+
+    def _no_op(_state: GraphState):
+        """Does nothing other than log."""
+        logger.info('---%s---', banner_msg)
+        return {}
+
+    return _no_op
 
 
 def get_input_grade(state: GraphState):
@@ -101,13 +85,23 @@ def get_retrieval_grade_in_subgraph(state: GraphState):
 
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
-    if state.retrieval_grade in [RetrievalOverallGrade.NO_RELEVANT_DOCS]:
+
+    KICK_DECISION_TO_MAIN = '__default__'
+
+    if state.retrieval_grade == RetrievalOverallGrade.RELEVANT_DOCS_FOUND:
+        return KICK_DECISION_TO_MAIN
+
+    if state.retrieval_grade == RetrievalOverallGrade.NO_RELEVANT_DOCS:
+        # If the document retrieval attempts are still under the maximum,
+        # then try again.
         config = get_lib_config()
-        if state.query_rewrite_count >= config.max_query_rewrites:
-            logger.warning('Maximum rewrite attempts reached. Exiting retrieval subgraph.')
-            return '__default__'
-        return state.retrieval_grade
-    return '__default__'
+        if state.query_rewrite_count < config.max_query_rewrites:
+            return RetrievalOverallGrade.NO_RELEVANT_DOCS
+
+        logger.warning('Maximum rewrite attempts reached. Exiting retrieval subgraph.')
+        return KICK_DECISION_TO_MAIN
+
+    return KICK_DECISION_TO_MAIN
 
 
 def get_retrieval_grade(state: GraphState):
@@ -125,9 +119,18 @@ def get_retrieval_grade(state: GraphState):
 
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
+
+    # These 2 grades are definitive opinions from the subgraph regarding
+    # the next node. Hence we simply accept the informed opinions.
     if state.retrieval_grade in [RetrievalOverallGrade.REJECT_RETRIEVAL, RetrievalOverallGrade.RELEVANT_DOCS_FOUND]:
         return state.retrieval_grade
-    return '__default__'
+
+    # When no documents were retrieved, we cannot generate a document-grounded response.
+    # Thus we do not go to the response generation phase.
+    if state.retrieval_grade == RetrievalOverallGrade.NO_RELEVANT_DOCS:
+        return RetrievalOverallGrade.REJECT_RETRIEVAL
+
+    return RetrievalOverallGrade.REJECT_RETRIEVAL
 
 
 def get_answer_grade_in_subgraph(state: GraphState):
@@ -145,13 +148,23 @@ def get_answer_grade_in_subgraph(state: GraphState):
 
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
-    if state.answer_grade in [ResponseOverallGrade.REDO_ANSWER_GENERATION]:
+
+    KICK_DECISION_TO_MAIN = '__default__'
+
+    if state.answer_grade == ResponseOverallGrade.ACCEPT_ANSWER:
+        return KICK_DECISION_TO_MAIN
+
+    if state.answer_grade == ResponseOverallGrade.REDO_ANSWER_GENERATION:
+        # If the response generation attempts are still under the maximum,
+        # then try again.
         config = get_lib_config()
-        if state.response_regeneration_count >= config.max_response_regeneration:
-            logger.warning('Maximum generate attempts reached. Exiting retrieval subgraph.')
-            return '__default__'
-        return state.answer_grade
-    return '__default__'
+        if state.response_generation_count < config.max_response_generation_attempts:
+            return ResponseOverallGrade.REDO_ANSWER_GENERATION
+
+        logger.warning('Maximum generate attempts reached. Exiting retrieval subgraph.')
+        return KICK_DECISION_TO_MAIN
+
+    return KICK_DECISION_TO_MAIN
 
 
 def get_answer_grade(state: GraphState):
@@ -169,15 +182,26 @@ def get_answer_grade(state: GraphState):
 
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
-    if state.answer_grade in [ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL]:
+
+    # These 2 grades are definitive opinions from the subgraph regarding
+    # the next node. Hence we simply accept the informed opinions.
+    if state.answer_grade in [ResponseOverallGrade.REJECT_ANSWER, ResponseOverallGrade.ACCEPT_ANSWER]:
+        return state.answer_grade
+
+    # No acceptable answer was generated, despite retrying.
+    if state.answer_grade == ResponseOverallGrade.REDO_ANSWER_GENERATION:
+        return ResponseOverallGrade.REJECT_ANSWER
+
+    if state.answer_grade == ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL:
+        # If the document retrieval attempts reached the
+        # maximum number of attempts, then we should reject the retrieval.
         config = get_lib_config()
-        if state.query_rewrite_count >= config.max_query_rewrites:
-            logger.warning('Maximum rewrite attempts reached. Exiting graph.')
-            return '__default__'
-        return state.answer_grade
-    if state.answer_grade in [ResponseOverallGrade.ACCEPT_ANSWER, ResponseOverallGrade.REJECT_ANSWER]:
-        return state.answer_grade
-    return '__default__'
+        if state.query_rewrite_count < config.max_query_rewrites:
+            return ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL
+
+        logger.warning('Maximum rewrite attempts reached. Exiting graph.')
+
+    return ResponseOverallGrade.REJECT_ANSWER
 
 
 def _get_uncompiled_agent_graph() -> StateGraph:
@@ -198,9 +222,9 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     graph = StateGraph(GraphState)
 
     # Define the nodes
-    graph.add_node(NodeName.BAD_INPUT, no_op)
-    graph.add_node(NodeName.BAD_RETRIEVAL, no_op)
-    graph.add_node(NodeName.BAD_RESPONSE, no_op)
+    graph.add_node(NodeName.BAD_INPUT, no_op('Bad input'))
+    graph.add_node(NodeName.BAD_RETRIEVAL, no_op('Bad Retrieval'))
+    graph.add_node(NodeName.BAD_RESPONSE, no_op('Bad Response'))
 
     graph.add_node(NodeName.ADD_QUERY_TO_HISTORY, add_input_to_history)
     graph.add_node(NodeName.ADD_RESPONSE_TO_HISTORY, add_response_to_history)
@@ -262,7 +286,7 @@ def _build_input_guard_subgraph():
     """
     input_guard_subgraph = StateGraph(GraphState)
 
-    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op)
+    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op('Enter Input Guard'))
     input_guard_subgraph.add_node(NodeName.INPUT_GUARD_DECISION, check_if_safe_input)
 
     input_guard_subgraph.add_node(NodeName.CHECK_INPUT_WITH_NEMO, check_input_with_nemo)
@@ -294,7 +318,7 @@ def _build_retrieval_guard_subgraph():
     """
     retrieval_guard_subgraph = StateGraph(GraphState)
 
-    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op)
+    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op('Enter Retrieval Guard'))
     retrieval_guard_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
     retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, check_for_relevant_documents)
 
@@ -338,7 +362,7 @@ def _build_retrieval_subgraph():
     retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile())
     retrieval_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
     retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)
-    retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op)
+    retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op('Exit Retrieval Subgraph'))
 
     retrieval_subgraph.set_entry_point(NodeName.QUERY_DOCUMENTS)
     retrieval_subgraph.add_edge(NodeName.QUERY_DOCUMENTS, NodeName.RETRIEVAL_GUARD)
@@ -367,7 +391,7 @@ def _build_response_guard_subgraph():
     """
     response_guard_subgraph = StateGraph(GraphState)
 
-    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op)
+    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op('Enter Response Guard'))
     response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_DECISION, check_response_quality)
 
     response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)
@@ -413,7 +437,7 @@ def _build_response_subgraph():
     response_subgraph = StateGraph(GraphState)
     response_subgraph.add_node(NodeName.GENERATE_ANSWER, generate_answer)
     response_subgraph.add_node(NodeName.RESPONSE_GUARD, response_guard_subgraph.compile())
-    response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op)
+    response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op('Exit Response Subgraph'))
 
     response_subgraph.set_entry_point(NodeName.GENERATE_ANSWER)
 
@@ -514,7 +538,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
             for key, value in output.items():
                 # Node
                 logger.info("Node '%s':", key)
-                latest_value.update(value)
+                if isinstance(value, dict):
+                    latest_value.update(value)
     except GraphRecursionError as e:
         logger.error('Graph recursion error', exc_info=e)
     except Exception as e:
