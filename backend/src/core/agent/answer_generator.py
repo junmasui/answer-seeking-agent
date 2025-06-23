@@ -59,6 +59,8 @@ def generate_answer(state: GraphState):
 
     chain = answer_generator()
 
+    logger.info('Response generation count %d', response_generation_count)
+
     # RAG generation
     result = chain.invoke(
         input={'documents': documents, 'chat_history': history, 'question': question},

@@ -44,7 +44,7 @@ def check_input_with_presidio(state: GraphState):
 
     result = execute_presidio_check(question)
 
-    result = [x for x in result if x.get('score',0.) < 0.2 ]
+    result = [x for x in result if x.get('score', 0.0) < 0.2]
     result = [x for x in result if x.get('entity_type') not in ['PERSON', 'LOCATION', 'DATE_TIME']]
 
     violation_score = len(result)

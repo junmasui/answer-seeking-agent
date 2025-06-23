@@ -34,6 +34,7 @@ from .preprocess import add_input_to_history
 from .question_rewriter import rewrite_question
 from .response_guards import check_output_with_nemo, check_output_with_presidio
 from .retrieval_grader import grade_document_relevancies
+from .state_resetter import reset_state_on_start
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +159,11 @@ def get_answer_grade_in_subgraph(state: GraphState):
         # If the response generation attempts are still under the maximum,
         # then try again.
         config = get_lib_config()
+        logger.info(
+            'Response generation comparison %d ? %d',
+            state.response_generation_count,
+            config.max_response_generation_attempts,
+        )
         if state.response_generation_count < config.max_response_generation_attempts:
             return ResponseOverallGrade.REDO_ANSWER_GENERATION
 
@@ -196,6 +202,7 @@ def get_answer_grade(state: GraphState):
         # If the document retrieval attempts reached the
         # maximum number of attempts, then we should reject the retrieval.
         config = get_lib_config()
+        logger.info('Query rewrite comparison %d ? %d', state.query_rewrite_count, config.max_query_rewrites)
         if state.query_rewrite_count < config.max_query_rewrites:
             return ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL
 
@@ -226,6 +233,7 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     graph.add_node(NodeName.BAD_RETRIEVAL, no_op('Bad Retrieval'))
     graph.add_node(NodeName.BAD_RESPONSE, no_op('Bad Response'))
 
+    graph.add_node(NodeName.RESET_STATE_ON_START, reset_state_on_start)
     graph.add_node(NodeName.ADD_QUERY_TO_HISTORY, add_input_to_history)
     graph.add_node(NodeName.ADD_RESPONSE_TO_HISTORY, add_response_to_history)
 
@@ -235,7 +243,8 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     graph.add_node(NodeName.GENERATE_ANSWER, response_subgraph.compile())
 
     # Build graph
-    graph.add_edge(START, NodeName.INPUT_GUARD)
+    graph.add_edge(START, NodeName.RESET_STATE_ON_START)
+    graph.add_edge(NodeName.RESET_STATE_ON_START, NodeName.INPUT_GUARD)
     graph.add_conditional_edges(
         NodeName.INPUT_GUARD,
         get_input_grade,

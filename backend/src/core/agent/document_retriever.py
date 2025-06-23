@@ -83,9 +83,9 @@ def query_documents(state: GraphState):
     documents = [_clean_up_retrieved(x) for x in documents]
 
     logger.info('---RETRIEVED %d DOCUMENTS---', len(documents))
-    
+
     for idx, doc in enumerate(documents):
-        logger.info('document %d:\n%s', idx, doc)
+        logger.debug('document %d:\n%s', idx, doc)
 
     # Update agent state with retrieved documents
     state_updates = {'documents': documents}

@@ -22,17 +22,23 @@ def add_response_to_history(state: GraphState):
     answer = state.answer
     citations = state.citations
 
-    content = [{'answer': answer, 'citations': citations}]
+    # The content of an AIMessage should be a string. Store only the answer
+    # intho this field. This avoid serialization issues with the LLM API.
+    content = answer
 
-    # Update agent state with new AI-generation entries in the message histories.
+    # Store citations in additional_kwargs to preserve them in history
+    # without breaking the LLM's expected input format.
+    additional_kwargs = {'citations': citations}
 
+    # Claim the next message id.
     next_message_id = x if (x := state.next_message_id) is not None else 0
     message_id = str(next_message_id)
     next_message_id += 1
 
+    # Update agent state with new AI-generation entries in the message histories.
     state_updates = {
-        'messages': [AIMessage(content=content, id=message_id)],
-        'original_messages': [AIMessage(content=content, id=message_id)],
+        'messages': [AIMessage(content=content, id=message_id, additional_kwargs=additional_kwargs)],
+        'original_messages': [AIMessage(content=content, id=message_id, additional_kwargs=additional_kwargs)],
         'next_message_id': next_message_id,
     }
     return state_updates

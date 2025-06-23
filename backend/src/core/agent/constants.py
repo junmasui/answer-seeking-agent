@@ -49,6 +49,8 @@ class NodeName(StrEnum):
     CHECK_RESPONSE_WITH_PRESIDIO = 'check_response_with_presidio'
     RESPONSE_GUARD_DECISION = 'response_guard_decision'
 
+    RESET_STATE_ON_START = 'reset_state_on_start'
+
 
 class UserInputGrade(StrEnum):
     """

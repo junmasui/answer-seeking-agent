@@ -6,6 +6,7 @@ from ..lib_config import get_lib_config
 
 logger = logging.getLogger(__name__)
 
+
 def execute_presidio_check(text: str) -> dict:
     """Helper function to call the Presidio server."""
     config = get_lib_config()
