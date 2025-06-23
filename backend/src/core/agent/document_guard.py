@@ -1,5 +1,12 @@
 import logging
 
+from langgraph.graph import StateGraph
+
+from core.agent.constants import NodeName
+from core.agent.deciders import check_for_relevant_documents, gather_relevant_documents
+from core.agent.document_grader import grade_document_relevancies
+from core.agent.node_util import no_op
+
 from .agent_state import GraphState
 from .nemo_guards import execute_nemo_guardrails_check
 from .presidio_guard import execute_presidio_check
@@ -77,3 +84,40 @@ def check_retrieval_with_presidio(state: GraphState):
     scores = [scores[key] for key in sorted(scores.keys())]
 
     return {'presidio_retrieval_check': scores}
+
+
+def build_retrieval_guard_subgraph():
+    """
+    Build and return a StateGraph for the retrieval guard subgraph.
+
+    This subgraph handles tasks related to document retrieval, such as
+    grading relevancies and detecting toxic content.
+
+    Returns:
+        A StateGraph instance for the retrieval guard subgraph.
+
+    """
+    retrieval_guard_subgraph = StateGraph(GraphState)
+
+    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op('Enter Retrieval Guard'))
+    retrieval_guard_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
+    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, check_for_relevant_documents)
+
+    retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)
+    retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_NEMO, check_retrieval_with_nemo)
+    retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO, check_retrieval_with_presidio)
+
+    retrieval_guard_subgraph.set_entry_point(NodeName.RETRIEVAL_GUARD_START)
+
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.GRADE_RELEVANCIES)
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.CHECK_RETRIEVAL_WITH_NEMO)
+    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO)
+
+    retrieval_guard_subgraph.add_edge(
+        [NodeName.GRADE_RELEVANCIES, NodeName.CHECK_RETRIEVAL_WITH_NEMO, NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO],
+        NodeName.GATHER_RELEVANT_DOCUMENTS,
+    )
+    retrieval_guard_subgraph.add_edge(NodeName.GATHER_RELEVANT_DOCUMENTS, NodeName.RETRIEVAL_GUARD_DECISION)
+
+    retrieval_guard_subgraph.set_finish_point(NodeName.RETRIEVAL_GUARD_DECISION)
+    return retrieval_guard_subgraph

@@ -45,7 +45,7 @@ def grade_hallucination(state: GraphState):
     logger.info('---CHECK HALLUCINATIONS---')
 
     documents = state.documents
-    generation = state.answer
+    generation = state.response
 
     hallucination_grader = get_hallucination_grader()
 

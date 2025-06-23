@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @cache
-def get_answer_grader():
+def get_response_grader():
     """
     Initializes and returns an answer grading chain.
 
@@ -26,12 +26,12 @@ def get_answer_grader():
     """
     prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_ANSWER)
 
-    answer_grader = build_grader(prompt, GradeAnswer, 'answer_grader')
+    response_grader = build_grader(prompt, GradeAnswer, 'response_grader')
 
-    return answer_grader
+    return response_grader
 
 
-def grade_answer(state: GraphState):
+def grade_response(state: GraphState):
     """
     Determines whether the generation is grounded in the document and answers question.
 
@@ -47,9 +47,9 @@ def grade_answer(state: GraphState):
     question = state.question
     generation = state.generation
 
-    answer_grader = get_answer_grader()
+    response_grader = get_response_grader()
 
-    score = answer_grader.invoke({'question': question, 'generation': generation})
+    score = response_grader.invoke({'question': question, 'generation': generation})
 
     grade = score.binary_score
 

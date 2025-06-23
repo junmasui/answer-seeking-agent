@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def prepare_state(state: GraphState):
     state_updates = {
-        'answer': '',
+        'response': '',
         'citations': [],
         'query_rewrite_count': 0,
         'response_generation_count': 0,

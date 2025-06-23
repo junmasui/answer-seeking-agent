@@ -116,7 +116,7 @@ def check_response_quality(state: GraphState):
 
     if grade != 'yes':
         logger.info('---DECISION: GENERATION DOES NOT ADDRESS QUESTION---')
-        overall_grade = ResponseOverallGrade.REDO_ANSWER_GENERATION
+        overall_grade = ResponseOverallGrade.REDO_RESPONSE_GENERATION
     else:
         logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
         grade = state.grounded_in_facts
@@ -125,6 +125,6 @@ def check_response_quality(state: GraphState):
             overall_grade = ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL
         else:
             logger.info('---DECISION: GENERATION IS GROUNDED IN FACTS FROM DOCUMENTS---')
-            overall_grade = ResponseOverallGrade.ACCEPT_ANSWER
+            overall_grade = ResponseOverallGrade.ACCEPT_RESPONSE
 
     return {'answer_grade': overall_grade}

@@ -62,7 +62,7 @@ class GraphState(BaseModel):
         Optional[str],
         Field(default=None, description='The raw LLM generation.', json_schema_extra={'reset_on_start': True}),
     ]
-    answer: Annotated[
+    response: Annotated[
         Optional[str],
         Field(
             default=None, description='The final answer to be presented.', json_schema_extra={'reset_on_start': True}

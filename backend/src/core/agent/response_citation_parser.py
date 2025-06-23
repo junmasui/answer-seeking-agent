@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
-class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
+class ResponseCitationParser(BaseGenerationOutputParser[dict[str, str]]):
     """Parse the output of an LLM call into a Dictionary using a regex."""
 
     regex_footnote: str = re.compile(
@@ -63,7 +63,7 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
         text = result[0].text
 
-        answer = ''
+        response = ''
         citations = []
         pos = 0
 
@@ -76,7 +76,7 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
             page_content = documents_by_id[doc_id].page_content if doc_id in documents_by_id else ''
 
-            answer += text[pos : match.start()]
+            response += text[pos : match.start()]
 
             citation = {
                 'doc_id': doc_id,
@@ -92,6 +92,6 @@ class AnswerCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
             pos = match.end()
 
-        output = {'generation': text, 'answer': answer, 'citations': citations}
+        output = {'generation': text, 'response': response, 'citations': citations}
 
         return output

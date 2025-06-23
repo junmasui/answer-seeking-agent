@@ -9,18 +9,16 @@ class NodeName(StrEnum):
     logic.
     """
 
+    RESET_STATE_ON_START = 'reset_state_on_start'
+    ADD_QUERY_TO_HISTORY = 'add_query_to_history'
+    ADD_RESPONSE_TO_HISTORY = 'add_response_to_history'
     QUERY_DOCUMENTS = 'query_documents'
     GRADE_RELEVANCIES = 'grade_relevancies'
     REWRITE_QUERY = 'rewrite_query'
     GRADE_HALLUCINATION = 'grade_hallucination'
-    GRADE_ANSWER = 'grade_answer'
-    ACCEPT_ANSWER = 'accept_answer'
-    REDO_DOCUMENT_RETRIEVAL = 'redo_document_retrieval'
-    REDO_ANSWER_GENERATION = 'redo_answer_generation'
-    ADD_QUERY_TO_HISTORY = 'add_query_to_history'
-    ADD_RESPONSE_TO_HISTORY = 'add_response_to_history'
+    GRADE_RESPONSE = 'grade_response'
     RETRIEVE_DOCUMENTS = 'retrieve_documents'
-    GENERATE_ANSWER = 'generate_answer'
+    GENERATE_RESPONSE = 'generate_response'
 
     BAD_INPUT = 'bad_input'
     BAD_RETRIEVAL = 'bad_retrieval'
@@ -49,8 +47,6 @@ class NodeName(StrEnum):
     CHECK_RESPONSE_WITH_PRESIDIO = 'check_response_with_presidio'
     RESPONSE_GUARD_DECISION = 'response_guard_decision'
 
-    RESET_STATE_ON_START = 'reset_state_on_start'
-
 
 class UserInputGrade(StrEnum):
     """
@@ -67,7 +63,7 @@ class RetrievalOverallGrade(StrEnum):
     """
     Represents the possible overall grades for document retrieval.
 
-    These grades guide the agent on whether to proceed with answer generation, retry retrieval, or
+    These grades guide the agent on whether to proceed with response generation, retry retrieval, or
     reject the retrieval attempt.
     """
 
@@ -80,11 +76,11 @@ class ResponseOverallGrade(StrEnum):
     """
     Represents the possible overall grades for the generated response.
 
-    These grades determine whether the answer is accepted, rejected, or if parts of the process need
+    These grades determine whether the response is accepted, rejected, or if parts of the process need
     to be redone.
     """
 
     REDO_DOCUMENT_RETRIEVAL = 'redo document retrieval'
-    REDO_ANSWER_GENERATION = 'redo answer generation'
-    ACCEPT_ANSWER = 'accept answer'
-    REJECT_ANSWER = 'reject answer'
+    REDO_RESPONSE_GENERATION = 'redo response generation'
+    ACCEPT_RESPONSE = 'accept response'
+    REJECT_RESPONSE = 'reject response'
