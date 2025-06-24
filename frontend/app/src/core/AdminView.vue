@@ -17,12 +17,8 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
-
-const currentUserStore = useCurrentUserStore()
-
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
+import { getAuthorization } from '../common/AuthUtils.js'
 
 const confirmReset = ref(false)
 
@@ -43,9 +39,11 @@ async function resetConfirmed() {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
+
     const response = await fetch('/api/admin/resetDatabase', {
       method: 'POST',
       headers

@@ -57,17 +57,15 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useConversationStore } from './ConversationStore'
+import { getAuthorization } from '../common/AuthUtils.js'
 
 import SystemMessageComponent from './SystemMessageComponent.vue'
 import UserMessageComponent from './UserMessageComponent.vue'
 import logger from '../common/Logger.js'
 
-const currentUserStore = useCurrentUserStore()
 const conversationStore = useConversationStore()
 
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { userInput, messages, threadId } = storeToRefs(conversationStore)
 
 const querySubmitted = ref(false)
@@ -112,8 +110,9 @@ async function submit() {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const response = await fetch('/api/answer/', {

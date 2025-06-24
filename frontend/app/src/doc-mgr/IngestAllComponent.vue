@@ -9,12 +9,8 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import logger from '../common/Logger.js'
-
-const currentUserStore = useCurrentUserStore()
-
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
+import { getAuthorization } from '../common/AuthUtils.js'
 
 /**
  * Handles the ingest all operation by sending a request to process all uploaded documents.
@@ -25,8 +21,9 @@ async function onIngest() {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const response = await fetch('/api/ingest', {

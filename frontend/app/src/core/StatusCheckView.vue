@@ -17,6 +17,7 @@
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import logger from '../common/Logger.js'
+import { getAuthorization } from '../common/AuthUtils.js'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 
@@ -49,9 +50,11 @@ async function checkStatus() {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
+
     const response = await fetch('/api/status', {
       method: 'GET',
       headers

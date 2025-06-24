@@ -40,7 +40,9 @@
     </v-app-bar>
     <sign-in-dialog
       v-model:active="performSignIn"
-      v-model:accessToken="accessToken"
+      v-model:access-token="accessToken"
+      v-model:refresh-token="refreshToken"
+      v-model:refresh-access-after="refreshAccessAfter"
       v-model:signed-in="signedIn"
       @on-success="signInSucceeded"
     >
@@ -86,7 +88,7 @@ const drawerModel = ref(false)
 const performSignIn = ref(false)
 
 const currentUserStore = useCurrentUserStore()
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
+const { signedIn, accessToken, refreshToken, refreshAccessAfter } = storeToRefs(currentUserStore)
 
 /**
  * Toggles the visibility of the navigation drawer.
@@ -111,6 +113,11 @@ function signIn() {
 function signInSucceeded() {
   // If user was trying to access a protected route, redirect there
   // Otherwise, redirect to conversational page
+
+  console.log(`ACCESS ${accessToken.value}`)
+  console.log(`REFRESH ${refreshToken.value}`)
+  console.log(`REFRESH ${refreshAccessAfter.value}`)
+
   const returnTo = route.query.returnTo || '/conversational'
   router.push(returnTo)
 }
@@ -133,6 +140,8 @@ watch(
  */
 function signOut() {
   accessToken.value = ''
+  refreshToken.value = ''
+  refreshAccessAfter.value = null
   signedIn.value = false
   // Redirect to home page after sign-out
   router.push('/')
