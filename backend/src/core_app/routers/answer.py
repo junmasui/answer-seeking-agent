@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get('', response_model=Answer)  # Empty path handles no trailing slash without using 307 redirect.
 @router.get('/', response_model=Answer)
 async def handle_question(
     params: Annotated[AnswerRequestBody, Depends()],
@@ -29,13 +30,14 @@ async def handle_question(
     return answer
 
 
+@router.post('', response_model=Answer)  # Empty path handles no trailing slash without using 307 redirect.
 @router.post('/', response_model=Answer)
 async def handler_question(
     body: Annotated[AnswerRequestBody, Body(...)],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
     """Handle a question submitted via POST request and return an answer."""
-    user_id = current_user.user_id if current_user is not None else None
+    user_id = current_user.userid if current_user is not None else None
 
     answer = seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
 

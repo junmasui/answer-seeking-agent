@@ -7,6 +7,29 @@ from core.agent.agent_state import GraphState
 logger = logging.getLogger(__name__)
 
 
+def prepare_state(state: GraphState):
+    state_updates = {
+        'response': '',
+        'citations': [],
+        'query_rewrite_count': 0,
+        'response_generation_count': 0,
+        'input_overall_grade': None,
+        'nemo_input_check': None,
+        'presidio_input_check': None,
+        'retrieval_grade': None,
+        'document_relevancy': None,
+        'nemo_retrieval_check': None,
+        'presidio_retrieval_check': None,
+        'answer_grade': None,
+        'grounded_in_facts': None,
+        'answer_addresses_question': None,
+        'nemo_output_check': None,
+        'presidio_output_check': None,
+    }
+
+    return state_updates
+
+
 def add_input_to_history(state: GraphState):
     """
     Capture raw question.

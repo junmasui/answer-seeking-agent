@@ -96,5 +96,7 @@ secrets:
 
   langfuse_env:
     file: ./secrets/langfuse.secrets.env
+  langfuse_client_env:
+    file: ./secrets/langfuse-client.secrets.env
   langfuse_web_env:
     file: ./secrets/langfuse-web.secrets.env

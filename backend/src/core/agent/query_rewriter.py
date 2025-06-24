@@ -50,6 +50,7 @@ def rewrite_question(state: GraphState):
     """
     logger.info('---TRANSFORM QUERY---')
     question = state.question
+    query_rewrite_count = state.query_rewrite_count
 
     question_rewriter = get_question_rewriter()
 
@@ -65,6 +66,10 @@ def rewrite_question(state: GraphState):
     message = messages[-1]
     updated_message = message.model_copy(update={'content': better_question})
 
-    state_updates = {'question': better_question, 'messages': [updated_message]}
+    state_updates = {
+        'question': better_question,
+        'messages': [updated_message],
+        'query_rewrite_count': query_rewrite_count + 1,
+    }
 
     return state_updates

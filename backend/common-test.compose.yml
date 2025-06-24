@@ -122,6 +122,7 @@ services:
       - answers_minio_test_env
       - answers_postgres_test_env
       - checkpoints_postgres_test_env
+      - langfuse_client_env
       - vectors_postgres_test_env
       - redis_env
       - weaviate_env
@@ -198,6 +199,7 @@ services:
       - backend-test-prometheus-2:/var/local/prometheus
     secrets:
       - answers_test_env
+      - answers_api_key_test_env
       - answers_jwt_test_env
       - answers_minio_test_env
       - answers_postgres_test_env
@@ -273,6 +275,7 @@ services:
       - backend-test-venv-3:/app/.venv
     secrets:
       - answers_test_env
+      - answers_api_key_test_env
       - answers_jwt_test_env
       - answers_minio_test_env
       - answers_postgres_test_env
@@ -345,6 +348,7 @@ services:
       - backend-test-venv-4:/app/.venv
     secrets:
       - answers_test_env
+      - answers_api_key_test_env
       - answers_jwt_test_env
       - answers_minio_test_env
       - answers_postgres_test_env

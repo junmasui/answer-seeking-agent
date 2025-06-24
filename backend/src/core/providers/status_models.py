@@ -1,7 +1,7 @@
 import enum
 from typing import Annotated, Dict, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PingStatus(str, enum.Enum):
@@ -14,8 +14,7 @@ class PingStatus(str, enum.Enum):
 class PingResult(BaseModel):
     """Represents the result of a ping operation."""
 
-    class Config:
-        arbitrary_types_allowed = True  # To allow Exception types if we revert error to Exception
+    model_config = ConfigDict(extra='forbid', arbitrary_types_allowed=True)
 
     status: Annotated[PingStatus, Field(description='The status of the ping attempt.')]
     message: Annotated[str, Field(description='A message describing the ping result.')]

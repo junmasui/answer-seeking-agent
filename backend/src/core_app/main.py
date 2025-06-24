@@ -3,15 +3,34 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 import sim_auth_app
 from core.signals import configure_sender, send_start_up
 from log_config_monitor import get_logging_conf_monitor
 
 from .middlewares import ErrorLoggingMiddleware
+from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
 from .routers import admin, answer, document_sets, documents, health, prompts, status, tasks
 
 logger = logging.getLogger(__name__)
+
+
+class SubAppRootPathFixer:
+    """
+    A middleware that resets the `root_path` for a sub-application.
+
+    This is used to isolate a mounted sub-app from dynamic `root_path`
+    changes made by a proxy, ensuring consistent routing behavior.
+    """
+
+    def __init__(self, app: ASGIApp, root_path: str):
+        self.app = app
+        self.root_path = root_path
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        scope['root_path'] = self.root_path
+        await self.app(scope, receive, send)
 
 
 @asynccontextmanager
@@ -38,8 +57,9 @@ async def lifespan(fastapi_app: FastAPI):
     get_logging_conf_monitor().stop()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, title='Seeking Answers', version='1.0.0')
 
+app.add_middleware(DynamicRootPathMiddleware)
 app.add_middleware(ErrorLoggingMiddleware)
 
 instrumentator = Instrumentator().instrument(app)
@@ -53,9 +73,10 @@ app.include_router(router=status.router, prefix='/status')
 app.include_router(router=prompts.router, prefix='/prompts')
 app.include_router(router=tasks.router, prefix='/tasks')
 
-app.mount('/sim_auth', sim_auth_app.app)
+app.mount('/sim_auth/', SubAppRootPathFixer(sim_auth_app.app, root_path='/sim_auth'))
 
 
+@app.get('')  # Empty path handles no trailing slash without using 307 redirect.
 @app.get('/')
 async def handle_root():
     """

@@ -11,6 +11,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 
+from ..auth import Scope
 from .api_key import get_current_user_from_api_key
 from .error import raise_credentials_error
 from .jwt import get_current_user_from_token
@@ -43,12 +44,12 @@ async def _get_current_user(
         # but oauth2_scheme (with auto_error=False) handles making bearer_token None if no
         # header.
         user = await get_current_user_from_token(bearer_token)
-        if user:
+        if user is not None:
             return user
 
     if x_api_key:
         user = await get_current_user_from_api_key(x_api_key)
-        if user:
+        if user is not None:
             return user
 
     # No valid user was retrieved by get_current_user. This implies no valid
@@ -84,7 +85,7 @@ def get_scoped_current_user(scope: str | list[str], missing_ok: bool = False):
         user = await _get_current_user(bearer_token=bearer_token, x_api_key=x_api_key, missing_ok=missing_ok)
 
         # Check for the required scope.
-        if not user or not user.scopes or scope not in user.scopes:
+        if not user or not user.scopes or (scope not in user.scopes and Scope.ADMIN not in user.scopes):
             # User is authenticated, but not authorized for this specific scope.
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail=f"Not enough permissions. Requires scope: '{scope}'."

@@ -83,6 +83,16 @@ def get_current_version(engine):
     session_maker = sessionmaker(bind=engine)
     with session_maker() as session:
         try:
+            if not session.execute(
+                text("""SELECT EXISTS (
+                    SELECT FROM
+                        information_schema.tables
+                    WHERE
+                        table_schema = 'answers' AND
+                        table_name = 'alembic_version'
+                );""")
+            ):
+                return None
             # There is not a lot of good official documentation at https://alembic.sqlalchemy.org/
             # regarding the table `alembic_version`. Specifically, there is a lack of documentation
             # regarding the number of records in the table `alembic_version`
@@ -202,10 +212,15 @@ def drop_all_tables():
     logger.info('dropping all registered tables')
     engine = get_engine(DataDomain.ANSWERS)
 
+    # Drop any custom enums types and cascade to any dependencies.
+    with engine.connect() as conn:
+        conn.execute(text('DROP TYPE IF EXISTS agentpromptstatus CASCADE'))
+        conn.commit()
+
     DECLARED_METADATA.drop_all(engine)
 
-    # Reset the Alembic migration table. If this table remains populated, our migration detection
+    # Drop the Alembic migration table. If this table remains, our migration detection
     # logic will prevent the recreation of the registered tables.
     with engine.connect() as conn:
-        conn.execute(text('TRUNCATE TABLE "alembic_version" RESTART IDENTITY CASCADE'))
+        conn.execute(text('DROP TABLE IF EXISTS "alembic_version" CASCADE'))
         conn.commit()

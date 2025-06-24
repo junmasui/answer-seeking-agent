@@ -35,7 +35,7 @@ class Answer(CamelModel):
     answer: str = Field(description="Answer to the user's question with citations.")
     citations: list[Citation] = Field(description='List of citations.')
     thread_id: UUID = Field(description='Conversation UUID. A conversation is a sequence of questions and answers.')
-    user_id: Optional[str] = Field(default=None, description='User UUID associated this question and answer.')
+    user_id: Optional[UUID] = Field(default=None, description='User UUID associated this question and answer.')
 
 
 #

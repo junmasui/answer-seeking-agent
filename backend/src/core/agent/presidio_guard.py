@@ -17,7 +17,9 @@ def execute_presidio_check(text: str) -> dict:
         with httpx.Client() as client:
             response = client.post(presidio_analyzer_url, json=payload, timeout=60.0)
             response.raise_for_status()
-            return response.json()
+            resp = response.json()
+            logger.info('presidio result: %s', resp)
+            return resp
     except httpx.HTTPStatusError as e:
         logger.warning('Error calling presidio API', exc_info=e)
         return {}

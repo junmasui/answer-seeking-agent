@@ -17,9 +17,10 @@ services:
 
     volumes:
       - ./conf:/conf
+      - ./healthcheck.py:/healthcheck.py
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health?check=full"]
+      test: ["CMD", "python3", "/healthcheck.py"]
       interval: 30s
       timeout: 5s
       retries: 3
