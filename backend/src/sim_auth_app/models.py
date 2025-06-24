@@ -43,6 +43,8 @@ class Token(BaseModel):
     # Number of seconds until access token expires.
     expires_in: int
     refresh_token: Optional[str] = None
+    # The grant type for the token.
+    grant_type: Optional[str] = None
 
 
 class TokenData(BaseModel):

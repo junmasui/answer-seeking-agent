@@ -68,6 +68,14 @@ const accessToken = defineModel('accessToken', {
   type: String,
   default: ''
 })
+const refreshToken = defineModel('refreshToken', {
+  type: String,
+  default: ''
+})
+const refreshAccessAfter = defineModel('refreshAccessAfter', {
+  type: Date,
+  default: null
+})
 
 const emit = defineEmits(['onSuccess', 'onFail'])
 
@@ -131,6 +139,9 @@ async function onConfirm() {
     signedIn.value = true
 
     accessToken.value = data.access_token
+    refreshToken.value = data.refresh_token
+    const now = new Date()
+    refreshAccessAfter.value = new Date(now.getTime() + data.expires_in * 1000)
     emit('onSuccess')
   } catch (error) {
     console.error('Could not sign in:', error)

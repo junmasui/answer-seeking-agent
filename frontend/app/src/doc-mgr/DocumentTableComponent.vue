@@ -92,6 +92,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
+import { getAuthorization } from '../common/AuthUtils.js'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useDocumentStore } from './DocStore'
@@ -208,8 +209,9 @@ async function ingestDocument(doc_uuid) {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
     const response = await fetch('/api/documents/ingest', {
       method: 'POST',
@@ -323,8 +325,9 @@ async function deleteDocument(doc_uuid) {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const response = await fetch(`/api/documents/${doc_uuid}`, {
@@ -388,8 +391,9 @@ async function ingestSelectedDocuments() {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const body = {
@@ -456,8 +460,9 @@ async function ingestAllUploadedDocuments() {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const body = {
@@ -521,8 +526,9 @@ async function deleteSelectedDocuments() {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const body = {
@@ -585,8 +591,9 @@ async function loadTableStats() {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const response = await fetch('/api/documents/stats', {
@@ -622,6 +629,14 @@ async function loadItems() {
   loading.value = true
 
   try {
+    const headers = {
+      Accept: 'application/json'
+    }
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
+    }
+
     const params = new URLSearchParams({
       // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
       page: page.value - 1,
@@ -640,13 +655,6 @@ async function loadItems() {
         .join(',')
 
       params.append('sortBy', sortByParam)
-    }
-
-    const headers = {
-      Accept: 'application/json'
-    }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
     }
 
     const response = await fetch(`/api/documents/?${params}`, {

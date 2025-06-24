@@ -11,7 +11,7 @@ from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
 from .models import Token
-from .sim_create_jwt import create_token_from_login
+from .sim_create_jwt import create_token_from_login, create_token_from_refresh_token
 
 app = FastAPI()
 
@@ -33,3 +33,9 @@ async def handle_root():
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     """Return a JWT token for the user specified in the OAuth2 FormData."""
     return create_token_from_login(form_data)
+
+
+@app.post('/refresh', response_model=Token)
+async def refresh_access_token(refresh_token: str) -> Token:
+    """Return a new JWT token for the user specified in the refresh token."""
+    return create_token_from_refresh_token(refresh_token)

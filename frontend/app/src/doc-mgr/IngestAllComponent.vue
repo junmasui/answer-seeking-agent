@@ -11,6 +11,7 @@ import { storeToRefs } from 'pinia'
 
 import { useCurrentUserStore } from '../common/CurrentUserStore'
 import logger from '../common/Logger.js'
+import { getAuthorization } from '../common/AuthUtils.js'
 
 const currentUserStore = useCurrentUserStore()
 
@@ -25,8 +26,9 @@ async function onIngest() {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const response = await fetch('/api/ingest', {

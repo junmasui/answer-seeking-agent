@@ -41,6 +41,8 @@
     <sign-in-dialog
       v-model:active="performSignIn"
       v-model:accessToken="accessToken"
+      v-model:refreshToken="refreshToken"
+      v-model:refreshAccessAfter="refreshAccessAfter"
       v-model:signed-in="signedIn"
       @on-success="signInSucceeded"
     >
@@ -86,7 +88,7 @@ const drawerModel = ref(false)
 const performSignIn = ref(false)
 
 const currentUserStore = useCurrentUserStore()
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
+const { signedIn, accessToken, refreshToken, refreshAccessAfter } = storeToRefs(currentUserStore)
 
 /**
  * Toggles the visibility of the navigation drawer.
@@ -133,6 +135,8 @@ watch(
  */
 function signOut() {
   accessToken.value = ''
+  refreshToken.value = ''
+  refreshAccessAfter.value = null
   signedIn.value = false
   // Redirect to home page after sign-out
   router.push('/')

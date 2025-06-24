@@ -70,6 +70,7 @@ import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import AddDocSetDialog from './AddDocSetDialog.vue'
 import EditDocSetDialog from './EditDocSetDialog.vue'
 import logger from '../common/Logger.js'
+import { getAuthorization } from '../common/AuthUtils.js'
 
 const currentUserStore = useCurrentUserStore()
 const documentSetStore = useDocumentSetStore()
@@ -161,8 +162,9 @@ async function addDocumentSet() {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const body = {
@@ -240,8 +242,9 @@ async function editDocumentSet(doc_set_uuid) {
       Accept: 'application/json',
       'Content-Type': 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const body = {
@@ -315,8 +318,9 @@ async function deleteDocumentSet(doc_set_uuid) {
     const headers = {
       Accept: 'application/json'
     }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
     }
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
