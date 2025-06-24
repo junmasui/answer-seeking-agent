@@ -20,7 +20,7 @@ from .models import Scope, Token
 from .users import authenticate_user, get_user_by_name
 
 ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 10
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def _create_access_token(
 
 
 def _create_refresh_token(
-    *, userid: uuid.UUID, expires_in: Optional[timedelta] = None, additional_claims: Optional[dict] = None
+    *, userid: uuid.UUID, username: str, expires_in: Optional[timedelta] = None, additional_claims: Optional[dict] = None
 ) -> str:
     """Simulates an actual token creation inside an true authentication service."""
     to_encode = {'sub': userid.urn}
@@ -75,6 +75,7 @@ def _create_refresh_token(
         expires_in = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     expire = datetime.now(timezone.utc) + expires_in
     to_encode.update({'exp': expire})
+    to_encode['email'] = username
 
     if additional_claims:
         to_encode.update(additional_claims)
@@ -112,7 +113,7 @@ def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depe
 
     access_token = _create_access_token(additional_claims={}, userid=user.userid, username=user.username, scopes=scopes)
 
-    refresh_token = _create_refresh_token(userid=user.userid)
+    refresh_token = _create_refresh_token(userid=user.userid, username=user.username)
     access_token.refresh_token = refresh_token
 
     return access_token
@@ -147,7 +148,7 @@ def create_token_from_refresh_token(refresh_token: str):
     access_token = _create_access_token(additional_claims={}, userid=user.userid, username=user.username, scopes=scopes)
 
     # Issue a new refresh token
-    new_refresh_token = _create_refresh_token(userid=user.userid)
+    new_refresh_token = _create_refresh_token(userid=user.userid, username=user.username)
     access_token.refresh_token = new_refresh_token
     access_token.grant_type = 'refresh_token'
 

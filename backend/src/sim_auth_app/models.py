@@ -9,7 +9,8 @@ import uuid
 from enum import StrEnum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 #
@@ -45,14 +46,6 @@ class Token(BaseModel):
     refresh_token: Optional[str] = None
     # The grant type for the token.
     grant_type: Optional[str] = None
-
-
-class TokenData(BaseModel):
-    """Contains decoded JWT token data including user identity and authorization scope."""
-
-    userid: uuid.UUID
-    username: str
-    scope: str | None
 
 
 class User(BaseModel):

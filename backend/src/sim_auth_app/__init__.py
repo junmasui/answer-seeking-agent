@@ -7,7 +7,7 @@ and https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
 
 from typing import Annotated
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Form
 from fastapi.security import OAuth2PasswordRequestForm
 
 from .models import Token
@@ -36,6 +36,6 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
 
 @app.post('/refresh', response_model=Token)
-async def refresh_access_token(refresh_token: str) -> Token:
+async def refresh_access_token(refresh_token: Annotated[str, Form()]) -> Token:
     """Return a new JWT token for the user specified in the refresh token."""
     return create_token_from_refresh_token(refresh_token)

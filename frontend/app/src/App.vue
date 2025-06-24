@@ -113,6 +113,11 @@ function signIn() {
 function signInSucceeded() {
   // If user was trying to access a protected route, redirect there
   // Otherwise, redirect to conversational page
+
+  console.log(`ACCESS ${accessToken.value}`)
+  console.log(`REFRESH ${refreshToken.value}`)
+  console.log(`REFRESH ${refreshAccessAfter.value}`)
+
   const returnTo = route.query.returnTo || '/conversational'
   router.push(returnTo)
 }

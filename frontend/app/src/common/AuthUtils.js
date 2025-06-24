@@ -1,9 +1,14 @@
 import { useCurrentUserStore } from './CurrentUserStore'
 import { storeToRefs } from 'pinia'
+import { ACCESS_TOKEN_EXPIRY_BUFFER_SECONDS } from './AppConstants'
 
 export async function getAuthorization() {
   const currentUserStore = useCurrentUserStore()
   const { signedIn, accessToken, refreshToken, refreshAccessAfter } = storeToRefs(currentUserStore)
+
+  console.log(`ACCESS ${accessToken.value}`)
+  console.log(`REFRESH ${refreshToken.value}`)
+  console.log(`REFRESH ${refreshAccessAfter.value}`)
 
   if (signedIn.value) {
     const now = new Date()
@@ -30,7 +35,9 @@ export async function getAuthorization() {
         const expiresIn = data.expires_in
         const newNow = new Date()
         // 30-second safety window
-        refreshAccessAfter.value = new Date(newNow.getTime() + (expiresIn - 30) * 1000)
+        refreshAccessAfter.value = new Date(
+          newNow.getTime() + (expiresIn - ACCESS_TOKEN_EXPIRY_BUFFER_SECONDS) * 1000
+        )
       } catch (error) {
         console.error('Failed to refresh access token:', error)
         // Sign out
