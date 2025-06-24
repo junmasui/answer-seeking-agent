@@ -5,7 +5,9 @@ export const useCurrentUserStore = defineStore('currentUser', {
     return {
       signedIn: false,
       username: '',
-      accessToken: ''
+      accessToken: '',
+      refreshToken: '',
+      refreshAccessAfter: null
     }
   },
   persist: true

@@ -55,6 +55,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { ACCESS_TOKEN_EXPIRY_BUFFER_SECONDS } from './AppConstants'
 
 const active = defineModel('active', {
   type: Boolean,
@@ -67,6 +68,14 @@ const signedIn = defineModel('signedIn', {
 const accessToken = defineModel('accessToken', {
   type: String,
   default: ''
+})
+const refreshToken = defineModel('refreshToken', {
+  type: String,
+  default: ''
+})
+const refreshAccessAfter = defineModel('refreshAccessAfter', {
+  type: Date,
+  default: null
 })
 
 const emit = defineEmits(['onSuccess', 'onFail'])
@@ -128,9 +137,22 @@ async function onConfirm() {
 
     const data = await response.json()
 
+    console.log(`DATA ${JSON.stringify(data, null, 2)}`)
+
     signedIn.value = true
 
     accessToken.value = data.access_token
+    refreshToken.value = data.refresh_token
+    const now = new Date()
+    // 30-second safety window
+    refreshAccessAfter.value = new Date(
+      now.getTime() + (data.expires_in - ACCESS_TOKEN_EXPIRY_BUFFER_SECONDS) * 1000
+    )
+
+    console.log(`ACCESS ${accessToken.value}`)
+    console.log(`REFRESH ${refreshToken.value}`)
+    console.log(`REFRESH ${refreshAccessAfter.value}`)
+
     emit('onSuccess')
   } catch (error) {
     console.error('Could not sign in:', error)

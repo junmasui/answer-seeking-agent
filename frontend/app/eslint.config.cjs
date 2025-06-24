@@ -46,7 +46,7 @@ module.exports = [
       
       // Vue-specific rules
       'vue/multi-word-component-names': 'warn',
-      'vue/component-api-style': ['error', ['script setup']],
+      'vue/component-api-style': ['error', ['script-setup']],
       'vue/attribute-hyphenation': ['error', 'always'],
       'vue/no-v-model-argument': 'off' // Explicitly disable v-model argument rule
     },
