@@ -76,8 +76,8 @@ class ResponseOverallGrade(StrEnum):
     """
     Represents the possible overall grades for the generated response.
 
-    These grades determine whether the response is accepted, rejected, or if parts of the process need
-    to be redone.
+    These grades determine whether the response is accepted, rejected, or if parts of the process
+    need to be redone.
     """
 
     REDO_DOCUMENT_RETRIEVAL = 'redo document retrieval'

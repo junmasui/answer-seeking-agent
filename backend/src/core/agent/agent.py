@@ -11,10 +11,10 @@ from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, START, StateGraph
 from langgraph.pregel import Pregel
 
-from core.agent.document_guard import build_retrieval_guard_subgraph
 from core.agent.input_guard import build_input_guard_subgraph
 from core.agent.node_util import no_op
 from core.agent.response_guard import build_response_guard_subgraph
+from core.agent.retrieval_guard import build_retrieval_guard_subgraph
 
 from ..doc_mgr import list_document_sets
 from ..lib_config import get_lib_config
@@ -322,7 +322,10 @@ def _build_response_subgraph():
     response_subgraph.add_conditional_edges(
         NodeName.RESPONSE_GUARD,
         get_answer_grade_in_subgraph,
-        {ResponseOverallGrade.REDO_RESPONSE_GENERATION: NodeName.GENERATE_RESPONSE, '__default__': NodeName.RESPONSE_EXIT},
+        {
+            ResponseOverallGrade.REDO_RESPONSE_GENERATION: NodeName.GENERATE_RESPONSE,
+            '__default__': NodeName.RESPONSE_EXIT,
+        },
     )
     response_subgraph.set_finish_point(NodeName.RESPONSE_EXIT)
     return response_subgraph

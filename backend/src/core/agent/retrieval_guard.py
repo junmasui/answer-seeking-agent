@@ -4,8 +4,8 @@ from langgraph.graph import StateGraph
 
 from core.agent.constants import NodeName
 from core.agent.deciders import check_for_relevant_documents, gather_relevant_documents
-from core.agent.document_grader import grade_document_relevancies
 from core.agent.node_util import no_op
+from core.agent.retrieval_grader import grade_document_relevancies
 
 from .agent_state import GraphState
 from .nemo_guards import execute_nemo_guardrails_check
