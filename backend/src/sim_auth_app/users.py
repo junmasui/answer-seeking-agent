@@ -1,6 +1,9 @@
+import logging
 import uuid
 
-from .models import TokenData, User
+from .models import User
+
+logger = logging.getLogger(__name__)
 
 
 def generate_uuid_from_username(name):
@@ -27,38 +30,18 @@ def get_user_by_name(*, username: str = None):
     return User(userid=userid, username=username)
 
 
-def get_user_by_id(*, userid: str = None):
-    """
-    Retrieve a user object by user ID.
-
-    Creates a minimal User object with only the userid populated.
-    """
-    return User(userid=userid)
-
-
 def authenticate_user(username: str, password: str):
     """
     Returns the user object specified by username only when the password check passed.
 
     Otherwise None is returned.
     """
-    user = get_user_by_name(username=username)
-
     # When the mock password is blank or less than 3 characters, fail the
     # password check.
     if len(password) < 3:
         return None
 
     # Since we are simulating authentication, the password check always passes here.
-
-    return user
-
-
-def retrieve_user(token_data: TokenData):
-    """Returns the user object specified in the token data."""
-    user = get_user_by_id(userid=token_data.userid)
-
-    user.username = token_data.username
-    user.scopes = token_data.scope.split(' ')
+    user = get_user_by_name(username=username)
 
     return user

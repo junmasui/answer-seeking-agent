@@ -40,7 +40,7 @@
     </v-app-bar>
     <sign-in-dialog
       v-model:active="performSignIn"
-      v-model:access-token="accessToken"
+      v-model:accessToken="accessToken"
       v-model:signed-in="signedIn"
       @on-success="signInSucceeded"
     >

@@ -54,6 +54,7 @@ async def get_upload_form_data(
     )
 
 
+@router.get('', response_model=DocumentList)  # Empty path handles no trailing slash without using 307 redirect.
 @router.get('/', response_model=DocumentList)
 async def handle_list_files(
     doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')] = None,

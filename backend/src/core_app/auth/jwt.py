@@ -47,9 +47,10 @@ def _decode_token_data(token: str):
             raise_credentials_error('Bearer')
         scopes = scope.split(' ')
 
-        user = User(userid=userid, scope=scopes)
+        user = User(userid=userid, scopes=scopes)
     except InvalidTokenError:
         raise_credentials_error('Bearer')
+
     return user
 
 

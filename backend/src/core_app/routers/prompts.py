@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get('', response_model=AgentPromptList)  # Empty path handles no trailing slash without using 307 redirect.
 @router.get('/', response_model=AgentPromptList)
 async def handle_list_prompts(
     name: Annotated[str, Query(..., description='Prompt name')] = None,

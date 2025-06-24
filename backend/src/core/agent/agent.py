@@ -11,64 +11,28 @@ from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, START, StateGraph
 from langgraph.pregel import Pregel
 
+from core.agent.input_guard import build_input_guard_subgraph
+from core.agent.node_util import no_op
+from core.agent.response_guard import build_response_guard_subgraph
+from core.agent.retrieval_guard import build_retrieval_guard_subgraph
+
 from ..doc_mgr import list_document_sets
+from ..lib_config import get_lib_config
 from ..public_models import Answer, Citation
 from .agent_state import GraphState
-from .answer_generator import generate_answer
-from .answer_grader import grade_answer
 from .checkpointer import get_checkpointer
 from .constants import NodeName, ResponseOverallGrade, RetrievalOverallGrade, UserInputGrade
-from .deciders import (
-    check_for_relevant_documents,
-    check_if_safe_input,
-    check_response_quality,
-    gather_relevant_documents,
-)
-from .document_guards import check_retrieval_with_nemo, check_retrieval_with_presidio
+from .deciders import gather_relevant_documents
 from .document_retriever import query_documents
-from .hallucination_grader import grade_hallucination
-from .input_guards import check_input_with_nemo, check_input_with_presidio
-from .lib_config import get_lib_config
 from .postprocess import add_response_to_history
 from .preprocess import add_input_to_history
-from .question_rewriter import rewrite_question
-from .response_guards import check_output_with_nemo, check_output_with_presidio
-from .retrieval_grader import grade_document_relevancies
+from .query_rewriter import rewrite_question
+from .response_generator import generate_response
+from .state_resetter import reset_state_on_start
 
 logger = logging.getLogger(__name__)
 
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
-
-
-def redo_document_retrieval(_state: GraphState):
-    """
-    Set the answer_grade to 'redo document retrieval' to indicate that document retrieval should
-    be redone.
-    """
-    return {'answer_grade': ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL}
-
-
-def redo_answer_generation(_state: GraphState):
-    """
-    Set the answer_grade to 'redo answer generation' to indicate that answer generation should be
-    redone.
-    """
-    return {'answer_grade': ResponseOverallGrade.REDO_ANSWER_GENERATION}
-
-
-def accept_answer(_state: GraphState):
-    """Set the answer_grade to 'accept answer' to indicate that the current answer is acceptable."""
-    return {'answer_grade': ResponseOverallGrade.ACCEPT_ANSWER}
-
-
-def no_op(_state: GraphState):
-    """
-    Does nothing.
-
-    This is useful for defining a fan-out or a fan-in node.
-    """
-    logger.info('---No Op---')
-    return {}
 
 
 def get_input_grade(state: GraphState):
@@ -101,9 +65,23 @@ def get_retrieval_grade_in_subgraph(state: GraphState):
 
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
-    if state.retrieval_grade in [RetrievalOverallGrade.NO_RELEVANT_DOCS]:
-        return state.retrieval_grade
-    return '__default__'
+
+    KICK_DECISION_TO_MAIN = '__default__'
+
+    if state.retrieval_grade == RetrievalOverallGrade.RELEVANT_DOCS_FOUND:
+        return KICK_DECISION_TO_MAIN
+
+    if state.retrieval_grade == RetrievalOverallGrade.NO_RELEVANT_DOCS:
+        # If the document retrieval attempts are still under the maximum,
+        # then try again.
+        config = get_lib_config()
+        if state.query_rewrite_count < config.max_query_rewrites:
+            return RetrievalOverallGrade.NO_RELEVANT_DOCS
+
+        logger.warning('Maximum rewrite attempts reached. Exiting retrieval subgraph.')
+        return KICK_DECISION_TO_MAIN
+
+    return KICK_DECISION_TO_MAIN
 
 
 def get_retrieval_grade(state: GraphState):
@@ -121,9 +99,18 @@ def get_retrieval_grade(state: GraphState):
 
     """
     logger.info('---Extracting Retrieval Grade: %s---', state.retrieval_grade)
+
+    # These 2 grades are definitive opinions from the subgraph regarding
+    # the next node. Hence we simply accept the informed opinions.
     if state.retrieval_grade in [RetrievalOverallGrade.REJECT_RETRIEVAL, RetrievalOverallGrade.RELEVANT_DOCS_FOUND]:
         return state.retrieval_grade
-    return '__default__'
+
+    # When no documents were retrieved, we cannot generate a document-grounded response.
+    # Thus we do not go to the response generation phase.
+    if state.retrieval_grade == RetrievalOverallGrade.NO_RELEVANT_DOCS:
+        return RetrievalOverallGrade.REJECT_RETRIEVAL
+
+    return RetrievalOverallGrade.REJECT_RETRIEVAL
 
 
 def get_answer_grade_in_subgraph(state: GraphState):
@@ -141,9 +128,28 @@ def get_answer_grade_in_subgraph(state: GraphState):
 
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
-    if state.answer_grade in [ResponseOverallGrade.REDO_ANSWER_GENERATION]:
-        return state.answer_grade
-    return '__default__'
+
+    KICK_DECISION_TO_MAIN = '__default__'
+
+    if state.answer_grade == ResponseOverallGrade.ACCEPT_RESPONSE:
+        return KICK_DECISION_TO_MAIN
+
+    if state.answer_grade == ResponseOverallGrade.REDO_RESPONSE_GENERATION:
+        # If the response generation attempts are still under the maximum,
+        # then try again.
+        config = get_lib_config()
+        logger.info(
+            'Response generation comparison %d ? %d',
+            state.response_generation_count,
+            config.max_response_generation_attempts,
+        )
+        if state.response_generation_count < config.max_response_generation_attempts:
+            return ResponseOverallGrade.REDO_RESPONSE_GENERATION
+
+        logger.warning('Maximum generate attempts reached. Exiting retrieval subgraph.')
+        return KICK_DECISION_TO_MAIN
+
+    return KICK_DECISION_TO_MAIN
 
 
 def get_answer_grade(state: GraphState):
@@ -161,19 +167,33 @@ def get_answer_grade(state: GraphState):
 
     """
     logger.info('---Extracting Response Grade: %s---', state.answer_grade)
-    if state.answer_grade in [
-        ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL,
-        ResponseOverallGrade.ACCEPT_ANSWER,
-        ResponseOverallGrade.REJECT_ANSWER,
-    ]:
+
+    # These 2 grades are definitive opinions from the subgraph regarding
+    # the next node. Hence we simply accept the informed opinions.
+    if state.answer_grade in [ResponseOverallGrade.REJECT_RESPONSE, ResponseOverallGrade.ACCEPT_RESPONSE]:
         return state.answer_grade
-    return '__default__'
+
+    # No acceptable answer was generated, despite retrying.
+    if state.answer_grade == ResponseOverallGrade.REDO_RESPONSE_GENERATION:
+        return ResponseOverallGrade.REJECT_RESPONSE
+
+    if state.answer_grade == ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL:
+        # If the document retrieval attempts reached the
+        # maximum number of attempts, then we should reject the retrieval.
+        config = get_lib_config()
+        logger.info('Query rewrite comparison %d ? %d', state.query_rewrite_count, config.max_query_rewrites)
+        if state.query_rewrite_count < config.max_query_rewrites:
+            return ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL
+
+        logger.warning('Maximum rewrite attempts reached. Exiting graph.')
+
+    return ResponseOverallGrade.REJECT_RESPONSE
 
 
 def _get_uncompiled_agent_graph() -> StateGraph:
     """Define and return the uncompiled LangGraph agent graph structure."""
     # Build subgraph for input guards.
-    input_guard_subgraph = _build_input_guard_subgraph()
+    input_guard_subgraph = build_input_guard_subgraph()
 
     # Build subgraph for document retrieval.
 
@@ -188,20 +208,22 @@ def _get_uncompiled_agent_graph() -> StateGraph:
     graph = StateGraph(GraphState)
 
     # Define the nodes
-    graph.add_node(NodeName.BAD_INPUT, no_op)
-    graph.add_node(NodeName.BAD_RETRIEVAL, no_op)
-    graph.add_node(NodeName.BAD_RESPONSE, no_op)
+    graph.add_node(NodeName.BAD_INPUT, no_op('Bad input'))
+    graph.add_node(NodeName.BAD_RETRIEVAL, no_op('Bad Retrieval'))
+    graph.add_node(NodeName.BAD_RESPONSE, no_op('Bad Response'))
 
+    graph.add_node(NodeName.RESET_STATE_ON_START, reset_state_on_start)
     graph.add_node(NodeName.ADD_QUERY_TO_HISTORY, add_input_to_history)
     graph.add_node(NodeName.ADD_RESPONSE_TO_HISTORY, add_response_to_history)
 
     graph.add_node(NodeName.INPUT_GUARD, input_guard_subgraph.compile())
 
     graph.add_node(NodeName.RETRIEVE_DOCUMENTS, retrieval_subgraph.compile())
-    graph.add_node(NodeName.GENERATE_ANSWER, response_subgraph.compile())
+    graph.add_node(NodeName.GENERATE_RESPONSE, response_subgraph.compile())
 
     # Build graph
-    graph.add_edge(START, NodeName.INPUT_GUARD)
+    graph.add_edge(START, NodeName.RESET_STATE_ON_START)
+    graph.add_edge(NodeName.RESET_STATE_ON_START, NodeName.INPUT_GUARD)
     graph.add_conditional_edges(
         NodeName.INPUT_GUARD,
         get_input_grade,
@@ -219,93 +241,24 @@ def _get_uncompiled_agent_graph() -> StateGraph:
         get_retrieval_grade,
         {
             RetrievalOverallGrade.REJECT_RETRIEVAL: NodeName.BAD_RETRIEVAL,
-            RetrievalOverallGrade.RELEVANT_DOCS_FOUND: NodeName.GENERATE_ANSWER,
+            RetrievalOverallGrade.RELEVANT_DOCS_FOUND: NodeName.GENERATE_RESPONSE,
         },
     )
     graph.add_edge(NodeName.BAD_RETRIEVAL, END)
 
     graph.add_conditional_edges(
-        NodeName.GENERATE_ANSWER,
+        NodeName.GENERATE_RESPONSE,
         get_answer_grade,
         {
             ResponseOverallGrade.REDO_DOCUMENT_RETRIEVAL: NodeName.RETRIEVE_DOCUMENTS,
-            ResponseOverallGrade.ACCEPT_ANSWER: NodeName.ADD_RESPONSE_TO_HISTORY,
-            ResponseOverallGrade.REJECT_ANSWER: NodeName.BAD_RESPONSE,
+            ResponseOverallGrade.ACCEPT_RESPONSE: NodeName.ADD_RESPONSE_TO_HISTORY,
+            ResponseOverallGrade.REJECT_RESPONSE: NodeName.BAD_RESPONSE,
         },
     )
     graph.add_edge(NodeName.ADD_RESPONSE_TO_HISTORY, END)
     graph.add_edge(NodeName.BAD_RESPONSE, END)
 
     return graph
-
-
-def _build_input_guard_subgraph():
-    """
-    Build and return a StateGraph for the input guard subgraph.
-
-    This subgraph handles input validation tasks like prompt injection,
-    privacy violation, and toxic input detection.
-
-    Returns:
-        A StateGraph instance for the input guard subgraph.
-
-    """
-    input_guard_subgraph = StateGraph(GraphState)
-
-    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_START, no_op)
-    input_guard_subgraph.add_node(NodeName.INPUT_GUARD_DECISION, check_if_safe_input)
-
-    input_guard_subgraph.add_node(NodeName.CHECK_INPUT_WITH_NEMO, check_input_with_nemo)
-    input_guard_subgraph.add_node(NodeName.CHECK_INPUT_WITH_PRESIDIO, check_input_with_presidio)
-
-    input_guard_subgraph.set_entry_point(NodeName.INPUT_GUARD_START)
-
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.CHECK_INPUT_WITH_NEMO)
-    input_guard_subgraph.add_edge(NodeName.INPUT_GUARD_START, NodeName.CHECK_INPUT_WITH_PRESIDIO)
-
-    input_guard_subgraph.add_edge(
-        [NodeName.CHECK_INPUT_WITH_NEMO, NodeName.CHECK_INPUT_WITH_PRESIDIO], NodeName.INPUT_GUARD_DECISION
-    )
-
-    input_guard_subgraph.set_finish_point(NodeName.INPUT_GUARD_DECISION)
-    return input_guard_subgraph
-
-
-def _build_retrieval_guard_subgraph():
-    """
-    Build and return a StateGraph for the retrieval guard subgraph.
-
-    This subgraph handles tasks related to document retrieval, such as
-    grading relevancies and detecting toxic content.
-
-    Returns:
-        A StateGraph instance for the retrieval guard subgraph.
-
-    """
-    retrieval_guard_subgraph = StateGraph(GraphState)
-
-    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_START, no_op)
-    retrieval_guard_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
-    retrieval_guard_subgraph.add_node(NodeName.RETRIEVAL_GUARD_DECISION, check_for_relevant_documents)
-
-    retrieval_guard_subgraph.add_node(NodeName.GRADE_RELEVANCIES, grade_document_relevancies)  # grade documents
-    retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_NEMO, check_retrieval_with_nemo)
-    retrieval_guard_subgraph.add_node(NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO, check_retrieval_with_presidio)
-
-    retrieval_guard_subgraph.set_entry_point(NodeName.RETRIEVAL_GUARD_START)
-
-    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.GRADE_RELEVANCIES)
-    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.CHECK_RETRIEVAL_WITH_NEMO)
-    retrieval_guard_subgraph.add_edge(NodeName.RETRIEVAL_GUARD_START, NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO)
-
-    retrieval_guard_subgraph.add_edge(
-        [NodeName.GRADE_RELEVANCIES, NodeName.CHECK_RETRIEVAL_WITH_NEMO, NodeName.CHECK_RETRIEVAL_WITH_PRESIDIO],
-        NodeName.GATHER_RELEVANT_DOCUMENTS,
-    )
-    retrieval_guard_subgraph.add_edge(NodeName.GATHER_RELEVANT_DOCUMENTS, NodeName.RETRIEVAL_GUARD_DECISION)
-
-    retrieval_guard_subgraph.set_finish_point(NodeName.RETRIEVAL_GUARD_DECISION)
-    return retrieval_guard_subgraph
 
 
 def _build_retrieval_subgraph():
@@ -320,15 +273,15 @@ def _build_retrieval_subgraph():
 
     """
     # Build subgraph for retrieved document guards.
-    retrieval_guard_subgraph = _build_retrieval_guard_subgraph()
+    retrieval_guard_subgraph = build_retrieval_guard_subgraph()
 
     retrieval_subgraph = StateGraph(GraphState)
 
-    retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)  # retrieve
+    retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)
     retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile())
     retrieval_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
-    retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)  # rewrite_query
-    retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op)
+    retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)
+    retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op('Exit Retrieval Subgraph'))
 
     retrieval_subgraph.set_entry_point(NodeName.QUERY_DOCUMENTS)
     retrieval_subgraph.add_edge(NodeName.QUERY_DOCUMENTS, NodeName.RETRIEVAL_GUARD)
@@ -343,49 +296,6 @@ def _build_retrieval_subgraph():
     return retrieval_subgraph
 
 
-def _build_response_guard_subgraph():
-    """
-    Build and return a StateGraph for the response guard subgraph.
-
-    This subgraph is responsible for ensuring the quality and safety of the
-    generated response by grading the answer, checking for hallucinations,
-    and detecting sensitive or toxic content.
-
-    Returns:
-        A StateGraph instance for the response guard subgraph.
-
-    """
-    response_guard_subgraph = StateGraph(GraphState)
-
-    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_START, no_op)
-    response_guard_subgraph.add_node(NodeName.RESPONSE_GUARD_DECISION, check_response_quality)
-
-    response_guard_subgraph.add_node(NodeName.GRADE_ANSWER, grade_answer)  # grade answers
-    response_guard_subgraph.add_node(NodeName.GRADE_HALLUCINATION, grade_hallucination)  # grade hallucination
-    response_guard_subgraph.add_node(NodeName.CHECK_RESPONSE_WITH_NEMO, check_output_with_nemo)
-    response_guard_subgraph.add_node(NodeName.CHECK_RESPONSE_WITH_PRESIDIO, check_output_with_presidio)
-
-    response_guard_subgraph.set_entry_point(NodeName.RESPONSE_GUARD_START)
-
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_ANSWER)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.GRADE_HALLUCINATION)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.CHECK_RESPONSE_WITH_PRESIDIO)
-    response_guard_subgraph.add_edge(NodeName.RESPONSE_GUARD_START, NodeName.CHECK_RESPONSE_WITH_NEMO)
-
-    response_guard_subgraph.add_edge(
-        [
-            NodeName.GRADE_ANSWER,
-            NodeName.GRADE_HALLUCINATION,
-            NodeName.CHECK_RESPONSE_WITH_NEMO,
-            NodeName.CHECK_RESPONSE_WITH_PRESIDIO,
-        ],
-        NodeName.RESPONSE_GUARD_DECISION,
-    )
-
-    response_guard_subgraph.set_finish_point(NodeName.RESPONSE_GUARD_DECISION)
-    return response_guard_subgraph
-
-
 def _build_response_subgraph():
     """
     Build and return a StateGraph for the response generation subgraph.
@@ -398,21 +308,24 @@ def _build_response_subgraph():
 
     """
     # Build subgraph for response guards.
-    response_guard_subgraph = _build_response_guard_subgraph()
+    response_guard_subgraph = build_response_guard_subgraph()
 
     response_subgraph = StateGraph(GraphState)
-    response_subgraph.add_node(NodeName.GENERATE_ANSWER, generate_answer)
+    response_subgraph.add_node(NodeName.GENERATE_RESPONSE, generate_response)
     response_subgraph.add_node(NodeName.RESPONSE_GUARD, response_guard_subgraph.compile())
-    response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op)
+    response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op('Exit Response Subgraph'))
 
-    response_subgraph.set_entry_point(NodeName.GENERATE_ANSWER)
+    response_subgraph.set_entry_point(NodeName.GENERATE_RESPONSE)
 
-    response_subgraph.add_edge(NodeName.GENERATE_ANSWER, NodeName.RESPONSE_GUARD)
+    response_subgraph.add_edge(NodeName.GENERATE_RESPONSE, NodeName.RESPONSE_GUARD)
 
     response_subgraph.add_conditional_edges(
         NodeName.RESPONSE_GUARD,
         get_answer_grade_in_subgraph,
-        {ResponseOverallGrade.REDO_ANSWER_GENERATION: NodeName.GENERATE_ANSWER, '__default__': NodeName.RESPONSE_EXIT},
+        {
+            ResponseOverallGrade.REDO_RESPONSE_GENERATION: NodeName.GENERATE_RESPONSE,
+            '__default__': NodeName.RESPONSE_EXIT,
+        },
     )
     response_subgraph.set_finish_point(NodeName.RESPONSE_EXIT)
     return response_subgraph
@@ -458,7 +371,7 @@ def get_mermaid_graph():
     return mermaid_graph
 
 
-def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[str]):
+def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[uuid.UUID | str]):
     """
     Seek an answer to the user's input using the agent graph.
 
@@ -481,7 +394,10 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # Initialize Langfuse CallbackHandler for Langchain (tracing)
     if config.enable_langfuse_tracing:
-        langfuse_handler = CallbackHandler(session_id=thread_id.hex, user_id=user_id, sample_rate=1.0)
+        callback_kwargs = {'session_id': thread_id.hex, 'sample_rate': 1.0}
+        if user_id is not None:
+            callback_kwargs['user_id'] = user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+        langfuse_handler = CallbackHandler(**callback_kwargs)
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
@@ -493,7 +409,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     try:
         extra_data = {'thread_id': thread_id.hex}
         if user_id:
-            extra_data['user_id'] = user_id
+            extra_data['user_id'] = user_id.hex
         run_config = {'recursion_limit': 30, 'configurable': extra_data}
         if langfuse_handler is not None:
             run_config['callbacks'] = [langfuse_handler]
@@ -501,7 +417,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
             for key, value in output.items():
                 # Node
                 logger.info("Node '%s':", key)
-                latest_value.update(value)
+                if isinstance(value, dict):
+                    latest_value.update(value)
     except GraphRecursionError as e:
         logger.error('Graph recursion error', exc_info=e)
     except Exception as e:
@@ -509,7 +426,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # If we haven't assigned the answer yet, then pull it from the
     # generated output.
-    answer = latest_value.get('answer', '')
+    answer = latest_value.get('response', '')
     citations = []
 
     if answer:

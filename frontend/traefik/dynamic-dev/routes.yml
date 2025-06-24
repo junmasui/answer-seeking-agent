@@ -14,6 +14,7 @@ http:
       service: fastapi-service
       middlewares:
         - strip-api-prefix
+        - add-api-prefix-header
       tls: {}
 
   middlewares:
@@ -21,6 +22,11 @@ http:
       stripPrefix:
         prefixes:
           - "/api"
+
+    add-api-prefix-header:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Prefix: "/api"
 
   services:
     vite-service:

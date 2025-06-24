@@ -120,6 +120,7 @@ services:
       - answers_minio_dev_env
       - answers_postgres_dev_env
       - checkpoints_postgres_dev_env
+      - langfuse_client_env
       - vectors_postgres_dev_env
       - redis_env
       - weaviate_env

@@ -9,16 +9,16 @@ import logging
 from core.agent.agent_state import GraphState
 
 from ..providers.chat_llm import get_chat_llm
-from .answer_citation_parser import AnswerCitationParser
 from .internal_models import AgentPromptName
 from .prompt_util import get_chat_prompt
+from .response_citation_parser import ResponseCitationParser
 
 logger = logging.getLogger(__name__)
 
 
-def answer_generator():
+def response_generator():
     """
-    Create an answer generation chain for RAG (Retrieval-Augmented Generation).
+    Create a response generation chain for RAG (Retrieval-Augmented Generation).
 
     Combines a chat prompt, language model, and answer citation parser to generate answers from
     retrieved documents with proper citation extraction.
@@ -33,30 +33,33 @@ def answer_generator():
     #     return '\n\n'.join(doc.page_content for doc in docs)
 
     # Chain
-    rag_chain = prompt | llm | AnswerCitationParser()
+    rag_chain = prompt | llm | ResponseCitationParser()
 
-    rag_chain = rag_chain.with_config({'run_name': 'answer_generator'})
+    rag_chain = rag_chain.with_config({'run_name': 'response_generator'})
 
     return rag_chain
 
 
-def generate_answer(state: GraphState):
+def generate_response(state: GraphState):
     """
-    Generate an answer using the RAG agent.
+    Generate an response using the RAG agent.
 
     Args:
         state (dict): The current graph state
 
     Returns:
-        dict: Updates to the graph state with the generated answer and citations
+        dict: Updates to the graph state with the generated response and citations
 
     """
     logger.info('---GENERATE ANSWER---')
     question = state.question
     documents = state.documents
     history = state.messages
+    response_generation_count = state.response_generation_count
 
-    chain = answer_generator()
+    chain = response_generator()
+
+    logger.info('Response generation count %d', response_generation_count)
 
     # RAG generation
     result = chain.invoke(
@@ -65,5 +68,10 @@ def generate_answer(state: GraphState):
     )
 
     # Update state with generated output
-    state_updates = {'generation': result['generation'], 'answer': result['answer'], 'citations': result['citations']}
+    state_updates = {
+        'generation': result['generation'],
+        'response': result['response'],
+        'citations': result['citations'],
+        'response_generation_count': response_generation_count + 1,
+    }
     return state_updates

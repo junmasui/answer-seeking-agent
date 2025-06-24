@@ -2,6 +2,7 @@ import logging
 
 from rich.console import Console
 from rich.logging import RichHandler
+from rich.markup import escape
 
 
 class SafeRichHandler(RichHandler):
@@ -22,7 +23,7 @@ class SafeRichHandler(RichHandler):
         # The RichHandler uses square brackets for its own markup syntax.
         # Thus we need to escape the square brackets that are in the original message.
         if self.markup:
-            message = message.replace('[', r'\[').replace(']', r'\]')
+            message = escape(message)
         return super().render_message(record, message)
 
 

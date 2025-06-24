@@ -15,8 +15,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import logger from '../common/Logger.js'
 
+import { useCurrentUserStore } from '../common/CurrentUserStore'
+
+const currentUserStore = useCurrentUserStore()
+
+const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const systemStatus = ref('unknown')
 const statusColor = ref('primary')
 
@@ -39,8 +45,16 @@ onMounted(async () => {
  */
 async function checkStatus() {
   try {
-    const response = await fetch('/api/live/status', {
-      method: 'GET'
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    if (signedIn.value) {
+      headers.Authorization = `Bearer ${accessToken.value}`
+    }
+    const response = await fetch('/api/status', {
+      method: 'GET',
+      headers
     })
 
     if (!response.ok) {

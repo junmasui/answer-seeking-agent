@@ -66,6 +66,7 @@ def _create_access_token(
 
 def create_token_from_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     """Simulates the user-password workflow inside an true authentication service."""
+    logger.info('creating JWT token from login form')
     user = authenticate_user(username=form_data.username, password=form_data.password)
 
     if not user:
