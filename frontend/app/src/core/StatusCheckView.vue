@@ -19,11 +19,6 @@ import { storeToRefs } from 'pinia'
 import logger from '../common/Logger.js'
 import { getAuthorization } from '../common/AuthUtils.js'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
-
-const currentUserStore = useCurrentUserStore()
-
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const systemStatus = ref('unknown')
 const statusColor = ref('primary')
 

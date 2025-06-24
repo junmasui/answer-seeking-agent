@@ -9,13 +9,8 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import logger from '../common/Logger.js'
 import { getAuthorization } from '../common/AuthUtils.js'
-
-const currentUserStore = useCurrentUserStore()
-
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 /**
  * Handles the ingest all operation by sending a request to process all uploaded documents.

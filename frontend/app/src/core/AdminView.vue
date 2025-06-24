@@ -17,13 +17,8 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import { getAuthorization } from '../common/AuthUtils.js'
-
-const currentUserStore = useCurrentUserStore()
-
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 
 const confirmReset = ref(false)
 

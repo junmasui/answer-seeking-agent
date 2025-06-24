@@ -42,15 +42,12 @@
 import { ref, computed, onMounted, onBeforeUnmount, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useUploadStore } from './UploadStore'
 import logger from '../common/Logger.js'
 import { getAuthorization } from '../common/AuthUtils.js'
 
-const currentUserStore = useCurrentUserStore()
 const updateStore = useUploadStore()
 
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { fileList, selectedDocSet } = storeToRefs(updateStore)
 
 const downloading = ref(false)

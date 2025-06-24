@@ -94,15 +94,12 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getAuthorization } from '../common/AuthUtils.js'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
 
-const currentUserStore = useCurrentUserStore()
 const documentStore = useDocumentStore()
 
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentStore)
 const tableUpdatedAt = ref()
 const tableOutdated = ref(false)
