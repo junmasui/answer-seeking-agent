@@ -28,6 +28,54 @@
     item-key="name"
     @update:options="loadItems"
   >
+    <template #header.documentSetName="slotProps">
+      <th
+        :class="slotProps.column.class"
+        :style="slotProps.column.style"
+        @click="slotProps.toggleSort"
+        role="columnheader"
+        :aria-sort="slotProps.isSorted ? ((Array.isArray(slotProps.sortBy) ? (slotProps.sortBy.find(s => s.key === slotProps.column.key)?.order === 'desc') : false) ? 'descending' : 'ascending') : 'none'"
+        tabindex="0"
+      >
+        <div style="display: flex; align-items: center;">
+          <span>{{ slotProps.column.title }}</span>
+          <!-- up/down badge for sorting -->
+          <v-icon v-if="slotProps.isSorted" color="primary" class="ms-1">
+            {{
+              (Array.isArray(slotProps.sortBy)
+                ? (slotProps.sortBy.find(s => s.key === slotProps.column.key)?.order === 'desc')
+                : false)
+                ? 'mdi-arrow-down'
+                : 'mdi-arrow-up'
+            }}
+          </v-icon>
+          <v-icon v-else class="ms-1">mdi-arrow-up-down</v-icon>
+          <!-- number badge for sorting precedence -->
+          <span v-if="slotProps.isSorted && Array.isArray(slotProps.sortBy) && slotProps.sortBy.length > 0" class="v-badge ms-1" style="font-size: 0.75em; color: #1976d2;">
+            {{ (Array.isArray(slotProps.sortBy) ? slotProps.sortBy.findIndex(s => s.key === slotProps.column.key) + 1 : '') }}
+          </span>
+          <!-- filter badge -->
+          <v-menu v-model="showDocumentSetFilter" :close-on-content-click="false">
+            <template #activator="{ props }">
+              <v-icon v-bind="props" small class="ms-1" color="primary">mdi-filter-variant</v-icon>
+            </template>
+            <v-card>
+              <!-- The clear button does not always emit an input event -->
+              <v-text-field
+                v-model="filterDocumentSet"
+                label="Filter by Document Set"
+                @input="onDocumentSetFilterChange"
+                @click:clear="onDocumentSetFilterChange"
+                clearable
+                dense
+                hide-details
+              />
+            </v-card>
+          </v-menu>
+        </div>
+      </th>
+    </template>
+    <!-- Custom rendering of actions column -->
     <template #item.actions="{ item, index }">
       <div class="action-icons">
         <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
@@ -100,7 +148,7 @@ import logger from '../common/Logger.js'
 
 const documentStore = useDocumentStore()
 
-const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentStore)
+const { page, itemsPerPage, totalItems, items, selectedItems, filterDocumentSet, showDocumentSetFilter } = storeToRefs(documentStore)
 const tableUpdatedAt = ref()
 const tableOutdated = ref(false)
 
@@ -109,7 +157,7 @@ const loading = ref(false)
 const tableHeaders = ref([
   {
     title: 'File Name',
-    value: 'name',
+    key: 'name',
     width: '500px',
     sortable: true
   },
@@ -118,7 +166,7 @@ const tableHeaders = ref([
     title: 'Document Set',
     key: 'documentSetName',
     width: '150px',
-    sortable: false
+    sortable: true
   },
   {
     title: 'Source URL',
@@ -130,7 +178,7 @@ const tableHeaders = ref([
     title: 'Content Type',
     key: 'contentType',
     width: '50px',
-    sortable: false
+    sortable: true
   },
   { title: 'Status', key: 'status', width: '50px', sortable: true },
   {
@@ -618,6 +666,10 @@ async function loadTableStats() {
 // Loading data from server
 //
 
+function onDocumentSetFilterChange() {
+  loadItems()
+}
+
 /**
  * Loads document data from the server with pagination and sorting support.
  * Fetches documents based on current page, items per page, and sort criteria, then updates the table display.
@@ -652,6 +704,10 @@ async function loadItems() {
         .join(',')
 
       params.append('sortBy', sortByParam)
+    }
+    // Add document set filter if set
+    if (filterDocumentSet.value) {
+      params.append('documentSetName', filterDocumentSet.value)
     }
 
     const response = await fetch(`/api/documents/?${params}`, {

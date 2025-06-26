@@ -5,6 +5,7 @@ from typing import Optional, Sequence
 from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased, subqueryload
 
+from core.db_models.doc_mgr import DbTrackedDocumentSet
 from core.public_models.doc import DocumentStatus
 
 from ...db_models import DbTrackedDocument
@@ -43,10 +44,12 @@ def list_documents(
     start: Optional[int] = None,
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
+    document_set_name: Optional[str] = None
 ):
     """Return the list of files in cloud storage."""
     existing_objs = _list_tracking_records(
-        doc_set_id=doc_set_id, status=status, file_name=file_name, start=start, length=length, sort_by=sort_by
+        doc_set_id=doc_set_id, status=status, file_name=file_name, start=start, length=length, sort_by=sort_by,
+        document_set_name=document_set_name
     )
     table_stats = get_document_statistics()
 
@@ -89,6 +92,7 @@ def _list_tracking_records(
     start: Optional[int] = None,
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
+    document_set_name: Optional[str] = None
 ):
     """
     Return a page of tracking records.
@@ -102,13 +106,22 @@ def _list_tracking_records(
 
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
+    # Determine if we need to explicitly join the related table for sorting inside the
+    # primary SQL query. The relationship between SQLAlchemy classes is used only for
+    # followup SQL queries to access related data. The explicit join is needed for
+    # scenarios that involve WHERE and ORDER BY in the primary SQL query.
+    join_document_set = _should_join_document_set(sort_by)
+
     with sessionmaker() as session:
         paginate = start is not None and length is not None
 
         core_query = select(DbTrackedDocument)
+        if join_document_set:
+            # Explicitly join to the related document set table for sorting
+            core_query = core_query.join(DbTrackedDocument.document_set)
 
         # Apply query filters
-        where = _build_query_filter(doc_set_id, status, file_name)
+        where = _build_query_filter(doc_set_id, status, file_name, document_set_name)
 
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -132,6 +145,7 @@ def _list_tracking_records(
             # Query the CTE
             query = (
                 select(WindowedTrackedDocument)
+                # Eager load the document set records in a single query.
                 .options(subqueryload(WindowedTrackedDocument.document_set))
                 .where(
                     # NOTE: Use the `column` function to directly reference the CTE column
@@ -142,6 +156,7 @@ def _list_tracking_records(
                 )
             )
         else:
+            # Eager load the document set records in a single query.
             query = core_query.options(subqueryload(DbTrackedDocument.document_set))
 
         result = session.execute(query)
@@ -150,10 +165,30 @@ def _list_tracking_records(
     return existing_objs
 
 
+def _should_join_document_set(sort_by):
+    """
+    Determine if the query should explicitly join the document set table for sorting.
+
+    Args:
+        sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
+
+    Returns:
+        bool: True if sorting by 'document_set_name', otherwise False.
+    """
+    join_document_set = False
+    if sort_by:
+        for field, _ in sort_by:
+            if field == 'document_set_name':
+                join_document_set = True
+                break
+    return join_document_set
+
+
 def _build_query_filter(
     doc_set_id: Optional[uuid.UUID | list[uuid.UUID]],
     status: Optional[DocumentStatus | list[DocumentStatus]],
     file_name: Optional[str],
+    document_set_name: Optional[str]
 ):
     """
     Build WHERE clause conditions from filter parameters.
@@ -186,6 +221,9 @@ def _build_query_filter(
 
     if file_name is not None:
         where.append(DbTrackedDocument.filename.ilike(file_name))
+
+    if document_set_name is not None:
+        where.append(DbTrackedDocumentSet.name.ilike(document_set_name))
     return where
 
 
@@ -228,12 +266,19 @@ def _build_order_by(sort_by: Optional[list] = None):
                 expr = DbTrackedDocument.file_modified_time
             case 'ingestion_time':
                 expr = DbTrackedDocument.ingested_time
+            case 'document_set_name':
+                # Sort by related document set's name
+                expr = DbTrackedDocumentSet.name
+            case 'content_type':
+                expr = DbTrackedDocument.content_type
             case 'status':
                 expr = DbTrackedDocument.status
             case _:
                 raise ValueError('unknown field name', name)
+        if expr is None:
+            return None
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
         return expr
 
-    order_by = [_to_col(x) for x in sort_by]
+    order_by = [y for x in sort_by if (y := _to_col(x)) is not None]
     return order_by

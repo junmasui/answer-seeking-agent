@@ -68,13 +68,15 @@ async def handle_list_files(
             description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
+    document_set_name: Annotated[str, Query(..., alias='documentSetName', description='Document set name startswith')] = None,
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None,
 ):
     """Returns a list of documents."""
     parsed_sort_by = parse_sort_by(sort_by)
 
     return list_documents(
-        doc_set_id=doc_set_uuid, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by
+        doc_set_id=doc_set_uuid, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by,
+        document_set_name=document_set_name
     )
 
 

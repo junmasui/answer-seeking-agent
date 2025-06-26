@@ -7,7 +7,9 @@ export const useDocumentStore = defineStore('document', {
       itemsPerPage: 10,
       totalItems: 0,
       items: [],
-      selectedItems: []
+      selectedItems: [],
+      filterDocumentSet: '',
+      showDocumentSetFilter: false
     }
   }
 })
