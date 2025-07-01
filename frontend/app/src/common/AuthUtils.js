@@ -6,10 +6,6 @@ export async function getAuthorization() {
   const currentUserStore = useCurrentUserStore()
   const { signedIn, accessToken, refreshToken, refreshAccessAfter } = storeToRefs(currentUserStore)
 
-  console.log(`ACCESS ${accessToken.value}`)
-  console.log(`REFRESH ${refreshToken.value}`)
-  console.log(`REFRESH ${refreshAccessAfter.value}`)
-
   if (signedIn.value) {
     const now = new Date()
     const refreshDate = refreshAccessAfter.value ? new Date(refreshAccessAfter.value) : null

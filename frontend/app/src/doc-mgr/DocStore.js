@@ -8,8 +8,8 @@ export const useDocumentStore = defineStore('document', {
       totalItems: 0,
       items: [],
       selectedItems: [],
-      filterDocumentSet: '',
-      showDocumentSetFilter: false
+      documentSetFilter: '',
+      contentTypeFilter: ''
     }
   }
 })

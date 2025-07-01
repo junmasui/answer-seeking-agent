@@ -1,91 +1,31 @@
 <template>
-  <v-banner
-    v-if="tableOutdated"
-    class="pa-2 ma-2"
-    icon="mdi-alert-circle"
-    color="warning"
-    lines="one"
-  >
-    <v-banner-text> Newer table data is available. </v-banner-text>
-
-    <template #actions>
-      <v-btn variant="text" @click="loadItems">Refresh</v-btn>
-    </template>
-  </v-banner>
-  <v-data-table-server
-    v-model="selectedItems"
+  <standard-data-table
+    :headers="headers"
+    :items-per-page-options="itemsPerPageOptions"
+    v-model:total-items="totalItems"
+    v-model:items="items"
     v-model:sort-by="sortBy"
     v-model:page="page"
     v-model:items-per-page="itemsPerPage"
-    show-select
-    return-object
-    multi-sort
-    :items-per-page-options="itemsPerPageOptions"
-    :items-length="totalItems"
-    :headers="tableHeaders"
-    :items="items"
-    density="compact"
-    item-key="name"
-    @update:options="loadItems"
+    v-model:selected-items="selectedItems"
+    v-model:shouldReload="shouldReload"
+    :active-filter-edit="activeFilterEdit"
+    :edit-document="editDocument"
+    :delete-document="deleteDocument"
+    :loadItems="loadItems"
+    @refresh="loadItems"
+    :loadTableStats="loadTableStats"
   >
-    <template #header.documentSetName="slotProps">
-      <th
-        :class="slotProps.column.class"
-        :style="slotProps.column.style"
-        @click="slotProps.toggleSort"
-        role="columnheader"
-        :aria-sort="slotProps.isSorted ? ((Array.isArray(slotProps.sortBy) ? (slotProps.sortBy.find(s => s.key === slotProps.column.key)?.order === 'desc') : false) ? 'descending' : 'ascending') : 'none'"
-        tabindex="0"
-      >
-        <div style="display: flex; align-items: center;">
-          <span>{{ slotProps.column.title }}</span>
-          <!-- up/down badge for sorting -->
-          <v-icon v-if="slotProps.isSorted" color="primary" class="ms-1">
-            {{
-              (Array.isArray(slotProps.sortBy)
-                ? (slotProps.sortBy.find(s => s.key === slotProps.column.key)?.order === 'desc')
-                : false)
-                ? 'mdi-arrow-down'
-                : 'mdi-arrow-up'
-            }}
-          </v-icon>
-          <v-icon v-else class="ms-1">mdi-arrow-up-down</v-icon>
-          <!-- number badge for sorting precedence -->
-          <span v-if="slotProps.isSorted && Array.isArray(slotProps.sortBy) && slotProps.sortBy.length > 0" class="v-badge ms-1" style="font-size: 0.75em; color: #1976d2;">
-            {{ (Array.isArray(slotProps.sortBy) ? slotProps.sortBy.findIndex(s => s.key === slotProps.column.key) + 1 : '') }}
-          </span>
-          <!-- filter badge -->
-          <v-menu v-model="showDocumentSetFilter" :close-on-content-click="false">
-            <template #activator="{ props }">
-              <v-icon v-bind="props" small class="ms-1" color="primary">mdi-filter-variant</v-icon>
-            </template>
-            <v-card>
-              <!-- The clear button does not always emit an input event -->
-              <v-text-field
-                v-model="filterDocumentSet"
-                label="Filter by Document Set"
-                @input="onDocumentSetFilterChange"
-                @click:clear="onDocumentSetFilterChange"
-                clearable
-                dense
-                hide-details
-              />
-            </v-card>
-          </v-menu>
-        </div>
-      </th>
+
+  <!-- Templates of Usability -->
+
+  <template #edit-dialog-text>
+      Are you sure you want to edit this item?
     </template>
-    <!-- Custom rendering of actions column -->
-    <template #item.actions="{ item, index }">
-      <div class="action-icons">
-        <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
-          mdi-database-import
-        </v-icon>
-        <v-icon class="me-2" size="small" @click="editItem(item, index)"> mdi-pencil </v-icon>
-        <v-icon size="small" @click="deleteItem(item, index)"> mdi-delete </v-icon>
-      </div>
+    <template #delete-dialog-text>
+      Are you sure you want to delete this item?
     </template>
-  </v-data-table-server>
+  </standard-data-table>
   <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="ingestSelectedItems"
     >Ingest Selected</v-btn
   >
@@ -112,15 +52,12 @@
     Are you sure you want to ingest all uploaded items?
   </confirmation-dialog>
   <confirmation-dialog
-    v-model:active="activeConfirmDeleteItem"
-    @done="closeDeleteItem"
-    @confirmed="applyDeleteItem"
+    v-model:active="activeConfirmDeleteSelected"
+    @canceled="closeDeleteSelected"
+    @confirmed="applyDeleteSelected"
   >
-    Are you sure you want to delete this item?
+    Are you sure you want to delete {{ selectedItemCount }} selected items?
   </confirmation-dialog>
-  <edit-doc-dialog v-model:active="activeEditDoc" @done="closeEditDoc" @confirmed="applyEditDoc">
-  </edit-doc-dialog>
-
   <confirmation-dialog
     v-model:active="activeConfirmIngestSelected"
     @canceled="closeIngestSelected"
@@ -128,62 +65,58 @@
   >
     Are you sure you want to ingest {{ selectedItemCount }} selected items?
   </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmDeleteSelected"
-    @canceled="closeDeleteSelected"
-    @confirmed="applyDeleteSelected"
-  >
-    Are you sure you want to delete {{ selectedItemCount }} selected items?
-  </confirmation-dialog>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
+import StandardDataTable from './StandardDataTable.vue'
+import { ref, computed, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getAuthorization } from '../common/AuthUtils.js'
-
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
 
 const documentStore = useDocumentStore()
 
-const { page, itemsPerPage, totalItems, items, selectedItems, filterDocumentSet, showDocumentSetFilter } = storeToRefs(documentStore)
-const tableUpdatedAt = ref()
-const tableOutdated = ref(false)
-
+const { page, itemsPerPage, totalItems, items, selectedItems, documentSetFilter, contentTypeFilter } = storeToRefs(documentStore)
 const loading = ref(false)
 
-const tableHeaders = ref([
+const headers = ref([
   {
     title: 'File Name',
-    key: 'name',
+    value: 'name',
     width: '500px',
     sortable: true
   },
-  { title: 'Size', key: 'sizeBytes', sortable: true },
+  { title: 'Size', value: 'sizeBytes', width: '100px', sortable: true },
   {
     title: 'Document Set',
-    key: 'documentSetName',
+    value: 'documentSetName',
     width: '150px',
-    sortable: true
+    sortable: true,
+    filterable: true,
+    filterModel: documentSetFilter,
+    onFilterChange: onDocumentSetFilterChange
   },
   {
     title: 'Source URL',
-    key: 'sourceUrl',
+    value: 'sourceUrl',
     width: '300px',
     sortable: false
   },
   {
     title: 'Content Type',
-    key: 'contentType',
+    value: 'contentType',
     width: '50px',
-    sortable: true
+    sortable: true,
+    filterable: true,
+    filterModel: contentTypeFilter,
+    onFilterChagne: onContentTypeFilterChange
   },
-  { title: 'Status', key: 'status', width: '50px', sortable: true },
+  { title: 'Status', value: 'status', width: '50px', sortable: true },
   {
     title: 'Ingestion Date',
-    key: 'ingestionTime',
+    value: 'ingestionTime',
     width: '150px',
     sortable: true
   },
@@ -195,11 +128,11 @@ const tableHeaders = ref([
   },
   {
     title: 'Download Date',
-    key: 'downloadTimeUtc',
+    value: 'downloadTimeUtc',
     width: '150px',
     sortable: true
   },
-  { title: 'Actions', key: 'actions', width: '50px', sortable: false }
+  { title: 'Actions', value: 'actions', width: '50px', sortable: false }
 ])
 
 const sortBy = ref([])
@@ -219,6 +152,9 @@ const selectedItemCount = computed(() => {
 
 const targetIndex = ref(-1)
 const targetItem = ref({})
+
+const activeFilterEdit = ref({})
+const shouldReload = ref(false)
 
 //
 // Confirmation dialog for one-file ingestion
@@ -288,30 +224,69 @@ async function closeIngestItem() {
 }
 
 //
-// Edit document
+// Confirmation dialog for ingestion of all uploaded files
 //
 
-const activeEditDoc = ref(false)
+const activeConfirmIngestAllUploaded = ref(false)
 
 /**
- * Opens the edit dialog for a specific document.
- * @param {Object} item - The document item to be edited
- * @param {number} index - The index of the item in the table
+ * Opens the confirmation dialog for ingesting all uploaded documents.
+ * Displays a confirmation prompt before proceeding with full batch ingestion.
  */
-function editItem(item, index) {
-  activeEditDoc.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
+function ingestAllUploaded() {
+  activeConfirmIngestAllUploaded.value = true
 }
 
 /**
- * Applies the document edit operation after user confirmation.
- * Calls the editDocument function and closes the dialog.
+ * Applies the operation to ingest all uploaded documents after user confirmation.
+ * Calls the ingestAllUploadedDocuments function to process all uploaded files.
  */
-async function applyEditDoc() {
-  await editDocument(targetItem.value.id)
+async function applyIngestAllUploaded() {
+  await ingestAllUploadedDocuments()
+}
 
-  await closeEditDoc()
+/**
+ * Sends a request to the server to ingest all documents with uploaded status.
+ * Processes all uploaded documents regardless of current selection state.
+ */
+async function ingestAllUploadedDocuments() {
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
+    }
+
+    const body = {
+      allUploaded: true
+    }
+
+    const response = await fetch('/api/documents/ingest', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body, null, 2)
+    })
+
+    if (!response.ok) {
+      throw new Error('Ingest failed')
+    }
+
+    await response.json()
+    logger.apiSuccess('All uploaded documents ingest queued')
+  } catch (error) {
+    console.error('Error ingesting:', error)
+  }
+}
+
+/**
+ * Closes the ingest all confirmation dialog and refreshes the table data.
+ * Called after the batch ingestion operation completes.
+ */
+async function closeIngestAllUploaded() {
+  await loadItems()
 }
 
 /**
@@ -323,43 +298,6 @@ async function editDocument(_doc_uuid) {
   await new Promise((resolve) => setTimeout(resolve, 100))
 }
 
-/**
- * Closes the edit document dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeEditDoc() {
-  await loadItems()
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
-}
-
-//
-// Confirmation dialog for one-file deletion
-//
-
-const activeConfirmDeleteItem = ref(false)
-
-/**
- * Opens the confirmation dialog for deleting a single document.
- * @param {Object} item - The document item to be deleted
- * @param {number} index - The index of the item in the table
- */
-function deleteItem(item, index) {
-  activeConfirmDeleteItem.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
-}
-
-/**
- * Applies the deletion operation after user confirmation.
- * Calls the deleteDocument function with the target item's ID.
- */
-async function applyDeleteItem() {
-  await deleteDocument(targetItem.value.id)
-}
 
 /**
  * Sends a request to the server to delete a specific document.
@@ -389,19 +327,6 @@ async function deleteDocument(doc_uuid) {
   } catch (error) {
     console.error('Error deleting:', error)
   }
-}
-
-/**
- * Closes the delete confirmation dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeDeleteItem() {
-  await loadItems()
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
 }
 
 //
@@ -473,71 +398,6 @@ async function closeIngestSelected() {
   await loadItems()
 }
 
-//
-// Confirmation dialog for ingestion of all uploaded files
-//
-
-const activeConfirmIngestAllUploaded = ref(false)
-
-/**
- * Opens the confirmation dialog for ingesting all uploaded documents.
- * Displays a confirmation prompt before proceeding with full batch ingestion.
- */
-function ingestAllUploaded() {
-  activeConfirmIngestAllUploaded.value = true
-}
-
-/**
- * Applies the operation to ingest all uploaded documents after user confirmation.
- * Calls the ingestAllUploadedDocuments function to process all uploaded files.
- */
-async function applyIngestAllUploaded() {
-  await ingestAllUploadedDocuments()
-}
-
-/**
- * Sends a request to the server to ingest all documents with uploaded status.
- * Processes all uploaded documents regardless of current selection state.
- */
-async function ingestAllUploadedDocuments() {
-  try {
-    const headers = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
-    const auth = await getAuthorization()
-    if (auth) {
-      headers.Authorization = auth
-    }
-
-    const body = {
-      allUploaded: true
-    }
-
-    const response = await fetch('/api/documents/ingest', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body, null, 2)
-    })
-
-    if (!response.ok) {
-      throw new Error('Ingest failed')
-    }
-
-    await response.json()
-    logger.apiSuccess('All uploaded documents ingest queued')
-  } catch (error) {
-    console.error('Error ingesting:', error)
-  }
-}
-
-/**
- * Closes the ingest all confirmation dialog and refreshes the table data.
- * Called after the batch ingestion operation completes.
- */
-async function closeIngestAllUploaded() {
-  await loadItems()
-}
 
 //
 // Confirmation dialog for deletion of selected files
@@ -608,31 +468,11 @@ async function closeDeleteSelected() {
   await loadItems()
 }
 
-//
-// Polling for server table updates.
-//
-
-let intervalId = null
-
-onMounted(async () => {
-  await loadItems()
-
-  intervalId = setInterval(async () => {
-    await loadTableStats()
-  }, 30000)
-})
-
-onBeforeUnmount(() => {
-  clearInterval(intervalId)
-  intervalId = null
-})
-
 /**
  * Loads table statistics from the server to check for data updates.
  * Updates the total item count and tracks when the table was last modified to show refresh notifications.
  */
 async function loadTableStats() {
-  try {
     const headers = {
       Accept: 'application/json'
     }
@@ -652,22 +492,26 @@ async function loadTableStats() {
 
     const data = await response.json()
 
-    totalItems.value = data.documentCount
-    if (tableUpdatedAt.value !== data.tableUpdatedTime) {
-      tableOutdated.value = true
-      tableUpdatedAt.value = data.tableUpdatedTime
+    return {
+      totalItems: data.documentCount,
+      tableUpdatedTime: data.tableUpdatedTime
     }
-  } catch (error) {
-    console.error('Error getting table stats:', error)
-  }
 }
 
 //
 // Loading data from server
 //
 
-function onDocumentSetFilterChange() {
-  loadItems()
+async function onDocumentSetFilterChange() {
+  logger.debug(`on document set filter change ${documentSetFilter.value}`)
+  // Notify the child that data should be reloaded
+  shouldReload.value = true
+}
+
+async function onContentTypeFilterChange() {
+  logger.debug(`on content type filter change ${contentTypeFilter.value}`)
+  // Notify the child that data should be reloaded
+  shouldReload.value = true
 }
 
 /**
@@ -706,8 +550,12 @@ async function loadItems() {
       params.append('sortBy', sortByParam)
     }
     // Add document set filter if set
-    if (filterDocumentSet.value) {
-      params.append('documentSetName', filterDocumentSet.value)
+    if (documentSetFilter.value) {
+      params.append('documentSetName', documentSetFilter.value)
+    }
+    // Add content type filter if set
+    if (contentTypeFilter.value) {
+      params.append('contentType', contentTypeFilter.value)
     }
 
     const response = await fetch(`/api/documents/?${params}`, {
@@ -721,19 +569,16 @@ async function loadItems() {
 
     const data = await response.json()
 
-    totalItems.value = data.documentCount
-    tableUpdatedAt.value = data.tableUpdatedTime
-    tableOutdated.value = false
-    items.value = data.documents.map((item) => toRaw(item))
-  } catch (error) {
-    totalItems.value = 0
-    tableOutdated.value = false
-    items.value = []
+    return {
+      totalItems: data.documentCount,
+      items: data.documents.map((item) => toRaw(item)),
+      tableUpdatedTime: data.tableUpdatedTime
+    }
+  } finally{
     loading.value = false
-    console.error('Error getting files:', error)
   }
-  loading.value = false
 }
+
 </script>
 
 <style>
