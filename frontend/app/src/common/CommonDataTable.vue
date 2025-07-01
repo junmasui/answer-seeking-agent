@@ -65,7 +65,9 @@
             :close-on-content-click="false"
           >
             <template #activator="{ props }">
-              <v-icon v-bind="props" small class="ms-1" color="primary">mdi-filter-variant</v-icon>
+                <v-icon v-bind="props" small class="ms-1">
+                    {{ header.filterModel ? 'mdi-filter-variant-plus' : 'mdi-filter-variant' }}
+                </v-icon>
             </template>
             <v-card>
               <!-- The clear button does not always emit an input event -->
