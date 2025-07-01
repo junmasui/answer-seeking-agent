@@ -1,31 +1,26 @@
 <template>
-  <standard-data-table
-    :headers="headers"
-    :items-per-page-options="itemsPerPageOptions"
+  <common-data-table
     v-model:total-items="totalItems"
     v-model:items="items"
     v-model:sort-by="sortBy"
     v-model:page="page"
     v-model:items-per-page="itemsPerPage"
     v-model:selected-items="selectedItems"
-    v-model:shouldReload="shouldReload"
+    v-model:should-reload="shouldReload"
+    :headers="headers"
+    :items-per-page-options="itemsPerPageOptions"
     :active-filter-edit="activeFilterEdit"
     :edit-document="editDocument"
     :delete-document="deleteDocument"
-    :loadItems="loadItems"
+    :load-items="loadItems"
+    :load-table-stats="loadTableStats"
     @refresh="loadItems"
-    :loadTableStats="loadTableStats"
   >
+    <!-- Templates of Usability -->
 
-  <!-- Templates of Usability -->
-
-  <template #edit-dialog-text>
-      Are you sure you want to edit this item?
-    </template>
-    <template #delete-dialog-text>
-      Are you sure you want to delete this item?
-    </template>
-  </standard-data-table>
+    <template #edit-dialog-text> Are you sure you want to edit this item? </template>
+    <template #delete-dialog-text> Are you sure you want to delete this item? </template>
+  </common-data-table>
   <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="ingestSelectedItems"
     >Ingest Selected</v-btn
   >
@@ -68,7 +63,7 @@
 </template>
 
 <script setup>
-import StandardDataTable from './StandardDataTable.vue'
+import CommonDataTable from '../common/CommonDataTable.vue'
 import { ref, computed, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getAuthorization } from '../common/AuthUtils.js'
@@ -78,7 +73,16 @@ import logger from '../common/Logger.js'
 
 const documentStore = useDocumentStore()
 
-const { page, itemsPerPage, totalItems, items, selectedItems, documentSetFilter, contentTypeFilter } = storeToRefs(documentStore)
+const {
+  page,
+  itemsPerPage,
+  totalItems,
+  items,
+  selectedItems,
+  documentSetFilter,
+  contentTypeFilter,
+  sourceUrlFilter
+} = storeToRefs(documentStore)
 const loading = ref(false)
 
 const headers = ref([
@@ -102,7 +106,10 @@ const headers = ref([
     title: 'Source URL',
     value: 'sourceUrl',
     width: '300px',
-    sortable: false
+    sortable: false,
+    filterable: true,
+    filterModel: sourceUrlFilter,
+    onFilterChange: onSourceUrlFilterChange
   },
   {
     title: 'Content Type',
@@ -111,7 +118,7 @@ const headers = ref([
     sortable: true,
     filterable: true,
     filterModel: contentTypeFilter,
-    onFilterChagne: onContentTypeFilterChange
+    onFilterChange: onContentTypeFilterChange
   },
   { title: 'Status', value: 'status', width: '50px', sortable: true },
   {
@@ -298,7 +305,6 @@ async function editDocument(_doc_uuid) {
   await new Promise((resolve) => setTimeout(resolve, 100))
 }
 
-
 /**
  * Sends a request to the server to delete a specific document.
  * @param {string} doc_uuid - The unique identifier of the document to delete
@@ -398,7 +404,6 @@ async function closeIngestSelected() {
   await loadItems()
 }
 
-
 //
 // Confirmation dialog for deletion of selected files
 //
@@ -473,29 +478,29 @@ async function closeDeleteSelected() {
  * Updates the total item count and tracks when the table was last modified to show refresh notifications.
  */
 async function loadTableStats() {
-    const headers = {
-      Accept: 'application/json'
-    }
-    const auth = await getAuthorization()
-    if (auth) {
-      headers.Authorization = auth
-    }
+  const headers = {
+    Accept: 'application/json'
+  }
+  const auth = await getAuthorization()
+  if (auth) {
+    headers.Authorization = auth
+  }
 
-    const response = await fetch('/api/documents/stats', {
-      method: 'GET',
-      headers
-    })
+  const response = await fetch('/api/documents/stats', {
+    method: 'GET',
+    headers
+  })
 
-    if (!response.ok) {
-      throw new Error('Getting table stats failed')
-    }
+  if (!response.ok) {
+    throw new Error('Getting table stats failed')
+  }
 
-    const data = await response.json()
+  const data = await response.json()
 
-    return {
-      totalItems: data.documentCount,
-      tableUpdatedTime: data.tableUpdatedTime
-    }
+  return {
+    totalItems: data.documentCount,
+    tableUpdatedTime: data.tableUpdatedTime
+  }
 }
 
 //
@@ -510,6 +515,12 @@ async function onDocumentSetFilterChange() {
 
 async function onContentTypeFilterChange() {
   logger.debug(`on content type filter change ${contentTypeFilter.value}`)
+  // Notify the child that data should be reloaded
+  shouldReload.value = true
+}
+
+async function onSourceUrlFilterChange() {
+  logger.debug(`on source URL filter change ${sourceUrlFilter.value}`)
   // Notify the child that data should be reloaded
   shouldReload.value = true
 }
@@ -557,6 +568,10 @@ async function loadItems() {
     if (contentTypeFilter.value) {
       params.append('contentType', contentTypeFilter.value)
     }
+    // Add source URL filter if set
+    if (sourceUrlFilter.value) {
+      params.append('sourceUrl', sourceUrlFilter.value)
+    }
 
     const response = await fetch(`/api/documents/?${params}`, {
       method: 'GET',
@@ -574,11 +589,10 @@ async function loadItems() {
       items: data.documents.map((item) => toRaw(item)),
       tableUpdatedTime: data.tableUpdatedTime
     }
-  } finally{
+  } finally {
     loading.value = false
   }
 }
-
 </script>
 
 <style>

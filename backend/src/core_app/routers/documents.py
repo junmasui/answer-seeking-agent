@@ -57,7 +57,7 @@ async def get_upload_form_data(
 @router.get('', response_model=DocumentList)  # Empty path handles no trailing slash without using 307 redirect.
 @router.get('/', response_model=DocumentList)
 async def handle_list_files(
-    doc_set_uuid: Annotated[uuid.UUID, Path(..., discription='Document set UUID')] = None,
+    doc_set_uuid: Annotated[uuid.UUID, Query(..., description='Document set UUID')] = None,
     page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
     items_per_page: Annotated[int, Query(..., alias='itemsPerPage', description='Item count per page', ge=1)] = 10,
     sort_by: Annotated[
@@ -68,15 +68,44 @@ async def handle_list_files(
             description='Sort by comma-separated list of fields. Higher precedence first, prefix - for descending',
         ),
     ] = 'name',
-    document_set_name: Annotated[str, Query(..., alias='documentSetName', description='Document set name startswith')] = None,
+    document_set_name: Annotated[
+        str, Query(..., alias='documentSetName', description='Document set name startswith')
+    ] = None,
+    content_type: Annotated[str, Query(..., alias='contentType', description='Content type startswith')] = None,
+    source_url: Annotated[str, Query(..., alias='sourceUrl', description='Source URL startswith')] = None,
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None,
 ):
-    """Returns a list of documents."""
+    """
+    Return a list of documents with optional filtering, sorting, and pagination.
+
+    This endpoint retrieves a list of documents, allowing for filtering by various
+    attributes such as document set, content type, and source URL. It also supports
+    pagination and sorting.
+
+    Args:
+        doc_set_uuid: Optional. UUID of a document set to filter by.
+        page: The zero-indexed page number for pagination.
+        items_per_page: The number of items to return per page.
+        sort_by: A comma-separated list of fields to sort by. Prefix a field with
+            '-' for descending order.
+        document_set_name: Optional. Filter documents by the start of the document
+            set name (case-insensitive).
+        content_type: Optional. Filter documents by the start of the content type
+            (case-insensitive).
+        source_url: Optional. Filter documents by the start of the source URL
+            (case-insensitive).
+        _current_user: The authenticated user.
+    """
     parsed_sort_by = parse_sort_by(sort_by)
 
     return list_documents(
-        doc_set_id=doc_set_uuid, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by,
-        document_set_name=document_set_name
+        doc_set_id=doc_set_uuid,
+        start=page * items_per_page,
+        length=items_per_page,
+        sort_by=parsed_sort_by,
+        document_set_name=document_set_name,
+        content_type=content_type,
+        source_url=source_url,
     )
 
 

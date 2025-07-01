@@ -44,12 +44,48 @@ def list_documents(
     start: Optional[int] = None,
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
-    document_set_name: Optional[str] = None
+    document_set_name: Optional[str] = None,
+    content_type: Optional[str] = None,
+    source_url: Optional[str] = None,
 ):
-    """Return the list of files in cloud storage."""
+    """
+    Return a list of documents, with optional filtering, sorting, and pagination.
+
+    This function retrieves a list of documents from the database, applies various
+    filters based on the provided parameters, and can paginate the results. It also
+    gathers statistics about the documents table.
+
+    Args:
+        doc_set_id: Optional. A single UUID or a list of UUIDs to filter documents
+            by their document set.
+        status: Optional. A single DocumentStatus or a list of statuses to filter
+            documents by.
+        file_name: Optional. A string to filter documents by the start of their
+            filename (case-insensitive).
+        start: Optional. The starting index for pagination.
+        length: Optional. The number of documents to return for pagination.
+        sort_by: Optional. A list of tuples, where each tuple contains a field name
+            and a SortDirection, to specify the sorting of the results.
+        document_set_name: Optional. A string to filter documents by the start of
+            their document set name (case-insensitive).
+        content_type: Optional. A string to filter documents by the start of their
+            content type (case-insensitive).
+        source_url: Optional. A string to filter documents by the start of their
+            source URL (case-insensitive).
+
+    Returns:
+        A DocumentList object containing the list of documents and table statistics.
+    """
     existing_objs = _list_tracking_records(
-        doc_set_id=doc_set_id, status=status, file_name=file_name, start=start, length=length, sort_by=sort_by,
-        document_set_name=document_set_name
+        doc_set_id=doc_set_id,
+        status=status,
+        file_name=file_name,
+        start=start,
+        length=length,
+        sort_by=sort_by,
+        document_set_name=document_set_name,
+        content_type=content_type,
+        source_url=source_url,
     )
     table_stats = get_document_statistics()
 
@@ -92,15 +128,37 @@ def _list_tracking_records(
     start: Optional[int] = None,
     length: Optional[int] = None,
     sort_by: Optional[list] = None,
-    document_set_name: Optional[str] = None
+    document_set_name: Optional[str] = None,
+    content_type: Optional[str] = None,
+    source_url: Optional[str] = None,
 ):
     """
-    Return a page of tracking records.
+    Return a page of tracking records from the database with filtering and sorting.
 
-    The implementation is an older known-performance technique. The technique creates a CTE
-    (alternatively, a subquery could have been used) where each row is augmented with the windowing
-    function ROW_NUMBER. Then the rows whose ROW_NUMBER values fall into the page range are choosen.
-    Finally, the row data minus the ROW_NUMBER values are returned.
+    This function constructs and executes a SQL query to fetch document tracking
+    records. It supports filtering by various attributes, sorting, and pagination.
+    For pagination, it uses a Common Table Expression (CTE) with the ROW_NUMBER()
+    window function for performance.
+
+    Args:
+        doc_set_id: Optional. A single UUID or a list of UUIDs to filter documents
+            by their document set.
+        status: Optional. A single DocumentStatus or a list of statuses to filter
+            documents by.
+        file_name: Optional. A string to filter documents by the start of their
+            filename (case-insensitive).
+        start: Optional. The starting index for pagination.
+        length: Optional. The number of documents to return for pagination.
+        sort_by: Optional. A list of tuples for sorting the results.
+        document_set_name: Optional. A string to filter documents by the start of
+            their document set name (case-insensitive).
+        content_type: Optional. A string to filter documents by the start of their
+            content type (case-insensitive).
+        source_url: Optional. A string to filter documents by the start of their
+            source URL (case-insensitive).
+
+    Returns:
+        A list of DbTrackedDocument objects.
     """
     order_by = _build_order_by(sort_by)
 
@@ -121,7 +179,14 @@ def _list_tracking_records(
             core_query = core_query.join(DbTrackedDocument.document_set)
 
         # Apply query filters
-        where = _build_query_filter(doc_set_id, status, file_name, document_set_name)
+        where = _build_query_filter(
+            doc_set_id,
+            status,
+            file_name=file_name,
+            document_set_name=document_set_name,
+            content_type=content_type,
+            source_url=source_url,
+        )
 
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -169,11 +234,9 @@ def _should_join_document_set(sort_by):
     """
     Determine if the query should explicitly join the document set table for sorting.
 
-    Args:
-        sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
+    Args:     sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
 
-    Returns:
-        bool: True if sorting by 'document_set_name', otherwise False.
+    Returns:     bool: True if sorting by 'document_set_name', otherwise False.
     """
     join_document_set = False
     if sort_by:
@@ -187,31 +250,41 @@ def _should_join_document_set(sort_by):
 def _build_query_filter(
     doc_set_id: Optional[uuid.UUID | list[uuid.UUID]],
     status: Optional[DocumentStatus | list[DocumentStatus]],
+    *,
     file_name: Optional[str],
-    document_set_name: Optional[str]
+    document_set_name: Optional[str],
+    content_type: Optional[str],
+    source_url: Optional[str],
 ):
     """
     Build WHERE clause conditions from filter parameters.
 
     Args:
         doc_set_id: Single document set UUID or list of UUIDs to filter by.
-                   If None, no document set filtering is applied.
+            If None, no document set filtering is applied.
         status: Single DocumentStatus or list of statuses to filter by.
-               If None, no status filtering is applied.
-        file_name: Filename pattern for ILIKE matching (case-insensitive).
-                  If None, no filename filtering is applied.
+            If None, no status filtering is applied.
+        file_name: Filename pattern for istartswith matching (case-insensitive).
+            If None, no filename filtering is applied.
+        document_set_name: Document set name pattern for istartswith matching
+            (case-insensitive). If None, no document set name filtering is applied.
+        content_type: Content type pattern for istartswith matching
+            (case-insensitive). If None, no content type filtering is applied.
+        source_url: Source URL pattern for istartswith matching (case-insensitive).
+            If None, no source URL filtering is applied.
 
     Returns:
-        list: List of SQLAlchemy WHERE clause conditions that can be used
-              with and_() or applied individually to a query.
-
+        A list of SQLAlchemy WHERE clause conditions that can be used with and_()
+        or applied individually to a query.
     """
     where = []
+
     if doc_set_id is not None:
         if isinstance(doc_set_id, list):
             where.append(DbTrackedDocument.document_set_id.in_(doc_set_id))
         elif isinstance(doc_set_id, uuid.UUID):
             where.append(DbTrackedDocument.document_set_id == doc_set_id)
+
     if status is not None:
         if isinstance(status, list):
             if len(status) > 0:
@@ -220,10 +293,17 @@ def _build_query_filter(
             where.append(DbTrackedDocument.status == status)
 
     if file_name is not None:
-        where.append(DbTrackedDocument.filename.ilike(file_name))
+        where.append(DbTrackedDocument.filename.istartswith(file_name))
 
     if document_set_name is not None:
-        where.append(DbTrackedDocumentSet.name.ilike(document_set_name))
+        where.append(DbTrackedDocumentSet.name.istartswith(document_set_name))
+
+    if content_type is not None:
+        where.append(DbTrackedDocument.content_type.istartswith(content_type))
+
+    if source_url is not None:
+        where.append(DbTrackedDocument.source_url.istartswith(source_url))
+
     return where
 
 
@@ -231,20 +311,16 @@ def _build_order_by(sort_by: Optional[list] = None):
     """
     Build ORDER BY clause expressions from sort specification.
 
-    Args:
-        sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
-                If None, defaults to [('name', SortDirection.ASC)].
-                Supported field names: 'name', 'size_bytes', 'modification_time',
-                                       'ingestion_time', 'status'
-                Direction should be SortDirection.ASC or SortDirection.DESC
+    Args:     sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria. If
+    None, defaults to [('name', SortDirection.ASC)].             Supported field names: 'name',
+    'size_bytes', 'modification_time',                                    'ingestion_time', 'status'
+    Direction should be SortDirection.ASC or SortDirection.DESC
 
-    Returns:
-        list: List of SQLAlchemy order_by expressions that can be passed to query.order_by()
+    Returns:     list: List of SQLAlchemy order_by expressions that can be passed to
+    query.order_by()
 
-    Raises:
-        TypeError: If sort_by is not a list or tuple
-        ValueError: If sort_by is empty or contains unknown field names
-
+    Raises:     TypeError: If sort_by is not a list or tuple     ValueError: If sort_by is empty or
+    contains unknown field names
     """
     if sort_by is None:
         sort_by = [('name', SortDirection.ASC)]

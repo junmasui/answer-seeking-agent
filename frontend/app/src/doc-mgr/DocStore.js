@@ -9,7 +9,8 @@ export const useDocumentStore = defineStore('document', {
       items: [],
       selectedItems: [],
       documentSetFilter: '',
-      contentTypeFilter: ''
+      contentTypeFilter: '',
+      sourceUrlFilter: ''
     }
   }
 })
