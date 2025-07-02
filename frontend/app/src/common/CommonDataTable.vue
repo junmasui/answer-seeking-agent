@@ -13,7 +13,7 @@
       </template>
     </v-banner>
     <v-data-table-server
-      v-model="internalSelectedItems"
+      v-model="selectedItems"
       v-model:sort-by="sortBy"
       v-model:page="page"
       v-model:items-per-page="itemsPerPage"
@@ -34,6 +34,7 @@
             -->
       <template
         v-for="header in headers"
+        :key="header.value"
         #[`header.${header.value}`]="{ column, isSorted, sortBy }"
       >
         <div
@@ -211,15 +212,11 @@ const props = defineProps({
 
 /**
  * Defines the events emitted by the component.
- * @emits refresh - When the table data needs to be refreshed.
  * @emits confirmDelete - When the user confirms a delete action.
  */
-const emit = defineEmits(['refresh', 'confirmDelete'])
+const emit = defineEmits(['confirmDelete'])
 
-const internalSelectedItems = selectedItems
-const activeConfirmEdit = ref(false)
 const targetItem = ref({})
-const targetIndex = ref(-1)
 
 const selectedItemCount = computed(() => {
   return selectedItems.value.length
@@ -330,51 +327,6 @@ watch(shouldRefresh, async (newVal, _oldVal) => {
     await handleRefresh()
   }
 })
-
-
-//
-// Edit
-//
-
-/**
- * Opens the edit confirmation dialog for a specific item.
- * @param {Object} item - The item to edit
- * @param {number} index - The index of the item in the table
- */
-function openEditDialog(item, index) {
-  targetItem.value = { ...item }
-  targetIndex.value = index
-  activeConfirmEdit.value = true
-}
-
-/**
- * Closes the edit document dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeEditDialog() {
-  await callLoadItems()
-
-  targetItem.value = {}
-  targetIndex.value = -1
-  activeConfirmEdit.value = false
-}
-/**
- * Applies the document edit operation after user confirmation.
- * Calls the editDocument function and closes the dialog.
- */
-async function applyEditDoc() {
-  if (props.editDocument && targetItem.value.id) {
-    await props.editDocument(targetItem.value.id)
-  }
-  await closeEditDialog()
-}
-
-/**
- * Handles confirmation of edit dialog by applying the edit operation.
- */
-function confirmEdit() {
-  applyEditDoc()
-}
 
 
 //

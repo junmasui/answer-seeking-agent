@@ -13,7 +13,7 @@
     :delete-multiple-items="deleteMultipleDocuments"
     :load-items="loadItems"
     :load-table-stats="loadTableStats"
-    @refresh="loadItems"
+    :shouldRefresh="shouldRefresh"
   >
 
     <template #delete-dialog-text> Are you sure you want to delete this item? </template>
@@ -52,6 +52,12 @@
       >
         Are you sure you want to ingest {{ selectedItemCount }} selected items?
       </confirmation-dialog>
+      <edit-doc-dialog
+        v-model:active="activeConfirmEdit"
+        @canceled="closeEditDialog"
+        @confirmed="applyEditDoc"
+      >
+      </edit-doc-dialog>
 
     </template>
 
@@ -68,6 +74,7 @@ import { getAuthorization } from '../common/AuthUtils.js'
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
+import EditDocDialog from './EditDocDialog.vue'
 
 const documentStore = useDocumentStore()
 
@@ -83,6 +90,7 @@ const {
 } = storeToRefs(documentStore)
 
 const loading = ref(false)
+const shouldRefresh = ref(false)
 
 const headers = ref([
   {
@@ -217,13 +225,65 @@ async function ingestDocument(doc_uuid) {
  * Resets the target item and index after the operation completes.
  */
 async function closeIngestItem() {
-  await loadItems()
+  shouldRefresh.value = true
 
   nextTick(() => {
     targetItem.value = {}
     targetIndex.value = -1
   })
 }
+
+//
+//
+//
+
+//
+// Edit
+//
+const activeConfirmEdit = ref(false)
+
+/**
+ * Opens the edit confirmation dialog for a specific item.
+ * @param {Object} item - The item to edit
+ * @param {number} index - The index of the item in the table
+ */
+function openEditDialog(item, index) {
+  targetItem.value = { ...item }
+  targetIndex.value = index
+  activeConfirmEdit.value = true
+}
+
+/**
+ * Closes the edit document dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
+async function closeEditDialog() {
+  shouldRefresh.value = true
+
+  targetItem.value = {}
+  targetIndex.value = -1
+  activeConfirmEdit.value = false
+}
+/**
+ * Applies the document edit operation after user confirmation.
+ * Calls the editDocument function and closes the dialog.
+ */
+async function applyEditDoc() {
+  if (props.editDocument && targetItem.value.id) {
+    await props.editDocument(targetItem.value.id)
+  }
+  await closeEditDialog()
+}
+
+/**
+ * Handles confirmation of edit dialog by applying the edit operation.
+ */
+function confirmEdit() {
+  applyEditDoc()
+}
+
+
+
 
 //
 // Confirmation dialog for ingestion of all uploaded files
@@ -288,7 +348,7 @@ async function ingestAllUploadedDocuments() {
  * Called after the batch ingestion operation completes.
  */
 async function closeIngestAllUploaded() {
-  await loadItems()
+  shouldRefresh.value = true
 }
 
 /**
@@ -396,7 +456,7 @@ async function ingestSelectedDocuments() {
  * Called after the batch ingestion operation completes.
  */
 async function closeIngestSelected() {
-  await loadItems()
+  shouldRefresh.value = true
 }
 
 //
