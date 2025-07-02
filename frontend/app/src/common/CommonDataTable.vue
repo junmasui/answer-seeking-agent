@@ -70,23 +70,19 @@
                 </v-icon>
             </template>
             <v-card>
-              <!-- The clear button does not always emit an input event -->
-              <v-text-field
-                v-model="header.filterModel"
-                :label="`Filter by ${header.title}`"
-                clearable
-                dense
-                hide-details
-                @input="header.onFilterChange"
-                @click:clear="header.onFilterChange"
-                @keydown.enter="setShowFilter(header, false)"
-              />
-              <!-- TODO: There are problems:
-                                        @input and @click:clear call out to the parent.
-                                        @kyedown.enter only changes the show/hide state.
-                                        We need:
-                                        when hiding, to call loadItems.
-                            -->
+              <slot :name="`filter-input.${header.value}`" :header="header" :on-filter-change="onFilterChange">
+                <!-- The clear button does not always emit an input event -->
+                <v-text-field
+                  v-model="header.filterModel"
+                  :label="`Filter by ${header.title}`"
+                  clearable
+                  dense
+                  hide-details
+                  @input="onFilterChange"
+                  @click:clear="onFilterChange"
+                  @keydown.enter="setShowFilter(header, false)"
+                />
+              </slot>
             </v-card>
           </v-menu>
         </div>
@@ -95,24 +91,38 @@
       <!-- Customize the contents of the "actions" column for every row. -->
       <template #item.actions="{ item, index }">
         <div class="action-icons">
-          <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>
-          <v-icon size="small" @click="openDeleteDialog(item, index)">mdi-delete</v-icon>
+          <slot name="more-action-icons" :item="item" :index="index">
+          </slot>
+        <v-icon size="small" @click="openDeleteDialog(item, index)">mdi-delete</v-icon>
         </div>
       </template>
     </v-data-table-server>
-    <confirmation-dialog
-      v-model:active="activeConfirmEdit"
-      @done="closeEditDialog"
-      @confirmed="confirmEdit"
-    >
-      <slot name="edit-dialog-text">Are you sure you want to edit this item?</slot>
-    </confirmation-dialog>
+
+    <slot name="more-selected-items-buttons" :selectedItemCount="selectedItemCount">
+    </slot>
+
+    <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="deleteSelectedItems">
+        Delete Selected
+    </v-btn>
+    <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
+
+    <slot name="more-action-dialogs" :selectedItemCount="selectedItemCount">
+    </slot>
+
     <confirmation-dialog
       v-model:active="activeConfirmDelete"
-      @done="closeDeleteDialog"
+      @canceled="cancelDelete"
       @confirmed="confirmDelete"
     >
       <slot name="delete-dialog-text">Are you sure you want to delete this item?</slot>
+    </confirmation-dialog>
+
+    <confirmation-dialog
+        v-model:active="activeConfirmDeleteSelected"
+        @canceled="closeDeleteSelected"
+        @confirmed="applyDeleteSelected"
+    >
+        Are you sure you want to delete {{ selectedItemCount }} selected items?
     </confirmation-dialog>
   </div>
 </template>
@@ -120,47 +130,104 @@
 <script setup>
 import {
   ref,
+  computed,
   watch,
   defineEmits,
   defineProps,
   defineModel,
   onMounted,
   onBeforeUnmount,
-  nextTick
+  nextTick,
 } from 'vue'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '@/common/Logger'
 
 // Use defineModel for v-model bindings
+/**
+ * The currently selected items in the data table.
+ * @model
+ * @type {Array}
+ */
 const selectedItems = defineModel('selectedItems', { type: Array })
+/**
+ * The sorting criteria for the data table.
+ * @model
+ * @type {Array}
+ */
 const sortBy = defineModel('sortBy', { type: Array })
+/**
+ * The current page number.
+ * @model
+ * @type {Number}
+ */
 const page = defineModel('page', { type: Number })
+/**
+ * The number of items to display per page.
+ * @model
+ * @type {Number}
+ */
 const itemsPerPage = defineModel('itemsPerPage', { type: Number })
+/**
+ * The total number of items in the data table.
+ * @model
+ * @type {Number}
+ */
 const totalItems = defineModel('totalItems', { type: Number })
+/**
+ * The items to display in the data table.
+ * @model
+ * @type {Array}
+ */
 const items = defineModel('items', { type: Array })
+/**
+ * The currently active filter edit state.
+ * @model
+ * @type {Object}
+ */
 const activeFilterEdit = defineModel('activeFilterEdit', { type: Object })
-const shouldReload = defineModel('shouldReload', { type: Boolean })
+/**
+ * A flag to indicate that the table should be reloaded.
+ * @model
+ * @type {Boolean}
+ */
+const shouldRefresh = defineModel('shouldRefresh', { type: Boolean })
 
+/**
+ * @property {Array} headers The headers for the data table.
+ * @property {Array} itemsPerPageOptions The options for the number of items to display per page.
+ * @property {Function} deleteSingleItem The function to call when a document is deleted.
+ * @property {Function} deleteMultipleItems The function to call when multiple documents are deleted.
+ * @property {Function} loadItems The function to call to load the items for the data table.
+ * @property {Function} loadTableStats The function to call to load the stats for the data table.
+ */
 const props = defineProps({
   headers: Array,
   itemsPerPageOptions: Array,
-  editDocument: Function,
-  deleteDocument: Function,
+  deleteSingleItem: Function,
+  deleteMultipleItems: Function,
   loadItems: Function,
   loadTableStats: Function
 })
 
-const emit = defineEmits(['edit', 'delete', 'refresh', 'confirmEdit', 'confirmDelete'])
+/**
+ * Defines the events emitted by the component.
+ * @emits refresh - When the table data needs to be refreshed.
+ * @emits confirmDelete - When the user confirms a delete action.
+ */
+const emit = defineEmits(['refresh', 'confirmDelete'])
 
 const internalSelectedItems = selectedItems
 const activeConfirmEdit = ref(false)
-const activeConfirmDelete = ref(false)
 const targetItem = ref({})
 const targetIndex = ref(-1)
 
-function setShowFilter(header, val) {
-  activeFilterEdit.value[header.value] = val
-}
+const selectedItemCount = computed(() => {
+  return selectedItems.value.length
+})
+
+//
+// Sorting
+//
 
 /**
  *
@@ -215,34 +282,60 @@ function sortNumber(columnKey, isSorted, sortBy) {
   return null
 }
 
+//
+// Filtering
+//
+
+function setShowFilter(header, val) {
+  activeFilterEdit.value[header.value] = val
+}
+
+async function onFilterChange() {
+    await nextTick()
+
+    await handleRefresh()
+}
+
+
+
+//
+// Refresh
+//
+
 // Internal state for table freshness
 const tableOutdated = ref(false)
 const tableUpdatedAt = ref()
 
 /**
- * Watches the `shouldReload` model property for changes.
- * When `shouldReload` is set to `true`, this watcher triggers a refresh of the table data
- * by calling `callLoadItems`. After the data is loaded, it resets `shouldReload` to `false`.
- * This allows parent components to programmatically trigger a data reload.
- * @param {boolean} newVal The new value of `shouldReload`.
- * @param {boolean} _oldVal The old value of `shouldReload`.
+ * Refresh
  */
-watch(shouldReload, async (newVal, _oldVal) => {
+async function handleRefresh() {
+    await callLoadItems()
+
+    shouldRefresh.value = false
+}
+
+/**
+ * Watches the `shouldRefresh` model property for changes.
+ * When `shouldRefresh` is set to `true`, this watcher triggers a refresh of the table data
+ * by calling `callLoadItems`. After the data is loaded, it resets `shouldRefresh` to `false`.
+ * This allows parent components to programmatically trigger a data reload.
+ * @param {boolean} newVal The new value of `shouldRefresh`.
+ * @param {boolean} _oldVal The old value of `shouldRefresh`.
+ */
+watch(shouldRefresh, async (newVal, _oldVal) => {
   if (newVal) {
     await nextTick()
 
-    await callLoadItems()
-
-    shouldReload.value = false
+    await handleRefresh()
   }
 })
 
-/**
- * Emits the refresh event to trigger a refresh from the parent.
- */
-function handleRefresh() {
-  emit('refresh')
-}
+
+//
+// Edit
+//
+
 /**
  * Opens the edit confirmation dialog for a specific item.
  * @param {Object} item - The item to edit
@@ -275,49 +368,94 @@ async function applyEditDoc() {
   }
   await closeEditDialog()
 }
-/**
- * Opens the delete confirmation dialog for a specific item.
- * @param {Object} item - The item to delete
- * @param {number} index - The index of the item in the table
- */
-function openDeleteDialog(item, index) {
-  targetItem.value = { ...item }
-  targetIndex.value = index
-  activeConfirmDelete.value = true
-}
-/**
- * Closes the delete confirmation dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeDeleteDialog() {
-  await callLoadItems()
 
-  targetItem.value = {}
-  targetIndex.value = -1
-  activeConfirmDelete.value = false
-}
-/**
- * Applies the deletion operation after user confirmation.
- * Calls the deleteDocument function with the target item's ID.
- */
-async function applyDeleteItem() {
-  if (props.deleteDocument && targetItem.value.id) {
-    await props.deleteDocument(targetItem.value.id)
-  }
-  await closeDeleteDialog()
-}
 /**
  * Handles confirmation of edit dialog by applying the edit operation.
  */
 function confirmEdit() {
   applyEditDoc()
 }
+
+
+//
+// Delete
+//
+
+const activeConfirmDelete = ref(false)
+
+/**
+ * Opens the delete confirmation dialog for a specific item.
+ * @param {Object} item - The item to delete
+ */
+function openDeleteDialog(item) {
+  targetItem.value = { ...item }
+  activeConfirmDelete.value = true
+}
+
 /**
  * Handles confirmation of delete dialog by applying the delete operation.
  */
-function confirmDelete() {
-  applyDeleteItem()
+async function confirmDelete() {
+  if (props.deleteSingleItem && targetItem.value.id) {
+    await props.deleteSingleItem(targetItem.value.id)
+  }
+  await closeDeleteDialog()
 }
+
+/**
+ * Handles cancellation of delete dialog by applying the delete operation.
+ */
+async function cancelDelete() {
+  await closeDeleteDialog()
+}
+
+/**
+ * Closes the delete confirmation dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
+async function closeDeleteDialog() {
+  await handleRefresh()
+
+  targetItem.value = {}
+  activeConfirmDelete.value = false
+}
+
+//
+// Confirmation dialog for deletion of selected files
+//
+const activeConfirmDeleteSelected = ref(false)
+
+/**
+ * Opens the confirmation dialog for deleting multiple selected documents.
+ * Displays a confirmation prompt before proceeding with batch deletion.
+ */
+function deleteSelectedItems() {
+  activeConfirmDeleteSelected.value = true
+}
+
+/**
+ * Applies the batch deletion operation after user confirmation.
+ * Calls the deleteSelectedDocuments function to process all selected items.
+ */
+async function applyDeleteSelected() {
+    await props.deleteMultipleItems(selectedItems.value.map((x) => x.id))
+
+    // Clear the selections
+    selectedItems.value = []
+}
+
+/**
+ * Closes the batch delete confirmation dialog and refreshes the table data.
+ * Called after the batch deletion operation completes.
+ */
+async function closeDeleteSelected() {
+  await handleRefresh()
+}
+
+
+//
+// Load
+//
 
 /**
  * Emits the loadTableStats event to request table stats refresh from the parent.

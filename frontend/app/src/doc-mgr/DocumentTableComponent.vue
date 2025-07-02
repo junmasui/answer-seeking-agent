@@ -6,60 +6,58 @@
     v-model:page="page"
     v-model:items-per-page="itemsPerPage"
     v-model:selected-items="selectedItems"
-    v-model:should-reload="shouldReload"
     :headers="headers"
     :items-per-page-options="itemsPerPageOptions"
     :active-filter-edit="activeFilterEdit"
-    :edit-document="editDocument"
-    :delete-document="deleteDocument"
+    :delete-single-item="deleteDocument"
+    :delete-multiple-items="deleteMultipleDocuments"
     :load-items="loadItems"
     :load-table-stats="loadTableStats"
     @refresh="loadItems"
   >
-    <!-- Templates of Usability -->
 
-    <template #edit-dialog-text> Are you sure you want to edit this item? </template>
     <template #delete-dialog-text> Are you sure you want to delete this item? </template>
-  </common-data-table>
-  <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="ingestSelectedItems"
-    >Ingest Selected</v-btn
-  >
-  <v-btn class="ma-2" size="large" :disabled="totalItems === 0" @click="ingestAllUploaded"
-    >Ingest All Uploaded</v-btn
-  >
-  <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="deleteSelectedItems"
-    >Delete Selected</v-btn
-  >
-  <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
 
-  <confirmation-dialog
-    v-model:active="activeConfirmIngestItem"
-    @done="closeIngestItem"
-    @confirmed="applyIngestItem"
-  >
-    Are you sure you want to ingest this item?
-  </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmIngestAllUploaded"
-    @done="closeIngestAllUploaded"
-    @confirmed="applyIngestAllUploaded"
-  >
-    Are you sure you want to ingest all uploaded items?
-  </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmDeleteSelected"
-    @canceled="closeDeleteSelected"
-    @confirmed="applyDeleteSelected"
-  >
-    Are you sure you want to delete {{ selectedItemCount }} selected items?
-  </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmIngestSelected"
-    @canceled="closeIngestSelected"
-    @confirmed="applyIngestSelected"
-  >
-    Are you sure you want to ingest {{ selectedItemCount }} selected items?
-  </confirmation-dialog>
+    <template #more-action-icons="{item, index}">
+        <v-icon class="me-2" size="small" @click="ingestItem(item, index)">mdi-database-import</v-icon>
+        <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>      
+    </template>
+    <template #more-selected-items-buttons="{ selectedItemCount }">
+      <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="ingestSelectedItems"
+        >Ingest Selected</v-btn
+      >
+      <v-btn class="ma-2" size="large" :disabled="totalItems === 0" @click="ingestAllUploaded"
+        >Ingest All Uploaded</v-btn
+      >
+    </template>
+    <template #more-action-dialogs="{ selectedItemCount }">
+      <confirmation-dialog
+        v-model:active="activeConfirmIngestItem"
+        @canceled="closeIngestItem"
+        @confirmed="applyIngestItem"
+      >
+        Are you sure you want to ingest this item?
+      </confirmation-dialog>
+      <confirmation-dialog
+        v-model:active="activeConfirmIngestAllUploaded"
+        @canceled="closeIngestAllUploaded"
+        @confirmed="applyIngestAllUploaded"
+      >
+        Are you sure you want to ingest all uploaded items?
+      </confirmation-dialog>
+      <confirmation-dialog
+        v-model:active="activeConfirmIngestSelected"
+        @canceled="closeIngestSelected"
+        @confirmed="applyIngestSelected"
+      >
+        Are you sure you want to ingest {{ selectedItemCount }} selected items?
+      </confirmation-dialog>
+
+    </template>
+
+  </common-data-table>
+
+
 </template>
 
 <script setup>
@@ -83,6 +81,7 @@ const {
   contentTypeFilter,
   sourceUrlFilter
 } = storeToRefs(documentStore)
+
 const loading = ref(false)
 
 const headers = ref([
@@ -99,8 +98,7 @@ const headers = ref([
     width: '150px',
     sortable: true,
     filterable: true,
-    filterModel: documentSetFilter,
-    onFilterChange: onDocumentSetFilterChange
+    filterModel: documentSetFilter
   },
   {
     title: 'Source URL',
@@ -108,8 +106,7 @@ const headers = ref([
     width: '300px',
     sortable: false,
     filterable: true,
-    filterModel: sourceUrlFilter,
-    onFilterChange: onSourceUrlFilterChange
+    filterModel: sourceUrlFilter
   },
   {
     title: 'Content Type',
@@ -117,8 +114,7 @@ const headers = ref([
     width: '50px',
     sortable: true,
     filterable: true,
-    filterModel: contentTypeFilter,
-    onFilterChange: onContentTypeFilterChange
+    filterModel: contentTypeFilter
   },
   { title: 'Status', value: 'status', width: '50px', sortable: true },
   {
@@ -161,7 +157,6 @@ const targetIndex = ref(-1)
 const targetItem = ref({})
 
 const activeFilterEdit = ref({})
-const shouldReload = ref(false)
 
 //
 // Confirmation dialog for one-file ingestion
@@ -408,29 +403,11 @@ async function closeIngestSelected() {
 // Confirmation dialog for deletion of selected files
 //
 
-const activeConfirmDeleteSelected = ref(false)
-
-/**
- * Opens the confirmation dialog for deleting multiple selected documents.
- * Displays a confirmation prompt before proceeding with batch deletion.
- */
-function deleteSelectedItems() {
-  activeConfirmDeleteSelected.value = true
-}
-
-/**
- * Applies the batch deletion operation after user confirmation.
- * Calls the deleteSelectedDocuments function to process all selected items.
- */
-async function applyDeleteSelected() {
-  await deleteSelectedDocuments()
-}
-
 /**
  * Sends a request to the server to delete all currently selected documents.
  * Clears the selection after successful deletion and logs the operation.
  */
-async function deleteSelectedDocuments() {
+async function deleteMultipleDocuments(docUuids) {
   try {
     const headers = {
       Accept: 'application/json',
@@ -442,7 +419,7 @@ async function deleteSelectedDocuments() {
     }
 
     const body = {
-      docUuids: selectedItems.value.map((x) => x.id)
+      docUuids
     }
 
     const response = await fetch('/api/documents/delete', {
@@ -455,9 +432,6 @@ async function deleteSelectedDocuments() {
       throw new Error('Delete failed')
     }
 
-    // Clear the selections
-    selectedItems.value = []
-
     await response.json()
     logger.apiSuccess('Selected documents deleted', { count: body.docUuids.length })
   } catch (error) {
@@ -465,13 +439,6 @@ async function deleteSelectedDocuments() {
   }
 }
 
-/**
- * Closes the batch delete confirmation dialog and refreshes the table data.
- * Called after the batch deletion operation completes.
- */
-async function closeDeleteSelected() {
-  await loadItems()
-}
 
 /**
  * Loads table statistics from the server to check for data updates.
@@ -506,24 +473,6 @@ async function loadTableStats() {
 //
 // Loading data from server
 //
-
-async function onDocumentSetFilterChange() {
-  logger.debug(`on document set filter change ${documentSetFilter.value}`)
-  // Notify the child that data should be reloaded
-  shouldReload.value = true
-}
-
-async function onContentTypeFilterChange() {
-  logger.debug(`on content type filter change ${contentTypeFilter.value}`)
-  // Notify the child that data should be reloaded
-  shouldReload.value = true
-}
-
-async function onSourceUrlFilterChange() {
-  logger.debug(`on source URL filter change ${sourceUrlFilter.value}`)
-  // Notify the child that data should be reloaded
-  shouldReload.value = true
-}
 
 /**
  * Loads document data from the server with pagination and sorting support.
