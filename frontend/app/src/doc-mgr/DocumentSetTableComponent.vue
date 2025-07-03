@@ -26,6 +26,7 @@
     <template #more-action-dialogs="{ selectedItemCount }">
       <edit-doc-set-dialog
         v-model:active="activeEditDocSet"
+        v-model="targetDocSet"
         @canceled="closeEditDocSet"
         @confirmed="applyEditDocSet"
       >
@@ -43,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import CommonDataTable from '../common/CommonDataTable.vue'
@@ -92,7 +93,6 @@ const selectedItemCount = computed(() => {
 })
 
 const targetIndex = ref(-1)
-const targetItem = ref({})
 
 const activeFilterEdit = ref({})
 
@@ -122,6 +122,8 @@ function addDocSet() {
  */
 async function applyAddDocSet() {
   await addDocumentSet()
+
+  shouldRefresh.value = true
 }
 
 /**
@@ -156,9 +158,9 @@ async function addDocumentSet() {
     }
 
     await response.json()
-    logger.apiSuccess('Document set added', { name: targetItem.value.name })
+    logger.apiSuccess('Document set added', { name: newDocSet.value.name })
   } catch (error) {
-    logger.apiError('Document set add failed', error, { name: targetItem.value.name })
+    logger.apiError('Document set add failed', error, { name: newDocSet.value.name })
   }
 }
 
@@ -175,6 +177,7 @@ async function closeAddDocSet() {
 //
 // Edit document-set dialog
 //
+const targetDocSet = ref(null)
 const activeEditDocSet = ref(false)
 
 /**
@@ -182,15 +185,9 @@ const activeEditDocSet = ref(false)
  * @param {Object} item - The document set item to be edited
  * @param {number} index - The index of the item in the table
  */
-function editItem(item, index) {
+function openEditDialog(item, _index) {
   activeEditDocSet.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
-
-  logger.debug('Edit document set dialog opened', {
-    docSetName: targetItem.value.name,
-    docSetId: targetItem.value.id
-  })
+  targetDocSet.value = Object.assign({}, item)
 }
 
 /**
@@ -198,7 +195,10 @@ function editItem(item, index) {
  * Calls the editDocumentSet function with the target item's ID.
  */
 async function applyEditDocSet() {
-  await editDocumentSet(targetItem.value.id)
+  await editDocumentSet(targetDocSet.value.id)
+  logger.info('edited doc set')
+
+  await closeEditDocSet()
 }
 
 /**
@@ -217,11 +217,10 @@ async function editDocumentSet(doc_set_uuid) {
     }
 
     const body = {
-      isNewDocDefault: targetItem.value.isNewDocDefault,
-      isPublicViewable: targetItem.value.isPublicViewable
+      name: targetDocSet.value.name,
+      isNewDocDefault: targetDocSet.value.isNewDocDefault,
+      isPublicViewable: targetDocSet.value.isPublicViewable
     }
-
-    logger.debug('Editing document set', { docSetId: doc_set_uuid, changes: body })
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
       method: 'PATCH',
@@ -246,11 +245,7 @@ async function editDocumentSet(doc_set_uuid) {
  */
 async function closeEditDocSet() {
   shouldRefresh.value = true
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
+  targetDocSet.value = {}
 }
 
 //

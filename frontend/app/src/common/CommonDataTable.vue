@@ -112,7 +112,7 @@
     >
       Delete Selected
     </v-btn>
-    <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
+    <v-btn class="ma-2" size="large" @click="handleRefresh">Refresh</v-btn>
 
     <slot name="more-action-dialogs" :selected-item-count="selectedItemCount"> </slot>
 
@@ -311,6 +311,7 @@ const tableUpdatedAt = ref()
  * Refresh
  */
 async function handleRefresh() {
+  logger.info('refreshing - calling load item')
   await callLoadItems()
 
   shouldRefresh.value = false

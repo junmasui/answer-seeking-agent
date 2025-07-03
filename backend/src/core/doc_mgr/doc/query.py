@@ -75,6 +75,7 @@ def list_documents(
 
     Returns:
         A DocumentList object containing the list of documents and table statistics.
+
     """
     existing_objs = _list_tracking_records(
         doc_set_id=doc_set_id,
@@ -159,6 +160,7 @@ def _list_tracking_records(
 
     Returns:
         A list of DbTrackedDocument objects.
+
     """
     order_by = _build_order_by(sort_by)
 
@@ -276,6 +278,7 @@ def _build_query_filter(
     Returns:
         A list of SQLAlchemy WHERE clause conditions that can be used with and_()
         or applied individually to a query.
+
     """
     where = []
 

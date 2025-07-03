@@ -254,7 +254,7 @@ const activeConfirmEdit = ref(false)
  * @param {Object} item - The item to edit
  * @param {number} index - The index of the item in the table
  */
-function openEditDialog(item, index) {
+async function openEditDialog(item, index) {
   targetItem.value = { ...item }
   targetIndex.value = index
   activeConfirmEdit.value = true

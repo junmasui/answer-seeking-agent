@@ -74,6 +74,7 @@ async def handle_single_update(
 
     update_document_set(
         doc_set_uuid,
+        name=body.name,
         is_new_doc_default=body.is_new_doc_default,
         is_public_viewable=body.is_public_viewable,
         last_user_id=user_id,

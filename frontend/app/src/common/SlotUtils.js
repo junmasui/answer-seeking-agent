@@ -2,10 +2,9 @@ import { Comment, Text, Fragment } from 'vue'
 
 function _isVnodesEmpty(vnodes) {
   return vnodes.every((node) => {
-    if (node.type === Comment) return true
-    if (node.type === Text && !node.children.trim()) return true
-    if (node.type === Fragment && _isVnodesEmpty(node.children)) return true
-    return false
+    return (node.type === Comment)
+      || (node.type === Text && !node.children.trim())
+      || (node.type === Fragment && _isVnodesEmpty(node.children))
   })
 }
 

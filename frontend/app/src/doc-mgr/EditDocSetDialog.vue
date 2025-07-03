@@ -31,6 +31,13 @@ const active = defineModel('active', {
 
 const modelValue = defineModel({
   type: Object,
+  default: () => {
+    return {
+      name: '',
+      isPublicViewable: true,
+      isNewDocDefault: false
+    }
+  },
   validator: (value) => {
     const requiredKeys = ['name', 'isPublicViewable', 'isNewDocDefault']
     return requiredKeys.every((key) => key in value)

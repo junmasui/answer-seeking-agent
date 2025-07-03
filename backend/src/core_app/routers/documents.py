@@ -95,6 +95,7 @@ async def handle_list_files(
         source_url: Optional. Filter documents by the start of the source URL
             (case-insensitive).
         _current_user: The authenticated user.
+
     """
     parsed_sort_by = parse_sort_by(sort_by)
 

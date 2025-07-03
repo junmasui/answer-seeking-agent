@@ -25,7 +25,6 @@ __all__ = ['ingest_documents', 'reset_worker_data']
 def _load_one_source(
     source_path: Path,
     tracked_doc_id: UUID,
-    tracked_rel_path: str,
     tracked_doc_set_id: UUID,
     source_url: str,
     content_type: str,
@@ -68,8 +67,6 @@ def _load_one_source(
         # Must convert the 'source' metadata field to a string because the metadata
         # is serialized to JSON then stored in a JSONB column in the database.
         doc.metadata['source'] = str(doc.metadata['source'])
-
-        doc.metadata['relative_path'] = tracked_rel_path
 
         # Add metadata useful for search-time pre-filtering, such as the document set ID.
         doc.metadata['document_set_id'] = str(tracked_doc_set_id)
@@ -145,7 +142,6 @@ def _ingest_one_document(
         for doc_chunk in _load_one_source(
             actual_local_path,
             tracked_doc_id=doc_id,
-            tracked_rel_path=rel_path,
             tracked_doc_set_id=doc_set_id,
             source_url=source_url,
             content_type=content_type,
