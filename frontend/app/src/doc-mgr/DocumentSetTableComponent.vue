@@ -1,113 +1,84 @@
 <template>
-  <v-banner
-    v-if="tableOutdated"
-    class="pa-2 ma-2"
-    icon="mdi-alert-circle"
-    color="warning"
-    lines="one"
-  >
-    <v-banner-text> Newer table data is available. </v-banner-text>
-
-    <template #actions>
-      <v-btn variant="text" @click="loadItems">Refresh</v-btn>
-    </template>
-  </v-banner>
-  <v-data-table-server
-    v-model="selectedItems"
+  <common-data-table
+    v-model:total-items="totalItems"
+    v-model:items="items"
     v-model:sort-by="sortBy"
     v-model:page="page"
     v-model:items-per-page="itemsPerPage"
-    show-select
-    return-object
-    multi-sort
+    v-model:selected-items="selectedItems"
+    :headers="headers"
     :items-per-page-options="itemsPerPageOptions"
-    :items-length="totalItems"
-    :headers="tableHeaders"
-    :items="items"
-    density="compact"
-    item-key="name"
-    @update:options="loadItems"
+    :active-filter-edit="activeFilterEdit"
+    :delete-single-item="deleteSingleDocumentSet"
+    :delete-multiple-items="deleteMultipleDocumentSets"
+    :load-items="loadItems"
+    :load-table-stats="loadTableStats"
+    :should-refresh="shouldRefresh"
   >
-    <template #item.actions="{ item, index }">
-      <div class="action-icons">
-        <v-icon class="me-2" size="small" @click="editItem(item, index)"> mdi-pencil </v-icon>
-        <v-icon size="small" @click="deleteItem(item, index)"> mdi-delete </v-icon>
-      </div>
+    <template #delete-dialog-text> Are you sure you want to delete this item? </template>
+
+    <template #more-action-icons="{ item, index }">
+      <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>
     </template>
-  </v-data-table-server>
-  <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
-  <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
-  <add-doc-set-dialog
-    v-model:active="activeAddDocSet"
-    v-model="targetItem"
-    @done="closeAddDocSet"
-    @confirmed="applyAddDocSet"
-  >
-  </add-doc-set-dialog>
-  <edit-doc-set-dialog
-    v-model:active="activeEditDocSet"
-    v-model="targetItem"
-    @done="closeEditDocSet"
-    @confirmed="applyEditDocSet"
-  >
-  </edit-doc-set-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmDelete"
-    @done="closeDeleteItem"
-    @confirmed="applyDeleteItem"
-  >
-    Are you sure you want to delete this item?
-  </confirmation-dialog>
+    <template #more-selected-items-buttons="{ selectedItemCount }">
+      <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
+    </template>
+    <template #more-action-dialogs="{ selectedItemCount }">
+      <edit-doc-set-dialog
+        v-model:active="activeEditDocSet"
+        v-model="targetDocSet"
+        @canceled="closeEditDocSet"
+        @confirmed="applyEditDocSet"
+      >
+      </edit-doc-set-dialog>
+
+      <add-doc-set-dialog
+        v-model:active="activeAddDocSet"
+        v-model="newDocSet"
+        @canceled="closeAddDocSet"
+        @confirmed="applyAddDocSet"
+      >
+      </add-doc-set-dialog>
+    </template>
+  </common-data-table>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
+import CommonDataTable from '../common/CommonDataTable.vue'
+import { getAuthorization } from '../common/AuthUtils.js'
 import { useDocumentSetStore } from './DocSetStore'
-import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import AddDocSetDialog from './AddDocSetDialog.vue'
 import EditDocSetDialog from './EditDocSetDialog.vue'
 import logger from '../common/Logger.js'
-import { getAuthorization } from '../common/AuthUtils.js'
 
-const currentUserStore = useCurrentUserStore()
 const documentSetStore = useDocumentSetStore()
 
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentSetStore)
-const tableUpdatedAt = ref()
-const tableOutdated = ref(false)
 
-const loading = ref(false)
+const shouldRefresh = ref(false)
 
-const tableHeaders = ref([
+const headers = ref([
   {
     title: 'Document Set',
-    key: 'name',
+    value: 'name',
     width: '150px',
     sortable: true
   },
   { title: 'Is Public', value: 'isPublicViewable', sortable: true },
-  { title: 'Is Default', key: 'isNewDocDefault', sortable: true },
+  { title: 'Is Default', value: 'isNewDocDefault', sortable: true },
   {
     title: 'Last Modified Date',
-    key: 'modificationTime',
+    value: 'modificationTime',
     sortable: false
   },
-  { title: 'Status', key: 'status', sortable: true },
-  { title: 'Actions', key: 'actions', sortable: false }
+  { title: 'Status', value: 'status', sortable: true },
+  { title: 'Actions', value: 'actions', sortable: false }
 ])
 
 const sortBy = ref([])
-
-watch(sortBy, (newValue, _oldValue) => {
-  logger.debug('Sort criteria changed', {
-    newSort: newValue,
-    oldSort: _oldValue
-  })
-})
 
 const itemsPerPageOptions = [
   { value: 2, title: '2' },
@@ -122,12 +93,14 @@ const selectedItemCount = computed(() => {
 })
 
 const targetIndex = ref(-1)
-const targetItem = ref({})
+
+const activeFilterEdit = ref({})
 
 //
 // Add new document-set dialog
 //
 const activeAddDocSet = ref(false)
+const newDocSet = ref(null)
 
 /**
  * Opens the dialog for adding a new document set.
@@ -136,8 +109,7 @@ const activeAddDocSet = ref(false)
 function addDocSet() {
   activeAddDocSet.value = true
 
-  targetIndex.value = -1
-  targetItem.value = {
+  newDocSet.value = {
     name: '',
     isPublicViewable: true,
     isNewDocDefault: false
@@ -150,6 +122,8 @@ function addDocSet() {
  */
 async function applyAddDocSet() {
   await addDocumentSet()
+
+  shouldRefresh.value = true
 }
 
 /**
@@ -168,9 +142,9 @@ async function addDocumentSet() {
     }
 
     const body = {
-      name: targetItem.value.name,
-      isNewDocDefault: targetItem.value.isNewDocDefault,
-      isPublicViewable: targetItem.value.isPublicViewable
+      name: newDocSet.value.name,
+      isNewDocDefault: newDocSet.value.isNewDocDefault,
+      isPublicViewable: newDocSet.value.isPublicViewable
     }
 
     const response = await fetch('/api/document-sets/', {
@@ -184,9 +158,9 @@ async function addDocumentSet() {
     }
 
     await response.json()
-    logger.apiSuccess('Document set added', { name: targetItem.value.name })
+    logger.apiSuccess('Document set added', { name: newDocSet.value.name })
   } catch (error) {
-    logger.apiError('Document set add failed', error, { name: targetItem.value.name })
+    logger.apiError('Document set add failed', error, { name: newDocSet.value.name })
   }
 }
 
@@ -195,17 +169,15 @@ async function addDocumentSet() {
  * Resets the target item and index after the operation completes.
  */
 async function closeAddDocSet() {
-  await loadItems()
+  shouldRefresh.value = true
 
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
+  newDocSet.value = {}
 }
 
 //
 // Edit document-set dialog
 //
+const targetDocSet = ref(null)
 const activeEditDocSet = ref(false)
 
 /**
@@ -213,15 +185,9 @@ const activeEditDocSet = ref(false)
  * @param {Object} item - The document set item to be edited
  * @param {number} index - The index of the item in the table
  */
-function editItem(item, index) {
+function openEditDialog(item, _index) {
   activeEditDocSet.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
-
-  logger.debug('Edit document set dialog opened', {
-    docSetName: targetItem.value.name,
-    docSetId: targetItem.value.id
-  })
+  targetDocSet.value = Object.assign({}, item)
 }
 
 /**
@@ -229,7 +195,10 @@ function editItem(item, index) {
  * Calls the editDocumentSet function with the target item's ID.
  */
 async function applyEditDocSet() {
-  await editDocumentSet(targetItem.value.id)
+  await editDocumentSet(targetDocSet.value.id)
+  logger.info('edited doc set')
+
+  await closeEditDocSet()
 }
 
 /**
@@ -248,11 +217,10 @@ async function editDocumentSet(doc_set_uuid) {
     }
 
     const body = {
-      isNewDocDefault: targetItem.value.isNewDocDefault,
-      isPublicViewable: targetItem.value.isPublicViewable
+      name: targetDocSet.value.name,
+      isNewDocDefault: targetDocSet.value.isNewDocDefault,
+      isPublicViewable: targetDocSet.value.isPublicViewable
     }
-
-    logger.debug('Editing document set', { docSetId: doc_set_uuid, changes: body })
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
       method: 'PATCH',
@@ -276,54 +244,30 @@ async function editDocumentSet(doc_set_uuid) {
  * Resets the target item and index after the operation completes.
  */
 async function closeEditDocSet() {
-  await loadItems()
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
+  shouldRefresh.value = true
+  targetDocSet.value = {}
 }
 
 //
-// Confirmation dialog for single deletion
+// Single deletion
 //
-
-const activeConfirmDelete = ref(false)
-
-/**
- * Opens the confirmation dialog for deleting a document set.
- * @param {Object} item - The document set item to be deleted
- * @param {number} index - The index of the item in the table
- */
-function deleteItem(item, index) {
-  activeConfirmDelete.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
-}
-
-/**
- * Applies the deletion operation after user confirmation.
- * Calls the deleteDocumentSet function with the target item's ID.
- */
-async function applyDeleteItem() {
-  await deleteDocumentSet(targetItem.value.id)
-}
 
 /**
  * Sends a request to the server to delete a specific document set.
- * @param {string} doc_set_uuid - The unique identifier of the document set to delete
+ * @param {string} docSetUuid - The unique identifier of the document set to delete
  */
-async function deleteDocumentSet(doc_set_uuid) {
+async function deleteSingleDocumentSet(docSetUuid) {
   try {
     const headers = {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
     const auth = await getAuthorization()
     if (auth) {
       headers.Authorization = auth
     }
 
-    const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
+    const response = await fetch(`/api/document-sets/${docSetUuid}`, {
       method: 'DELETE',
       headers
     })
@@ -333,23 +277,47 @@ async function deleteDocumentSet(doc_set_uuid) {
     }
 
     await response.json()
-    logger.apiSuccess('Document set deleted', { docSetId: doc_set_uuid })
+    logger.apiSuccess('Document set deleted', { docSetId: docSetUuid })
   } catch (error) {
-    logger.apiError('Document set deletion failed', error, { docSetId: doc_set_uuid })
+    logger.apiError('Document set deletion failed', error, { docSetId: docSetUuid })
   }
 }
 
-/**
- * Closes the delete confirmation dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeDeleteItem() {
-  await loadItems()
+//
+// Multiple deletions
+//
 
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
+/**
+ * Sends a request to the server to delete a specific document set.
+ * @param {string} doc_set_uuid - The unique identifier of the document set to delete
+ */
+async function deleteMultipleDocumentSets(docSetUuids) {
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
+    }
+
+    for (const docSetUuid of docSetUuids) {
+      const response = await fetch(`/api/document-sets/${docSetUuid}`, {
+        method: 'DELETE',
+        headers
+      })
+
+      if (!response.ok) {
+        throw new Error(`Delete failed for doc-set ${docSetUuid}`)
+      }
+
+      await response.json()
+      logger.apiSuccess('Document set deleted', { docSetId: docSetUuid })
+    }
+  } catch (error) {
+    logger.apiError('Document set deletion failed', error, { docSetUuids: docSetUuids })
+  }
 }
 
 //
@@ -359,7 +327,7 @@ async function closeDeleteItem() {
 let intervalId = null
 
 onMounted(async () => {
-  await loadItems()
+  shouldRefresh.value = true
 
   intervalId = setInterval(async () => {
     await loadTableStats()
@@ -376,37 +344,33 @@ onBeforeUnmount(() => {
  * Updates the total item count and tracks when the table was last modified to show refresh notifications.
  */
 async function loadTableStats() {
-  try {
-    const headers = {
-      Accept: 'application/json'
-    }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
-    }
+  const headers = {
+    Accept: 'application/json'
+  }
+  const auth = await getAuthorization()
+  if (auth) {
+    headers.Authorization = auth
+  }
 
-    const response = await fetch('/api/document-sets/stats', {
-      method: 'GET',
-      headers
-    })
+  const response = await fetch('/api/document-sets/stats', {
+    method: 'GET',
+    headers
+  })
 
-    if (!response.ok) {
-      throw new Error('Getting table stats failed')
-    }
+  if (!response.ok) {
+    throw new Error('Getting table stats failed')
+  }
 
-    const data = await response.json()
+  const data = await response.json()
 
-    totalItems.value = data.documentSetCount
-    if (tableUpdatedAt.value !== data.tableUpdatedTime) {
-      tableOutdated.value = true
-      tableUpdatedAt.value = data.tableUpdatedTime
-    }
-  } catch (error) {
-    console.error('Error getting table stats:', error)
+  return {
+    totalItems: data.documentSetCount,
+    tableUpdatedTime: data.tableUpdatedTime
   }
 }
 
 //
-// Loading data from server
+// Load data from server
 //
 
 /**
@@ -414,59 +378,50 @@ async function loadTableStats() {
  * Fetches document sets based on current page, items per page, and sort criteria, then updates the table display.
  */
 async function loadItems() {
-  loading.value = true
+  const params = new URLSearchParams({
+    // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
+    page: page.value - 1,
+    itemsPerPage: itemsPerPage.value
+  })
 
-  try {
-    const params = new URLSearchParams({
-      // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
-      page: page.value - 1,
-      itemsPerPage: itemsPerPage.value
-    })
+  if (sortBy.value.length > 0) {
+    const sortByParam = sortBy.value
+      .map((item) => {
+        let key = item.key
+        if (item.order === 'desc') {
+          key = `-${key}`
+        }
+        return key
+      })
+      .join(',')
 
-    if (sortBy.value.length > 0) {
-      const sortByParam = sortBy.value
-        .map((item) => {
-          let key = item.key
-          if (item.order === 'desc') {
-            key = `-${key}`
-          }
-          return key
-        })
-        .join(',')
-
-      params.append('sortBy', sortByParam)
-    }
-
-    const headers = {
-      Accept: 'application/json'
-    }
-    if (signedIn.value) {
-      headers.Authorization = `Bearer ${accessToken.value}`
-    }
-
-    const response = await fetch(`/api/document-sets/?${params}`, {
-      method: 'GET',
-      headers
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to get files')
-    }
-
-    const data = await response.json()
-
-    totalItems.value = data.documentSetCount
-    tableUpdatedAt.value = data.tableUpdatedTime
-    tableOutdated.value = false
-    items.value = data.documentSets.map((item) => toRaw(item))
-  } catch (error) {
-    totalItems.value = 0
-    tableOutdated.value = false
-    items.value = []
-    loading.value = false
-    console.error('Error getting files:', error)
+    params.append('sortBy', sortByParam)
   }
-  loading.value = false
+
+  const headers = {
+    Accept: 'application/json'
+  }
+  const auth = await getAuthorization()
+  if (auth) {
+    headers.Authorization = auth
+  }
+
+  const response = await fetch(`/api/document-sets/?${params}`, {
+    method: 'GET',
+    headers
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to get document sets')
+  }
+
+  const data = await response.json()
+
+  return {
+    totalItems: data.documentSetCount,
+    items: data.documentSets.map((item) => toRaw(item)),
+    tableUpdatedTime: data.tableUpdatedTime
+  }
 }
 </script>
 

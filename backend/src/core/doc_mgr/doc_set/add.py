@@ -33,23 +33,23 @@ def _add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_v
             existing_obj = result.scalar_one_or_none()
 
         with session.begin():
+            doc_root_dir = get_lib_config().doc_root_dir
+            s3_rel_path = doc_root_dir + '/' + name
+
             if existing_obj:
                 doc_set_uuid = existing_obj.id
                 existing_obj.name = name
+                existing_obj.s3_rel_path=s3_rel_path
                 existing_obj.is_new_doc_default = is_new_doc_default
                 existing_obj.is_public_viewable = is_public_viewable
                 existing_obj.last_user_id = user_id
             else:
                 doc_set_uuid = uuid.uuid4()
 
-                doc_root_dir = get_lib_config().doc_root_dir
-
-                rel_path = doc_root_dir + '/' + name
-
                 new_obj = DbTrackedDocumentSet(
                     id=doc_set_uuid,
                     name=name,
-                    s3_rel_path=rel_path,
+                    s3_rel_path=s3_rel_path,
                     is_new_doc_default=is_new_doc_default,
                     is_public_viewable=is_public_viewable,
                     last_user_id=user_id,
