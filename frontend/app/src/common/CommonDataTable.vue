@@ -66,12 +66,16 @@
             :close-on-content-click="false"
           >
             <template #activator="{ props }">
-                <v-icon v-bind="props" small class="ms-1">
-                    {{ header.filterModel ? 'mdi-filter-variant-plus' : 'mdi-filter-variant' }}
-                </v-icon>
+              <v-icon v-bind="props" small class="ms-1">
+                {{ header.filterModel ? 'mdi-filter-variant-plus' : 'mdi-filter-variant' }}
+              </v-icon>
             </template>
             <v-card>
-              <slot :name="`filter-input.${header.value}`" :header="header" :on-filter-change="onFilterChange">
+              <slot
+                :name="`filter-input.${header.value}`"
+                :header="header"
+                :on-filter-change="onFilterChange"
+              >
                 <!-- The clear button does not always emit an input event -->
                 <v-text-field
                   v-model="header.filterModel"
@@ -92,23 +96,25 @@
       <!-- Customize the contents of the "actions" column for every row. -->
       <template #item.actions="{ item, index }">
         <div class="action-icons">
-          <slot name="more-action-icons" :item="item" :index="index">
-          </slot>
-        <v-icon size="small" @click="openDeleteDialog(item, index)">mdi-delete</v-icon>
+          <slot name="more-action-icons" :item="item" :index="index"> </slot>
+          <v-icon size="small" @click="openDeleteDialog(item, index)">mdi-delete</v-icon>
         </div>
       </template>
     </v-data-table-server>
 
-    <slot name="more-selected-items-buttons" :selectedItemCount="selectedItemCount">
-    </slot>
+    <slot name="more-selected-items-buttons" :selected-item-count="selectedItemCount"> </slot>
 
-    <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="deleteSelectedItems">
-        Delete Selected
+    <v-btn
+      class="ma-2"
+      size="large"
+      :disabled="selectedItemCount === 0"
+      @click="deleteSelectedItems"
+    >
+      Delete Selected
     </v-btn>
     <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
 
-    <slot name="more-action-dialogs" :selectedItemCount="selectedItemCount">
-    </slot>
+    <slot name="more-action-dialogs" :selected-item-count="selectedItemCount"> </slot>
 
     <confirmation-dialog
       v-model:active="activeConfirmDelete"
@@ -119,11 +125,11 @@
     </confirmation-dialog>
 
     <confirmation-dialog
-        v-model:active="activeConfirmDeleteSelected"
-        @canceled="closeDeleteSelected"
-        @confirmed="applyDeleteSelected"
+      v-model:active="activeConfirmDeleteSelected"
+      @canceled="closeDeleteSelected"
+      @confirmed="applyDeleteSelected"
     >
-        Are you sure you want to delete {{ selectedItemCount }} selected items?
+      Are you sure you want to delete {{ selectedItemCount }} selected items?
     </confirmation-dialog>
   </div>
 </template>
@@ -138,7 +144,7 @@ import {
   defineModel,
   onMounted,
   onBeforeUnmount,
-  nextTick,
+  nextTick
 } from 'vue'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '@/common/Logger'
@@ -288,12 +294,10 @@ function setShowFilter(header, val) {
 }
 
 async function onFilterChange() {
-    await nextTick()
+  await nextTick()
 
-    await handleRefresh()
+  await handleRefresh()
 }
-
-
 
 //
 // Refresh
@@ -307,9 +311,9 @@ const tableUpdatedAt = ref()
  * Refresh
  */
 async function handleRefresh() {
-    await callLoadItems()
+  await callLoadItems()
 
-    shouldRefresh.value = false
+  shouldRefresh.value = false
 }
 
 /**
@@ -327,7 +331,6 @@ watch(shouldRefresh, async (newVal, _oldVal) => {
     await handleRefresh()
   }
 })
-
 
 //
 // Delete
@@ -390,10 +393,10 @@ function deleteSelectedItems() {
  * Calls the deleteSelectedDocuments function to process all selected items.
  */
 async function applyDeleteSelected() {
-    await props.deleteMultipleItems(selectedItems.value.map((x) => x.id))
+  await props.deleteMultipleItems(selectedItems.value.map((x) => x.id))
 
-    // Clear the selections
-    selectedItems.value = []
+  // Clear the selections
+  selectedItems.value = []
 }
 
 /**
@@ -403,7 +406,6 @@ async function applyDeleteSelected() {
 async function closeDeleteSelected() {
   await handleRefresh()
 }
-
 
 //
 // Load

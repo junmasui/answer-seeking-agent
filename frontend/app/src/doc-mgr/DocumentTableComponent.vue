@@ -13,17 +13,22 @@
     :delete-multiple-items="deleteMultipleDocuments"
     :load-items="loadItems"
     :load-table-stats="loadTableStats"
-    :shouldRefresh="shouldRefresh"
+    :should-refresh="shouldRefresh"
   >
-
     <template #delete-dialog-text> Are you sure you want to delete this item? </template>
 
-    <template #more-action-icons="{item, index}">
-        <v-icon class="me-2" size="small" @click="ingestItem(item, index)">mdi-database-import</v-icon>
-        <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>      
+    <template #more-action-icons="{ item, index }">
+      <v-icon class="me-2" size="small" @click="ingestItem(item, index)"
+        >mdi-database-import</v-icon
+      >
+      <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>
     </template>
     <template #more-selected-items-buttons="{ selectedItemCount }">
-      <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="ingestSelectedItems"
+      <v-btn
+        class="ma-2"
+        size="large"
+        :disabled="selectedItemCount === 0"
+        @click="ingestSelectedItems"
         >Ingest Selected</v-btn
       >
       <v-btn class="ma-2" size="large" :disabled="totalItems === 0" @click="ingestAllUploaded"
@@ -58,12 +63,8 @@
         @confirmed="applyEditDoc"
       >
       </edit-doc-dialog>
-
     </template>
-
   </common-data-table>
-
-
 </template>
 
 <script setup>
@@ -280,8 +281,6 @@ async function applyEditDoc() {
   }
   await closeEditDialog()
 }
-
-
 
 //
 // Confirmation dialog for ingestion of all uploaded files
@@ -501,7 +500,6 @@ async function deleteMultipleDocuments(docUuids) {
 //
 // Load data from server
 //
-
 
 /**
  * Loads table statistics from the server to check for data updates.

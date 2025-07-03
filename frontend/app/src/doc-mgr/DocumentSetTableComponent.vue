@@ -13,13 +13,12 @@
     :delete-multiple-items="deleteMultipleDocumentSets"
     :load-items="loadItems"
     :load-table-stats="loadTableStats"
-    :shouldRefresh="shouldRefresh"
+    :should-refresh="shouldRefresh"
   >
-
     <template #delete-dialog-text> Are you sure you want to delete this item? </template>
 
-    <template #more-action-icons="{item, index}">
-        <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>      
+    <template #more-action-icons="{ item, index }">
+      <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>
     </template>
     <template #more-selected-items-buttons="{ selectedItemCount }">
       <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
@@ -40,9 +39,7 @@
       >
       </add-doc-set-dialog>
     </template>
-
   </common-data-table>
-
 </template>
 
 <script setup>
@@ -291,7 +288,6 @@ async function deleteSingleDocumentSet(docSetUuid) {
   }
 }
 
-
 //
 // Multiple deletions
 //
@@ -329,7 +325,6 @@ async function deleteMultipleDocumentSets(docSetUuids) {
   }
 }
 
-
 //
 // Polling for server table updates.
 //
@@ -337,7 +332,7 @@ async function deleteMultipleDocumentSets(docSetUuids) {
 let intervalId = null
 
 onMounted(async () => {
-  await loadItems()
+  shouldRefresh.value = true
 
   intervalId = setInterval(async () => {
     await loadTableStats()
