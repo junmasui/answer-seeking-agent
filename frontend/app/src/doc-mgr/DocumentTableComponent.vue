@@ -9,7 +9,7 @@
     :headers="headers"
     :items-per-page-options="itemsPerPageOptions"
     :active-filter-edit="activeFilterEdit"
-    :delete-single-item="deleteDocument"
+    :delete-single-item="deleteSingleDocument"
     :delete-multiple-items="deleteMultipleDocuments"
     :load-items="loadItems"
     :load-table-stats="loadTableStats"
@@ -67,9 +67,9 @@
 </template>
 
 <script setup>
-import CommonDataTable from '../common/CommonDataTable.vue'
 import { ref, computed, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
+import CommonDataTable from '../common/CommonDataTable.vue'
 import { getAuthorization } from '../common/AuthUtils.js'
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
@@ -89,7 +89,6 @@ const {
   sourceUrlFilter
 } = storeToRefs(documentStore)
 
-const loading = ref(false)
 const shouldRefresh = ref(false)
 
 const headers = ref([
@@ -193,20 +192,27 @@ async function applyIngestItem() {
 
 /**
  * Sends a request to the server to ingest a specific document.
- * @param {string} doc_uuid - The unique identifier of the document to ingest
+ * @param {string} docUuid - The unique identifier of the document to ingest
  */
-async function ingestDocument(doc_uuid) {
+async function ingestDocument(docUuid) {
   try {
     const headers = {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
     const auth = await getAuthorization()
     if (auth) {
       headers.Authorization = auth
     }
+
+    const body = {
+      docUuids: [docUuid]
+    }
+
     const response = await fetch('/api/documents/ingest', {
       method: 'POST',
-      headers
+      headers,
+      body: JSON.stringify(body, null, 2)
     })
 
     if (!response.ok) {
@@ -214,7 +220,7 @@ async function ingestDocument(doc_uuid) {
     }
 
     await response.json()
-    logger.apiSuccess('Document ingest queued', { docId: doc_uuid })
+    logger.apiSuccess('Document ingest queued', { docId: docUuid })
   } catch (error) {
     console.error('Error ingesting:', error)
   }
@@ -274,14 +280,6 @@ async function applyEditDoc() {
   }
   await closeEditDialog()
 }
-
-/**
- * Handles confirmation of edit dialog by applying the edit operation.
- */
-function confirmEdit() {
-  applyEditDoc()
-}
-
 
 
 
@@ -364,10 +362,11 @@ async function editDocument(_doc_uuid) {
  * Sends a request to the server to delete a specific document.
  * @param {string} doc_uuid - The unique identifier of the document to delete
  */
-async function deleteDocument(doc_uuid) {
+async function deleteSingleDocument(doc_uuid) {
   try {
     const headers = {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
     const auth = await getAuthorization()
     if (auth) {
@@ -499,6 +498,10 @@ async function deleteMultipleDocuments(docUuids) {
   }
 }
 
+//
+// Load data from server
+//
+
 
 /**
  * Loads table statistics from the server to check for data updates.
@@ -530,76 +533,66 @@ async function loadTableStats() {
   }
 }
 
-//
-// Loading data from server
-//
-
 /**
  * Loads document data from the server with pagination and sorting support.
  * Fetches documents based on current page, items per page, and sort criteria, then updates the table display.
  */
 async function loadItems() {
-  loading.value = true
+  const headers = {
+    Accept: 'application/json'
+  }
+  const auth = await getAuthorization()
+  if (auth) {
+    headers.Authorization = auth
+  }
 
-  try {
-    const headers = {
-      Accept: 'application/json'
-    }
-    const auth = await getAuthorization()
-    if (auth) {
-      headers.Authorization = auth
-    }
+  const params = new URLSearchParams({
+    // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
+    page: page.value - 1,
+    itemsPerPage: itemsPerPage.value
+  })
 
-    const params = new URLSearchParams({
-      // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
-      page: page.value - 1,
-      itemsPerPage: itemsPerPage.value
-    })
+  if (sortBy.value.length > 0) {
+    const sortByParam = sortBy.value
+      .map((item) => {
+        let key = item.key
+        if (item.order === 'desc') {
+          key = `-${key}`
+        }
+        return key
+      })
+      .join(',')
 
-    if (sortBy.value.length > 0) {
-      const sortByParam = sortBy.value
-        .map((item) => {
-          let key = item.key
-          if (item.order === 'desc') {
-            key = `-${key}`
-          }
-          return key
-        })
-        .join(',')
+    params.append('sortBy', sortByParam)
+  }
+  // Add document set filter if set
+  if (documentSetFilter.value) {
+    params.append('documentSetName', documentSetFilter.value)
+  }
+  // Add content type filter if set
+  if (contentTypeFilter.value) {
+    params.append('contentType', contentTypeFilter.value)
+  }
+  // Add source URL filter if set
+  if (sourceUrlFilter.value) {
+    params.append('sourceUrl', sourceUrlFilter.value)
+  }
 
-      params.append('sortBy', sortByParam)
-    }
-    // Add document set filter if set
-    if (documentSetFilter.value) {
-      params.append('documentSetName', documentSetFilter.value)
-    }
-    // Add content type filter if set
-    if (contentTypeFilter.value) {
-      params.append('contentType', contentTypeFilter.value)
-    }
-    // Add source URL filter if set
-    if (sourceUrlFilter.value) {
-      params.append('sourceUrl', sourceUrlFilter.value)
-    }
+  const response = await fetch(`/api/documents/?${params}`, {
+    method: 'GET',
+    headers
+  })
 
-    const response = await fetch(`/api/documents/?${params}`, {
-      method: 'GET',
-      headers
-    })
+  if (!response.ok) {
+    throw new Error('Failed to get files')
+  }
 
-    if (!response.ok) {
-      throw new Error('Failed to get files')
-    }
+  const data = await response.json()
 
-    const data = await response.json()
-
-    return {
-      totalItems: data.documentCount,
-      items: data.documents.map((item) => toRaw(item)),
-      tableUpdatedTime: data.tableUpdatedTime
-    }
-  } finally {
-    loading.value = false
+  return {
+    totalItems: data.documentCount,
+    items: data.documents.map((item) => toRaw(item)),
+    tableUpdatedTime: data.tableUpdatedTime
   }
 }
 </script>

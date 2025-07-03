@@ -408,6 +408,7 @@ async function closeDeleteSelected() {
 //
 // Load
 //
+const loading = ref(false)
 
 /**
  * Emits the loadTableStats event to request table stats refresh from the parent.
@@ -440,6 +441,7 @@ async function callLoadTableStats() {
  */
 async function callLoadItems() {
   try {
+    loading.value = true
     const data = await props.loadItems()
 
     totalItems.value = data.totalItems
@@ -453,6 +455,8 @@ async function callLoadItems() {
     tableOutdated.value = false
   } catch (error) {
     console.error('Error getting table items:', error)
+  } finally {
+    loading.value = false
   }
 }
 
