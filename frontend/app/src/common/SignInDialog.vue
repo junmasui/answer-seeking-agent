@@ -149,10 +149,6 @@ async function onConfirm() {
       now.getTime() + (data.expires_in - ACCESS_TOKEN_EXPIRY_BUFFER_SECONDS) * 1000
     )
 
-    console.log(`ACCESS ${accessToken.value}`)
-    console.log(`REFRESH ${refreshToken.value}`)
-    console.log(`REFRESH ${refreshAccessAfter.value}`)
-
     emit('onSuccess')
   } catch (error) {
     console.error('Could not sign in:', error)

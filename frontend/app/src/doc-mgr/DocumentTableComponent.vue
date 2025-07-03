@@ -1,141 +1,133 @@
 <template>
-  <v-banner
-    v-if="tableOutdated"
-    class="pa-2 ma-2"
-    icon="mdi-alert-circle"
-    color="warning"
-    lines="one"
-  >
-    <v-banner-text> Newer table data is available. </v-banner-text>
-
-    <template #actions>
-      <v-btn variant="text" @click="loadItems">Refresh</v-btn>
-    </template>
-  </v-banner>
-  <v-data-table-server
-    v-model="selectedItems"
+  <common-data-table
+    v-model:total-items="totalItems"
+    v-model:items="items"
     v-model:sort-by="sortBy"
     v-model:page="page"
     v-model:items-per-page="itemsPerPage"
-    show-select
-    return-object
-    multi-sort
+    v-model:selected-items="selectedItems"
+    :headers="headers"
     :items-per-page-options="itemsPerPageOptions"
-    :items-length="totalItems"
-    :headers="tableHeaders"
-    :items="items"
-    density="compact"
-    item-key="name"
-    @update:options="loadItems"
+    :active-filter-edit="activeFilterEdit"
+    :delete-single-item="deleteSingleDocument"
+    :delete-multiple-items="deleteMultipleDocuments"
+    :load-items="loadItems"
+    :load-table-stats="loadTableStats"
+    :should-refresh="shouldRefresh"
   >
-    <template #item.actions="{ item, index }">
-      <div class="action-icons">
-        <v-icon class="me-2" size="small" @click="ingestItem(item, index)">
-          mdi-database-import
-        </v-icon>
-        <v-icon class="me-2" size="small" @click="editItem(item, index)"> mdi-pencil </v-icon>
-        <v-icon size="small" @click="deleteItem(item, index)"> mdi-delete </v-icon>
-      </div>
+    <template #delete-dialog-text> Are you sure you want to delete this item? </template>
+
+    <template #more-action-icons="{ item, index }">
+      <v-icon class="me-2" size="small" @click="ingestItem(item, index)"
+        >mdi-database-import</v-icon
+      >
+      <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>
     </template>
-  </v-data-table-server>
-  <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="ingestSelectedItems"
-    >Ingest Selected</v-btn
-  >
-  <v-btn class="ma-2" size="large" :disabled="totalItems === 0" @click="ingestAllUploaded"
-    >Ingest All Uploaded</v-btn
-  >
-  <v-btn class="ma-2" size="large" :disabled="selectedItemCount === 0" @click="deleteSelectedItems"
-    >Delete Selected</v-btn
-  >
-  <v-btn class="ma-2" size="large" @click="loadItems">Refresh</v-btn>
-
-  <confirmation-dialog
-    v-model:active="activeConfirmIngestItem"
-    @done="closeIngestItem"
-    @confirmed="applyIngestItem"
-  >
-    Are you sure you want to ingest this item?
-  </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmIngestAllUploaded"
-    @done="closeIngestAllUploaded"
-    @confirmed="applyIngestAllUploaded"
-  >
-    Are you sure you want to ingest all uploaded items?
-  </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmDeleteItem"
-    @done="closeDeleteItem"
-    @confirmed="applyDeleteItem"
-  >
-    Are you sure you want to delete this item?
-  </confirmation-dialog>
-  <edit-doc-dialog v-model:active="activeEditDoc" @done="closeEditDoc" @confirmed="applyEditDoc">
-  </edit-doc-dialog>
-
-  <confirmation-dialog
-    v-model:active="activeConfirmIngestSelected"
-    @canceled="closeIngestSelected"
-    @confirmed="applyIngestSelected"
-  >
-    Are you sure you want to ingest {{ selectedItemCount }} selected items?
-  </confirmation-dialog>
-  <confirmation-dialog
-    v-model:active="activeConfirmDeleteSelected"
-    @canceled="closeDeleteSelected"
-    @confirmed="applyDeleteSelected"
-  >
-    Are you sure you want to delete {{ selectedItemCount }} selected items?
-  </confirmation-dialog>
+    <template #more-selected-items-buttons="{ selectedItemCount }">
+      <v-btn
+        class="ma-2"
+        size="large"
+        :disabled="selectedItemCount === 0"
+        @click="ingestSelectedItems"
+        >Ingest Selected</v-btn
+      >
+      <v-btn class="ma-2" size="large" :disabled="totalItems === 0" @click="ingestAllUploaded"
+        >Ingest All Uploaded</v-btn
+      >
+    </template>
+    <template #more-action-dialogs="{ selectedItemCount }">
+      <confirmation-dialog
+        v-model:active="activeConfirmIngestItem"
+        @canceled="closeIngestItem"
+        @confirmed="applyIngestItem"
+      >
+        Are you sure you want to ingest this item?
+      </confirmation-dialog>
+      <confirmation-dialog
+        v-model:active="activeConfirmIngestAllUploaded"
+        @canceled="closeIngestAllUploaded"
+        @confirmed="applyIngestAllUploaded"
+      >
+        Are you sure you want to ingest all uploaded items?
+      </confirmation-dialog>
+      <confirmation-dialog
+        v-model:active="activeConfirmIngestSelected"
+        @canceled="closeIngestSelected"
+        @confirmed="applyIngestSelected"
+      >
+        Are you sure you want to ingest {{ selectedItemCount }} selected items?
+      </confirmation-dialog>
+      <edit-doc-dialog
+        v-model:active="activeConfirmEdit"
+        @canceled="closeEditDialog"
+        @confirmed="applyEditDoc"
+      >
+      </edit-doc-dialog>
+    </template>
+  </common-data-table>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
+import { ref, computed, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
+import CommonDataTable from '../common/CommonDataTable.vue'
 import { getAuthorization } from '../common/AuthUtils.js'
-
 import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
+import EditDocDialog from './EditDocDialog.vue'
 
 const documentStore = useDocumentStore()
 
-const { page, itemsPerPage, totalItems, items, selectedItems } = storeToRefs(documentStore)
-const tableUpdatedAt = ref()
-const tableOutdated = ref(false)
+const {
+  page,
+  itemsPerPage,
+  totalItems,
+  items,
+  selectedItems,
+  documentSetFilter,
+  contentTypeFilter,
+  sourceUrlFilter
+} = storeToRefs(documentStore)
 
-const loading = ref(false)
+const shouldRefresh = ref(false)
 
-const tableHeaders = ref([
+const headers = ref([
   {
     title: 'File Name',
     value: 'name',
     width: '500px',
     sortable: true
   },
-  { title: 'Size', key: 'sizeBytes', sortable: true },
+  { title: 'Size', value: 'sizeBytes', width: '100px', sortable: true },
   {
     title: 'Document Set',
-    key: 'documentSetName',
+    value: 'documentSetName',
     width: '150px',
-    sortable: false
+    sortable: true,
+    filterable: true,
+    filterModel: documentSetFilter
   },
   {
     title: 'Source URL',
-    key: 'sourceUrl',
+    value: 'sourceUrl',
     width: '300px',
-    sortable: false
+    sortable: false,
+    filterable: true,
+    filterModel: sourceUrlFilter
   },
   {
     title: 'Content Type',
-    key: 'contentType',
+    value: 'contentType',
     width: '50px',
-    sortable: false
+    sortable: true,
+    filterable: true,
+    filterModel: contentTypeFilter
   },
-  { title: 'Status', key: 'status', width: '50px', sortable: true },
+  { title: 'Status', value: 'status', width: '50px', sortable: true },
   {
     title: 'Ingestion Date',
-    key: 'ingestionTime',
+    value: 'ingestionTime',
     width: '150px',
     sortable: true
   },
@@ -147,11 +139,11 @@ const tableHeaders = ref([
   },
   {
     title: 'Download Date',
-    key: 'downloadTimeUtc',
+    value: 'downloadTimeUtc',
     width: '150px',
     sortable: true
   },
-  { title: 'Actions', key: 'actions', width: '50px', sortable: false }
+  { title: 'Actions', value: 'actions', width: '50px', sortable: false }
 ])
 
 const sortBy = ref([])
@@ -171,6 +163,8 @@ const selectedItemCount = computed(() => {
 
 const targetIndex = ref(-1)
 const targetItem = ref({})
+
+const activeFilterEdit = ref({})
 
 //
 // Confirmation dialog for one-file ingestion
@@ -199,20 +193,27 @@ async function applyIngestItem() {
 
 /**
  * Sends a request to the server to ingest a specific document.
- * @param {string} doc_uuid - The unique identifier of the document to ingest
+ * @param {string} docUuid - The unique identifier of the document to ingest
  */
-async function ingestDocument(doc_uuid) {
+async function ingestDocument(docUuid) {
   try {
     const headers = {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
     const auth = await getAuthorization()
     if (auth) {
       headers.Authorization = auth
     }
+
+    const body = {
+      docUuids: [docUuid]
+    }
+
     const response = await fetch('/api/documents/ingest', {
       method: 'POST',
-      headers
+      headers,
+      body: JSON.stringify(body, null, 2)
     })
 
     if (!response.ok) {
@@ -220,7 +221,7 @@ async function ingestDocument(doc_uuid) {
     }
 
     await response.json()
-    logger.apiSuccess('Document ingest queued', { docId: doc_uuid })
+    logger.apiSuccess('Document ingest queued', { docId: docUuid })
   } catch (error) {
     console.error('Error ingesting:', error)
   }
@@ -231,7 +232,7 @@ async function ingestDocument(doc_uuid) {
  * Resets the target item and index after the operation completes.
  */
 async function closeIngestItem() {
-  await loadItems()
+  shouldRefresh.value = true
 
   nextTick(() => {
     targetItem.value = {}
@@ -240,30 +241,111 @@ async function closeIngestItem() {
 }
 
 //
-// Edit document
+//
 //
 
-const activeEditDoc = ref(false)
+//
+// Edit
+//
+const activeConfirmEdit = ref(false)
 
 /**
- * Opens the edit dialog for a specific document.
- * @param {Object} item - The document item to be edited
+ * Opens the edit confirmation dialog for a specific item.
+ * @param {Object} item - The item to edit
  * @param {number} index - The index of the item in the table
  */
-function editItem(item, index) {
-  activeEditDoc.value = true
+async function openEditDialog(item, index) {
+  targetItem.value = { ...item }
   targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
+  activeConfirmEdit.value = true
 }
 
+/**
+ * Closes the edit document dialog and refreshes the table data.
+ * Resets the target item and index after the operation completes.
+ */
+async function closeEditDialog() {
+  shouldRefresh.value = true
+
+  targetItem.value = {}
+  targetIndex.value = -1
+  activeConfirmEdit.value = false
+}
 /**
  * Applies the document edit operation after user confirmation.
  * Calls the editDocument function and closes the dialog.
  */
 async function applyEditDoc() {
-  await editDocument(targetItem.value.id)
+  if (props.editDocument && targetItem.value.id) {
+    await props.editDocument(targetItem.value.id)
+  }
+  await closeEditDialog()
+}
 
-  await closeEditDoc()
+//
+// Confirmation dialog for ingestion of all uploaded files
+//
+
+const activeConfirmIngestAllUploaded = ref(false)
+
+/**
+ * Opens the confirmation dialog for ingesting all uploaded documents.
+ * Displays a confirmation prompt before proceeding with full batch ingestion.
+ */
+function ingestAllUploaded() {
+  activeConfirmIngestAllUploaded.value = true
+}
+
+/**
+ * Applies the operation to ingest all uploaded documents after user confirmation.
+ * Calls the ingestAllUploadedDocuments function to process all uploaded files.
+ */
+async function applyIngestAllUploaded() {
+  await ingestAllUploadedDocuments()
+}
+
+/**
+ * Sends a request to the server to ingest all documents with uploaded status.
+ * Processes all uploaded documents regardless of current selection state.
+ */
+async function ingestAllUploadedDocuments() {
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
+    }
+
+    const body = {
+      allUploaded: true
+    }
+
+    const response = await fetch('/api/documents/ingest', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body, null, 2)
+    })
+
+    if (!response.ok) {
+      throw new Error('Ingest failed')
+    }
+
+    await response.json()
+    logger.apiSuccess('All uploaded documents ingest queued')
+  } catch (error) {
+    console.error('Error ingesting:', error)
+  }
+}
+
+/**
+ * Closes the ingest all confirmation dialog and refreshes the table data.
+ * Called after the batch ingestion operation completes.
+ */
+async function closeIngestAllUploaded() {
+  shouldRefresh.value = true
 }
 
 /**
@@ -276,51 +358,14 @@ async function editDocument(_doc_uuid) {
 }
 
 /**
- * Closes the edit document dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeEditDoc() {
-  await loadItems()
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
-}
-
-//
-// Confirmation dialog for one-file deletion
-//
-
-const activeConfirmDeleteItem = ref(false)
-
-/**
- * Opens the confirmation dialog for deleting a single document.
- * @param {Object} item - The document item to be deleted
- * @param {number} index - The index of the item in the table
- */
-function deleteItem(item, index) {
-  activeConfirmDeleteItem.value = true
-  targetIndex.value = index
-  targetItem.value = Object.assign({}, item)
-}
-
-/**
- * Applies the deletion operation after user confirmation.
- * Calls the deleteDocument function with the target item's ID.
- */
-async function applyDeleteItem() {
-  await deleteDocument(targetItem.value.id)
-}
-
-/**
  * Sends a request to the server to delete a specific document.
  * @param {string} doc_uuid - The unique identifier of the document to delete
  */
-async function deleteDocument(doc_uuid) {
+async function deleteSingleDocument(doc_uuid) {
   try {
     const headers = {
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
     }
     const auth = await getAuthorization()
     if (auth) {
@@ -341,19 +386,6 @@ async function deleteDocument(doc_uuid) {
   } catch (error) {
     console.error('Error deleting:', error)
   }
-}
-
-/**
- * Closes the delete confirmation dialog and refreshes the table data.
- * Resets the target item and index after the operation completes.
- */
-async function closeDeleteItem() {
-  await loadItems()
-
-  nextTick(() => {
-    targetItem.value = {}
-    targetIndex.value = -1
-  })
 }
 
 //
@@ -422,102 +454,18 @@ async function ingestSelectedDocuments() {
  * Called after the batch ingestion operation completes.
  */
 async function closeIngestSelected() {
-  await loadItems()
-}
-
-//
-// Confirmation dialog for ingestion of all uploaded files
-//
-
-const activeConfirmIngestAllUploaded = ref(false)
-
-/**
- * Opens the confirmation dialog for ingesting all uploaded documents.
- * Displays a confirmation prompt before proceeding with full batch ingestion.
- */
-function ingestAllUploaded() {
-  activeConfirmIngestAllUploaded.value = true
-}
-
-/**
- * Applies the operation to ingest all uploaded documents after user confirmation.
- * Calls the ingestAllUploadedDocuments function to process all uploaded files.
- */
-async function applyIngestAllUploaded() {
-  await ingestAllUploadedDocuments()
-}
-
-/**
- * Sends a request to the server to ingest all documents with uploaded status.
- * Processes all uploaded documents regardless of current selection state.
- */
-async function ingestAllUploadedDocuments() {
-  try {
-    const headers = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
-    const auth = await getAuthorization()
-    if (auth) {
-      headers.Authorization = auth
-    }
-
-    const body = {
-      allUploaded: true
-    }
-
-    const response = await fetch('/api/documents/ingest', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body, null, 2)
-    })
-
-    if (!response.ok) {
-      throw new Error('Ingest failed')
-    }
-
-    await response.json()
-    logger.apiSuccess('All uploaded documents ingest queued')
-  } catch (error) {
-    console.error('Error ingesting:', error)
-  }
-}
-
-/**
- * Closes the ingest all confirmation dialog and refreshes the table data.
- * Called after the batch ingestion operation completes.
- */
-async function closeIngestAllUploaded() {
-  await loadItems()
+  shouldRefresh.value = true
 }
 
 //
 // Confirmation dialog for deletion of selected files
 //
 
-const activeConfirmDeleteSelected = ref(false)
-
-/**
- * Opens the confirmation dialog for deleting multiple selected documents.
- * Displays a confirmation prompt before proceeding with batch deletion.
- */
-function deleteSelectedItems() {
-  activeConfirmDeleteSelected.value = true
-}
-
-/**
- * Applies the batch deletion operation after user confirmation.
- * Calls the deleteSelectedDocuments function to process all selected items.
- */
-async function applyDeleteSelected() {
-  await deleteSelectedDocuments()
-}
-
 /**
  * Sends a request to the server to delete all currently selected documents.
  * Clears the selection after successful deletion and logs the operation.
  */
-async function deleteSelectedDocuments() {
+async function deleteMultipleDocuments(docUuids) {
   try {
     const headers = {
       Accept: 'application/json',
@@ -529,7 +477,7 @@ async function deleteSelectedDocuments() {
     }
 
     const body = {
-      docUuids: selectedItems.value.map((x) => x.id)
+      docUuids
     }
 
     const response = await fetch('/api/documents/delete', {
@@ -542,9 +490,6 @@ async function deleteSelectedDocuments() {
       throw new Error('Delete failed')
     }
 
-    // Clear the selections
-    selectedItems.value = []
-
     await response.json()
     logger.apiSuccess('Selected documents deleted', { count: body.docUuids.length })
   } catch (error) {
@@ -552,131 +497,101 @@ async function deleteSelectedDocuments() {
   }
 }
 
-/**
- * Closes the batch delete confirmation dialog and refreshes the table data.
- * Called after the batch deletion operation completes.
- */
-async function closeDeleteSelected() {
-  await loadItems()
-}
-
 //
-// Polling for server table updates.
+// Load data from server
 //
-
-let intervalId = null
-
-onMounted(async () => {
-  await loadItems()
-
-  intervalId = setInterval(async () => {
-    await loadTableStats()
-  }, 30000)
-})
-
-onBeforeUnmount(() => {
-  clearInterval(intervalId)
-  intervalId = null
-})
 
 /**
  * Loads table statistics from the server to check for data updates.
  * Updates the total item count and tracks when the table was last modified to show refresh notifications.
  */
 async function loadTableStats() {
-  try {
-    const headers = {
-      Accept: 'application/json'
-    }
-    const auth = await getAuthorization()
-    if (auth) {
-      headers.Authorization = auth
-    }
+  const headers = {
+    Accept: 'application/json'
+  }
+  const auth = await getAuthorization()
+  if (auth) {
+    headers.Authorization = auth
+  }
 
-    const response = await fetch('/api/documents/stats', {
-      method: 'GET',
-      headers
-    })
+  const response = await fetch('/api/documents/stats', {
+    method: 'GET',
+    headers
+  })
 
-    if (!response.ok) {
-      throw new Error('Getting table stats failed')
-    }
+  if (!response.ok) {
+    throw new Error('Getting table stats failed')
+  }
 
-    const data = await response.json()
+  const data = await response.json()
 
-    totalItems.value = data.documentCount
-    if (tableUpdatedAt.value !== data.tableUpdatedTime) {
-      tableOutdated.value = true
-      tableUpdatedAt.value = data.tableUpdatedTime
-    }
-  } catch (error) {
-    console.error('Error getting table stats:', error)
+  return {
+    totalItems: data.documentCount,
+    tableUpdatedTime: data.tableUpdatedTime
   }
 }
-
-//
-// Loading data from server
-//
 
 /**
  * Loads document data from the server with pagination and sorting support.
  * Fetches documents based on current page, items per page, and sort criteria, then updates the table display.
  */
 async function loadItems() {
-  loading.value = true
-
-  try {
-    const headers = {
-      Accept: 'application/json'
-    }
-    const auth = await getAuthorization()
-    if (auth) {
-      headers.Authorization = auth
-    }
-
-    const params = new URLSearchParams({
-      // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
-      page: page.value - 1,
-      itemsPerPage: itemsPerPage.value
-    })
-
-    if (sortBy.value.length > 0) {
-      const sortByParam = sortBy.value
-        .map((item) => {
-          let key = item.key
-          if (item.order === 'desc') {
-            key = `-${key}`
-          }
-          return key
-        })
-        .join(',')
-
-      params.append('sortBy', sortByParam)
-    }
-
-    const response = await fetch(`/api/documents/?${params}`, {
-      method: 'GET',
-      headers
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to get files')
-    }
-
-    const data = await response.json()
-
-    totalItems.value = data.documentCount
-    tableUpdatedAt.value = data.tableUpdatedTime
-    tableOutdated.value = false
-    items.value = data.documents.map((item) => toRaw(item))
-  } catch (error) {
-    totalItems.value = 0
-    tableOutdated.value = false
-    items.value = []
-    loading.value = false
-    console.error('Error getting files:', error)
+  const headers = {
+    Accept: 'application/json'
   }
-  loading.value = false
+  const auth = await getAuthorization()
+  if (auth) {
+    headers.Authorization = auth
+  }
+
+  const params = new URLSearchParams({
+    // VDataTableServer's page is 1-indexed. The backend API's page is 0-indexed.
+    page: page.value - 1,
+    itemsPerPage: itemsPerPage.value
+  })
+
+  if (sortBy.value.length > 0) {
+    const sortByParam = sortBy.value
+      .map((item) => {
+        let key = item.key
+        if (item.order === 'desc') {
+          key = `-${key}`
+        }
+        return key
+      })
+      .join(',')
+
+    params.append('sortBy', sortByParam)
+  }
+  // Add document set filter if set
+  if (documentSetFilter.value) {
+    params.append('documentSetName', documentSetFilter.value)
+  }
+  // Add content type filter if set
+  if (contentTypeFilter.value) {
+    params.append('contentType', contentTypeFilter.value)
+  }
+  // Add source URL filter if set
+  if (sourceUrlFilter.value) {
+    params.append('sourceUrl', sourceUrlFilter.value)
+  }
+
+  const response = await fetch(`/api/documents/?${params}`, {
+    method: 'GET',
+    headers
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to get files')
+  }
+
+  const data = await response.json()
+
+  return {
+    totalItems: data.documentCount,
+    items: data.documents.map((item) => toRaw(item)),
+    tableUpdatedTime: data.tableUpdatedTime
+  }
 }
 </script>
 

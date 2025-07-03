@@ -74,5 +74,29 @@ def configure_logging():
         logger.addHandler(rich_handler)
     logger.setLevel(logging.INFO)
 
+    # Enable SQLAlchemy SQL statement logging
+    sa_logger = logging.getLogger('sqlalchemy.engine')
+    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in sa_logger.handlers)
+    if not has_rich_handler:
+        sa_logger.addHandler(rich_handler)
+        sa_logger.propagate = False
+    sa_logger.setLevel(logging.INFO)  # Use DEBUG for SQL + params
+
+    # Enable HTTP request logging for requests (urllib3)
+    urllib3_logger = logging.getLogger('urllib3.connectionpool')
+    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in urllib3_logger.handlers)
+    if not has_rich_handler:
+        urllib3_logger.addHandler(rich_handler)
+        urllib3_logger.propagate = False
+    urllib3_logger.setLevel(logging.INFO)
+
+    # Enable HTTP request logging for httpx
+    httpx_logger = logging.getLogger('httpx')
+    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in httpx_logger.handlers)
+    if not has_rich_handler:
+        httpx_logger.addHandler(rich_handler)
+        httpx_logger.propagate = False
+    httpx_logger.setLevel(logging.INFO)
+
 
 configure_logging()
