@@ -41,7 +41,6 @@
           style="display: flex; align-items: center"
           :width="column.width"
           :aria-sort="sortDirection(header.value, isSorted, sortBy)"
-          tabindex="0"
         >
           <!-- Display text -->
           <span>{{ header.title }}</span>
