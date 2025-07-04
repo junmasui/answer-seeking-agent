@@ -9,8 +9,7 @@ import uuid
 from enum import StrEnum
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
-from pydantic.alias_generators import to_camel
+from pydantic import BaseModel
 
 
 #

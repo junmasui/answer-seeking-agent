@@ -6,12 +6,15 @@ from core import ingest_documents, reset_worker_data
 from log_config_monitor import dump_logger_tree
 
 from . import celeryconfig
+from .event_handlers import setup_monitoring
 
 logger = logging.getLogger(__name__)
 celery_app = Celery(main=__name__)
 
 # Load the configuration from the celeryconfig module
 celery_app.config_from_object(celeryconfig)
+
+setup_monitoring(celery_app)
 
 
 @celery_app.task(name='ingest-docs')
