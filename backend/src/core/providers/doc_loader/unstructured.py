@@ -47,7 +47,7 @@ def start(sender):
 #
 # Create a document loader.
 #
-def get_doc_loader(file_path: Path | list[Path]):
+def get_doc_loader(file_path: Path | list[Path], strategy: str = 'hi_res', chunking_strategy: str = 'by_title'):
     """
     Return an UnstructuredLoader instance for the given file path(s).
 

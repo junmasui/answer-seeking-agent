@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 @after_setup_task_logger.connect
-def setup_task_logger(task_logger, *_args, **_kwargs):
+def setup_task_logger(logger, *_args, **_kwargs):
     """
     Configures the task logger format.
 
     See: https://celery.school/custom-celery-task-logger
     """
-    for handler in task_logger.handlers:
+    for handler in logger.handlers:
         handler.setFormatter(
             TaskFormatter('%(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s')
         )

@@ -17,12 +17,6 @@ uvx autopep8 \
   --in-place --recursive \
   src tests
 
-# Fix doc line length (W505) - wrap docstrings at 100 characters to match ruff config
-uvx docformatter \
-  --wrap-summaries 100 --wrap-descriptions 100 \
-  --in-place --recursive \
-  src tests
-
 # Sort the import statement
 uvx ruff check --select I --fix src tests
 
