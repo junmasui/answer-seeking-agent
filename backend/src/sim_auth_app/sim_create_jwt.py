@@ -66,7 +66,11 @@ def _create_access_token(
 
 
 def _create_refresh_token(
-    *, userid: uuid.UUID, username: str, expires_in: Optional[timedelta] = None, additional_claims: Optional[dict] = None
+    *,
+    userid: uuid.UUID,
+    username: str,
+    expires_in: Optional[timedelta] = None,
+    additional_claims: Optional[dict] = None,
 ) -> str:
     """Simulates an actual token creation inside an true authentication service."""
     to_encode = {'sub': userid.urn}

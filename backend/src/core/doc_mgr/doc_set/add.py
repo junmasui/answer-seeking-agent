@@ -39,7 +39,7 @@ def _add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_v
             if existing_obj:
                 doc_set_uuid = existing_obj.id
                 existing_obj.name = name
-                existing_obj.s3_rel_path=s3_rel_path
+                existing_obj.s3_rel_path = s3_rel_path
                 existing_obj.is_new_doc_default = is_new_doc_default
                 existing_obj.is_public_viewable = is_public_viewable
                 existing_obj.last_user_id = user_id

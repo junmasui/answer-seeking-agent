@@ -36,7 +36,7 @@ def _load_one_source(
     Uses the appropriate document loader for the file type and yields individual document chunks
     with enhanced metadata including document set ID, source URL, content type, and download time.
     """
-    loader = get_doc_loader(file_path=source_path)
+    loader = get_doc_loader(file_path=source_path, strategy='fast')
 
     check_in_interval = 10
     check_in_time = datetime.now() + timedelta(seconds=check_in_interval)
