@@ -122,6 +122,17 @@ class LibrarySettings(BaseSettings):
 
     enable_langfuse_tracing: bool = Field(default=True, validation_alias='ENABLE_LANGFUSE_TRACKING')
 
+    # OpenTelemetry configuration
+    enable_opentelemetry: bool = Field(default=False, validation_alias='ENABLE_OPENTELEMETRY')
+    otel_service_name: str = Field(default='answers-agent', validation_alias='OTEL_SERVICE_NAME')
+    otel_service_version: str = Field(default='0.1.0', validation_alias='OTEL_SERVICE_VERSION')
+    otel_environment: str = Field(default='development', validation_alias='OTEL_ENVIRONMENT')
+    otel_jaeger_endpoint: str = Field(default='http://jaeger:14268/api/traces', validation_alias='OTEL_EXPORTER_JAEGER_ENDPOINT')
+    otel_prometheus_port: int = Field(default=8889, validation_alias='OTEL_EXPORTER_PROMETHEUS_PORT')
+    otel_enable_tracing: bool = Field(default=True, validation_alias='OTEL_ENABLE_TRACING')
+    otel_enable_metrics: bool = Field(default=True, validation_alias='OTEL_ENABLE_METRICS')
+    otel_trace_sample_rate: float = Field(default=1.0, validation_alias='OTEL_TRACE_SAMPLE_RATE')
+
     chat_llm_type: LowerCaseStr = Field(default='', validation_alias='CHAT_LLM_TYPE')
     llm_has_structured_output: bool = Field(default=False, validation_alias='LLM_HAS_STRUCTURED_OUTPUT')
 

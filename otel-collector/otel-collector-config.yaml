@@ -1,0 +1,185 @@
+# OpenTelemetry Collector Configuration
+# This configuration sets up the collector to:
+# 1. Receive telemetry data from applications via OTLP
+# 2. Scrape Prometheus metrics from existing endpoints
+# 3. Export metrics to Prometheus via HTTP endpoint
+# 4. Export traces to Jaeger
+# 5. Process and enrich telemetry data
+
+receivers:
+  # OTLP receiver for applications sending telemetry data
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
+
+  # Prometheus receiver to scrape existing metrics endpoints
+  # This allows gradual migration from direct Prometheus scraping
+  prometheus:
+    config:
+      global:
+        scrape_interval: 30s
+        scrape_timeout: 10s
+      scrape_configs:
+        # FastAPI application metrics
+        - job_name: 'fastapi-dev-server'
+          static_configs:
+            - targets: ['fastapi-dev-server:8100']
+          metrics_path: /metrics
+          scrape_interval: 15s
+
+        # Celery worker metrics
+        - job_name: 'celery-worker'
+          static_configs:
+            - targets: ['celery-worker:8989']
+          metrics_path: /metrics
+          scrape_interval: 15s
+
+        # Celery exporter metrics
+        - job_name: 'celery-exporter'
+          static_configs:
+            - targets: ['celery-exporter:9808']
+          metrics_path: /metrics
+          scrape_interval: 30s
+
+        # Celery flower metrics
+        - job_name: 'celery-flower'
+          static_configs:
+            - targets: ['celery-flower:5555']
+          metrics_path: /metrics
+          scrape_interval: 30s
+
+        # Grafana metrics (optional)
+        - job_name: 'grafana'
+          static_configs:
+            - targets: ['grafana:3000']
+          metrics_path: /metrics
+          scrape_interval: 30s
+
+  # Host metrics receiver (optional - for system metrics)
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      disk:
+      filesystem:
+      network:
+      process:
+
+processors:
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
+
+  # Batch processor for better performance
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+    send_batch_max_size: 2048
+
+  # Resource processor to add common attributes
+  resource:
+    attributes:
+      - key: service.instance.id
+        value: "${POD_NAME}"
+        action: upsert
+      - key: service.name
+        from_attribute: service.name
+        action: insert
+      - key: service.version
+        value: "0.1.0"
+        action: insert
+      - key: deployment.environment
+        value: "${OTEL_ENVIRONMENT}"
+        action: insert
+
+  # Attributes processor for enrichment
+  attributes:
+    actions:
+      - key: collector.name
+        value: "answer-seeking-agent-collector"
+        action: insert
+      - key: collector.version
+        value: "1.0.0"
+        action: insert
+
+exporters:
+  # Prometheus exporter - exposes metrics for Prometheus to scrape
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: "otel"
+    const_labels:
+      collector: "answer-seeking-agent"
+    metric_expiration: 180m
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # OTLP exporter for traces to Jaeger
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  # Debug exporter for debugging (replaces deprecated logging exporter)
+  debug:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # pprof extension for performance profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zpages extension for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  
+  pipelines:
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, resource, attributes, batch]
+      exporters: [prometheus, debug]
+
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, attributes, batch]
+      exporters: [otlp/jaeger, debug]
+
+    # Logs pipeline (if needed)
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, attributes, batch]
+      exporters: [debug]
+
+  # Telemetry configuration for the collector itself
+  telemetry:
+    logs:
+      level: "info"
+    metrics:
+      address: 0.0.0.0:8888
+      level: basic

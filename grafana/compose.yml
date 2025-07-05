@@ -36,3 +36,5 @@ services:
 volumes:
   grafana-data-1:
     driver: local
+  grafana-provisioning-1:
+    driver: local

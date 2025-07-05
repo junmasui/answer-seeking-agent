@@ -6,7 +6,7 @@ import uuid
 from functools import cache
 from typing import Optional
 
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 from langgraph.errors import GraphRecursionError
 from langgraph.graph import END, START, StateGraph
 from langgraph.pregel import Pregel
@@ -15,6 +15,7 @@ from core.agent.input_guard import build_input_guard_subgraph
 from core.agent.node_util import no_op
 from core.agent.response_guard import build_response_guard_subgraph
 from core.agent.retrieval_guard import build_retrieval_guard_subgraph
+from core.telemetry.langchain_handler import OpenTelemetryCallbackHandler
 
 from ..doc_mgr import list_document_sets
 from ..lib_config import get_lib_config
@@ -392,12 +393,50 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     graph = get_agent_graph()
     logger.info('streaming_mode: %s', graph.stream_mode)
 
-    # Initialize Langfuse CallbackHandler for Langchain (tracing)
+    # Initialize telemetry callback handlers
+    callback_handlers = []
+    
+    # Langfuse handler (legacy, will be deprecated)
     if config.enable_langfuse_tracing:
         callback_kwargs = {'session_id': thread_id.hex, 'sample_rate': 1.0}
         if user_id is not None:
             callback_kwargs['user_id'] = user_id.hex if isinstance(user_id, uuid.UUID) else user_id
-        langfuse_handler = CallbackHandler(**callback_kwargs)
+        # Currently commented out for migration
+        # langfuse_handler = CallbackHandler(**callback_kwargs)
+        # callback_handlers.append(langfuse_handler)
+    
+    # OpenTelemetry/OpenLLMetry handler (new implementation)
+    if config.enable_opentelemetry:
+        from core.telemetry import initialize_telemetry, get_callback_handler
+        
+        # Initialize telemetry (will choose best available method)
+        initialize_telemetry(
+            method='auto',  # Will prefer OpenLLMetry if available
+            disable_batch=True,  # For immediate traces in development
+            service_name=config.otel_service_name,
+            environment=config.otel_environment,
+            trace_sample_rate=config.otel_trace_sample_rate,
+        )
+        
+        # Get callback handler (None if using OpenLLMetry auto-instrumentation)
+        otel_handler = get_callback_handler(
+            session_id=thread_id.hex,
+            user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id,
+            sample_rate=config.otel_trace_sample_rate,
+        )
+        
+        if otel_handler:
+            callback_handlers.append(otel_handler)
+        
+        # Set session/user context for OpenLLMetry (if available)
+        try:
+            from core.telemetry.openllmetry import set_session_id, set_user_id, is_openllmetry_initialized
+            if is_openllmetry_initialized():
+                set_session_id(thread_id.hex)
+                if user_id:
+                    set_user_id(user_id.hex if isinstance(user_id, uuid.UUID) else user_id)
+        except ImportError:
+            pass  # OpenLLMetry not available
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
@@ -411,8 +450,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         if user_id:
             extra_data['user_id'] = user_id.hex
         run_config = {'recursion_limit': 30, 'configurable': extra_data}
-        if langfuse_handler is not None:
-            run_config['callbacks'] = [langfuse_handler]
+        if callback_handlers:
+            run_config['callbacks'] = callback_handlers
         for output in graph.stream(input=graph_input, config=run_config):
             for key, value in output.items():
                 # Node

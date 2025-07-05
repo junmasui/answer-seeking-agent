@@ -6,6 +6,7 @@ include:
   - grafana/compose.yml
   - langfuse/compose.yml
   - minio/compose.yml
+  - otel-collector/compose.yml
   - nemo/compose.yml
   - postgres/compose.yml
   - presidio/compose.yml
