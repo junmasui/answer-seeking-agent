@@ -160,7 +160,7 @@ service:
   pipelines:
     # Metrics pipeline
     metrics:
-      receivers: [otlp, prometheus, hostmetrics]
+      receivers: [otlp, prometheus]
       processors: [memory_limiter, resource, attributes, batch]
       exporters: [prometheus, debug]
 

@@ -1,6 +1,6 @@
 import logging
 
-from core.agent.agent_state import GraphState
+from .agent_state import GraphState
 
 logger = logging.getLogger(__name__)
 

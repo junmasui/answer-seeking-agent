@@ -10,10 +10,9 @@ import pprint
 from langchain_core.documents import Document
 from weaviate.classes.query import Filter
 
-from core.agent.agent_state import GraphState
-
-from ..lib_config import get_lib_config
-from ..providers.retriever import get_retriever
+from ...lib_config import get_lib_config
+from ...providers.retriever import get_retriever
+from .agent_state import GraphState
 
 logger = logging.getLogger(__name__)
 

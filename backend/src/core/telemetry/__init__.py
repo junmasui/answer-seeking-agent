@@ -24,17 +24,18 @@ _telemetry_method = None  # 'openllmetry' or 'custom'
 def initialize_telemetry(method: str = 'auto', **kwargs):
     """
     Initialize telemetry with the best available method.
-    
+
     Args:
         method: Telemetry method ('auto', 'openllmetry', 'custom')
         **kwargs: Configuration options passed to the chosen method
+
     """
     global _telemetry_initialized, _telemetry_method
-    
+
     if _telemetry_initialized:
-        logger.debug(f"Telemetry already initialized with method: {_telemetry_method}")
+        logger.debug(f'Telemetry already initialized with method: {_telemetry_method}')
         return
-    
+
     if method == 'auto':
         # Try OpenLLMetry first, fallback to custom
         if _try_initialize_openllmetry(**kwargs):
@@ -44,76 +45,74 @@ def initialize_telemetry(method: str = 'auto', **kwargs):
             _telemetry_method = 'custom'
     elif method == 'openllmetry':
         if not _try_initialize_openllmetry(**kwargs):
-            raise RuntimeError("OpenLLMetry initialization failed")
+            raise RuntimeError('OpenLLMetry initialization failed')
         _telemetry_method = 'openllmetry'
     elif method == 'custom':
         _initialize_custom_telemetry(**kwargs)
         _telemetry_method = 'custom'
     else:
-        raise ValueError(f"Unknown telemetry method: {method}")
-    
+        raise ValueError(f'Unknown telemetry method: {method}')
+
     _telemetry_initialized = True
-    logger.info(f"Telemetry initialized successfully with method: {_telemetry_method}")
+    logger.info(f'Telemetry initialized successfully with method: {_telemetry_method}')
 
 
 def _try_initialize_openllmetry(**kwargs) -> bool:
     """
     Try to initialize OpenLLMetry.
-    
+
     Returns:
         bool: True if successful, False otherwise
+
     """
     try:
         from .openllmetry import initialize_openllmetry, is_openllmetry_available
-        
+
         if not is_openllmetry_available():
-            logger.info("OpenLLMetry not available, will use custom telemetry")
+            logger.info('OpenLLMetry not available, will use custom telemetry')
             return False
-        
+
         # Extract OpenLLMetry-specific config
         openllmetry_config = {
             'disable_batch': kwargs.get('disable_batch', False),
             'app_name': kwargs.get('service_name', 'answers-agent'),
             'telemetry_enabled': kwargs.get('telemetry_enabled', False),
+            'endpoint': kwargs.get('otel_jaeger_endpoint'),
         }
-        
+
         initialize_openllmetry(**openllmetry_config)
-        logger.info("Successfully initialized OpenLLMetry")
+        logger.info('Successfully initialized OpenLLMetry')
         return True
-        
+
     except Exception as e:
-        logger.warning(f"Failed to initialize OpenLLMetry: {e}")
+        logger.warning(f'Failed to initialize OpenLLMetry: {e}')
         return False
 
 
 def _initialize_custom_telemetry(**kwargs):
     """Initialize custom OpenTelemetry setup."""
     from .custom_otel import initialize_custom_telemetry as _init_custom
+
     _init_custom(**kwargs)
-    logger.info("Successfully initialized custom OpenTelemetry")
+    logger.info('Successfully initialized custom OpenTelemetry')
 
 
 def get_callback_handler(session_id: Optional[str] = None, user_id: Optional[str] = None, **kwargs):
     """
     Get appropriate callback handler for LangChain integration.
-    
+
     Returns:
         Callback handler or None (if using auto-instrumentation)
+
     """
     if not _telemetry_initialized:
         initialize_telemetry()
-    
+
     if _telemetry_method == 'openllmetry':
         from .openllmetry import get_opentelemetry_callback_handler
-        return get_opentelemetry_callback_handler(
-            session_id=session_id,
-            user_id=user_id,
-            **kwargs
-        )
+
+        return get_opentelemetry_callback_handler(session_id=session_id, user_id=user_id, **kwargs)
     else:
         from .langchain_handler import OpenTelemetryCallbackHandler
-        return OpenTelemetryCallbackHandler(
-            session_id=session_id,
-            user_id=user_id,
-            **kwargs
-        )
+
+        return OpenTelemetryCallbackHandler(session_id=session_id, user_id=user_id, **kwargs)

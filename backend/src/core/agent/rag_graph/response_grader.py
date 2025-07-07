@@ -7,10 +7,10 @@ See: Answer Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/lan
 import logging
 from functools import cache
 
-from core.agent.agent_state import GraphState
-
+from ..internal_models import AgentPromptName
+from .agent_state import GraphState
 from .grader_util import build_grader
-from .internal_models import AgentPromptName, GradeAnswer
+from .internal_models import GradeAnswer
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)

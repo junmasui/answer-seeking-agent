@@ -51,11 +51,11 @@ scrape_configs:
         action: replace
         replacement: 'otelcol_${1}'
 
-  # Prometheus self-monitoring
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
-    scrape_interval: 30s
+  # # Prometheus self-monitoring
+  # - job_name: 'prometheus'
+  #   static_configs:
+  #     - targets: ['localhost:9090']
+  #   scrape_interval: 30s
 
   # Grafana metrics (direct scraping still needed)
   - job_name: 'grafana'

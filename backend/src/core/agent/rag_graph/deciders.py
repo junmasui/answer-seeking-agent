@@ -1,7 +1,6 @@
 import logging
 
-from core.agent.agent_state import GraphState
-
+from .agent_state import GraphState
 from .constants import ResponseOverallGrade, RetrievalOverallGrade, UserInputGrade
 
 logger = logging.getLogger(__name__)

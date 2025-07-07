@@ -7,10 +7,10 @@ See: Hallucination Grader in https://langchain-ai.github.io/langgraph/tutorials/
 import logging
 from functools import cache
 
-from core.agent.agent_state import GraphState
-
+from ..internal_models import AgentPromptName
+from .agent_state import GraphState
 from .grader_util import build_grader
-from .internal_models import AgentPromptName, GradeHallucinations
+from .internal_models import GradeHallucinations
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)

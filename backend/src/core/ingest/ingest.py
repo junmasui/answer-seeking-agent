@@ -17,7 +17,6 @@ from ..providers.file_store import get_s3_bucket
 from ..providers.vector_store import delete_vectors_by_document_id, get_vector_store
 from ..public_models import DocumentStatus
 from ..telemetry.openllmetry import annotate_workflow
-from ..telemetry.ingestion import get_ingestion_instrumentation
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +220,7 @@ def _ingest_one_document(
                 logger.warning('could not delete staged file %s', str(local_path), exc_info=ex)
 
 
-@annotate_workflow("ingest_documents")
+@annotate_workflow('ingest_documents')
 def ingest_documents(doc_ids):
     """
     Ingest cloud files.

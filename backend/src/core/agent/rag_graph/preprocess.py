@@ -2,7 +2,7 @@ import logging
 
 from langchain_core.messages import HumanMessage
 
-from core.agent.agent_state import GraphState
+from .agent_state import GraphState
 
 logger = logging.getLogger(__name__)
 

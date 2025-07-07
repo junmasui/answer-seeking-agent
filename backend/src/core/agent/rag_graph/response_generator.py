@@ -6,10 +6,9 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 
 import logging
 
-from core.agent.agent_state import GraphState
-
-from ..providers.chat_llm import get_chat_llm
-from .internal_models import AgentPromptName
+from ...providers.chat_llm import get_chat_llm
+from ..internal_models import AgentPromptName
+from .agent_state import GraphState
 from .prompt_util import get_chat_prompt
 from .response_citation_parser import ResponseCitationParser
 

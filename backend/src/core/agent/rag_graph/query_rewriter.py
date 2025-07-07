@@ -9,10 +9,9 @@ import logging
 
 from langchain_core.output_parsers import StrOutputParser
 
-from core.agent.agent_state import GraphState
-
-from ..providers.chat_llm import get_chat_llm
-from .internal_models import AgentPromptName
+from ...providers.chat_llm import get_chat_llm
+from ..internal_models import AgentPromptName
+from .agent_state import GraphState
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
