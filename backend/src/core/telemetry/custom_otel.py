@@ -97,7 +97,7 @@ def _setup_tracing(resource: Resource, config: dict):
     global _tracer
 
     # Create Jaeger exporter
-    jaeger_exporter = JaegerExporter(agent_host_name='jaeger', collector_endpoint=config['jaeger_endpoint'])
+    jaeger_exporter = JaegerExporter(agent_host_name='jaeger', agent_port=6831, collector_endpoint='http://jaeger:14268/api/traces')
 
     # Create tracer provider
     tracer_provider = TracerProvider(resource=resource, sampler=TraceIdRatioBased(config['trace_sample_rate']))
@@ -110,7 +110,7 @@ def _setup_tracing(resource: Resource, config: dict):
     trace.set_tracer_provider(tracer_provider)
     _tracer = trace.get_tracer(__name__)
 
-    logger.info(f'Tracing initialized with Jaeger endpoint: {config["jaeger_endpoint"]}')
+    logger.info(f'Tracing initialized with Jaeger endpoint: {jaeger_exporter.collector_endpoint}')
 
 
 def _setup_metrics(resource: Resource, config: dict):

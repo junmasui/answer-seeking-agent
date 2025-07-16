@@ -119,9 +119,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
+        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
+        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
+
         span = self.tracer.start_span(
             span_name,
             attributes=span_attributes,
+            context=parent_context,
         )
         logger.info('--- ON_LLM_START %s\n%r\n%r', run_id, serialized, span)
 
@@ -257,9 +261,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
+        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
+        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
+
         span = self.tracer.start_span(
             'retrieval.search',
             attributes=span_attributes,
+            context=parent_context,
         )
         logger.info('--- ON_RETRIEVER_START %s\n%r\n%r', run_id, serialized, span)
 
@@ -352,9 +360,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
+        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
+        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
+
         span = self.tracer.start_span(
             f'tool.{serialized.get("name", "unknown")}',
             attributes=span_attributes,
+            context=parent_context,
         )
 
         self._spans[run_id_str] = span
@@ -426,9 +438,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
+        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
+        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
+
         span = self.tracer.start_span(
             f'chain.{serialized.get("name", "unknown") if hasattr(serialized, 'get') else "unknown"}',
             attributes=span_attributes,
+            context=parent_context,
         )
         logger.info('--- ON_CHAIN_START %r\n%r', serialized, span)
 
@@ -536,9 +552,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
+        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
+        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
+
         span = self.tracer.start_span(
             span_name,
             attributes=span_attributes,
+            context=parent_context,
         )
         logger.info('--- ON_CHAT_MODEL_START %s\n%r\n%r', run_id, serialized, span)
 
