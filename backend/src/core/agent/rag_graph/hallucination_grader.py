@@ -49,7 +49,7 @@ def grade_hallucination(state: GraphState):
 
     hallucination_grader = get_hallucination_grader()
 
-    score = hallucination_grader.invoke({'documents': documents, 'generation': generation})
+    score = hallucination_grader.invoke(input={'documents': documents, 'generation': generation})
     grade = score.binary_score if score is not None else 'no'
 
     return {'grounded_in_facts': grade}

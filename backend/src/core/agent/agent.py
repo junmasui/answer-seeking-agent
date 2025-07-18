@@ -39,7 +39,7 @@ def get_compiled_agent_graph() -> Pregel:
     checkpointer = get_checkpointer()
 
     # Compile the graph with a checkpointer
-    compiled_graph = uncompiled_graph.compile(checkpointer=checkpointer)
+    compiled_graph = uncompiled_graph.compile(checkpointer=checkpointer, name='agent_graph')
     return compiled_graph
 
 
@@ -120,6 +120,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
+    logger.info('\n=============================\n=\n=\n=\n=')
     graph_input = {'question': user_input, 'document_set_ids': doc_set_ids}
     # Capture into a dict, not TypedDict. We want to make zero assumptions about the
     # graph's stream output's keys. In other words, the set of keys is dynamic not static.
@@ -142,6 +143,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         logger.error('Graph recursion error', exc_info=e)
     except Exception as e:
         logger.error('General error', exc_info=e)
+    logger.info('\n=\n=\n=\n=\n=============================')
 
     # If we haven't assigned the answer yet, then pull it from the
     # generated output.

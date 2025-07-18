@@ -206,10 +206,10 @@ def get_agent_graph() -> StateGraph:
     graph.add_node(NodeName.ADD_QUERY_TO_HISTORY, add_input_to_history)
     graph.add_node(NodeName.ADD_RESPONSE_TO_HISTORY, add_response_to_history)
 
-    graph.add_node(NodeName.INPUT_GUARD, input_guard_subgraph.compile())
+    graph.add_node(NodeName.INPUT_GUARD, input_guard_subgraph.compile(name='input_guard_subgraph'))
 
-    graph.add_node(NodeName.RETRIEVE_DOCUMENTS, retrieval_subgraph.compile())
-    graph.add_node(NodeName.GENERATE_RESPONSE, response_subgraph.compile())
+    graph.add_node(NodeName.RETRIEVE_DOCUMENTS, retrieval_subgraph.compile(name='retrieval_subgraph'))
+    graph.add_node(NodeName.GENERATE_RESPONSE, response_subgraph.compile(name='response_subgraph'))
 
     # Build graph
     graph.add_edge(START, NodeName.RESET_STATE_ON_START)
@@ -268,7 +268,7 @@ def _build_retrieval_subgraph():
     retrieval_subgraph = StateGraph(GraphState)
 
     retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)
-    retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile())
+    retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile(name='retrieval_guard_subgraph'))
     retrieval_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
     retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)
     retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op('Exit Retrieval Subgraph'))
@@ -302,7 +302,7 @@ def _build_response_subgraph():
 
     response_subgraph = StateGraph(GraphState)
     response_subgraph.add_node(NodeName.GENERATE_RESPONSE, generate_response)
-    response_subgraph.add_node(NodeName.RESPONSE_GUARD, response_guard_subgraph.compile())
+    response_subgraph.add_node(NodeName.RESPONSE_GUARD, response_guard_subgraph.compile(name='response_guard_subgraph'))
     response_subgraph.add_node(NodeName.RESPONSE_EXIT, no_op('Exit Response Subgraph'))
 
     response_subgraph.set_entry_point(NodeName.GENERATE_RESPONSE)

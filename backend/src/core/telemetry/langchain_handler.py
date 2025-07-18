@@ -92,7 +92,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
     def on_llm_start(
         self,
-        serialized: Dict[str, Any],
+        serialized: Optional[Dict[str, Any]],
         prompts: List[str],
         *,
         run_id: uuid.UUID,
@@ -104,13 +104,27 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         """Handle LLM start event."""
         run_id_str = str(run_id)
 
+        # Handle None serialized parameter (common with LCEL Runnables)
+        llm_name = 'unknown'
+        llm_vendor = 'unknown' 
+        llm_model = 'unknown'
+        llm_temperature = None
+        llm_max_tokens = None
+        
+        if serialized is not None:
+            llm_name = serialized.get('name', 'unknown')
+            llm_vendor = serialized.get('_type', 'unknown')
+            llm_model = serialized.get('model_name', 'unknown')
+            llm_temperature = serialized.get('temperature')
+            llm_max_tokens = serialized.get('max_tokens')
+
         # Create span for LLM operation
-        span_name = f'llm.{serialized.get("name", "unknown")}'
+        span_name = f'llm.{llm_name}'
         span_attributes = {
-                'llm.vendor': serialized.get('_type', 'unknown'),
-                'llm.model': serialized.get('model_name', 'unknown'),
-                'llm.temperature': serialized.get('temperature'),
-                'llm.max_tokens': serialized.get('max_tokens'),
+                'llm.vendor': llm_vendor,
+                'llm.model': llm_model,
+                'llm.temperature': llm_temperature,
+                'llm.max_tokens': llm_max_tokens,
                 'session.id': self.session_id,
                 'user.id': self.user_id,
                 'run.id': run_id_str,
@@ -123,11 +137,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
 
         span = self.tracer.start_span(
-            span_name,
+            name=span_name,
             attributes=span_attributes,
             context=parent_context,
         )
-        logger.info('--- ON_LLM_START %s\n%r\n%r', run_id, serialized, span)
+        logger.info('--- ON_LLM_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
         # Add prompt content to span (with size limits)
         for i, prompt in enumerate(prompts[:3]):  # Limit to first 3 prompts
@@ -147,8 +161,8 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         self.llm_request_counter.add(
             1,
             attributes={
-                'model': serialized.get('model_name', 'unknown'),
-                'vendor': serialized.get('_type', 'unknown'),
+                'model': llm_model,
+                'vendor': llm_vendor,
                 'session_id': self.session_id,
             },
         )
@@ -161,7 +175,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         span = self._spans.get(run_id_str)
         start_time = self._run_start_times.get(run_id_str)
 
-        logger.info('--- ON_LLM_END %s\n%r', run_id, span)
+        logger.info('--- ON_LLM_END %s\nspan: %r', run_id, span)
 
         if not span:
             logger.warning(f'No span found for LLM run {run_id_str}')
@@ -239,7 +253,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
     def on_retriever_start(
         self,
-        serialized: Dict[str, Any],
+        serialized: Optional[Dict[str, Any]],
         query: str,
         *,
         run_id: uuid.UUID,
@@ -250,6 +264,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Handle retriever start event."""
         run_id_str = str(run_id)
+
+        # Handle None serialized parameter (common with LCEL Runnables)
+        retriever_type = 'unknown'
+        if serialized is not None:
+            retriever_type = serialized.get('_type', 'unknown')
 
         span_attributes = {
                 'retrieval.query': query[:200] + '...' if len(query) > 200 else query,
@@ -265,19 +284,24 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
 
         span = self.tracer.start_span(
-            'retrieval.search',
+            name='retrieval.search',
             attributes=span_attributes,
             context=parent_context,
         )
-        logger.info('--- ON_RETRIEVER_START %s\n%r\n%r', run_id, serialized, span)
+        logger.info('--- ON_RETRIEVER_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
+        # Add tags and metadata
+        if tags:
+            span.set_attribute('retrieval.tags', json.dumps(tags))
+        if metadata:
+            span.set_attribute('retrieval.metadata', json.dumps(metadata, default=str))
 
         self._spans[run_id_str] = span
         self._run_start_times[run_id_str] = time.time()
 
         # Record metrics
         self.retrieval_counter.add(
-            1, attributes={'session_id': self.session_id, 'retriever_type': serialized.get('_type', 'unknown') if hasattr(serialized, 'get') else 'unknown'}
+            1, attributes={'session_id': self.session_id, 'retriever_type': retriever_type}
         )
 
     def on_retriever_end(
@@ -288,7 +312,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         span = self._spans.get(run_id_str)
         start_time = self._run_start_times.get(run_id_str)
 
-        logger.info('--- ON_RETRIEVER_END %s\n%r', run_id, span)
+        logger.info('--- ON_RETRIEVER_END %s\nspan: %r', run_id, span)
 
         if not span:
             return
@@ -337,7 +361,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
     def on_tool_start(
         self,
-        serialized: Dict[str, Any],
+        serialized: Optional[Dict[str, Any]],
         input_str: str,
         *,
         run_id: uuid.UUID,
@@ -350,8 +374,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         """Handle tool start event."""
         run_id_str = str(run_id)
 
+        # Handle None serialized parameter (common with LCEL Runnables)
+        tool_name = 'unknown'
+        if serialized is not None:
+            tool_name = serialized.get('name', 'unknown')
+
         span_attributes = {
-                'tool.name': serialized.get('name', 'unknown'),
+                'tool.name': tool_name,
                 'tool.input': input_str[:200] + '...' if len(input_str) > 200 else input_str,
                 'session.id': self.session_id,
                 'user.id': self.user_id,
@@ -364,10 +393,17 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
 
         span = self.tracer.start_span(
-            f'tool.{serialized.get("name", "unknown")}',
+            name=f'tool.{tool_name}',
             attributes=span_attributes,
             context=parent_context,
         )
+        logger.info('--- ON_TOOL_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
+
+        # Add tags and metadata
+        if tags:
+            span.set_attribute('tool.tags', json.dumps(tags))
+        if metadata:
+            span.set_attribute('tool.metadata', json.dumps(metadata, default=str))
 
         self._spans[run_id_str] = span
         self._run_start_times[run_id_str] = time.time()
@@ -416,7 +452,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
     def on_chain_start(
         self,
-        serialized: Dict[str, Any],
+        serialized: Optional[Dict[str, Any]],
         inputs: Dict[str, Any],
         *,
         run_id: uuid.UUID,
@@ -428,9 +464,25 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         """Handle chain start event."""
         run_id_str = str(run_id)
 
+        # Handle None serialized parameter (common with LCEL Runnables)
+        chain_name = 'unknown'
+        chain_type = 'unknown'
+        logger.info('--- ON_CHAIN_START SERIALIZED %s\nserialized: %r', run_id, serialized)
+        logger.info('--- ON_CHAIN_START TAGS %s\nmetadata: %r', run_id, tags)
+        logger.info('--- ON_CHAIN_START METADATA %s\nmetadata: %r', run_id, metadata)
+        logger.info('--- ON_CHAIN_START KWARGS %s\nkwargs: %r', run_id, kwargs)
+        if serialized is not None:
+            chain_name = serialized.get('name', 'unknown')
+            chain_type = serialized.get('_type', 'unknown')
+        else:
+            if metadata is not None:
+                langgraph_node = metadata.get('langgraph_node', None)
+                # The node will be a StrEnum type: see our agent graph definitions.
+                chain_name = str(langgraph_node)
+
         span_attributes = {
-                'chain.name': serialized.get('name', 'unknown') if hasattr(serialized, 'get') else "unknown",
-                'chain.type': serialized.get('_type', 'unknown') if hasattr(serialized, 'get') else "unknown",
+                'chain.name': chain_name,
+                'chain.type': chain_type,
                 'session.id': self.session_id,
                 'user.id': self.user_id,
                 'run.id': run_id_str,
@@ -438,15 +490,20 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
+        # Add metadata to span attributes
+        if metadata:
+            for key, value in metadata.items():
+                span_attributes[f'meta.{key}'] = str(value)
+
         parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
 
         span = self.tracer.start_span(
-            f'chain.{serialized.get("name", "unknown") if hasattr(serialized, 'get') else "unknown"}',
+            name=f'chain.{chain_name}',
             attributes=span_attributes,
             context=parent_context,
         )
-        logger.info('--- ON_CHAIN_START %r\n%r', serialized, span)
+        logger.info('--- ON_CHAIN_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
         # Add input information (limited)
         input_summary = {}
@@ -462,9 +519,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             else:
                 input_summary = str(inputs)[:100]
 
-
-
         span.set_attribute('chain.inputs', json.dumps(input_summary))
+
+        # Add tags and metadata
+        if tags:
+            span.set_attribute('chain.tags', json.dumps(tags))
+        if metadata:
+            span.set_attribute('chain.metadata', json.dumps(metadata, default=str))
 
         self._spans[run_id_str] = span
         self._run_start_times[run_id_str] = time.time()
@@ -477,7 +538,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         span = self._spans.get(run_id_str)
         start_time = self._run_start_times.get(run_id_str)
 
-        logger.info('--- ON_CHAIN_END %s\n%r', run_id, span)
+        logger.info('--- ON_CHAIN_END %s\nspan: %r', run_id, span)
 
         if not span:
             return
@@ -529,7 +590,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
     def on_chat_model_start(
         self,
-        serialized: Dict[str, Any],
+        serialized: Optional[Dict[str, Any]],
         messages: List[List[Any]],
         *,
         run_id: uuid.UUID,
@@ -540,10 +601,21 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Handle Chat Model start event."""
         run_id_str = str(run_id)
-        span_name = f'chat_model.{serialized.get("name", "unknown")}'
+        
+        # Handle None serialized parameter (common with LCEL Runnables)
+        chat_model_name = 'unknown'
+        chat_model_vendor = 'unknown'
+        chat_model_model = 'unknown'
+        
+        if serialized is not None:
+            chat_model_name = serialized.get('name', 'unknown')
+            chat_model_vendor = serialized.get('_type', 'unknown')
+            chat_model_model = serialized.get('model_name', 'unknown')
+        
+        span_name = f'chat_model.{chat_model_name}'
         span_attributes = {
-                'chat_model.vendor': serialized.get('_type', 'unknown'),
-                'chat_model.model': serialized.get('model_name', 'unknown'),
+                'chat_model.vendor': chat_model_vendor,
+                'chat_model.model': chat_model_model,
                 'session.id': self.session_id,
                 'user.id': self.user_id,
                 'run.id': run_id_str,
@@ -556,11 +628,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
 
         span = self.tracer.start_span(
-            span_name,
+            name=span_name,
             attributes=span_attributes,
             context=parent_context,
         )
-        logger.info('--- ON_CHAT_MODEL_START %s\n%r\n%r', run_id, serialized, span)
+        logger.info('--- ON_CHAT_MODEL_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
         # Add message content (limit to first 3 messages)
         msg_idx = 0
@@ -570,12 +642,17 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
                 preview = content[:500] + '...' if isinstance(content, str) and len(content) > 500 else content
                 span.set_attribute(f'chat_model.message.{msg_idx}', preview)
                 msg_idx += 1
+
+        # Add tags and metadata
         if tags:
             span.set_attribute('chat_model.tags', json.dumps(tags))
         if metadata:
             span.set_attribute('chat_model.metadata', json.dumps(metadata, default=str))
+
         self._spans[run_id_str] = span
         self._run_start_times[run_id_str] = time.time()
+
+
 
     def on_chat_model_end(
         self, response: LLMResult, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
@@ -583,7 +660,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         """Handle Chat Model end event."""
         run_id_str = str(run_id)
         span = self._spans.get(run_id_str)
-        logger.info('--- ON_CHAT_MODEL_END %s\n%r', run_id, span)
+        logger.info('--- ON_CHAT_MODEL_END %s\nspan: %r', run_id, span)
         start_time = self._run_start_times.get(run_id_str)
         if not span:
             logger.warning(f'No span found for Chat Model run {run_id_str}')

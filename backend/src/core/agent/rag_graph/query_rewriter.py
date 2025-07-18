@@ -54,7 +54,7 @@ def rewrite_question(state: GraphState):
     question_rewriter = get_question_rewriter()
 
     # Re-write question
-    better_question = question_rewriter.invoke({'question': question})
+    better_question = question_rewriter.invoke(input={'question': question})
 
     # Update agent state with rewritten question.
     messages = [msg for msg in state.messages if msg.type == 'human']

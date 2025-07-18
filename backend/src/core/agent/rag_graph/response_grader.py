@@ -49,7 +49,7 @@ def grade_response(state: GraphState):
 
     response_grader = get_response_grader()
 
-    score = response_grader.invoke({'question': question, 'generation': generation})
+    score = response_grader.invoke(input={'question': question, 'generation': generation})
 
     grade = score.binary_score
 

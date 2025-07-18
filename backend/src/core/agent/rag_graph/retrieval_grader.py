@@ -53,7 +53,7 @@ def grade_document_relevancies(state: GraphState):
     # Score each doc
     document_relevancy = []
     for doc in documents:
-        score = retrieval_grader.invoke({'question': question, 'document': doc.page_content})
+        score = retrieval_grader.invoke(input={'question': question, 'document': doc.page_content})
         grade = score.binary_score if score is not None else 'no'
 
         if grade == 'yes':
