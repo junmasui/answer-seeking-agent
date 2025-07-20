@@ -10,6 +10,7 @@ from functools import cache
 
 from ..internal_models import AgentPromptName
 from .agent_state import GraphState
+from .decorator_util import runnable
 from .grader_util import build_grader
 from .internal_models import GradeDocuments
 from .prompt_util import get_chat_prompt
@@ -32,6 +33,7 @@ def get_retrieval_grader():
     return retrieval_grader
 
 
+@runnable
 def grade_document_relevancies(state: GraphState):
     """
     Determines whether the retrieved documents are relevant to the question.
@@ -53,7 +55,10 @@ def grade_document_relevancies(state: GraphState):
     # Score each doc
     document_relevancy = []
     for doc in documents:
-        score = retrieval_grader.invoke(input={'question': question, 'document': doc.page_content})
+        score = retrieval_grader.invoke(
+            input={'question': question, 'document': doc.page_content},
+            config={'metadata': {'chain_name': grade_document_relevancies.name}}
+        )
         grade = score.binary_score if score is not None else 'no'
 
         if grade == 'yes':

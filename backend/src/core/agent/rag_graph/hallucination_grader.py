@@ -9,6 +9,7 @@ from functools import cache
 
 from ..internal_models import AgentPromptName
 from .agent_state import GraphState
+from .decorator_util import runnable
 from .grader_util import build_grader
 from .internal_models import GradeHallucinations
 from .prompt_util import get_chat_prompt
@@ -31,6 +32,7 @@ def get_hallucination_grader():
     return hallucination_grader
 
 
+@runnable
 def grade_hallucination(state: GraphState):
     """
     Determines whether the generation is grounded in the document and answers question.
@@ -49,7 +51,10 @@ def grade_hallucination(state: GraphState):
 
     hallucination_grader = get_hallucination_grader()
 
-    score = hallucination_grader.invoke(input={'documents': documents, 'generation': generation})
+    score = hallucination_grader.invoke(
+        input={'documents': documents, 'generation': generation},
+        config={'metadata': {'chain_name': grade_hallucination.name}}
+    )
     grade = score.binary_score if score is not None else 'no'
 
     return {'grounded_in_facts': grade}

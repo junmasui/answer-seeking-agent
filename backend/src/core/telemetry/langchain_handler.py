@@ -467,18 +467,16 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         # Handle None serialized parameter (common with LCEL Runnables)
         chain_name = 'unknown'
         chain_type = 'unknown'
-        logger.info('--- ON_CHAIN_START SERIALIZED %s\nserialized: %r', run_id, serialized)
-        logger.info('--- ON_CHAIN_START TAGS %s\nmetadata: %r', run_id, tags)
-        logger.info('--- ON_CHAIN_START METADATA %s\nmetadata: %r', run_id, metadata)
-        logger.info('--- ON_CHAIN_START KWARGS %s\nkwargs: %r', run_id, kwargs)
         if serialized is not None:
             chain_name = serialized.get('name', 'unknown')
             chain_type = serialized.get('_type', 'unknown')
         else:
             if metadata is not None:
-                langgraph_node = metadata.get('langgraph_node', None)
-                # The node will be a StrEnum type: see our agent graph definitions.
-                chain_name = str(langgraph_node)
+                chain_name = metadata.get('chain_name', None)
+                if not chain_name:
+                    langgraph_node = metadata.get('langgraph_node', None)
+                    # The node will be a StrEnum type: see our agent graph definitions.
+                    chain_name = str(langgraph_node)
 
         span_attributes = {
                 'chain.name': chain_name,

@@ -7,6 +7,8 @@ services:
     image: nemoguardrails
     profiles: [ nemo, infrastructure, all ]
 
+    env_file:
+      - nemo.env
     ports:
       - '27500:8000'
     networks:
@@ -14,10 +16,15 @@ services:
     volumes:
       - ./config:/config
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      # - ./docker/nemoguardrails/pyproject.toml:/nemoguardrails/pyproject.toml
+      # - ./docker/nemoguardrails/poetry.lock:/nemoguardrails/poetry.lock
+      - ./docker/nemoguardrails:/nemoguardrails
     secrets:
       - answers_dev_env
 
+
     entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # The option --config=/config is required for multi-config support.
     command: ["server", "--config=/config"]
 
     healthcheck:

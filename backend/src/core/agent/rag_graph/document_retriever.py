@@ -62,7 +62,11 @@ def query_documents(state: GraphState):
     retriever = get_retriever()
 
     # Retrieval
-    documents = retriever.invoke(input=question, **kwargs)
+    documents = retriever.invoke(
+        input=question,
+        config={'metadata': {'chain_name': query_documents.name}},
+        **kwargs
+    )
 
     # Remove irrelevant metadata. It's stuff that we don't need for processing
     # or evaluation.

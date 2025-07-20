@@ -19,6 +19,10 @@ receivers:
             - "http://*"
             - "https://*"
 
+  # Zipkin receiver for applications sending Zipkin-formatted traces
+  zipkin:
+    endpoint: 0.0.0.0:9411
+
   # Prometheus receiver to scrape existing metrics endpoints
   # This allows gradual migration from direct Prometheus scraping
   prometheus:
@@ -28,32 +32,39 @@ receivers:
         scrape_timeout: 10s
       scrape_configs:
         # FastAPI application metrics
-        - job_name: 'fastapi-dev-server'
+        - job_name: 'fastapi-integration-server'
           static_configs:
-            - targets: ['fastapi-dev-server:8100']
+            - targets: ['fastapi-integration-server:8100']
           metrics_path: /metrics
           scrape_interval: 15s
 
-        # Celery worker metrics
-        - job_name: 'celery-worker'
-          static_configs:
-            - targets: ['celery-worker:8989']
-          metrics_path: /metrics
-          scrape_interval: 15s
+        # # FastAPI application metrics
+        # - job_name: 'fastapi-dev-server'
+        #   static_configs:
+        #     - targets: ['fastapi-dev-server:8100']
+        #   metrics_path: /metrics
+        #   scrape_interval: 15s
 
-        # Celery exporter metrics
-        - job_name: 'celery-exporter'
-          static_configs:
-            - targets: ['celery-exporter:9808']
-          metrics_path: /metrics
-          scrape_interval: 30s
+        # # Celery worker metrics
+        # - job_name: 'celery-worker'
+        #   static_configs:
+        #     - targets: ['celery-worker:8989']
+        #   metrics_path: /metrics
+        #   scrape_interval: 15s
 
-        # Celery flower metrics
-        - job_name: 'celery-flower'
-          static_configs:
-            - targets: ['celery-flower:5555']
-          metrics_path: /metrics
-          scrape_interval: 30s
+        # # Celery exporter metrics
+        # - job_name: 'celery-exporter'
+        #   static_configs:
+        #     - targets: ['celery-exporter:9808']
+        #   metrics_path: /metrics
+        #   scrape_interval: 30s
+
+        # # Celery flower metrics
+        # - job_name: 'celery-flower'
+        #   static_configs:
+        #     - targets: ['celery-flower:5555']
+        #   metrics_path: /metrics
+        #   scrape_interval: 30s
 
         # Grafana metrics (optional)
         - job_name: 'grafana'
@@ -135,11 +146,19 @@ exporters:
     tls:
       insecure: true
 
-  # Debug exporter for debugging (replaces deprecated logging exporter)
-  debug:
+  # Debug exporter for traces
+  debug/traces:
+    # verbosity: basic, normal, or detailed
     verbosity: detailed
     sampling_initial: 5
     sampling_thereafter: 200
+
+  # Debug exporter for logs
+  debug/logs:
+    # verbosity: basic, normal, or detailed
+    verbosity: basic
+    sampling_initial: 1
+    sampling_thereafter: 100
 
 extensions:
   # Health check extension
@@ -162,19 +181,19 @@ service:
     metrics:
       receivers: [otlp, prometheus]
       processors: [memory_limiter, resource, attributes, batch]
-      exporters: [prometheus, debug]
+      exporters: [prometheus]
 
     # Traces pipeline
     traces:
-      receivers: [otlp]
+      receivers: [otlp, zipkin]
       processors: [memory_limiter, resource, attributes, batch]
-      exporters: [otlp/jaeger, debug]
+      exporters: [otlp/jaeger, debug/traces]
 
     # Logs pipeline (if needed)
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource, attributes, batch]
-      exporters: [debug]
+      exporters: [debug/logs]
 
   # Telemetry configuration for the collector itself
   telemetry:

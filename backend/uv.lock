@@ -207,6 +207,7 @@ dependencies = [
     { name = "alembic" },
     { name = "alembic-postgresql-enum" },
     { name = "alembic-utils" },
+    { name = "anyio" },
     { name = "blinker" },
     { name = "celery", extra = ["redis"] },
     { name = "cloudpathlib", extra = ["s3"] },
@@ -285,6 +286,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.15.1" },
     { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
     { name = "alembic-utils", specifier = ">=0.8.6" },
+    { name = "anyio", specifier = ">=4.9.0" },
     { name = "blinker", specifier = ">=1.9.0" },
     { name = "celery", extras = ["redis"], specifier = ">=5.4.0" },
     { name = "cloudpathlib", extras = ["s3"], specifier = ">=0.20.0" },
@@ -4262,6 +4264,7 @@ wheels = [
     { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:3bf2db5adf77b433844f080887ade049c4705ddf9fe1a32023ff84ff735aa5ad" },
     { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:8f8b3cfc53010a4b4a3c7ecb88c212e9decc4f5eeb6af75c3c803937d2d60947" },
     { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-win_amd64.whl", hash = "sha256:0bc887068772233f532b51a3e8c8cfc682ae62bef74bf4e0c53526c8b9e4138f" },
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-win_arm64.whl", hash = "sha256:a2618775f32eb4126c5b2050686da52001a08cffa331637d9cf51c8250931e00" },
 ]
 
 [[package]]
