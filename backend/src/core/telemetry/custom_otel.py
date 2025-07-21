@@ -12,6 +12,7 @@ from typing import Optional
 
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.instrumentation.celery import CeleryInstrumentor
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -97,20 +98,21 @@ def _setup_tracing(resource: Resource, config: dict):
     global _tracer
 
     # Create Jaeger exporter
-    jaeger_exporter = JaegerExporter(agent_host_name='jaeger', agent_port=6831, collector_endpoint='http://jaeger:14268/api/traces')
+    ## jaeger_exporter = JaegerExporter(agent_host_name='jaeger', agent_port=6831, collector_endpoint='http://jaeger:14268/api/traces')
 
+    otlp_exporter = OTLPSpanExporter(endpoint="http://otel-collector:4317")
     # Create tracer provider
     tracer_provider = TracerProvider(resource=resource, sampler=TraceIdRatioBased(config['trace_sample_rate']))
 
     # Add span processor
-    span_processor = BatchSpanProcessor(jaeger_exporter)
+    span_processor = BatchSpanProcessor(otlp_exporter)
     tracer_provider.add_span_processor(span_processor)
 
     # Set global tracer provider
     trace.set_tracer_provider(tracer_provider)
     _tracer = trace.get_tracer(__name__)
 
-    logger.info(f'Tracing initialized with Jaeger endpoint: {jaeger_exporter.collector_endpoint}')
+    logger.info(f'Tracing initialized with OTLP endpoint: {otlp_exporter}')
 
 
 def _setup_metrics(resource: Resource, config: dict):

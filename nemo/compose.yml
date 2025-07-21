@@ -4,7 +4,7 @@ services:
   nemo-guardrails:
     restart: unless-stopped
 
-    image: nemoguardrails
+    image: nemo-guardrails:latest
     profiles: [ nemo, infrastructure, all ]
 
     env_file:
@@ -18,7 +18,7 @@ services:
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       # - ./docker/nemoguardrails/pyproject.toml:/nemoguardrails/pyproject.toml
       # - ./docker/nemoguardrails/poetry.lock:/nemoguardrails/poetry.lock
-      - ./docker/nemoguardrails:/nemoguardrails
+      # - ./docker/nemoguardrails/nemoguardrails:/app/nemoguardrails
     secrets:
       - answers_dev_env
 

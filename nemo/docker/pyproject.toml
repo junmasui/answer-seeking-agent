@@ -59,6 +59,7 @@ tracing = [
     "opentelemetry-api>=1.27.0,<2.0.0",
     "opentelemetry-sdk>=1.27.0,<2.0.0",
     "aiofiles>=24.1.0",
+    "opentelemetry-exporter-otlp>=1.27.0,<2.0.0",
     "opentelemetry-exporter-zipkin>=1.27.0,<2.0.0",
 ]
 nvidia = ["langchain-nvidia-ai-endpoints>= 0.2.0"]

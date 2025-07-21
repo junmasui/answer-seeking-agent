@@ -21,7 +21,7 @@ FROM python:3.10
 RUN apt-get update && apt-get install -y git gcc g++
 
 # Set POETRY_VERSION environment variable
-ENV POETRY_VERSION=1.8.2
+##ENV POETRY_VERSION=1.8.2
 ##ENV UV_SYSTEM_PYTHON=1
 
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
@@ -47,16 +47,12 @@ COPY --from=parent-dir ./pyproject.toml /app/
 COPY --from=parent-dir ./uv.lock /app/
 
 RUN uv lock
-RUN cat pyproject.toml
-RUN ls -l1a .
 RUN uv sync --all-groups --all-extras
 
 # RUN ls -1 /usr/local/lib/python3.10/site-packages
 RUN ls -1 .venv/lib/python3.10/site-packages
 
 # Download the `all-MiniLM-L6-v2` model
-RUN uv run python -c "import sys; print(sys.modules)"
-RUN uv run python -c "import sys; import fastembed; print(sys.modules)"
 RUN uv run python -c "from fastembed.embedding import FlagEmbedding; FlagEmbedding('sentence-transformers/all-MiniLM-L6-v2');"
 
 RUN uv run nemoguardrails --help

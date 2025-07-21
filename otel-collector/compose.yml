@@ -9,6 +9,7 @@ services:
       - "4318:4318"   # OTLP HTTP receiver
       - "8889:8889"   # Prometheus metrics exporter
       - "8888:8888"   # Collector's own metrics
+      - "9411:9411"   # Zipkin receiver
       - "13133:13133" # Health check endpoint
       - "1777:1777"   # pprof endpoint
       - "55679:55679" # zpages endpoint
