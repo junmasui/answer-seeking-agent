@@ -1,0 +1,6 @@
+
+#
+config/__pycache__
+
+# Ignore the local nemoguardrails repo - used only for docker build
+docker/nemoguardrails

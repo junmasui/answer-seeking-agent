@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.types import ASGIApp, Receive, Scope, Send
 
@@ -63,6 +64,8 @@ app.add_middleware(DynamicRootPathMiddleware)
 app.add_middleware(ErrorLoggingMiddleware)
 
 instrumentator = Instrumentator().instrument(app)
+
+FastAPIInstrumentor.instrument_app(app, excluded_urls="health,status")
 
 app.include_router(router=admin.router, prefix='/admin')
 app.include_router(router=answer.router, prefix='/answer')

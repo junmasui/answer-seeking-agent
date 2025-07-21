@@ -1,7 +1,7 @@
 import logging
 
 import httpx
-from opentelemetry.propagate import inject
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 
 from ...lib_config import get_lib_config
 
@@ -18,11 +18,11 @@ def execute_nemo_guardrails_check(config_id: str, messages: list) -> dict:
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {openai_api_key}',  # Note: Nemo server can use this for its own OpenAI calls
     }
-    # Inject the OpenTelemetry context into the request
-    inject(headers)
     payload = {'config_id': config_id, 'messages': messages, 'options': {'output_vars': True}}
     try:
         with httpx.Client() as client:
+            HTTPXClientInstrumentor.instrument_client(client)
+
             response = client.post(guardrails_url, json=payload, headers=headers, timeout=60.0)
             response.raise_for_status()
             return response.json()

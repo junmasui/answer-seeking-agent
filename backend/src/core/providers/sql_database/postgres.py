@@ -2,6 +2,7 @@
 
 from functools import cache
 
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from psycopg_pool import ConnectionPool
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -55,6 +56,9 @@ def get_engine(db_schema: DataDomain):
     connection_str = get_connection_str(db_schema)
 
     engine = create_engine(connection_str)
+    SQLAlchemyInstrumentor().instrument(
+        engine=engine,
+    )
     return engine
 
 
