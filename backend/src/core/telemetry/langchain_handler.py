@@ -17,7 +17,8 @@ from langchain_core.outputs import ChatGeneration, Generation, LLMResult
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-from .custom_otel import get_meter, get_tracer
+from .custom_otel import get_meter
+from .span_tracker import SpanTracker, get_span_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +53,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         self.sample_rate = sample_rate
 
         # Initialize telemetry
-        self.tracer = get_tracer()
         self.meter = get_meter()
 
         # Create metrics
         self._init_metrics()
 
-        # Active spans tracking
-        self._spans: Dict[str, trace.Span] = {}
-        self._run_start_times: Dict[str, float] = {}
+        # Use SpanTracker for span management
+        self.span_tracker: SpanTracker = get_span_tracker()
 
         logger.debug(f'OpenTelemetryCallbackHandler initialized with session_id={self.session_id}')
 
@@ -106,7 +105,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
         # Handle None serialized parameter (common with LCEL Runnables)
         llm_name = 'unknown'
-        llm_vendor = 'unknown' 
+        llm_vendor = 'unknown'
         llm_model = 'unknown'
         llm_temperature = None
         llm_max_tokens = None
@@ -133,13 +132,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
-        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
-        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
-
-        span = self.tracer.start_span(
+        span = self.span_tracker.start_span(
             name=span_name,
             attributes=span_attributes,
-            context=parent_context,
+            run_id=run_id_str,
+            parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
         logger.info('--- ON_LLM_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
@@ -153,9 +150,6 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             span.set_attribute('llm.tags', json.dumps(tags))
         if metadata:
             span.set_attribute('llm.metadata', json.dumps(metadata, default=str))
-
-        self._spans[run_id_str] = span
-        self._run_start_times[run_id_str] = time.time()
 
         # Record metrics
         self.llm_request_counter.add(
@@ -172,8 +166,8 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Handle LLM end event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
-        start_time = self._run_start_times.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
+        start_time = self.span_tracker.get_start_time(run_id_str)
 
         logger.info('--- ON_LLM_END %s\nspan: %r', run_id, span)
 
@@ -231,16 +225,14 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             logger.warning('Error in on_llm_end', exc_info=ex)
             span.set_status(Status(StatusCode.ERROR, str(ex)))
         finally:
-            span.end()
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str)
 
     def on_llm_error(
         self, error: BaseException, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle LLM error event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
 
         if span:
             span.set_status(Status(StatusCode.ERROR, str(error)))
@@ -280,13 +272,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
-        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
-        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
-
-        span = self.tracer.start_span(
+        span = self.span_tracker.start_span(
             name='retrieval.search',
             attributes=span_attributes,
-            context=parent_context,
+            run_id=run_id_str,
+            parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
         logger.info('--- ON_RETRIEVER_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
@@ -295,9 +285,6 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             span.set_attribute('retrieval.tags', json.dumps(tags))
         if metadata:
             span.set_attribute('retrieval.metadata', json.dumps(metadata, default=str))
-
-        self._spans[run_id_str] = span
-        self._run_start_times[run_id_str] = time.time()
 
         # Record metrics
         self.retrieval_counter.add(
@@ -309,8 +296,8 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Handle retriever end event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
-        start_time = self._run_start_times.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
+        start_time = self.span_tracker.get_start_time(run_id_str)
 
         logger.info('--- ON_RETRIEVER_END %s\nspan: %r', run_id, span)
 
@@ -339,25 +326,17 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             logger.warning('Error in on_retriever_end', exc_info=ex)
             span.set_status(Status(StatusCode.ERROR, str(ex)))
         finally:
-            span.end()
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str)
 
     def on_retriever_error(
         self, error: BaseException, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle retriever error event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
 
         if span:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.set_attribute('error.type', type(error).__name__)
-            span.set_attribute('error.message', str(error))
-            span.end()
-
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str, status=Status(StatusCode.ERROR, str(error)), error=error)
 
     def on_tool_start(
         self,
@@ -389,13 +368,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
-        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
-        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
-
-        span = self.tracer.start_span(
+        span = self.span_tracker.start_span(
             name=f'tool.{tool_name}',
             attributes=span_attributes,
-            context=parent_context,
+            run_id=run_id_str,
+            parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
         logger.info('--- ON_TOOL_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
@@ -405,16 +382,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if metadata:
             span.set_attribute('tool.metadata', json.dumps(metadata, default=str))
 
-        self._spans[run_id_str] = span
-        self._run_start_times[run_id_str] = time.time()
-
     def on_tool_end(
         self, output: str, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle tool end event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
-        start_time = self._run_start_times.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
+        start_time = self.span_tracker.get_start_time(run_id_str)
 
         if not span:
             return
@@ -430,25 +404,17 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             logger.warning('Error in on_tool_end', exc_info=ex)
             span.set_status(Status(StatusCode.ERROR, str(ex)))
         finally:
-            span.end()
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str)
 
     def on_tool_error(
         self, error: BaseException, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle tool error event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
 
         if span:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.set_attribute('error.type', type(error).__name__)
-            span.set_attribute('error.message', str(error))
-            span.end()
-
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str, status=Status(StatusCode.ERROR, str(error)), error=error)
 
     def on_chain_start(
         self,
@@ -493,13 +459,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             for key, value in metadata.items():
                 span_attributes[f'meta.{key}'] = str(value)
 
-        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
-        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
-
-        span = self.tracer.start_span(
+        span = self.span_tracker.start_span(
             name=f'chain.{chain_name}',
             attributes=span_attributes,
-            context=parent_context,
+            run_id=run_id_str,
+            parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
         logger.info('--- ON_CHAIN_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
@@ -525,16 +489,15 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if metadata:
             span.set_attribute('chain.metadata', json.dumps(metadata, default=str))
 
-        self._spans[run_id_str] = span
-        self._run_start_times[run_id_str] = time.time()
+        # SpanTracker handles tracking internally
 
     def on_chain_end(
         self, outputs: Dict[str, Any], *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle chain end event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
-        start_time = self._run_start_times.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
+        start_time = self.span_tracker.get_start_time(run_id_str)
 
         logger.info('--- ON_CHAIN_END %s\nspan: %r', run_id, span)
 
@@ -566,25 +529,17 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             logger.warning('Error in on_chain_end', exc_info=ex)
             span.set_status(Status(StatusCode.ERROR, str(ex)))
         finally:
-            span.end()
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str)
 
     def on_chain_error(
         self, error: BaseException, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle chain error event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
 
         if span:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.set_attribute('error.type', type(error).__name__)
-            span.set_attribute('error.message', str(error))
-            span.end()
-
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str, status=Status(StatusCode.ERROR, str(error)), error=error)
 
     def on_chat_model_start(
         self,
@@ -622,13 +577,11 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
-        parent_span = self._spans.get(str(parent_run_id)) if parent_run_id else None
-        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
-
-        span = self.tracer.start_span(
+        span = self.span_tracker.start_span(
             name=span_name,
             attributes=span_attributes,
-            context=parent_context,
+            run_id=run_id_str,
+            parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
         logger.info('--- ON_CHAT_MODEL_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
 
@@ -647,8 +600,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         if metadata:
             span.set_attribute('chat_model.metadata', json.dumps(metadata, default=str))
 
-        self._spans[run_id_str] = span
-        self._run_start_times[run_id_str] = time.time()
+        # SpanTracker handles tracking internally
 
 
 
@@ -657,9 +609,9 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Handle Chat Model end event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
         logger.info('--- ON_CHAT_MODEL_END %s\nspan: %r', run_id, span)
-        start_time = self._run_start_times.get(run_id_str)
+        start_time = self.span_tracker.get_start_time(run_id_str)
         if not span:
             logger.warning(f'No span found for Chat Model run {run_id_str}')
             return
@@ -686,20 +638,13 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             logger.warning('Error in on_chat_model_end', exc_info=ex)
             span.set_status(Status(StatusCode.ERROR, str(ex)))
         finally:
-            span.end()
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str)
 
     def on_agent_error(
         self, error: BaseException, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
     ) -> Any:
         """Handle agent error event."""
         run_id_str = str(run_id)
-        span = self._spans.get(run_id_str)
+        span = self.span_tracker.get_span(run_id_str)
         if span:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.set_attribute('error.type', type(error).__name__)
-            span.set_attribute('error.message', str(error))
-            span.end()
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str, status=Status(StatusCode.ERROR, str(error)), error=error)
