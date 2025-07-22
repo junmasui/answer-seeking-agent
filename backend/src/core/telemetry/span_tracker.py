@@ -3,8 +3,14 @@ from typing import Any, Dict, Optional
 import time
 
 
+from opentelemetry import context as context_api
 from opentelemetry import trace
 from opentelemetry.trace import Status
+from opentelemetry.trace.propagation import (
+    _SPAN_KEY,
+    get_current_span,
+    set_span_in_context,
+)
 
 from .custom_otel import get_meter, get_tracer
 
@@ -24,6 +30,8 @@ class SpanTracker:
         self.tracer = tracer
         self._spans: Dict[str, trace.Span] = {}
         self._run_start_times: Dict[str, float] = {}
+        self._tokens: Dict[str, trace.Span] = {}
+
 
     def start_span(
         self,
@@ -44,8 +52,13 @@ class SpanTracker:
         )
         self._spans[run_id] = span
         self._run_start_times[run_id] = time.time()
-        return span
 
+        # 
+        token = context_api.attach(context_api.set_value(trace.propagation._SPAN_KEY, span))
+        self._tokens[run_id] = token
+
+        return span
+    
     def get_span(self, run_id: str) -> Optional[trace.Span]:
         return self._spans.get(run_id)
 
@@ -78,6 +91,10 @@ class SpanTracker:
             if duration is not None:
                 span.set_attribute('duration_seconds', duration)
             span.end()
-            self._spans.pop(run_id, None)
+            span = self._spans.pop(run_id, None)
             self._run_start_times.pop(run_id, None)
+
+            # 
+            token = self._tokens.pop(run_id, None)
+            context_api.detach(token)
         return duration
