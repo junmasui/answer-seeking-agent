@@ -21,6 +21,30 @@ _telemetry_initialized = False
 _telemetry_method = None  # 'openllmetry' or 'custom'
 
 
+
+def init_telemetry():
+    from .lib_config import get_lib_config
+
+    config = get_lib_config()
+    # OpenTelemetry/OpenLLMetry handler (new implementation)
+    if config.enable_opentelemetry:
+        from opentelemetry.instrumentation.celery import CeleryInstrumentor
+        from core_telemetry import initialize_telemetry
+
+        CeleryInstrumentor().instrument()
+
+        # Initialize telemetry (will choose best available method)
+        initialize_telemetry(
+            method='custom',  # Will prefer OpenLLMetry if available
+            disable_batch=True,  # For immediate traces in development
+            service_name=config.otel_service_name,
+            environment=config.otel_environment,
+            trace_sample_rate=config.otel_trace_sample_rate,
+            otel_jaeger_endpoint=config.otel_jaeger_endpoint,
+        )
+
+
+
 def initialize_telemetry(method: str = 'custom', **kwargs):
     """
     Initialize telemetry with the best available method.

@@ -13,36 +13,10 @@ from opentelemetry.metrics import Observation
 
 import psutil
 
-from core import init_telemetry
 from .app_config import get_app_config
 
 
 logger = logging.getLogger(__name__)
-
-def init_celery_telemetry():
-    """
-    Start the Prometheus metrics collection system for the Celery worker.
-
-    Sets up collectors for garbage collection, process, and platform metrics. If this is the main
-    worker, also starts a WSGI server to expose metrics.
-    """
-    logger.info('INITIALIZING TELEMETRY')
-
-    CeleryInstrumentor().instrument()
-
-    init_telemetry()
-
-    # Set up OpenTelemetry metrics provider and exporter
-
-    # # Configure OTLP exporter to send metrics to your OpenTelemetry Collector
-    # exporter = OTLPMetricExporter(endpoint="http://otel-collector:4317", insecure=True)
-    # reader = PeriodicExportingMetricReader(exporter)
-    # provider = MeterProvider(metric_readers=[reader])
-    # logger.info('SETTING METER PROVIDER')
-    # set_meter_provider(provider)
-    # logger.info('SET METER PROVIDER')
-
-
 
 def start_metrics(is_main_worker: bool):
     """

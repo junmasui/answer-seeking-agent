@@ -8,6 +8,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 import sim_auth_app
 import core
+from core_telemetry import init_telemetry
 from core.signals import configure_sender, send_start_up
 from log_config_monitor import get_logging_conf_monitor
 
@@ -49,7 +50,7 @@ async def lifespan(fastapi_app: FastAPI):
 
     instrumentator.expose(fastapi_app, include_in_schema=False, should_gzip=False)
 
-    core.init_telemetry()
+    init_telemetry()
 
 
     logger.info('Application is starting up...')

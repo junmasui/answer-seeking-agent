@@ -95,7 +95,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # OpenTelemetry/OpenLLMetry handler (new implementation)
     if config.enable_opentelemetry:
-        from core.telemetry import get_callback_handler
+        from core_telemetry import get_callback_handler
 
         # Get callback handler (None if using OpenLLMetry auto-instrumentation)
         otel_handler = get_callback_handler(
@@ -109,7 +109,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
         # Set session/user context for OpenLLMetry (if available)
         try:
-            from core.telemetry.openllmetry import is_openllmetry_initialized, set_session_id, set_user_id
+            from core_telemetry.openllmetry import is_openllmetry_initialized, set_session_id, set_user_id
 
             if is_openllmetry_initialized():
                 set_session_id(thread_id.hex)

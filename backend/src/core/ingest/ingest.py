@@ -16,7 +16,7 @@ from ..providers.doc_loader import get_doc_loader
 from ..providers.file_store import get_s3_bucket
 from ..providers.vector_store import delete_vectors_by_document_id, get_vector_store
 from ..public_models import DocumentStatus
-from ..telemetry.openllmetry import annotate_workflow
+from core_telemetry.openllmetry import annotate_workflow
 
 logger = logging.getLogger(__name__)
 
