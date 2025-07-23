@@ -9,11 +9,12 @@ from celery.signals import (
     worker_ready,
     worker_shutting_down,
 )
+from opentelemetry.instrumentation.celery import CeleryInstrumentor
 
 from core.signals import configure_sender, send_start_up
 from log_config_monitor import get_logging_conf_monitor
 
-from .metrics import child_exit, start_metrics
+from .metrics import child_exit, init_celery_telemetry, start_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,9 @@ def handle_worker_init(**_kwargs):
 
     get_logging_conf_monitor().start()
 
-    start_metrics(is_main_worker=True)
+    # init_celery_telemetry()
+
+    # start_metrics(is_main_worker=True)
 
     configure_sender(is_worker=True)
 
@@ -72,6 +75,8 @@ def handle_worker_process_init(**_kwargs):
     logger.info('worker process init')
 
     get_logging_conf_monitor().start()
+
+    init_celery_telemetry()
 
     start_metrics(is_main_worker=False)
 

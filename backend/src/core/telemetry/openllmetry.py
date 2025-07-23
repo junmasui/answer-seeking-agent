@@ -74,7 +74,8 @@ def initialize_openllmetry(
             'api_endpoint': None,
             'disable_batch': disable_batch,
             'telemetry_enabled': telemetry_enabled,
-            'span_postprocess_callback': temp_callback**kwargs,
+            'span_postprocess_callback': temp_callback,
+            **kwargs,
         }
 
         # Remove None values to use defaults
@@ -86,10 +87,10 @@ def initialize_openllmetry(
         logger.info(f"OpenLLMetry initialized successfully with app_name='{app_name}'")
 
     except ImportError as e:
-        logger.error('OpenLLMetry (traceloop-sdk) not installed. Install it with: pip install traceloop-sdk')
+        logger.error('OpenLLMetry (traceloop-sdk) not installed. Install it with: pip install traceloop-sdk', exc_info=e)
         raise e
     except Exception as e:
-        logger.error(f'Failed to initialize OpenLLMetry: {e}')
+        logger.error('Failed to initialize OpenLLMetry:', exc_info=e)
         raise e
 
 

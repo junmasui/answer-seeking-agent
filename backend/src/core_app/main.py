@@ -7,6 +7,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 import sim_auth_app
+import core
 from core.signals import configure_sender, send_start_up
 from log_config_monitor import get_logging_conf_monitor
 
@@ -47,6 +48,9 @@ async def lifespan(fastapi_app: FastAPI):
     get_logging_conf_monitor().start()
 
     instrumentator.expose(fastapi_app, include_in_schema=False, should_gzip=False)
+
+    core.init_telemetry()
+
 
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)

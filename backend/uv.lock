@@ -236,6 +236,7 @@ dependencies = [
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-exporter-prometheus" },
     { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-botocore" },
     { name = "opentelemetry-instrumentation-celery" },
     { name = "opentelemetry-instrumentation-fastapi" },
     { name = "opentelemetry-instrumentation-google-generativeai" },
@@ -244,11 +245,13 @@ dependencies = [
     { name = "opentelemetry-instrumentation-openai" },
     { name = "opentelemetry-instrumentation-requests" },
     { name = "opentelemetry-instrumentation-sqlalchemy" },
+    { name = "opentelemetry-instrumentation-system-metrics" },
     { name = "opentelemetry-instrumentation-transformers" },
     { name = "opentelemetry-instrumentation-weaviate" },
     { name = "pdfplumber" },
     { name = "prometheus-client" },
     { name = "prometheus-fastapi-instrumentator" },
+    { name = "psutil" },
     { name = "psycopg", extra = ["binary", "pool"] },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
@@ -281,6 +284,7 @@ cuda12 = [
 [package.dev-dependencies]
 dev = [
     { name = "autopep8" },
+    { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
@@ -320,6 +324,7 @@ requires-dist = [
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.34.1" },
     { name = "opentelemetry-exporter-prometheus", specifier = ">=0.55b1" },
     { name = "opentelemetry-instrumentation", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-botocore", specifier = ">=0.55b1" },
     { name = "opentelemetry-instrumentation-celery", specifier = ">=0.55b1" },
     { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.55b1" },
     { name = "opentelemetry-instrumentation-google-generativeai", specifier = ">=0.40.14" },
@@ -328,11 +333,13 @@ requires-dist = [
     { name = "opentelemetry-instrumentation-openai", specifier = ">=0.40.14" },
     { name = "opentelemetry-instrumentation-requests", specifier = ">=0.55b1" },
     { name = "opentelemetry-instrumentation-sqlalchemy", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-system-metrics", specifier = ">=0.55b1" },
     { name = "opentelemetry-instrumentation-transformers", specifier = ">=0.40.14" },
     { name = "opentelemetry-instrumentation-weaviate", specifier = ">=0.41.0" },
     { name = "pdfplumber", specifier = ">=0.11.5" },
     { name = "prometheus-client", specifier = ">=0.21.1" },
     { name = "prometheus-fastapi-instrumentator", specifier = ">=7.0.2" },
+    { name = "psutil", specifier = ">=7.0.0" },
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.4" },
     { name = "pydantic-settings", specifier = ">=2.7.0" },
     { name = "pyjwt", specifier = ">=2.10.1" },
@@ -357,6 +364,7 @@ provides-extras = ["cpu", "cuda12"]
 [package.metadata.requires-dev]
 dev = [
     { name = "autopep8", specifier = ">=2.3.2" },
+    { name = "psutil", extras = ["cuda12"], specifier = ">=7.0.0" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-asyncio", specifier = ">=0.26.0" },
     { name = "ruff", specifier = ">=0.9.2" },
@@ -2477,6 +2485,21 @@ wheels = [
 ]
 
 [[package]]
+name = "opentelemetry-instrumentation-botocore"
+version = "0.55b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-propagator-aws-xray" },
+    { name = "opentelemetry-semantic-conventions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2b/cf/8d0965ffc8f8125c2977abb1bc128b25f03f790d71b5a4d6e8ca5a3bea7d/opentelemetry_instrumentation_botocore-0.55b1.tar.gz", hash = "sha256:7d027a4371ac90f9c17c32c98012a484065ee2a4be6755493d8b9cbc73ee76fe", size = 118800, upload-time = "2025-06-10T08:58:23.637Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a9/0d/0777dbc65d0f76c8f0b16c76344fa43863350a669d244d8bc757cb2cad34/opentelemetry_instrumentation_botocore-0.55b1-py3-none-any.whl", hash = "sha256:a00a4a846b6caa26e0be42e96cd032f496c83a25a7d8298a1904978b088eb370", size = 35806, upload-time = "2025-06-10T08:57:31.837Z" },
+]
+
+[[package]]
 name = "opentelemetry-instrumentation-celery"
 version = "0.55b1"
 source = { registry = "https://pypi.org/simple" }
@@ -2885,6 +2908,20 @@ wheels = [
 ]
 
 [[package]]
+name = "opentelemetry-instrumentation-system-metrics"
+version = "0.55b1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "psutil" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f2/90/57932fbb8dc5517d5d2088e8d1c4af863000daf6e4e0ae7c40de65333d29/opentelemetry_instrumentation_system_metrics-0.55b1.tar.gz", hash = "sha256:68e742eb3d55b793d831b6a30bd09bbadf0098fd7e20ab0afaf24cb5079ffce6", size = 15341, upload-time = "2025-06-10T08:58:46.244Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f5/bf/125178a024af1dd23e3dbe5bb0ed86d1323eff81d2e02978c93cb9ebe2e7/opentelemetry_instrumentation_system_metrics-0.55b1-py3-none-any.whl", hash = "sha256:0617826df6e5c0369fe877df2442c1aaed6a3012926e2da76014837bc0a7bf91", size = 13216, upload-time = "2025-06-10T08:58:02.03Z" },
+]
+
+[[package]]
 name = "opentelemetry-instrumentation-threading"
 version = "0.55b1"
 source = { registry = "https://pypi.org/simple" }
@@ -2987,6 +3024,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fc/8a/e3a1109fd525430cbe661cd886b1c16886cdf0bcf68d0fe71807b568eb50/opentelemetry_instrumentation_weaviate-0.42.0.tar.gz", hash = "sha256:ba331195041f37414e69939259faf6f2672f6f4ccdb778c1855b38f0452ab557", size = 4428, upload-time = "2025-07-17T19:46:12.474Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/03/d179a6e9aec1746010e6d9c8ee79f74301b7850a1325fdb67065a083a06f/opentelemetry_instrumentation_weaviate-0.42.0-py3-none-any.whl", hash = "sha256:c57e1a74a5a9e2545385640d88078452e2d67d634328e6dff05346dc81dc47b5", size = 6401, upload-time = "2025-07-17T19:45:46.53Z" },
+]
+
+[[package]]
+name = "opentelemetry-propagator-aws-xray"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f4/31/40004e9e55b1e5694ef3a7526f0b7637df44196fc68a8b7d248a3684680f/opentelemetry_propagator_aws_xray-1.0.2.tar.gz", hash = "sha256:6b2cee5479d2ef0172307b66ed2ed151f598a0fd29b3c01133ac87ca06326260", size = 10994, upload-time = "2024-08-05T17:45:57.601Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ea/89/849a0847871fd9745315896ad9e23d6479db84d90b8b36c4c26dc46e92b8/opentelemetry_propagator_aws_xray-1.0.2-py3-none-any.whl", hash = "sha256:1c99181ee228e99bddb638a0c911a297fa21f1c3a0af951f841e79919b5f1934", size = 10856, upload-time = "2024-08-05T17:45:56.492Z" },
 ]
 
 [[package]]

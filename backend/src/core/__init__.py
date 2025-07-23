@@ -39,7 +39,7 @@ __all__ = [
 ]
 
 
-def init():
+def init_telemetry():
     from .lib_config import get_lib_config
 
     config = get_lib_config()
@@ -49,7 +49,7 @@ def init():
 
         # Initialize telemetry (will choose best available method)
         initialize_telemetry(
-            method='auto',  # Will prefer OpenLLMetry if available
+            method='custom',  # Will prefer OpenLLMetry if available
             disable_batch=True,  # For immediate traces in development
             service_name=config.otel_service_name,
             environment=config.otel_environment,
@@ -57,5 +57,3 @@ def init():
             otel_jaeger_endpoint=config.otel_jaeger_endpoint,
         )
 
-
-init()

@@ -21,7 +21,7 @@ _telemetry_initialized = False
 _telemetry_method = None  # 'openllmetry' or 'custom'
 
 
-def initialize_telemetry(method: str = 'auto', **kwargs):
+def initialize_telemetry(method: str = 'custom', **kwargs):
     """
     Initialize telemetry with the best available method.
 
@@ -91,9 +91,9 @@ def _try_initialize_openllmetry(**kwargs) -> bool:
 
 def _initialize_custom_telemetry(**kwargs):
     """Initialize custom OpenTelemetry setup."""
-    from .custom_otel import initialize_custom_telemetry as _init_custom
+    from .custom_otel import initialize_custom_telemetry
 
-    _init_custom(**kwargs)
+    initialize_custom_telemetry(**kwargs)
     logger.info('Successfully initialized custom OpenTelemetry')
 
 
@@ -106,7 +106,7 @@ def get_callback_handler(session_id: Optional[str] = None, user_id: Optional[str
 
     """
     if not _telemetry_initialized:
-        initialize_telemetry()
+        raise RuntimeError()
 
     if _telemetry_method == 'openllmetry':
         from .openllmetry import get_opentelemetry_callback_handler

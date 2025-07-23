@@ -85,8 +85,6 @@ class ApplicationSettings(BaseSettings):
     celery_task_queue: str = Field(default='', validation_alias='CELERY_TASK_QUEUE')
     celery_result_key_prefix: str = Field(default='', validation_alias='CELERY_RESULT_KEY_PREFIX')
 
-    prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
-
 
 @cache
 def get_app_config():
