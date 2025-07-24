@@ -21,11 +21,7 @@ import os
 from functools import cache
 from pathlib import Path
 
-from pydantic import (
-    BaseModel,
-    Field,
-    StringConstraints,
-)
+from pydantic import BaseModel, Field, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -38,6 +34,7 @@ MinimalStr = Annotated[str, StringConstraints(to_lower=True, min_length=3)]
 LowerCaseStr = Annotated[str, StringConstraints(to_lower=True)]
 PasswordOrKeyStr = Annotated[str, StringConstraints(min_length=8)]
 
+
 class TelemetrySettings(BaseModel):
     """
     Configuration group for OpenTelemetry settings.
@@ -47,77 +44,72 @@ class TelemetrySettings(BaseModel):
     It is used as a nested model within LibrarySettings to organize telemetry
     configuration in a structured way.
     """
+
     enable_opentelemetry: Annotated[
         bool,
         Field(
             default=True,
             validation_alias='ENABLE_OPENTELEMETRY',
-            description='Enable or disable OpenTelemetry instrumentation.'
-        )
+            description='Enable or disable OpenTelemetry instrumentation.',
+        ),
     ]
     service_name: Annotated[
         str,
         Field(
             default='answers-agent',
             validation_alias='OTEL_SERVICE_NAME',
-            description='Service name for OpenTelemetry traces and metrics.'
-        )
+            description='Service name for OpenTelemetry traces and metrics.',
+        ),
     ]
     service_version: Annotated[
         str,
         Field(
-            default='0.1.0',
-            validation_alias='OTEL_SERVICE_VERSION',
-            description='Service version for OpenTelemetry.'
-        )
+            default='0.1.0', validation_alias='OTEL_SERVICE_VERSION', description='Service version for OpenTelemetry.'
+        ),
     ]
     environment: Annotated[
         str,
         Field(
             default='development',
             validation_alias='OTEL_ENVIRONMENT',
-            description='Deployment environment for OpenTelemetry (e.g., development, staging, production).'
-        )
+            description='Deployment environment for OpenTelemetry (e.g., development, staging, production).',
+        ),
     ]
     jaeger_endpoint: Annotated[
         str,
         Field(
             default='http://jaeger:14268/api/traces',
             validation_alias='OTEL_EXPORTER_JAEGER_ENDPOINT',
-            description='Jaeger endpoint for exporting OpenTelemetry traces.'
-        )
+            description='Jaeger endpoint for exporting OpenTelemetry traces.',
+        ),
     ]
     prometheus_port: Annotated[
         int,
         Field(
             default=8889,
             validation_alias='OTEL_EXPORTER_PROMETHEUS_PORT',
-            description='Port for Prometheus metrics exporter.'
-        )
+            description='Port for Prometheus metrics exporter.',
+        ),
     ]
     enable_tracing: Annotated[
         bool,
         Field(
-            default=True,
-            validation_alias='OTEL_ENABLE_TRACING',
-            description='Enable or disable OpenTelemetry tracing.'
-        )
+            default=True, validation_alias='OTEL_ENABLE_TRACING', description='Enable or disable OpenTelemetry tracing.'
+        ),
     ]
     enable_metrics: Annotated[
         bool,
         Field(
-            default=True,
-            validation_alias='OTEL_ENABLE_METRICS',
-            description='Enable or disable OpenTelemetry metrics.'
-        )
+            default=True, validation_alias='OTEL_ENABLE_METRICS', description='Enable or disable OpenTelemetry metrics.'
+        ),
     ]
     trace_sample_rate: Annotated[
         float,
         Field(
             default=1.0,
             validation_alias='OTEL_TRACE_SAMPLE_RATE',
-            description='Sampling rate for OpenTelemetry traces (0.0 to 1.0).'
-        )
+            description='Sampling rate for OpenTelemetry traces (0.0 to 1.0).',
+        ),
     ]
 
 
@@ -167,12 +159,9 @@ class LibrarySettings(BaseSettings):
 
     # OpenTelemetry configuration
     otel: Annotated[
-        TelemetrySettings,
-        Field(
-            default_factory=TelemetrySettings,
-            description="OpenTelemetry configuration group."
-        )
+        TelemetrySettings, Field(default_factory=TelemetrySettings, description='OpenTelemetry configuration group.')
     ]
+
 
 @cache
 def get_lib_config():

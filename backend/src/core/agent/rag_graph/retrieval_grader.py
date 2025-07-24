@@ -57,7 +57,7 @@ def grade_document_relevancies(state: GraphState):
     for doc in documents:
         score = retrieval_grader.invoke(
             input={'question': question, 'document': doc.page_content},
-            config={'metadata': {'chain_name': grade_document_relevancies.name}}
+            config={'metadata': {'chain_name': grade_document_relevancies.name}},
         )
         grade = score.binary_score if score is not None else 'no'
 

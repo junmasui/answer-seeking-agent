@@ -9,10 +9,9 @@ from celery.signals import (
     worker_ready,
     worker_shutting_down,
 )
-from opentelemetry.instrumentation.celery import CeleryInstrumentor
 
-from core_telemetry import init_telemetry
 from core.signals import configure_sender, send_start_up
+from core_telemetry import init_telemetry
 from log_config_monitor import get_logging_conf_monitor
 
 from .metrics import child_exit, start_metrics

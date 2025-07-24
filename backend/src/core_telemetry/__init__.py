@@ -21,7 +21,6 @@ _telemetry_initialized = False
 _telemetry_method = None  # 'openllmetry' or 'custom'
 
 
-
 def init_telemetry():
     from .lib_config import get_lib_config
 
@@ -29,6 +28,7 @@ def init_telemetry():
     # OpenTelemetry/OpenLLMetry handler (new implementation)
     if config.enable_opentelemetry:
         from opentelemetry.instrumentation.celery import CeleryInstrumentor
+
         from core_telemetry import initialize_telemetry
 
         CeleryInstrumentor().instrument()
@@ -42,7 +42,6 @@ def init_telemetry():
             trace_sample_rate=config.trace_sample_rate,
             jaeger_endpoint=config.jaeger_endpoint,
         )
-
 
 
 def initialize_telemetry(method: str = 'custom', **kwargs):

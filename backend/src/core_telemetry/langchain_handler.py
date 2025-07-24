@@ -14,11 +14,10 @@ from typing import Any, Dict, List, Optional
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.documents import Document
 from langchain_core.outputs import ChatGeneration, Generation, LLMResult
-from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-from .metrics import get_meter
 from .lib_config import get_lib_config
+from .metrics import get_meter
 from .span_tracker import SpanTracker, get_span_tracker
 
 logger = logging.getLogger(__name__)
@@ -111,7 +110,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         llm_model = 'unknown'
         llm_temperature = None
         llm_max_tokens = None
-        
+
         if serialized is not None:
             llm_name = serialized.get('name', 'unknown')
             llm_vendor = serialized.get('_type', 'unknown')
@@ -122,15 +121,15 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         # Create span for LLM operation
         span_name = f'llm.{llm_name}'
         span_attributes = {
-                'llm.vendor': llm_vendor,
-                'llm.model': llm_model,
-                'llm.temperature': llm_temperature,
-                'llm.max_tokens': llm_max_tokens,
-                'session.id': self.session_id,
-                'user.id': self.user_id,
-                'run.id': run_id_str,
-                'llm.prompts.count': len(prompts),
-            }
+            'llm.vendor': llm_vendor,
+            'llm.model': llm_model,
+            'llm.temperature': llm_temperature,
+            'llm.max_tokens': llm_max_tokens,
+            'session.id': self.session_id,
+            'user.id': self.user_id,
+            'run.id': run_id_str,
+            'llm.prompts.count': len(prompts),
+        }
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
@@ -155,12 +154,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
 
         # Record metrics
         self.llm_request_counter.add(
-            1,
-            attributes={
-                'model': llm_model,
-                'vendor': llm_vendor,
-                'session_id': self.session_id,
-            },
+            1, attributes={'model': llm_model, 'vendor': llm_vendor, 'session_id': self.session_id}
         )
 
     def on_llm_end(
@@ -265,12 +259,12 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             retriever_type = serialized.get('_type', 'unknown')
 
         span_attributes = {
-                'retrieval.query': query[:200] + '...' if len(query) > 200 else query,
-                'retrieval.query_length': len(query),
-                'session.id': self.session_id,
-                'user.id': self.user_id,
-                'run.id': run_id_str,
-            }
+            'retrieval.query': query[:200] + '...' if len(query) > 200 else query,
+            'retrieval.query_length': len(query),
+            'session.id': self.session_id,
+            'user.id': self.user_id,
+            'run.id': run_id_str,
+        }
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
@@ -280,7 +274,9 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             run_id=run_id_str,
             parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
-        logger.info('--- ON_RETRIEVER_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
+        logger.info(
+            '--- ON_RETRIEVER_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata
+        )
 
         # Add tags and metadata
         if tags:
@@ -289,9 +285,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             span.set_attribute('retrieval.metadata', json.dumps(metadata, default=str))
 
         # Record metrics
-        self.retrieval_counter.add(
-            1, attributes={'session_id': self.session_id, 'retriever_type': retriever_type}
-        )
+        self.retrieval_counter.add(1, attributes={'session_id': self.session_id, 'retriever_type': retriever_type})
 
     def on_retriever_end(
         self, documents: List[Document], *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any
@@ -361,12 +355,12 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             tool_name = serialized.get('name', 'unknown')
 
         span_attributes = {
-                'tool.name': tool_name,
-                'tool.input': input_str[:200] + '...' if len(input_str) > 200 else input_str,
-                'session.id': self.session_id,
-                'user.id': self.user_id,
-                'run.id': run_id_str,
-            }
+            'tool.name': tool_name,
+            'tool.input': input_str[:200] + '...' if len(input_str) > 200 else input_str,
+            'session.id': self.session_id,
+            'user.id': self.user_id,
+            'run.id': run_id_str,
+        }
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
@@ -447,12 +441,12 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
                     chain_name = str(langgraph_node)
 
         span_attributes = {
-                'chain.name': chain_name,
-                'chain.type': chain_type,
-                'session.id': self.session_id,
-                'user.id': self.user_id,
-                'run.id': run_id_str,
-            }
+            'chain.name': chain_name,
+            'chain.type': chain_type,
+            'session.id': self.session_id,
+            'user.id': self.user_id,
+            'run.id': run_id_str,
+        }
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
@@ -556,26 +550,26 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         """Handle Chat Model start event."""
         run_id_str = str(run_id)
-        
+
         # Handle None serialized parameter (common with LCEL Runnables)
         chat_model_name = 'unknown'
         chat_model_vendor = 'unknown'
         chat_model_model = 'unknown'
-        
+
         if serialized is not None:
             chat_model_name = serialized.get('name', 'unknown')
             chat_model_vendor = serialized.get('_type', 'unknown')
             chat_model_model = serialized.get('model_name', 'unknown')
-        
+
         span_name = f'chat_model.{chat_model_name}'
         span_attributes = {
-                'chat_model.vendor': chat_model_vendor,
-                'chat_model.model': chat_model_model,
-                'session.id': self.session_id,
-                'user.id': self.user_id,
-                'run.id': run_id_str,
-                'chat_model.messages.count': sum(len(m) for m in messages),
-            }
+            'chat_model.vendor': chat_model_vendor,
+            'chat_model.model': chat_model_model,
+            'session.id': self.session_id,
+            'user.id': self.user_id,
+            'run.id': run_id_str,
+            'chat_model.messages.count': sum(len(m) for m in messages),
+        }
         if parent_run_id is not None:
             span_attributes['run.parent_id'] = str(parent_run_id)
 
@@ -585,7 +579,9 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             run_id=run_id_str,
             parent_run_id=str(parent_run_id) if parent_run_id else None,
         )
-        logger.info('--- ON_CHAT_MODEL_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata)
+        logger.info(
+            '--- ON_CHAT_MODEL_START %s\nserialized: %r\nspan: %r\nmetadata: %r', run_id, serialized, span, metadata
+        )
 
         # Add message content (limit to first 3 messages)
         msg_idx = 0
@@ -603,8 +599,6 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
             span.set_attribute('chat_model.metadata', json.dumps(metadata, default=str))
 
         # SpanTracker handles tracking internally
-
-
 
     def on_chat_model_end(
         self, response: LLMResult, *, run_id: uuid.UUID, parent_run_id: Optional[uuid.UUID] = None, **kwargs: Any

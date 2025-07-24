@@ -53,7 +53,7 @@ def grade_hallucination(state: GraphState):
 
     score = hallucination_grader.invoke(
         input={'documents': documents, 'generation': generation},
-        config={'metadata': {'chain_name': grade_hallucination.name}}
+        config={'metadata': {'chain_name': grade_hallucination.name}},
     )
     grade = score.binary_score if score is not None else 'no'
 

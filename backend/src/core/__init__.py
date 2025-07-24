@@ -37,4 +37,3 @@ __all__ = [
     'reset_worker_data',
     'status_check',
 ]
-

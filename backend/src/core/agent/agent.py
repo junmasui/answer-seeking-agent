@@ -98,8 +98,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
 
     # Get callback handler (None if using OpenLLMetry auto-instrumentation)
     otel_handler = get_callback_handler(
-        session_id=thread_id.hex,
-        user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+        session_id=thread_id.hex, user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
     )
 
     if otel_handler:

@@ -87,7 +87,9 @@ def initialize_openllmetry(
         logger.info(f"OpenLLMetry initialized successfully with app_name='{app_name}'")
 
     except ImportError as e:
-        logger.error('OpenLLMetry (traceloop-sdk) not installed. Install it with: pip install traceloop-sdk', exc_info=e)
+        logger.error(
+            'OpenLLMetry (traceloop-sdk) not installed. Install it with: pip install traceloop-sdk', exc_info=e
+        )
         raise e
     except Exception as e:
         logger.error('Failed to initialize OpenLLMetry:', exc_info=e)

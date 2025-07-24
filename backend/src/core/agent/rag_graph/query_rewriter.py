@@ -57,8 +57,7 @@ def rewrite_question(state: GraphState):
 
     # Re-write question
     better_question = question_rewriter.invoke(
-        input={'question': question},
-        config={'metadata': {'chain_name': rewrite_question.name}}
+        input={'question': question}, config={'metadata': {'chain_name': rewrite_question.name}}
     )
 
     # Update agent state with rewritten question.

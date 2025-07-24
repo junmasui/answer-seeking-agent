@@ -1,20 +1,13 @@
+import time
 from functools import cache
 from typing import Any, Dict, Optional
-import time
-
 
 from opentelemetry import context as context_api
 from opentelemetry import trace
 from opentelemetry.trace import Status
-from opentelemetry.trace.propagation import (
-    _SPAN_KEY,  # Internal key used by OpenTelemetry to store the current span in the context
-    get_current_span,
-    set_span_in_context,
-)
 
 from .tracing import get_tracer
 
-from .metrics import get_meter
 
 @cache
 def get_span_tracker():
@@ -23,31 +16,29 @@ def get_span_tracker():
 
     return SpanTracker(tracer)
 
+
 class SpanTracker:
     """
     Tracks active OpenTelemetry spans and their start times.
     Encapsulates span creation and ending logic for distributed tracing.
     Provides methods to start, retrieve, and end spans, as well as manage their context propagation.
     """
+
     def __init__(self, tracer: trace.Tracer):
         """
         Initialize a SpanTracker instance.
 
         Args:
             tracer (trace.Tracer): The OpenTelemetry tracer used to create spans.
+
         """
         self.tracer = tracer
         self._spans: Dict[str, trace.Span] = {}
         self._run_start_times: Dict[str, float] = {}
         self._tokens: Dict[str, trace.Span] = {}
 
-
     def start_span(
-        self,
-        name: str,
-        attributes: Dict[str, Any],
-        run_id: str,
-        parent_run_id: Optional[str] = None,
+        self, name: str, attributes: Dict[str, Any], run_id: str, parent_run_id: Optional[str] = None
     ) -> trace.Span:
         """
         Create and store a new span for the given run_id.
@@ -63,17 +54,14 @@ class SpanTracker:
 
         Returns:
             trace.Span: The created OpenTelemetry span object.
+
         """
         # Retrieve parent span if available, to maintain trace hierarchy
         parent_span = self._spans.get(parent_run_id) if parent_run_id else None
         # Set parent context for child span propagation
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
         # Start a new span using the tracer, with optional parent context and custom attributes
-        span = self.tracer.start_span(
-            name=name,
-            attributes=attributes,
-            context=parent_context,
-        )
+        span = self.tracer.start_span(name=name, attributes=attributes, context=parent_context)
         self._spans[run_id] = span
         self._run_start_times[run_id] = time.time()
 
@@ -84,7 +72,7 @@ class SpanTracker:
         self._tokens[run_id] = token
 
         return span
-    
+
     def get_span(self, run_id: str) -> Optional[trace.Span]:
         """
         Retrieve the span object for a given run_id.
@@ -94,6 +82,7 @@ class SpanTracker:
 
         Returns:
             Optional[trace.Span]: The OpenTelemetry span object, or None if not found.
+
         """
         return self._spans.get(run_id)
 
@@ -106,6 +95,7 @@ class SpanTracker:
 
         Returns:
             Optional[float]: The timestamp (in seconds since epoch) when the span was started, or None if not found.
+
         """
         return self._run_start_times.get(run_id)
 
@@ -129,6 +119,7 @@ class SpanTracker:
 
         Returns:
             Optional[float]: The duration of the span in seconds, or None if start time is not available.
+
         """
         span = self._spans.get(run_id)
         start_time = self._run_start_times.get(run_id)

@@ -26,7 +26,7 @@ import logging
 from opentelemetry import metrics, trace
 from opentelemetry.sdk.resources import Resource
 
-from core_telemetry.instrumentor import setup_auto_instrumentation
+from core_telemetry.instrumentation import setup_auto_instrumentation
 from core_telemetry.metrics import setup_metrics
 from core_telemetry.tracing import setup_tracing
 
@@ -44,6 +44,7 @@ def get_telemetry_config():
 
     Returns:
         dict: Dictionary containing telemetry configuration values such as service name, version, environment, endpoints, and feature flags.
+
     """
     return get_lib_config().otel
 
@@ -57,6 +58,7 @@ def initialize_custom_telemetry(**kwargs):
 
     Args:
         **kwargs: Optional overrides for telemetry configuration values.
+
     """
     global _custom_telemetry_initialized, _tracer, _meter
 

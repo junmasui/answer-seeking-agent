@@ -16,6 +16,7 @@ celery_app.config_from_object(celeryconfig)
 
 setup_monitoring(celery_app)
 
+
 @celery_app.task(name='ingest-docs')
 def ingest_task(doc_ids=None):
     """

@@ -12,6 +12,7 @@ from .presidio_guard import execute_presidio_check
 
 logger = logging.getLogger(__name__)
 
+
 @runnable
 def check_input_with_nemo(state: GraphState):
     """

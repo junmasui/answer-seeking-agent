@@ -268,7 +268,9 @@ def _build_retrieval_subgraph():
     retrieval_subgraph = StateGraph(GraphState)
 
     retrieval_subgraph.add_node(NodeName.QUERY_DOCUMENTS, query_documents)
-    retrieval_subgraph.add_node(NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile(name='retrieval_guard_subgraph'))
+    retrieval_subgraph.add_node(
+        NodeName.RETRIEVAL_GUARD, retrieval_guard_subgraph.compile(name='retrieval_guard_subgraph')
+    )
     retrieval_subgraph.add_node(NodeName.GATHER_RELEVANT_DOCUMENTS, gather_relevant_documents)
     retrieval_subgraph.add_node(NodeName.REWRITE_QUERY, rewrite_question)
     retrieval_subgraph.add_node(NodeName.RETRIEVAL_EXIT, no_op('Exit Retrieval Subgraph'))

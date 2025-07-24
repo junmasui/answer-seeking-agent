@@ -20,9 +20,8 @@ Key Features:
 import os
 from functools import cache
 from pathlib import Path
-from typing import Union
 
-from pydantic import DirectoryPath, Field, NewPath, RedisDsn, StringConstraints
+from pydantic import Field, RedisDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource

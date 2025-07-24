@@ -6,6 +6,7 @@ from .decorator_util import runnable
 
 logger = logging.getLogger(__name__)
 
+
 @runnable
 def check_if_safe_input(state: GraphState):
     """

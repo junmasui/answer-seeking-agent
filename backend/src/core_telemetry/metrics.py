@@ -1,29 +1,27 @@
 import logging
 from typing import Optional
 
+import opentelemetry.metrics
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 
-from core_telemetry.custom_otel import _custom_telemetry_initialized, initialize_custom_telemetry, logger
-
-from opentelemetry.metrics import metrics
-
 logger = logging.getLogger(__name__)
 
-_meter: Optional[metrics.Meter] = None
+_meter: Optional[opentelemetry.metrics.Meter] = None
 
 
-def get_meter() -> metrics.Meter:
+def get_meter() -> opentelemetry.metrics.Meter:
     """
     Get the global meter instance.
 
     Returns:
         metrics.Meter: The global OpenTelemetry meter instance.
+
     """
-    if not _custom_telemetry_initialized:
-        initialize_custom_telemetry()
+    if not _meter:
+        raise RuntimeError()
     return _meter
 
 
@@ -36,6 +34,7 @@ def setup_metrics(resource: Resource, config: dict):
     Args:
         resource (Resource): OpenTelemetry resource describing the service.
         config (dict): Telemetry configuration dictionary.
+
     """
     global _meter
 
@@ -48,9 +47,9 @@ def setup_metrics(resource: Resource, config: dict):
 
     # Set global meter provider
     logger.info('SETTING METER PROVIDER')
-    metrics.set_meter_provider(meter_provider)
+    opentelemetry.metrics.set_meter_provider(meter_provider)
     logger.info('SET METER PROVIDER')
 
-    _meter = metrics.get_meter(__name__)
+    _meter = opentelemetry.metrics.get_meter(__name__)
 
     logger.info('Metrics initialized with OTLP exporter')
