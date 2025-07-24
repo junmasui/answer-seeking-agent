@@ -13,8 +13,8 @@ from uuid import UUID
 
 from opentelemetry.trace import Status, StatusCode
 
-from .custom_otel import get_tracer
-from .metrics import get_llm_metrics
+from .tracing import get_tracer
+from .llm_metrics import get_llm_metrics
 
 logger = logging.getLogger(__name__)
 

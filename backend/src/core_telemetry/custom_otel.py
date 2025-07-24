@@ -22,34 +22,20 @@ Typical usage example:
 """
 
 import logging
-import os
-from typing import Optional
 
 from opentelemetry import metrics, trace
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
-from opentelemetry.instrumentation.celery import CeleryInstrumentor
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-from opentelemetry.instrumentation.redis import RedisInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.instrumentation.weaviate import WeaviateInstrumentor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
+
+from core_telemetry.instrumentor import setup_auto_instrumentation
+from core_telemetry.metrics import setup_metrics
+from core_telemetry.tracing import setup_tracing
+
+from .lib_config import get_lib_config
 
 logger = logging.getLogger(__name__)
 
 # Global telemetry configuration
 _custom_telemetry_initialized = False
-_tracer: Optional[trace.Tracer] = None
-_meter: Optional[metrics.Meter] = None
 
 
 def get_telemetry_config():
@@ -59,16 +45,7 @@ def get_telemetry_config():
     Returns:
         dict: Dictionary containing telemetry configuration values such as service name, version, environment, endpoints, and feature flags.
     """
-    return {
-        'service_name': os.getenv('OTEL_SERVICE_NAME', 'answers-agent'),
-        'service_version': os.getenv('OTEL_SERVICE_VERSION', '0.1.0'),
-        'environment': os.getenv('OTEL_ENVIRONMENT', 'development'),
-        'jaeger_endpoint': os.getenv('OTEL_EXPORTER_JAEGER_ENDPOINT', 'http://jaeger:14268/api/traces'),
-        'prometheus_port': int(os.getenv('OTEL_EXPORTER_PROMETHEUS_PORT', '8889')),
-        'enable_tracing': os.getenv('OTEL_ENABLE_TRACING', 'true').lower() == 'true',
-        'enable_metrics': os.getenv('OTEL_ENABLE_METRICS', 'true').lower() == 'true',
-        'trace_sample_rate': float(os.getenv('OTEL_TRACE_SAMPLE_RATE', '1.0')),
-    }
+    return get_lib_config().otel
 
 
 def initialize_custom_telemetry(**kwargs):
@@ -87,7 +64,7 @@ def initialize_custom_telemetry(**kwargs):
         logger.debug('Custom telemetry already initialized')
         return
 
-    config = get_telemetry_config()
+    config = get_telemetry_config().model_dump(mode='python')
 
     # Override with provided kwargs
     config.update(kwargs)
@@ -105,157 +82,17 @@ def initialize_custom_telemetry(**kwargs):
 
     # Initialize tracing
     if config['enable_tracing']:
-        _setup_tracing(resource, config)
+        setup_tracing(resource, config)
 
     # Initialize metrics
     if config['enable_metrics']:
-        _setup_metrics(resource, config)
+        setup_metrics(resource, config)
 
     # Auto-instrument common libraries
-    _setup_auto_instrumentation()
+    setup_auto_instrumentation()
 
     _custom_telemetry_initialized = True
     logger.info('Custom OpenTelemetry initialized successfully')
-
-
-def _setup_tracing(resource: Resource, config: dict):
-    """
-    Set up distributed tracing with OTLP exporter.
-
-    Configures the tracer provider, span processor, and global tracer for distributed tracing.
-
-    Args:
-        resource (Resource): OpenTelemetry resource describing the service.
-        config (dict): Telemetry configuration dictionary.
-    """
-    global _tracer
-
-    # Create Jaeger exporter
-    ## jaeger_exporter = JaegerExporter(agent_host_name='jaeger', agent_port=6831, collector_endpoint='http://jaeger:14268/api/traces')
-
-    otlp_exporter = OTLPSpanExporter(endpoint="http://otel-collector:4317")
-    # Create tracer provider
-    tracer_provider = TracerProvider(resource=resource, sampler=TraceIdRatioBased(config['trace_sample_rate']))
-
-    # Add span processor
-    span_processor = BatchSpanProcessor(otlp_exporter)
-    tracer_provider.add_span_processor(span_processor)
-
-    # Set global tracer provider
-    trace.set_tracer_provider(tracer_provider)
-    _tracer = trace.get_tracer(__name__)
-
-    logger.info(f'Tracing initialized with OTLP endpoint: {otlp_exporter}')
-
-
-def _setup_metrics(resource: Resource, config: dict):
-    """
-    Set up metrics collection with OTLP exporter.
-
-    Configures the meter provider, metric reader, and global meter for metrics collection.
-
-    Args:
-        resource (Resource): OpenTelemetry resource describing the service.
-        config (dict): Telemetry configuration dictionary.
-    """
-    global _meter
-
-    # Create OTLP metric exporter and wrap in a PeriodicExportingMetricReader
-    otlp_exporter = OTLPMetricExporter(endpoint='http://otel-collector:4318/v1/metrics')
-    otlp_reader = PeriodicExportingMetricReader(otlp_exporter)
-
-    # Create meter provider
-    meter_provider = MeterProvider(resource=resource, metric_readers=[otlp_reader])
-
-    # Set global meter provider
-    logger.info('SETTING METER PROVIDER')
-    metrics.set_meter_provider(meter_provider)
-    logger.info('SET METER PROVIDER')
-
-    _meter = metrics.get_meter(__name__)
-
-    logger.info('Metrics initialized with OTLP exporter')
-
-
-def _setup_auto_instrumentation():
-    """
-    Set up auto-instrumentation for common libraries (FastAPI, Celery, Requests).
-
-    Attempts to instrument supported libraries and logs any failures.
-    """
-    # try:
-    #     # Instrument FastAPI
-    #     FastAPIInstrumentor().instrument()
-    #     logger.debug('FastAPI instrumentation enabled')
-    # except Exception as e:
-    #     logger.warning(f'Failed to instrument FastAPI: {e}')
-
-    # try:
-    #     # Instrument Celery
-    #     CeleryInstrumentor().instrument()
-    #     logger.debug('Celery instrumentation enabled')
-    # except Exception as e:
-    #     logger.warning(f'Failed to instrument Celery: {e}')
-
-    try:
-        # Instrument Botocore requests
-        BotocoreInstrumentor().instrument()
-        logger.debug('Botocore instrumentation enabled')
-    except Exception as e:
-        logger.warning(f'Failed to instrument Botocore: {e}')
-
-    try:
-        # Instrument HTTP requests
-        RequestsInstrumentor().instrument()
-        logger.debug('Requests instrumentation enabled')
-    except Exception as e:
-        logger.warning(f'Failed to instrument Requests: {e}')
-
-    try:
-        # Instrument HTTPX requests
-        HTTPXClientInstrumentor().instrument()
-        logger.debug('Requests instrumentation enabled')
-    except Exception as e:
-        logger.warning(f'Failed to instrument Requests: {e}')
-
-    try:
-        # Instrument SQLAlchemy requests
-        SQLAlchemyInstrumentor().instrument()
-        logger.debug('SQLAlchemy instrumentation enabled')
-    except Exception as e:
-        logger.warning(f'Failed to instrument SQLAlchemy: {e}')
-
-    try:
-        # Instrument Redis requests
-        RedisInstrumentor().instrument()
-        logger.debug('Redis instrumentation enabled')
-    except Exception as e:
-        logger.warning(f'Failed to instrument Redis: {e}')
-
-
-
-def get_tracer() -> trace.Tracer:
-    """
-    Get the global tracer instance.
-
-    Returns:
-        trace.Tracer: The global OpenTelemetry tracer instance.
-    """
-    if not _custom_telemetry_initialized:
-        initialize_custom_telemetry()
-    return _tracer
-
-
-def get_meter() -> metrics.Meter:
-    """
-    Get the global meter instance.
-
-    Returns:
-        metrics.Meter: The global OpenTelemetry meter instance.
-    """
-    if not _custom_telemetry_initialized:
-        initialize_custom_telemetry()
-    return _meter
 
 
 def shutdown_telemetry():

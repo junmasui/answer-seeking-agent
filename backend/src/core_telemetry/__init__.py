@@ -25,7 +25,7 @@ _telemetry_method = None  # 'openllmetry' or 'custom'
 def init_telemetry():
     from .lib_config import get_lib_config
 
-    config = get_lib_config()
+    config = get_lib_config().otel
     # OpenTelemetry/OpenLLMetry handler (new implementation)
     if config.enable_opentelemetry:
         from opentelemetry.instrumentation.celery import CeleryInstrumentor
@@ -37,10 +37,10 @@ def init_telemetry():
         initialize_telemetry(
             method='custom',  # Will prefer OpenLLMetry if available
             disable_batch=True,  # For immediate traces in development
-            service_name=config.otel_service_name,
-            environment=config.otel_environment,
-            trace_sample_rate=config.otel_trace_sample_rate,
-            otel_jaeger_endpoint=config.otel_jaeger_endpoint,
+            service_name=config.service_name,
+            environment=config.environment,
+            trace_sample_rate=config.trace_sample_rate,
+            jaeger_endpoint=config.jaeger_endpoint,
         )
 
 
@@ -101,7 +101,7 @@ def _try_initialize_openllmetry(**kwargs) -> bool:
             'disable_batch': kwargs.get('disable_batch', False),
             'app_name': kwargs.get('service_name', 'answers-agent'),
             'telemetry_enabled': kwargs.get('telemetry_enabled', False),
-            'endpoint': kwargs.get('otel_jaeger_endpoint'),
+            'endpoint': kwargs.get('jaeger_endpoint'),
         }
 
         initialize_openllmetry(**openllmetry_config)

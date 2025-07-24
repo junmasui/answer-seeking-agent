@@ -17,7 +17,8 @@ from langchain_core.outputs import ChatGeneration, Generation, LLMResult
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-from .custom_otel import get_meter
+from .metrics import get_meter
+from .lib_config import get_lib_config
 from .span_tracker import SpanTracker, get_span_tracker
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     """
 
     def __init__(
-        self, session_id: Optional[str] = None, user_id: Optional[str] = None, sample_rate: float = 1.0, **kwargs
+        self, session_id: Optional[str] = None, user_id: Optional[str] = None, sample_rate: float = None, **kwargs
     ):
         """
         Initialize the OpenTelemetry callback handler.
@@ -50,7 +51,8 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         super().__init__()
         self.session_id = session_id or str(uuid.uuid4())
         self.user_id = user_id
-        self.sample_rate = sample_rate
+        config = get_lib_config().otel
+        self.sample_rate = sample_rate if sample_rate is not None else config.trace_sample_rate
 
         # Initialize telemetry
         self.meter = get_meter()

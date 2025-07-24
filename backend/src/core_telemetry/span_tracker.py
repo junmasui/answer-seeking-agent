@@ -12,7 +12,9 @@ from opentelemetry.trace.propagation import (
     set_span_in_context,
 )
 
-from .custom_otel import get_meter, get_tracer
+from .tracing import get_tracer
+
+from .metrics import get_meter
 
 @cache
 def get_span_tracker():

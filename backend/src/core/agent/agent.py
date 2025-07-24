@@ -94,29 +94,16 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         # callback_handlers.append(langfuse_handler)
 
     # OpenTelemetry/OpenLLMetry handler (new implementation)
-    if config.enable_opentelemetry:
-        from core_telemetry import get_callback_handler
+    from core_telemetry import get_callback_handler
 
-        # Get callback handler (None if using OpenLLMetry auto-instrumentation)
-        otel_handler = get_callback_handler(
-            session_id=thread_id.hex,
-            user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id,
-            sample_rate=config.otel_trace_sample_rate,
-        )
+    # Get callback handler (None if using OpenLLMetry auto-instrumentation)
+    otel_handler = get_callback_handler(
+        session_id=thread_id.hex,
+        user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+    )
 
-        if otel_handler:
-            callback_handlers.append(otel_handler)
-
-        # Set session/user context for OpenLLMetry (if available)
-        try:
-            from core_telemetry.openllmetry import is_openllmetry_initialized, set_session_id, set_user_id
-
-            if is_openllmetry_initialized():
-                set_session_id(thread_id.hex)
-                if user_id:
-                    set_user_id(user_id.hex if isinstance(user_id, uuid.UUID) else user_id)
-        except ImportError:
-            pass  # OpenLLMetry not available
+    if otel_handler:
+        callback_handlers.append(otel_handler)
 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
