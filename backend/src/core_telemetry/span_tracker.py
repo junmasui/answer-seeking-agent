@@ -1,3 +1,12 @@
+"""
+Span tracking utilities for OpenTelemetry instrumentation.
+
+This module provides the SpanTracker class, which manages the creation, retrieval, and
+completion of OpenTelemetry spans. It supports context propagation and error/status handling
+for distributed tracing. Use get_span_tracker() to obtain a singleton instance for span
+management.
+"""
+
 import time
 from functools import cache
 from typing import Any, Dict, Optional
@@ -11,7 +20,13 @@ from .tracing import get_tracer
 
 @cache
 def get_span_tracker():
-    # Initialize telemetry
+    """
+    Return a cached instance of SpanTracker initialized with the current tracer.
+
+    Returns:
+        SpanTracker: A singleton SpanTracker instance.
+
+    """
     tracer = get_tracer()
 
     return SpanTracker(tracer)
@@ -19,9 +34,11 @@ def get_span_tracker():
 
 class SpanTracker:
     """
-    Tracks active OpenTelemetry spans and their start times.
-    Encapsulates span creation and ending logic for distributed tracing.
-    Provides methods to start, retrieve, and end spans, as well as manage their context propagation.
+    Tracks and manages OpenTelemetry spans for distributed tracing.
+
+    This class encapsulates logic for creating, retrieving, and ending spans,
+    including context propagation, status, and error handling. It maintains
+    internal mappings for active spans, their start times, and context tokens.
     """
 
     def __init__(self, tracer: trace.Tracer):
@@ -43,8 +60,9 @@ class SpanTracker:
         """
         Create and store a new span for the given run_id.
 
-        Starts a new OpenTelemetry span, optionally as a child of a parent span, and attaches it to the current context for propagation.
-        Stores the span and its start time for later reference.
+        Starts a new OpenTelemetry span, optionally as a child of a parent span, and attaches it
+        to the current context for propagation. Stores the span and its start time for later
+        reference.
 
         Args:
             name (str): The name of the span.
@@ -67,7 +85,8 @@ class SpanTracker:
 
         # Attach the span to the OpenTelemetry context, so it becomes the current active span
         # This is necessary for context propagation across async boundaries and threads
-        # _SPAN_KEY is the internal key used by OpenTelemetry to store the current span in the context object
+        # _SPAN_KEY is the internal key used by OpenTelemetry to store the current span in the
+        # context object
         token = context_api.attach(context_api.set_value(trace.propagation._SPAN_KEY, span))
         self._tokens[run_id] = token
 
@@ -94,7 +113,8 @@ class SpanTracker:
             run_id (str): Unique identifier for the span/run.
 
         Returns:
-            Optional[float]: The timestamp (in seconds since epoch) when the span was started, or None if not found.
+            Optional[float]: The timestamp (in seconds since epoch) when the span was
+                started, or None if not found.
 
         """
         return self._run_start_times.get(run_id)
@@ -109,16 +129,19 @@ class SpanTracker:
         """
         End the span for the given run_id, set status and error attributes, and remove tracking.
 
-        Sets additional attributes, status, and error information on the span before ending it. Detaches the span from the context to clean up propagation state.
+        Sets additional attributes, status, and error information on the span before ending it.
+        Detaches the span from the context to clean up propagation state.
 
         Args:
             run_id (str): Unique identifier for the span/run.
             status (Optional[Status]): Optional status to set on the span (e.g., OK, ERROR).
             error (Optional[BaseException]): Optional error to record on the span.
-            extra_attributes (Optional[Dict[str, Any]]): Optional extra attributes to set on the span.
+            extra_attributes (Optional[Dict[str, Any]]): Optional extra attributes to set on the
+                span.
 
         Returns:
-            Optional[float]: The duration of the span in seconds, or None if start time is not available.
+            Optional[float]: The duration of the span in seconds, or None if start time is not
+                available.
 
         """
         span = self._spans.get(run_id)

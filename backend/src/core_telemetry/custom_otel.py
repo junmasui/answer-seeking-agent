@@ -1,9 +1,8 @@
 """
 Custom OpenTelemetry configuration and initialization.
 
-This module provides manual OpenTelemetry setup with custom exporters
-(Prometheus for metrics, Jaeger for traces) as a fallback when OpenLLMetry
-is not available.
+This module provides manual OpenTelemetry setup with custom exporters (Prometheus for metrics,
+Jaeger for traces) as a fallback when OpenLLMetry is not available.
 
 It exposes functions to initialize, configure, and shutdown telemetry for the application.
 
@@ -43,7 +42,8 @@ def get_telemetry_config():
     Retrieve telemetry configuration from environment variables.
 
     Returns:
-        dict: Dictionary containing telemetry configuration values such as service name, version, environment, endpoints, and feature flags.
+        dict: Dictionary containing telemetry configuration values such as service name,
+        version, environment, endpoints, and feature flags.
 
     """
     return get_lib_config().otel
@@ -53,8 +53,9 @@ def initialize_custom_telemetry(**kwargs):
     """
     Initialize custom OpenTelemetry with configured exporters and auto-instrumentation.
 
-    This function sets up resource attributes for service identification, tracing and metrics exporters, and auto-instruments common libraries.
-    If already initialized, it will not re-initialize.
+    This function sets up resource attributes for service identification, tracing and metrics
+    exporters, and auto-instruments common libraries. If already initialized, it will not
+    re-initialize.
 
     Args:
         **kwargs: Optional overrides for telemetry configuration values.
@@ -101,7 +102,8 @@ def shutdown_telemetry():
     """
     Shutdown telemetry and flush remaining data.
 
-    Gracefully shuts down tracer and meter providers, ensuring all telemetry data is exported.
+    Gracefully shuts down tracer and meter providers, ensuring all telemetry data is
+    exported.
     """
     global _custom_telemetry_initialized
 

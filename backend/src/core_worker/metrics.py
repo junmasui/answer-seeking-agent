@@ -7,7 +7,6 @@ import psutil
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
 from opentelemetry.metrics import Observation, get_meter_provider
 
-
 logger = logging.getLogger(__name__)
 
 
