@@ -51,7 +51,7 @@ def ping_chat_llm() -> PingResult:
 
         The current date and time in the following format: YYYY-MM-DD HH:MM (include your time zone).
         """
-        response = llm.invoke([HumanMessage(content=textwrap.dedent(message_content))])
+        response = llm.invoke(input=[HumanMessage(content=textwrap.dedent(message_content))])
         if response.content:
             return PingResult(status=PingStatus.GOOD, message='OpenAI model is responsive.')
         else:

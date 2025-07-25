@@ -4,15 +4,17 @@ include:
   - clickhouse/compose.yml
   - frontend/compose.yml
   - grafana/compose.yml
+  - jaeger/compose.yml
   - langfuse/compose.yml
   - minio/compose.yml
+  - opensearch/compose.yml
+  - otel-collector/compose.yml
   - nemo/compose.yml
   - postgres/compose.yml
   - presidio/compose.yml
   - prometheus/compose.yml
   - redis/compose.yml
   - weaviate/compose.yml
-  - opensearch/compose.yml
 
 networks:
   agent-poc:

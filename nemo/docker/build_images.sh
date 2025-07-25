@@ -16,13 +16,13 @@ fi
 
 git clone https://github.com/NVIDIA/NeMo-Guardrails.git nemoguardrails
 
-cd nemoguardrails
 (
-docker build -t nemo-guardrails .
+cd nemoguardrails
+docker build -f ../Dockerfile --build-context parent-dir=.. -t nemo-guardrails --progress plain .
 )
 
-(
-cd nemoguardrails/library/jailbreak_detection
-docker build -t nemo-jailbreak-detection-heuristics .
-docker build -t nemo-jailbreak-detection-heuristics-gpu .
-)
+# (
+# cd nemoguardrails/library/jailbreak_detection
+# docker build -t nemo-jailbreak-detection-heuristics .
+# docker build -t nemo-jailbreak-detection-heuristics-gpu .
+# )

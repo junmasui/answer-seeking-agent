@@ -1,12 +1,13 @@
 import logging
 
-from core.agent.agent_state import GraphState
-
+from .agent_state import GraphState
 from .constants import ResponseOverallGrade, RetrievalOverallGrade, UserInputGrade
+from .decorator_util import runnable
 
 logger = logging.getLogger(__name__)
 
 
+@runnable
 def check_if_safe_input(state: GraphState):
     """
     Determines whether to accept user input or not.
@@ -35,6 +36,7 @@ def check_if_safe_input(state: GraphState):
     return {'input_overall_grade': overall_grade}
 
 
+@runnable
 def gather_relevant_documents(state: GraphState):
     """
     Determines whether the retrieved documents are relevant to the question.
@@ -74,6 +76,7 @@ def gather_relevant_documents(state: GraphState):
     return {'documents': filtered_docs}
 
 
+@runnable
 def check_for_relevant_documents(state: GraphState):
     """
     Determines whether to generate an answer, or re-generate a question.

@@ -8,7 +8,10 @@ services:
     restart: 'no'
 
     image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ langfuse, infrastructure, all ]
+    profiles: [
+      langfuse,
+      ## infrastructure, all
+    ]
 
     env_file:
       - dependency-gate.env
@@ -36,7 +39,10 @@ services:
     restart: unless-stopped
 
     image: docker.io/langfuse/langfuse:3.24
-    profiles: [ langfuse, infrastructure, all ]
+    profiles: [
+      langfuse,
+      ## infrastructure, all
+    ]
 
     environment:
       # Only environment variables that are important to the Docker environment
@@ -103,7 +109,10 @@ services:
     restart: unless-stopped
 
     image: docker.io/langfuse/langfuse-worker:3.24
-    profiles: [ langfuse, infrastructure, all ]
+    profiles: [
+      langfuse,
+      ## infrastructure, all
+    ]
 
     environment:
       # Only environment variables that are important to the Docker environment

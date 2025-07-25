@@ -2,11 +2,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 import sim_auth_app
 from core.signals import configure_sender, send_start_up
+from core_telemetry import init_telemetry
 from log_config_monitor import get_logging_conf_monitor
 
 from .middlewares import ErrorLoggingMiddleware
@@ -47,6 +49,8 @@ async def lifespan(fastapi_app: FastAPI):
 
     instrumentator.expose(fastapi_app, include_in_schema=False, should_gzip=False)
 
+    init_telemetry()
+
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)
     send_start_up()
@@ -63,6 +67,8 @@ app.add_middleware(DynamicRootPathMiddleware)
 app.add_middleware(ErrorLoggingMiddleware)
 
 instrumentator = Instrumentator().instrument(app)
+
+FastAPIInstrumentor.instrument_app(app, excluded_urls='health,status')
 
 app.include_router(router=admin.router, prefix='/admin')
 app.include_router(router=answer.router, prefix='/answer')

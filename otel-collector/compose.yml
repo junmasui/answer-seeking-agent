@@ -1,0 +1,36 @@
+services:
+  # OpenTelemetry Collector - Central telemetry collection and processing
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    profiles: [telemetry, all]
+
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8889:8889"   # Prometheus metrics exporter
+      - "8888:8888"   # Collector's own metrics
+      - "9411:9411"   # Zipkin receiver
+      - "13133:13133" # Health check endpoint
+      - "1777:1777"   # pprof endpoint
+      - "55679:55679" # zpages endpoint
+    networks:
+      - agent-poc
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml
+      - otel-logs-1:/tmp  # For file exporter
+
+    environment:
+      OTEL_ENVIRONMENT: development
+      POD_NAME: otel-collector-1
+    command: ["--config=/etc/otelcol-contrib/otel-collector-config.yaml"]
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:13133/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  otel-logs-1:
+    driver: local

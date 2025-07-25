@@ -203,6 +203,11 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
             ]
 
         logger.info('doc statuses after test: %s', [str(x) for x in statuses])
+
+        import os
+
+        os._exit()
+
     finally:
         # Clean up table after we are done.
         _truncate_table(doc_table, sql_engine, sql_sessionmaker)

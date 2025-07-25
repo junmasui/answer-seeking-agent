@@ -6,10 +6,10 @@ See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#g
 
 import logging
 
-from core.agent.agent_state import GraphState
-
-from ..providers.chat_llm import get_chat_llm
-from .internal_models import AgentPromptName
+from ...providers.chat_llm import get_chat_llm
+from ..internal_models import AgentPromptName
+from .agent_state import GraphState
+from .decorator_util import runnable
 from .prompt_util import get_chat_prompt
 from .response_citation_parser import ResponseCitationParser
 
@@ -40,6 +40,7 @@ def response_generator():
     return rag_chain
 
 
+@runnable
 def generate_response(state: GraphState):
     """
     Generate an response using the RAG agent.
@@ -64,7 +65,7 @@ def generate_response(state: GraphState):
     # RAG generation
     result = chain.invoke(
         input={'documents': documents, 'chat_history': history, 'question': question},
-        config={'configurable': {'documents': documents}},
+        config={'configurable': {'documents': documents}, 'metadata': {'chain_name': generate_response.name}},
     )
 
     # Update state with generated output

@@ -12,7 +12,7 @@ logs
 # secrets, should never be committed
 secrets/
 secrets.env
-*.secrets.env
+secrets-*.env
 
 # SSL certificates should not be committed
 *.crt
