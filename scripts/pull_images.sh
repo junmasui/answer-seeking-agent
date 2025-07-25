@@ -12,7 +12,7 @@ docker pull jaegertracing/all-in-one:1.58
 
 docker pull mcr.microsoft.com/presidio-analyzer:latest
 docker pull mcr.microsoft.com/presidio-anonymizer:latest
-docker pull minio/minio:RELEASE.2024-12-13T22-19-12Z
+docker pull minio/minio:RELEASE.2025-05-24T17-08-30Z-cpuv1
 
 docker pull opensearchproject/opensearch:2.9.0
 docker pull otel/opentelemetry-collector-contrib:0.111.0

@@ -26,8 +26,6 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 [ -z "${ANSWERS_POSTGRES_DATABASE:-}" ] && echo "missing ANSWERS_POSTGRES_DATABASE" && exit 1
 [ -z "${ANSWERS_POSTGRES_USER_NAME:-}" ] && echo "missing ANSWERS_POSTGRES_USER_NAME" && exit 1
 [ -z "${ANSWERS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing ANSWERS_POSTGRES_USER_PASSWORD" && exit 1
-[ -z "${VECTORS_POSTGRES_USER_NAME:-}" ] && echo "missing VECTORS_POSTGRES_USER_NAME" && exit 1
-[ -z "${VECTORS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing VECTORS_POSTGRES_USER_PASSWORD" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
 
