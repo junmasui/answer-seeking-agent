@@ -19,8 +19,6 @@ services:
       # - ./docker/nemoguardrails/pyproject.toml:/nemoguardrails/pyproject.toml
       # - ./docker/nemoguardrails/poetry.lock:/nemoguardrails/poetry.lock
       # - ./docker/nemoguardrails/nemoguardrails:/app/nemoguardrails
-    secrets:
-      - answers_dev_secrets
 
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]

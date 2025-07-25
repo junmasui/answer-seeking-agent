@@ -61,9 +61,8 @@ services:
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - answers_minio_test_secrets
-      - answers_test_secrets
-      - checkpoints_test_secrets
-      - vectors_test_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -120,9 +119,8 @@ services:
       - answers_api_key_test_secrets
       - answers_jwt_test_secrets
       - answers_minio_test_secrets
-      - answers_test_secrets
-      - checkpoints_test_secrets
-      - vectors_test_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -201,9 +199,8 @@ services:
       - answers_api_key_test_secrets
       - answers_jwt_test_secrets
       - answers_minio_test_secrets
-      - answers_test_secrets
-      - checkpoints_test_secrets
-      - vectors_test_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -277,10 +274,9 @@ services:
       - answers_api_key_test_secrets
       - answers_jwt_test_secrets
       - answers_minio_test_secrets
-      - answers_test_secrets
+      - answers_postgres_test_secrets
       - celery_flower_test_secrets
-      - checkpoints_test_secrets
-      - vectors_test_secrets
+      - checkpoints_postgres_test_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -350,10 +346,9 @@ services:
       - answers_api_key_test_secrets
       - answers_jwt_test_secrets
       - answers_minio_test_secrets
-      - answers_test_secrets
+      - answers_postgres_test_secrets
       - celery_flower_test_secrets
-      - checkpoints_test_secrets
-      - vectors_test_secrets
+      - checkpoints_postgres_test_secrets
       - redis_secrets
 
     user: '1000:1000'

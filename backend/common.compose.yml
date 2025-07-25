@@ -58,9 +58,8 @@ services:
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - answers_minio_dev_secrets
-      - answers_dev_secrets
-      - checkpoints_dev_secrets
-      - vectors_dev_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -118,9 +117,8 @@ services:
       - answers_api_key_dev_secrets
       - answers_jwt_dev_secrets
       - answers_minio_dev_secrets
-      - answers_dev_secrets
-      - checkpoints_dev_secrets
-      - vectors_dev_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -199,9 +197,8 @@ services:
       - answers_dev_secrets
       - answers_jwt_dev_secrets
       - answers_minio_dev_secrets
-      - answers_dev_secrets
-      - checkpoints_dev_secrets
-      - vectors_dev_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -275,10 +272,9 @@ services:
       - answers_dev_secrets
       - answers_jwt_dev_secrets
       - answers_minio_dev_secrets
-      - answers_dev_secrets
+      - answers_postgres_dev_secrets
       - celery_flower_dev_secrets
-      - checkpoints_dev_secrets
-      - vectors_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 

@@ -56,9 +56,9 @@ secrets:
     file: ./secrets/answers-dev.jwt.secrets.env
   answers_minio_dev_secrets:
     file: ./secrets/answers-dev.minio.secrets.env
-  answers_dev_secrets:
+  answers_postgres_dev_secrets:
     file: ./secrets/answers-dev.postgres.secrets.env
-  checkpoints_dev_secrets:
+  checkpoints_postgres_dev_secrets:
     file: ./secrets/checkpoints-dev.postgres.secrets.env
 
   answers_test_secrets:
@@ -69,7 +69,7 @@ secrets:
     file: ./secrets/answers-test.jwt.secrets.env
   answers_minio_test_secrets:
     file: ./secrets/answers-test.minio.secrets.env
-  answers_test_secrets:
+  answers_postgres_test_secrets:
     file: ./secrets/answers-test.postgres.secrets.env
-  checkpoints_test_secrets:
+  checkpoints_postgres_test_secrets:
     file: ./secrets/checkpoints-test.postgres.secrets.env

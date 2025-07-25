@@ -5,7 +5,7 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 set +o history # temporarily turn off history
 SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
+export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 set -o history # turn it back on
 
 # Process with original entrypoint, which can be discovered
