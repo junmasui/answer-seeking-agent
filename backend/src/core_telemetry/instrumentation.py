@@ -74,44 +74,40 @@ def setup_auto_instrumentation():
         logger.debug('Redis instrumentation enabled')
     except Exception as e:
         logger.warning(f'Failed to instrument Redis: {e}')
+    logger.info('INSTRUMENTING')
+
+    try:
+        CustomInstrumentor().instrument(skip_dep_check=True)
+        logger.debug('Custom instrumentation enabled')
+    except Exception as e:
+        logger.warning(f'Failed to instrument Custom:', exc_info=e)
+
+    logger.info('INSTRUMENTED')
 
 
 ERROR_TYPE: str = 'error.type'
 
 
 WRAPPED_METHODS = [
-    {'module': 'weaviate.schema', 'object': 'Schema', 'method': 'get', 'span_name': 'db.weaviate.schema.get'}
+    {'module': 'core.ingest.ingest', 'object': '_ingest_one_document', 'method': None, 'span_name': '_ingest_one_document'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'add_documents', 'span_name': 'vectorstore.add_documents'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'search', 'span_name': 'vector.search'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search', 'span_name': 'vector.similarity_search'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search_with_score', 'span_name': 'vector.similarity_search_with_score'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search_with_relevance_scores', 'span_name': 'vector.similarity_search_with_relevance_scores'},
+
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search_by_vector', 'span_name': 'vector.similarity_search_by_vector'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'max_marginal_relevance_search', 'span_name': 'vector.max_marginal_relevance_search'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'max_marginal_relevance_search_by_vector', 'span_name': 'vector.max_marginal_relevance_search_by_vector'},
+
+    {'module': 'langchain_core.retrievers', 'object': 'BaseRetriever', 'method': 'invoke', 'span_name': 'retriever.invoke'},
+
+    {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader', 'method': 'lazy_load', 'span_name': 'doc_loader.lazy_load'},
+
+    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings', 'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
+    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings', 'method': 'embed_query', 'span_name': 'hf_embeddings_model.embed_query'},
 ]
 
-
-def _with_tracer_wrapper(func):
-    """Helper for providing tracer for wrapper functions."""
-
-    def _with_tracer(tracer, to_wrap):
-        def wrapper(wrapped, instance, args, kwargs):
-            return func(tracer, to_wrap, wrapped, instance, args, kwargs)
-
-        return wrapper
-
-    return _with_tracer
-
-
-@_with_tracer_wrapper
-def _wrap(tracer, to_wrap, wrapped, instance, args, kwargs):
-    """Instruments and calls every function defined in TO_WRAP."""
-    if context_api.get_value(_SUPPRESS_INSTRUMENTATION_KEY):
-        return wrapped(*args, **kwargs)
-
-    name = to_wrap.get('span_name')
-    with tracer.start_as_current_span(name) as span:
-        # span.set_attribute(SpanAttributes.DB_SYSTEM, "weaviate")
-        # span.set_attribute(SpanAttributes.DB_OPERATION, to_wrap.get("method"))
-
-        obj = to_wrap.get('object')
-
-        return_value = wrapped(*args, **kwargs)
-
-    return return_value
 
 
 class CustomInstrumentor(BaseInstrumentor):
@@ -123,18 +119,25 @@ class CustomInstrumentor(BaseInstrumentor):
     """
 
     def instrumentation_dependencies(self) -> typing.Collection[str]:
-        return ('core >= 0.1.0, <5',)
+        return []
 
-    def _instrument(self, **kwargs):
+    def instrument(self, **kwargs):
+        logger.info('CUSTOM INSTRUMENTING')
         tracer_provider = kwargs.get('tracer_provider')
         tracer = get_tracer(__name__, __version__, tracer_provider)
         for wrapped_method in WRAPPED_METHODS:
             wrap_module = wrapped_method.get('module')
             wrap_object = wrapped_method.get('object')
             wrap_method = wrapped_method.get('method')
+            span_name = wrapped_method.get('span_name')
+            logger.info('WRAPPING %s', wrap_module)
             module = importlib.import_module(wrap_module)
             if getattr(module, wrap_object, None):
-                wrap_function_wrapper(wrap_module, f'{wrap_object}.{wrap_method}', _wrap(tracer, wrapped_method))
+                fname = f'{wrap_object}.{wrap_method}' if wrap_method is not None else wrap_object
+                logger.info('WRAPPING %s', fname)
+                wrap_function_wrapper(wrap_module, fname,
+                                      partial(self._handle_request_wrapper, tracer=tracer, span_name=span_name))
+        logger.info('CUSTOM INSTRUMENTED')
 
     def _uninstrument(self, **kwargs):
         for wrapped_method in WRAPPED_METHODS:
@@ -142,42 +145,10 @@ class CustomInstrumentor(BaseInstrumentor):
             wrap_object = wrapped_method.get('object')
             module = importlib.import_module(wrap_module)
             wrapped = getattr(module, wrap_object, None)
-            if wrapped:
-                unwrap(wrapped, wrapped_method.get('method'))
 
-    def _instrument(self, **kwargs: typing.Any):
-        """
-        Instruments httpx Client and AsyncClient
+            # if wrapped:
+            #     unwrap(wrapped, wrapped_method.get('method'))
 
-        Args:
-            **kwargs: Optional arguments
-                ``tracer_provider``: a TracerProvider, defaults to global
-                ``meter_provider``: a MeterProvider, defaults to global
-
-        """
-        tracer_provider = kwargs.get('tracer_provider')
-        meter_provider = kwargs.get('meter_provider')
-
-        tracer = get_tracer(
-            __name__,
-            # instrumenting_library_version=__version__,
-            tracer_provider=tracer_provider,
-            # schema_url=schema_url,
-        )
-
-        wrap_function_wrapper(
-            'httpx', 'HTTPTransport.handle_request', partial(self._handle_request_wrapper, tracer=tracer)
-        )
-        wrap_function_wrapper(
-            'httpx',
-            'AsyncHTTPTransport.handle_async_request',
-            partial(self._handle_async_request_wrapper, tracer=tracer),
-        )
-
-    def _uninstrument(self, **kwargs: typing.Any):
-        """ """
-        # FIXME unwrap(httpx.HTTPTransport, "handle_request")
-        # FIXME unwrap(httpx.AsyncHTTPTransport, "handle_async_request")
 
     @staticmethod
     def _handle_request_wrapper(
@@ -186,13 +157,15 @@ class CustomInstrumentor(BaseInstrumentor):
         args: tuple[typing.Any, ...],
         kwargs: dict[str, typing.Any],
         tracer: Tracer,
+        span_name: str,
     ):
-        span_name = 'fixme'
         span_attributes = {}
         metric_attributes = {}
 
         with tracer.start_as_current_span(span_name, kind=SpanKind.INTERNAL, attributes=span_attributes) as span:
             exception = None
+
+            logger.info('WRAPPED REQUEST %s', wrapped.__name__)
 
             start_time = default_timer()
 
@@ -219,8 +192,8 @@ class CustomInstrumentor(BaseInstrumentor):
         args: tuple[typing.Any, ...],
         kwargs: dict[str, typing.Any],
         tracer: Tracer,
+        span_name: str,
     ):
-        span_name = 'fixme'
         span_attributes = {}
         metric_attributes = {}
 
