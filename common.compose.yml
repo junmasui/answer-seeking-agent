@@ -1,11 +1,9 @@
 name: agent
 
 include:
-  - clickhouse/compose.yml
   - frontend/compose.yml
   - grafana/compose.yml
   - jaeger/compose.yml
-  - langfuse/compose.yml
   - minio/compose.yml
   - opensearch/compose.yml
   - otel-collector/compose.yml
@@ -28,77 +26,50 @@ networks:
           gateway: 172.31.1.1
 
 secrets:
-  clickhouse_env:
-    file: ./secrets/clickhouse.secrets.env
-  minio_env:
+  minio_secrets:
     file: ./secrets/minio.secrets.env
-  postgres_env:
+  postgres_secrets:
     file: ./secrets/postgres.secrets.env
-  redis_env:
+  redis_secrets:
     file: ./secrets/redis.secrets.env
-  weaviate_env:
+  weaviate_secrets:
     file: ./secrets/weaviate.secrets.env
-  opensearch_secrets_env:
+  opensearch_secrets:
     file: ./secrets/opensearch.secrets.env
 
   redis_conf:
     file: ./secrets/redis.conf
 
-  clickhouse_server_crt:
-    file: ./secrets/clickhouse.server.crt
-  clickhouse_server_key:
-    file: ./secrets/clickhouse.server.key
-  clickhouse_admin_user_xml:
-    file: ./secrets/clickhouse.admin-user.xml
-
-  grafana_env:
+  grafana_secrets:
     file: ./secrets/grafana.secrets.env
 
-  celery_flower_dev_env:
+  celery_flower_dev_secrets:
     file: ./secrets/celery-flower-dev.secrets.env
-  celery_flower_test_env:
+  celery_flower_test_secrets:
     file: ./secrets/celery-flower-test.secrets.env
 
-  answers_dev_env:
+  answers_dev_secrets:
     file: ./secrets-dev.env
-  answers_api_key_dev_env:
+  answers_api_key_dev_secrets:
     file: ./secrets/answers-dev.api-key.secrets.env
-  answers_jwt_dev_env:
+  answers_jwt_dev_secrets:
     file: ./secrets/answers-dev.jwt.secrets.env
-  answers_minio_dev_env:
+  answers_minio_dev_secrets:
     file: ./secrets/answers-dev.minio.secrets.env
-  answers_postgres_dev_env:
+  answers_dev_secrets:
     file: ./secrets/answers-dev.postgres.secrets.env
-  checkpoints_postgres_dev_env:
+  checkpoints_dev_secrets:
     file: ./secrets/checkpoints-dev.postgres.secrets.env
-  vectors_postgres_dev_env:
-    file: ./secrets/vectors-dev.postgres.secrets.env
 
-  answers_test_env:
+  answers_test_secrets:
     file: ./secrets-test.env
-  answers_api_key_test_env:
+  answers_api_key_test_secrets:
     file: ./secrets/answers-test.api-key.secrets.env
-  answers_jwt_test_env:
+  answers_jwt_test_secrets:
     file: ./secrets/answers-test.jwt.secrets.env
-  answers_minio_test_env:
+  answers_minio_test_secrets:
     file: ./secrets/answers-test.minio.secrets.env
-  answers_postgres_test_env:
+  answers_test_secrets:
     file: ./secrets/answers-test.postgres.secrets.env
-  checkpoints_postgres_test_env:
+  checkpoints_test_secrets:
     file: ./secrets/checkpoints-test.postgres.secrets.env
-  vectors_postgres_test_env:
-    file: ./secrets/vectors-test.postgres.secrets.env
-
-  langfuse_clickhouse_env:
-    file: ./secrets/langfuse.clickhouse.secrets.env
-  langfuse_minio_env:
-    file: ./secrets/langfuse.minio.secrets.env
-  langfuse_postgres_env:
-    file: ./secrets/langfuse.postgres.secrets.env
-
-  langfuse_env:
-    file: ./secrets/langfuse.secrets.env
-  langfuse_client_env:
-    file: ./secrets/langfuse-client.secrets.env
-  langfuse_web_env:
-    file: ./secrets/langfuse-web.secrets.env

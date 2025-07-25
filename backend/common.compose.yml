@@ -57,12 +57,12 @@ services:
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
-      - answers_minio_dev_env
-      - answers_postgres_dev_env
-      - checkpoints_postgres_dev_env
-      - vectors_postgres_dev_env
-      - redis_env
-      - weaviate_env
+      - answers_minio_dev_secrets
+      - answers_dev_secrets
+      - checkpoints_dev_secrets
+      - vectors_dev_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     mem_limit: 128m
     memswap_limit: 128m
@@ -114,16 +114,15 @@ services:
       - backend-venv-1:/app/.venv
       - backend-staging-1:/staging
     secrets:
-      - answers_dev_env
-      - answers_api_key_dev_env
-      - answers_jwt_dev_env
-      - answers_minio_dev_env
-      - answers_postgres_dev_env
-      - checkpoints_postgres_dev_env
-      - langfuse_client_env
-      - vectors_postgres_dev_env
-      - redis_env
-      - weaviate_env
+      - answers_dev_secrets
+      - answers_api_key_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_dev_secrets
+      - checkpoints_dev_secrets
+      - vectors_dev_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -197,14 +196,14 @@ services:
       - backend-staging-2:/staging
       - backend-prometheus-2:/var/local/prometheus
     secrets:
-      - answers_dev_env
-      - answers_jwt_dev_env
-      - answers_minio_dev_env
-      - answers_postgres_dev_env
-      - checkpoints_postgres_dev_env
-      - vectors_postgres_dev_env
-      - redis_env
-      - weaviate_env
+      - answers_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_dev_secrets
+      - checkpoints_dev_secrets
+      - vectors_dev_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -273,15 +272,15 @@ services:
       - backend-home-3:/home/python
       - backend-venv-3:/app/.venv
     secrets:
-      - answers_dev_env
-      - answers_jwt_dev_env
-      - answers_minio_dev_env
-      - answers_postgres_dev_env
-      - celery_flower_dev_env
-      - checkpoints_postgres_dev_env
-      - vectors_postgres_dev_env
-      - redis_env
-      - weaviate_env
+      - answers_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_dev_secrets
+      - celery_flower_dev_secrets
+      - checkpoints_dev_secrets
+      - vectors_dev_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -321,7 +320,7 @@ services:
       - backend-init-signal-1:/init-signal
       - ./custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh
     secrets:
-      - redis_env
+      - redis_secrets
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.exporter.sh' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

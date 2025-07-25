@@ -63,7 +63,7 @@ services:
       - weaviate-data-1:/var/lib/weaviate
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
     secrets:
-      - weaviate_env
+      - weaviate_secrets
 
     #user: 'redis:redis'
     entrypoint: [ '/custom-docker-entrypoint.sh']

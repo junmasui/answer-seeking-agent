@@ -18,7 +18,7 @@ services:
       - minio-data-2:/data
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
     secrets:
-      - minio_env
+      - minio_secrets
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -55,7 +55,7 @@ services:
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
-      - postgres_env
+      - postgres_secrets
 
     mem_limit: 128m
     memswap_limit: 128m
@@ -84,8 +84,8 @@ services:
       - minio-init-signal-1:/init-signal
       - ./init-minio.sh:/init-minio.sh
     secrets:
-      - minio_env
-      - answers_minio_dev_env
+      - minio_secrets
+      - answers_minio_dev_secrets
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -111,41 +111,13 @@ services:
       - minio-init-signal-1:/init-signal
       - ./init-minio.sh:/init-minio.sh
     secrets:
-      - minio_env
-      - answers_minio_test_env
+      - minio_secrets
+      - answers_minio_test_secrets
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: /init-minio.sh
-
-  minio-langfuse-init:
-    restart: 'no'
-
-    image: docker.io/minio/minio:RELEASE.2024-12-13T22-19-12Z
-    profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
-
-    environment:
-      # Only environment variables that are important to the Docker environment
-      # will be configured here. All other environment variables are extracted
-      # to .env files for easier and more isolated management.
-      MINIO_ENDPOINT_URL: http://minio:9000
-    env_file:
-      - minio-init.env
-    networks:
-      - agent-poc
-    volumes:
-      - minio-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./init-langfuse-minio.sh:/init-langfuse-minio.sh
-    secrets:
-      - minio_env
-      - langfuse_minio_env
-
-    entrypoint: [ /bin/sh ]
-    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    command: /init-langfuse-minio.sh
 
 volumes:
   minio-data-2:

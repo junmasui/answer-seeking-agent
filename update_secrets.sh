@@ -22,24 +22,6 @@ then
 fi
 
 
-# Generate TLS keys for clickhouse
-#
-
-if [[ ! -e ./secrets/clickhouse.server.crt \
-    || ! -e ./secrets/clickhouse.server.key ]]
-then
-    openssl req -subj "/CN=localhost" -new -newkey rsa:2048 -days 365 -nodes -x509 \
-        -keyout ./secrets/clickhouse.server.key -out ./secrets/clickhouse.server.crt
-
-    chmod ug=rw secrets/clickhouse.server.crt
-    chmod ug=rw secrets/clickhouse.server.key
-
-    sudo chown rootless-101:rootless-101  secrets/clickhouse.server.crt
-    sudo chown rootless-101:rootless-101  secrets/clickhouse.server.key
-fi
-
-
-
 # Auto-generate passwords that will never leave the local Docker environment.
 
 function generate_secret ()  {
@@ -133,31 +115,6 @@ DESCR="Celery Flower basic auth account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-# Clickhouse
-
-SECRETS_FILE=./secrets/clickhouse.secrets.env
-VAR_NAME=CLICKHOUSE_DEFAULT_USER_PASSWORD
-VALUE_PREFIX=clickhouse_default_
-DESCR="Clickhouse's default account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-VAR_NAME=CLICKHOUSE_ADMIN_USER_PASSWORD
-VALUE_PREFIX=clickhouse_admin_
-DESCR="Clickhouse's admin account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-SECRETS_FILE=./secrets/langfuse.clickhouse.secrets.env
-VAR_NAME=LANGFUSE_CLICKHOUSE_USER_PASSWORD
-VALUE_PREFIX=langfuse_clickhouse_
-DESCR="Langfuse's Clickhouse account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-
 # Grafana
 
 SECRETS_FILE=./secrets/grafana.secrets.env
@@ -167,42 +124,6 @@ DESCR="Grafrana's admin account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-
-
-# Langfuse
-
-SECRETS_FILE=./secrets/langfuse.secrets.env
-VAR_NAME=LANGFUSE_SALT
-DESCR="LANGFUSE_SALT contains langfuse's salt."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "openssl-32-safe" "" "$DESCR"
-
-VAR_NAME=LANGFUSE_ENCRYPTION_KEY
-DESCR="LANGFUSE_ENCRYPTION_KEY contains langfuse's encryption key."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "openssl-32-safe" "" "$DESCR"
-
-
-# Langfuse-web
-
-SECRETS_FILE=./secrets/langfuse-web.secrets.env
-VAR_NAME=LANGFUSE_INIT_USER_PASSWORD
-VALUE_PREFIX=lf_pw_
-DESCR="langfuse's initial users's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "openssl-8" "$VALUE_PREFIX" "$DESCR"
-
-VAR_NAME=LANGFUSE_INIT_PROJECT_SECRET_KEY
-VALUE_PREFIX=sk-lf-
-DESCR="langfuse's initial users's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "uuidgen" "$VALUE_PREFIX" "$DESCR"
-
-VAR_NAME=LANGFUSE_INIT_PROJECT_PUBLIC_KEY
-VALUE_PREFIX=pk-lf-
-DESCR="langfuse's initial users's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "uuidgen" "$VALUE_PREFIX" "$DESCR"
 
 
 # Minio
@@ -225,14 +146,6 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 SECRETS_FILE=./secrets/answers-test.minio.secrets.env
 VALUE_PREFIX=backend_test_minio_
 DESCR="Backend Test's Minio account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-SECRETS_FILE=./secrets/langfuse.minio.secrets.env
-VAR_NAME=LANGFUSE_MINIO_USER_PASSWORD
-VALUE_PREFIX=langfuse_minio_
-DESCR="Langfuse's Minio account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
@@ -276,29 +189,6 @@ DESCR="backend test's checkpoints Postgres account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/vectors-dev.postgres.secrets.env
-VAR_NAME=VECTORS_POSTGRES_USER_PASSWORD
-VALUE_PREFIX=vectors_postgres_
-DESCR="backend's vectors Postgres account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-SECRETS_FILE=./secrets/vectors-test.postgres.secrets.env
-VALUE_PREFIX=vectors_test_postgres_
-DESCR="backend test's vectors Postgres account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-
-
-SECRETS_FILE=./secrets/langfuse.postgres.secrets.env
-VAR_NAME=LANGFUSE_POSTGRES_USER_PASSWORD
-VALUE_PREFIX=langfuse_postgres_
-DESCR="Langfuse's Postgres account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
 
 # Redis
 
@@ -330,15 +220,6 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 #=======
 
-#
-set +o history # temporarily turn off history
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "./secrets/clickhouse.secrets.env" | xargs -n1 )
-
-set -o history # turn it back on
-
-RELPATH=clickhouse/admin-user.xml
-envsubst < "${RELPATH}.template" > "secrets/clickhouse.admin-user.xml"
 
 #
 set +o history # temporarily turn off history
@@ -351,12 +232,3 @@ RELPATH=redis/redis.conf
 envsubst < "${RELPATH}.template" > "secrets/redis.conf"
 
 
-#
-set +o history # temporarily turn off history
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "./secrets/langfuse-web.secrets.env" | xargs -n1 )
-
-set -o history # turn it back on
-
-RELPATH=backend/langfuse-client.secrets.env
-envsubst < "${RELPATH}.template" > "secrets/langfuse-client.secrets.env"

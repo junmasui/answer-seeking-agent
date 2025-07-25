@@ -3,7 +3,7 @@ services:
     restart: unless-stopped
 
     profiles: [ grafana, infrastructure, all ]
-    image: grafana/grafana
+    image: grafana/grafana:12.1.0
 
     env_file:
       - grafana.env
@@ -16,7 +16,7 @@ services:
     networks:
       - agent-poc
     secrets:
-      - grafana_env
+      - grafana_secrets
 
     entrypoint: /custom-docker-entrypoint.sh
     # When entrypoint is specified in the compose file, the CMD in the Dockerfile is

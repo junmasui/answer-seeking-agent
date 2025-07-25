@@ -20,7 +20,7 @@ services:
       # - ./docker/nemoguardrails/poetry.lock:/nemoguardrails/poetry.lock
       # - ./docker/nemoguardrails/nemoguardrails:/app/nemoguardrails
     secrets:
-      - answers_dev_env
+      - answers_dev_secrets
 
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]

@@ -31,11 +31,11 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
 [ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
 
-wait_for_dependency_gate /init-signal/pgvector-gate
+wait_for_dependency_gate /init-signal/postgres-gate
 
 export PGPASSWORD="$POSTGRES_PASSWORD"
 
 envsubst < /init-db.sql.template > /init-db.sql
 sleep 10
-psql -h pgvector -U "$POSTGRES_USER" -f /init-db.sql
+psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -f /init-db.sql
 

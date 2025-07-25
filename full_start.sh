@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
+./pull_images.sh
+
+EXIT_CODE="$?"
+if [ "$EXIT_CODE" != 0 ]
+then
+    echo "Error pulling public images"
+    exit -1
+fi
+
 ./build_images.sh
 
 EXIT_CODE="$?"
-echo "build with " "$EXIT_CODE"
 if [ "$EXIT_CODE" != 0 ]
 then
     echo "Error building images"

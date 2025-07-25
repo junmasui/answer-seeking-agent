@@ -60,12 +60,12 @@ services:
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_minio_test_secrets
+      - answers_test_secrets
+      - checkpoints_test_secrets
+      - vectors_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     mem_limit: 128m
     memswap_limit: 128m
@@ -116,16 +116,15 @@ services:
       - backend-test-venv-1:/app/.venv
       - backend-test-staging-1:/staging
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - langfuse_client_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_test_secrets
+      - checkpoints_test_secrets
+      - vectors_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -198,15 +197,15 @@ services:
       - backend-test-staging-2:/staging
       - backend-test-prometheus-2:/var/local/prometheus
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_test_secrets
+      - checkpoints_test_secrets
+      - vectors_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -274,16 +273,16 @@ services:
       - backend-test-home-3:/home/python
       - backend-test-venv-3:/app/.venv
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - celery_flower_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_test_secrets
+      - celery_flower_test_secrets
+      - checkpoints_test_secrets
+      - vectors_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -347,15 +346,15 @@ services:
       - backend-test-home-4:/home/python
       - backend-test-venv-4:/app/.venv
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - celery_flower_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_test_secrets
+      - celery_flower_test_secrets
+      - checkpoints_test_secrets
+      - vectors_test_secrets
+      - redis_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
