@@ -1,8 +1,8 @@
 import logging
 
-from langchain_core.messages import AIMessage  # Add HumanMessage
+from langchain_core.messages import AIMessage
 
-from core.agent.agent_state import GraphState  # Add this import
+from .agent_state import GraphState
 
 logger = logging.getLogger(__name__)
 

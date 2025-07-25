@@ -9,6 +9,8 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
 
+from core_telemetry.openllmetry import annotate_workflow
+
 from ..db_models import DbTrackedDocument
 from ..doc_mgr import get_documents, update_tracking_record
 from ..lib_config import get_lib_config
@@ -219,6 +221,7 @@ def _ingest_one_document(
                 logger.warning('could not delete staged file %s', str(local_path), exc_info=ex)
 
 
+@annotate_workflow('ingest_documents')
 def ingest_documents(doc_ids):
     """
     Ingest cloud files.

@@ -11,4 +11,4 @@ set -o history # turn it back on
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker inspect nemoguardrails:latest | jq '.[0].Config.Entrypoint'
-exec poetry run nemoguardrails "$@"
+exec uv run nemoguardrails "$@"

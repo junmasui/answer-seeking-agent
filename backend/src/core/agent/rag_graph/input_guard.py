@@ -2,17 +2,18 @@ import logging
 
 from langgraph.graph import StateGraph
 
-from core.agent.constants import NodeName
-from core.agent.deciders import check_if_safe_input
-from core.agent.node_util import no_op
-
 from .agent_state import GraphState
+from .constants import NodeName
+from .deciders import check_if_safe_input
+from .decorator_util import runnable
 from .nemo_guards import execute_nemo_guardrails_check
+from .node_util import no_op
 from .presidio_guard import execute_presidio_check
 
 logger = logging.getLogger(__name__)
 
 
+@runnable
 def check_input_with_nemo(state: GraphState):
     """
     Determines .
@@ -34,6 +35,7 @@ def check_input_with_nemo(state: GraphState):
     return {'nemo_input_check': 100 if triggered_rail else 0}
 
 
+@runnable
 def check_input_with_presidio(state: GraphState):
     """
     Determines .

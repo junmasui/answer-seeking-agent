@@ -20,9 +20,8 @@ Key Features:
 import os
 from functools import cache
 from pathlib import Path
-from typing import Union
 
-from pydantic import DirectoryPath, Field, NewPath, RedisDsn, StringConstraints
+from pydantic import Field, RedisDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -84,8 +83,6 @@ class ApplicationSettings(BaseSettings):
 
     celery_task_queue: str = Field(default='', validation_alias='CELERY_TASK_QUEUE')
     celery_result_key_prefix: str = Field(default='', validation_alias='CELERY_RESULT_KEY_PREFIX')
-
-    prometheus_multiproc_dir: Union[DirectoryPath, NewPath] = Field(default='/var/local/prometheus')
 
 
 @cache

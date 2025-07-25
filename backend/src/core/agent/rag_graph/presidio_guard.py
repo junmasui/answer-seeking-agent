@@ -2,7 +2,7 @@ import logging
 
 import httpx
 
-from ..lib_config import get_lib_config
+from ...lib_config import get_lib_config
 
 logger = logging.getLogger(__name__)
 

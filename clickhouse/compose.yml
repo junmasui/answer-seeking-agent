@@ -5,7 +5,11 @@ services:
     restart: 'no'
 
     image: 'docker.io/debian:bookworm-slim'
-    profiles: [ init-volumes, clickhouse, infrastructure-core,  infrastructure, all ]
+    profiles: [
+      ## init-volumes,
+      clickhouse,
+      ## infrastructure-core,  infrastructure, all
+    ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -38,7 +42,10 @@ services:
         condition: service_completed_successfully
 
     image: clickhouse:24.12.3
-    profiles: [ clickhouse, infrastructure-core, infrastructure, all ]
+    profiles: [
+      clickhouse,
+      ## infrastructure-core, infrastructure, all
+    ]
 
     # environment:
     #   # Only environment variables that are important to the Docker environment
@@ -100,7 +107,10 @@ services:
   clickhouse-init:
 
     image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ clickhouse, infrastructure-core, infrastructure, all ]
+    profiles: [
+      clickhouse,
+      ## infrastructure-core, infrastructure, all
+    ]
 
     environment:
       # Only environment variables that are important to the Docker environment

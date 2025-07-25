@@ -1,0 +1,167 @@
+[project]
+name = "nemoguardrails"
+version = "0.14.0"
+description = "NeMo Guardrails is an open-source toolkit for easily adding programmable guardrails to LLM-based conversational systems."
+authors = [{ name = "NVIDIA", email = "nemoguardrails@nvidia.com" }]
+requires-python = ">=3.9,!=3.9.7,<3.14"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE.md"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "aiohttp>=3.10.11",
+    "annoy>=1.17.3",
+    "fastapi>=0.103.0",
+    "fastembed>=0.2.2, <=0.6.0 ; python_version >= '3.9' and python_version < '3.14'",
+    "httpx>=0.24.1",
+    "jinja2>=3.1.6",
+    "langchain>=0.2.14,<0.4.0",
+    "langchain-core>=0.2.14,<0.4.0",
+    "langchain-community>=0.2.5,<0.4.0",
+    "lark>=1.1.7",
+    "nest-asyncio>=1.5.6",
+    "prompt-toolkit>=3.0",
+    "pydantic>=1.10",
+    "pyyaml>=6.0",
+    "rich>=13.5.2",
+    "simpleeval>=0.9.13",
+    "starlette>=0.27.0",
+    "typer>=0.8",
+    "uvicorn>=0.23",
+    "watchdog>=3.0.0",
+    "pandas>=1.4.0,<3",
+]
+
+[project.optional-dependencies]
+sdd = [
+    "presidio-analyzer>=2.2 ; python_version < '3.13'",
+    "presidio-anonymizer>=2.2 ; python_version < '3.13'",
+]
+eval = [
+    "tqdm>=4.65,<5.0",
+    "numpy",
+    "streamlit>=1.37.0,<2 ; python_version >= '3.9' and python_version != '3.9.7' and python_version < '3.14'",
+    "tornado>=6.5.0 ; python_version >= '3.9' and python_version != '3.9.7' and python_version < '3.14'",
+]
+openai = ["langchain-openai>=0.0.5"]
+gcp = ["google-cloud-language>=2.14.0"]
+tracing = [
+    "opentelemetry-api>=1.27.0,<2.0.0",
+    "opentelemetry-sdk>=1.27.0,<2.0.0",
+    "aiofiles>=24.1.0",
+    "opentelemetry-exporter-otlp>=1.27.0,<2.0.0",
+    "opentelemetry-exporter-zipkin>=1.27.0,<2.0.0",
+]
+nvidia = ["langchain-nvidia-ai-endpoints>= 0.2.0"]
+jailbreak = ["yara-python>=4.5.1,<5"]
+all = [
+    "presidio-analyzer>=2.2 ; python_version < '3.13'",
+    "presidio-anonymizer>=2.2 ; python_version < '3.13'",
+    "tqdm>=4.65,<5.0",
+    "numpy",
+    "streamlit>=1.37.0,<2 ; python_version >= '3.9' and python_version != '3.9.7' and python_version < '3.14'",
+    "langchain-openai>=0.0.5",
+    "google-cloud-language>=2.14.0",
+    "opentelemetry-api>=1.27.0,<2.0.0",
+    "opentelemetry-sdk>=1.27.0,<2.0.0",
+    "aiofiles>=24.1.0",
+    "langchain-nvidia-ai-endpoints>= 0.2.0",
+    "yara-python>=4.5.1,<5",
+]
+
+[project.urls]
+homepage = "https://github.com/NVIDIA/nemo-guardrails"
+issues = "https://github.com/NVIDIA/nemo-guardrails/issues"
+changelog = "https://github.com/NVIDIA/NeMo-Guardrails/blob/develop/CHANGELOG.md"
+documentation = "https://docs.nvidia.com/nemo/guardrails/"
+repository = "https://github.com/NVIDIA/NeMo-Guardrails"
+
+[project.scripts]
+nemoguardrails = "nemoguardrails.__main__:app"
+
+[dependency-groups]
+dev = [
+    "black>=24.3.0",
+    "aioresponses>=0.7.6",
+    "mypy>=1.1.1",
+    "pre-commit>=3.1.1",
+    "pylint>=2.17.0",
+    "pytest>=7.2.2",
+    "pytest-asyncio>=0.21.0, <1.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-httpx>=0.22.0",
+    "streamlit>=1.37.0",
+    "tox>=4.23.2,<5",
+    "pytest-profiling>=1.7.0,<2",
+    "yara-python>=4.5.1,<5",
+]
+docs = [
+    "toml>=0.10.2,<0.11",
+    "sphinx-reredirects<0.2",
+    "sphinx<=7.5",
+    "myst-parser<=5",
+    "sphinx-copybutton<=0.6",
+    "nvidia-sphinx-theme>=0.0.8 ; python_version >= '3.10'",
+]
+
+[tool.uv]
+default-groups = [
+    "dev",
+    "docs",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "nemoguardrails",
+    "LICENSE.md",
+    "LICENSE-Apache-2.0.txt",
+    "LICENCES-3rd-party.txt",
+    "chat-ui/**/*",
+    "examples/**/*",
+    "eval/data/**/*",
+    "**/*.yml",
+    "**/*.co",
+    "**/*.txt",
+    "**/*.json",
+    "**/*.lark",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "nemoguardrails",
+    "LICENSE.md",
+    "LICENSE-Apache-2.0.txt",
+    "LICENCES-3rd-party.txt",
+    "chat-ui/**/*",
+    "examples/**/*",
+    "eval/data/**/*",
+    "**/*.yml",
+    "**/*.co",
+    "**/*.txt",
+    "**/*.json",
+    "**/*.lark",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+addopts = "-p no:warnings"
+log-level = "DEBUG"
+
+# The flag below should only be activated in special debug sessions
+# i.e. the test hangs and we need to see what happened up to that point.
+# There are some race conditions with how the logging streams are closed in the teardown
+# phase, which will cause tests to fail or "magically" ignored.
+log_cli = "False"

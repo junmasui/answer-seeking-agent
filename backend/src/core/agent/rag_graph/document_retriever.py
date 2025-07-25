@@ -10,16 +10,17 @@ import pprint
 from langchain_core.documents import Document
 from weaviate.classes.query import Filter
 
-from core.agent.agent_state import GraphState
-
-from ..lib_config import get_lib_config
-from ..providers.retriever import get_retriever
+from ...lib_config import get_lib_config
+from ...providers.retriever import get_retriever
+from .agent_state import GraphState
+from .decorator_util import runnable
 
 logger = logging.getLogger(__name__)
 
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
+@runnable
 def query_documents(state: GraphState):
     """
     Retrieve documents.
@@ -61,7 +62,7 @@ def query_documents(state: GraphState):
     retriever = get_retriever()
 
     # Retrieval
-    documents = retriever.invoke(question, **kwargs)
+    documents = retriever.invoke(input=question, config={'metadata': {'chain_name': query_documents.name}}, **kwargs)
 
     # Remove irrelevant metadata. It's stuff that we don't need for processing
     # or evaluation.
