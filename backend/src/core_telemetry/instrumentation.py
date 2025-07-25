@@ -102,7 +102,9 @@ WRAPPED_METHODS = [
 
     {'module': 'langchain_core.retrievers', 'object': 'BaseRetriever', 'method': 'invoke', 'span_name': 'retriever.invoke'},
 
-    {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader', 'method': 'lazy_load', 'span_name': 'doc_loader.lazy_load'},
+    {'module': 'langchain_unstructured.document_loaders', 'object': 'UnstructuredLoader', 'method': 'lazy_load', 'span_name': 'unstructured_loader.lazy_load'},
+    {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader', 'method': 'lazy_load', 'span_name': 'single_doc_loader.lazy_load'},
+    {'module': 'unstructured.partition.auto', 'object': 'partition', 'method': None, 'span_name': 'unstructured.partition'},
 
     {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings', 'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
     {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings', 'method': 'embed_query', 'span_name': 'hf_embeddings_model.embed_query'},
