@@ -46,7 +46,7 @@ services:
       - redis-data-1:/data
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
     secrets:
-      - redis_env
+      - redis_secrets
       - redis_conf
 
     user: "redis:redis"

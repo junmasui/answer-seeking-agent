@@ -9,7 +9,7 @@ set -e  # Exit immediately on error.
 ## TODO FIXME set +o history # temporarily turn off history
 SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
+export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 ## TODO FIXME set -o history # turn it back on
 
 # Wait for dependency-gate to open.
@@ -26,16 +26,14 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
 [ -z "${ANSWERS_POSTGRES_DATABASE:-}" ] && echo "missing ANSWERS_POSTGRES_DATABASE" && exit 1
 [ -z "${ANSWERS_POSTGRES_USER_NAME:-}" ] && echo "missing ANSWERS_POSTGRES_USER_NAME" && exit 1
 [ -z "${ANSWERS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing ANSWERS_POSTGRES_USER_PASSWORD" && exit 1
-[ -z "${VECTORS_POSTGRES_USER_NAME:-}" ] && echo "missing VECTORS_POSTGRES_USER_NAME" && exit 1
-[ -z "${VECTORS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing VECTORS_POSTGRES_USER_PASSWORD" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
 
-wait_for_dependency_gate /init-signal/pgvector-gate
+wait_for_dependency_gate /init-signal/postgres-gate
 
 export PGPASSWORD="$POSTGRES_PASSWORD"
 
 envsubst < /init-db.sql.template > /init-db.sql
 sleep 10
-psql -h pgvector -U "$POSTGRES_USER" -f /init-db.sql
+psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -f /init-db.sql
 

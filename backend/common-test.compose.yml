@@ -56,16 +56,15 @@ services:
       - agent-poc
     volumes:
       - backend-test-init-signal-1:/init-signal
-      - ./run_test_dependency_gate.sh:/run_test_dependency_gate.sh
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ./run_test_dependency_gate.sh:/run_test_dependency_gate.sh:ro
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_minio_test_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     mem_limit: 128m
     memswap_limit: 128m
@@ -108,24 +107,22 @@ services:
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh
+      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh:ro
       - backend-test-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-test-home-1:/home/python
       - backend-test-venv-1:/app/.venv
       - backend-test-staging-1:/staging
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - langfuse_client_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -189,24 +186,23 @@ services:
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_celery_worker.sh:/run_celery_worker.sh
+      - ./run_celery_worker.sh:/run_celery_worker.sh:ro
       - backend-test-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-test-home-2:/home/python
       - backend-test-venv-2:/app/.venv
       - backend-test-staging-2:/staging
       - backend-test-prometheus-2:/var/local/prometheus
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -267,23 +263,22 @@ services:
       ##- .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_celery_flower.sh:/run_celery_flower.sh
+      - ./run_celery_flower.sh:/run_celery_flower.sh:ro
       - backend-test-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-test-home-3:/home/python
       - backend-test-venv-3:/app/.venv
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - celery_flower_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
-      - weaviate_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_postgres_test_secrets
+      - celery_flower_test_secrets
+      - checkpoints_postgres_test_secrets
+      - redis_secrets
+      - weaviate_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -336,26 +331,26 @@ services:
     networks:
       - agent-poc
     volumes:
+      - backend-test-init-signal-1:/init-signal
       # Mount the project directory to /app in the container
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_integration_test.sh:/run_integration_test.sh
+      - ./run_integration_test.sh:/run_integration_test.sh:ro
       - backend-test-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-test-home-4:/home/python
       - backend-test-venv-4:/app/.venv
     secrets:
-      - answers_test_env
-      - answers_api_key_test_env
-      - answers_jwt_test_env
-      - answers_minio_test_env
-      - answers_postgres_test_env
-      - celery_flower_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
-      - redis_env
+      - answers_test_secrets
+      - answers_api_key_test_secrets
+      - answers_jwt_test_secrets
+      - answers_minio_test_secrets
+      - answers_postgres_test_secrets
+      - celery_flower_test_secrets
+      - checkpoints_postgres_test_secrets
+      - redis_secrets
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

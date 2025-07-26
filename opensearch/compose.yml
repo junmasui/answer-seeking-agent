@@ -38,7 +38,7 @@ services:
     container_name: opensearch
     hostname: opensearch
     profiles:
-      - infrastructure-code
+      - infrastructure-core
       - infrastructure
       - all
 
@@ -51,7 +51,7 @@ services:
       - opensearch-data-1:/usr/share/opensearch/data
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
-      - opensearch_secrets_env
+      - opensearch_secrets
 
     user: '1000:1000'
     entrypoint: /custom-docker-entrypoint.sh

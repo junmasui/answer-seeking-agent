@@ -7,7 +7,7 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 set +o history # temporarily turn off history
 SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_env | xargs -n1 )
+export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 set -o history # turn it back on
 
 # Wait for dependency-gate to open.
@@ -35,9 +35,8 @@ fi
 set +o history # temporarily turn off history
 export REDIS_URL="redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
 
-export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://${ANSWERS_POSTGRES_USER_NAME}:${ANSWERS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
-export POSTGRES_VECTORS_CONNECTION_URL="postgresql+psycopg://${VECTORS_POSTGRES_USER_NAME}:${VECTORS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
-export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://${CHECKPOINTS_POSTGRES_USER_NAME}:${CHECKPOINTS_POSTGRES_USER_PASSWORD}@pgvector:5432/${ANSWERS_POSTGRES_DATABASE}"
+export POSTGRES_ANSWERS_CONNECTION_URL="postgresql+psycopg://${ANSWERS_POSTGRES_USER_NAME}:${ANSWERS_POSTGRES_USER_PASSWORD}@postgres:5432/${ANSWERS_POSTGRES_DATABASE}"
+export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://${CHECKPOINTS_POSTGRES_USER_NAME}:${CHECKPOINTS_POSTGRES_USER_PASSWORD}@postgres:5432/${ANSWERS_POSTGRES_DATABASE}"
 set -o history # turn it back on
 
 # NOTE 1 regarding watchmdo:

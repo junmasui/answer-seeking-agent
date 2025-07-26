@@ -88,7 +88,7 @@ function wait_for_minio {
 
 }
 
-function wait_for_pgvector {
+function wait_for_postgres {
     declare DATABASE_URL="${1:-}"
 
     if [ -z "${DATABASE_URL:-}" ]
@@ -100,7 +100,7 @@ function wait_for_pgvector {
     #
     # Wait for DNS resolution of postgres
     #
-    wait_for_nslookup pgvector
+    wait_for_nslookup postgres
 
     #
     # Wait for postgres to be ready

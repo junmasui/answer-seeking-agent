@@ -1,7 +1,14 @@
 
-# Logs
-logs
-*.log
+# Log files should never be committed
+logs/*
+# Allow the one placeholder file to cause the logs directory to be created
+!logs/.keep
+
+# secrets should never be committed
+secrets-*.env
+secrets/*
+# Allow the one placeholder file to cause the secrets directory to be created
+!secrets/.keep
 
 # Editor directories and files
 .vscode/*
@@ -9,18 +16,10 @@ logs
 # local overrides, should not be committed
 *.overrides.env
 
-# secrets, should never be committed
-secrets/
-secrets.env
-secrets-*.env
-
 # SSL certificates should not be committed
 *.crt
 *.key
 *.pem
-
-# Clickhouse admin user configuration contains password. Should not be committed
-clickhouse/admin-user.xml
 
 # Redis configuration contains password. Should not be committed
 redis/redis.conf

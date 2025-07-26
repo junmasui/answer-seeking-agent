@@ -1,10 +1,10 @@
-name: pgvector
+name: postgres
 
 services:
-  pgvector:
+  postgres:
     restart: unless-stopped
 
-    image: localhost/localhost/postgres:17.2-with-pgvector
+    image: postgres:17.5-bookworm
     profiles: [ postgres, infrastructure-core, infrastructure, all ]
 
     environment:
@@ -13,21 +13,21 @@ services:
       # to .env files for easier and more isolated management.
       PGDATA: /var/lib/postgresql/data/pgdata
     env_file:
-      - pgvector.env
+      - postgres.env
     ports:
       - '25432:5432'
     networks:
       - agent-poc
     volumes:
-      - pgvector-data-1:/var/lib/postgresql/data
+      - postgres-data-1:/var/lib/postgresql/data
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
     secrets:
-      - postgres_env
+      - postgres_secrets
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]
     # When entrypoint is specified in the compose file, the CMD in the Dockerfile is
     # will be ignored. Hence, extract its value and add it here in the compose file:
-    #   docker inspect localhost/postgres:17.2-with-pgvector | jq '.[0].Config.Cmd'
+    #   docker inspect postgres:17.5-bookworm | jq '.[0].Config.Cmd'
     command: [ postgres ]
     mem_limit: 512m
     memswap_limit: 1g
@@ -35,7 +35,7 @@ services:
     shm_size: 128mb
 
     healthcheck:
-      # POSTGRES_USER is defined inside pgvector.env
+      # POSTGRES_USER is defined inside postgres.env
       test: [ 'CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}' ]
       interval: 10s
       timeout: 10s
@@ -43,23 +43,23 @@ services:
       start_period: 5s
 
 
-  pgvector-init-dependency-gate:
+  postgres-init-dependency-gate:
     restart: 'no'
 
     image: localhost/localhost/debian-slim-util:1.0
     profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
 
     env_file:
-      - pgvector.env
+      - postgres.env
     networks:
       - agent-poc
     volumes:
-      - pgvector-init-signal-1:/init-signal
+      - postgres-init-signal-1:/init-signal
       - ./run_dependency_gate.sh:/run_dependency_gate.sh
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
-      - postgres_env
+      - postgres_secrets
 
     mem_limit: 128m
     memswap_limit: 128m
@@ -70,31 +70,25 @@ services:
 
 
 
-  pgvector-init:
+  postgres-init:
 
     image: localhost/localhost/debian-slim-util:1.0
-    #image: localhost/localhost/postgres:17.2-with-pgvector
+    #image: localhost/localhost/postgres:17.2-with-postgres
     profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
 
-    environment:
-      # Only environment variables that are important to the Docker environment
-      # will be configured here. All other environment variables are extracted
-      # to .env files for easier and more isolated management.
-      POSTGRES_HOST: pgvector
     env_file:
-      - pgvector-init.env
+      - postgres-init.env
     networks:
       - agent-poc
     volumes:
-      - pgvector-init-signal-1:/init-signal
+      - postgres-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./init-db.sql.template:/init-db.sql.template
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
-      - postgres_env
-      - answers_postgres_dev_env
-      - checkpoints_postgres_dev_env
-      - vectors_postgres_dev_env
+      - postgres_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
 
     entrypoint: [ '/bin/bash' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -102,68 +96,33 @@ services:
     command: [ /init-postgres.sh ]
 
 
-  pgvector-test-init:
+  postgres-test-init:
 
     image: localhost/localhost/debian-slim-util:1.0
-    # image: localhost/localhost/postgres:17.2-with-pgvector
+    # image: localhost/localhost/postgres:17.2-with-postgres
     profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
 
-    environment:
-      # Only environment variables that are important to the Docker environment
-      # will be configured here. All other environment variables are extracted
-      # to .env files for easier and more isolated management.
-      POSTGRES_HOST: pgvector
     env_file:
-      - pgvector-test-init.env
+      - postgres-test-init.env
     networks:
       - agent-poc
     volumes:
-      - pgvector-init-signal-1:/init-signal
+      - postgres-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./init-db.sql.template:/init-db.sql.template
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
-      - postgres_env
-      - answers_postgres_test_env
-      - checkpoints_postgres_test_env
-      - vectors_postgres_test_env
+      - postgres_secrets
+      - answers_postgres_test_secrets
+      - checkpoints_postgres_test_secrets
 
     entrypoint: [ '/bin/bash' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: [ /init-postgres.sh ]
-
-  pgvector-langfuse-init:
-
-    image: localhost/localhost/debian-slim-util:1.0
-    # image: localhost/localhost/postgres:17.2-with-pgvector
-    profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
-
-    environment:
-      # Only environment variables that are important to the Docker environment
-      # will be configured here. All other environment variables are extracted
-      # to .env files for easier and more isolated management.
-      POSTGRES_HOST: pgvector
-    env_file:
-      - pgvector-init.env
-    networks:
-      - agent-poc
-    volumes:
-      - pgvector-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./init-langfuse-db.sql.template:/init-langfuse-db.sql.template
-      - ./init-langfuse-db.sh:/init-langfuse-db.sh
-    secrets:
-      - postgres_env
-      - langfuse_postgres_env
-
-    entrypoint: [ '/bin/bash' ]
-    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    command: [ /init-langfuse-db.sh ]
 
 volumes:
-  pgvector-data-1:
+  postgres-data-1:
     driver: local
-  pgvector-init-signal-1:
+  postgres-init-signal-1:
     driver: local

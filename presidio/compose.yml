@@ -30,7 +30,11 @@ services:
     restart: unless-stopped
 
     image: mcr.microsoft.com/presidio-anonymizer:latest
-    profiles: [ presidio, infrastructure, all ]
+    profiles: [
+      presidio,
+      # infrastructure,
+      # all
+    ]
 
     ports:
       - '27601:5001'
@@ -38,5 +42,8 @@ services:
       - agent-poc
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      test: ["CMD", "python3", "/healthcheck.py"]
       interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

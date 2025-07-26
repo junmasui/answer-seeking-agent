@@ -3,7 +3,7 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # The minio/minio image does not include the Debian findutil and grep packages.
 # Hence we need to use a pure-shell alternative to our more frequent technique
 # of `export $( grep | xargs )`
-for FILE in "${SECRETS_MOUNT}"/*_env
+for FILE in "${SECRETS_MOUNT}"/*_secrets
 do
     [ -f "$FILE" ] || continue
     exec 3< "$FILE" # Open file descriptor 3. This robustly avoids subshell issues.
