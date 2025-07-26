@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-./pull_images.sh
+./scripts/pull_images.sh
 
 EXIT_CODE="$?"
 if [ "$EXIT_CODE" != 0 ]
@@ -9,7 +9,7 @@ then
     exit -1
 fi
 
-./build_images.sh
+./scripts/build_images.sh
 
 EXIT_CODE="$?"
 if [ "$EXIT_CODE" != 0 ]
@@ -18,16 +18,7 @@ then
     exit -1
 fi
 
-./setup_rootless.sh
-
-EXIT_CODE="$?"
-if [ "$EXIT_CODE" != 0 ]
-then
-    echo "Error setting up for rootless docker"
-    exit -1
-fi
-
-./update_secrets.sh
+./scripts/update_secrets.sh
 
 EXIT_CODE="$?"
 if [ "$EXIT_CODE" != 0 ]
@@ -36,23 +27,22 @@ then
     exit -1
 fi
 
-./launch_services.sh
+./scripts/launch_services.sh
 
 EXIT_CODE="$?"
 if [ "$EXIT_CODE" != 0 ]
 then
     echo "Error launching. Retrying"
+
+    ./scripts/launch_services.sh
+
+    EXIT_CODE="$?"
+    if [ "$EXIT_CODE" != 0 ]
+    then
+        echo "Error launching."
+        exit -1
+    fi
 fi
 
-docker compose up -d langfuse-worker
-
-./launch_services.sh
-
-EXIT_CODE="$?"
-if [ "$EXIT_CODE" != 0 ]
-then
-    echo "Error launching."
-    exit -1
-fi
 
 ./display_processes.sh
