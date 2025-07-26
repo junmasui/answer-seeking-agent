@@ -15,7 +15,6 @@ answers in documents  to complex questions.
 
 Most large architectural elements are modularized
 behind minimal-surface plug-in interfaces.
- 
 
 ### Passion Project
 

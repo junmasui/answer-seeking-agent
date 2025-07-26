@@ -96,8 +96,10 @@ echo   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docke
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin bindfs
 ```
+
+The last package in the list is `bindfs`. We will be using this 
 
 The installation is tested with the "Hello World" image.
 
@@ -186,13 +188,6 @@ to get started.
 Go to [Getting started with API services](https://docs.unstructured.io/api-reference/api-services/free-api)
 to get started.
 
-### LangChain and LangSmith (Optional)
-
-LangSmith provides LangChain-specific application tracing and performance evaluation.
-
-To optionally use LangSmith, get an API key for LangSmith.
-
-Go to [smith.langchain.com/](https://smith.langchain.com/) to create an account.
 
 ## INSTALLATION
 
@@ -541,32 +536,37 @@ vite-dev-server-1  |   ➜  Vue DevTools: Press Alt(⌥)+Shift(⇧)+D in App to 
 ...
 ```
 
-#### Verify NginX Server
+#### Verify Traefik Server
 
 Run the following command.
 This will show logging output from
-the NginX reverse proxy server.
+the Traefik reverse proxy server.
 
 ```bash
-docker compose logs proxy
+docker compose logs traefik
 ```
 
 Read the output.
 Verify that there are no errors (self-correction is acceptable),
 and
-that the NginX service has started its NginX workers.
+that the Traefik service has started.
 
 ```console
 ...
-
-proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: using the "epoll" event method
-proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: nginx/1.27.3
-proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: built by gcc 12.2.0 (Debian 12.2.0-14) 
-
+traefik-1  | 2025-07-26T13:56:04Z INF Traefik version 3.4.5 built on 2025-07-23T09:26:45Z version=3.4.5
+traefik-1  | 2025-07-26T13:56:04Z INF 
+traefik-1  | Stats collection is disabled.
+traefik-1  | Help us improve Traefik by turning this feature on :)
+traefik-1  | More details on: https://doc.traefik.io/traefik/contributing/data-collection/
+traefik-1  | 
+traefik-1  | 2025-07-26T13:56:04Z INF Starting provider aggregator *aggregator.ProviderAggregator
+traefik-1  | 2025-07-26T13:56:04Z INF Starting provider *file.Provider
+traefik-1  | 2025-07-26T13:56:04Z INF Starting provider *traefik.Provider
+traefik-1  | 2025-07-26T13:56:04Z INF Starting provider *acme.ChallengeTLSALPN
+traefik-1  | 2025-07-26T13:56:04Z INF Starting provider *acme.Provider
+traefik-1  | 2025-07-26T13:56:04Z INF Testing certificate renew... acmeCA=https://acme-v02.api.letsencrypt.org/directory providerName=le.acme
+traefik-1  | 2025-07-26T14:06:05Z WRN A new release of Traefik has been found: 3.5.0. Please consider updating.
 ...
-
-proxy-1  | 2025/01/12 17:17:20 [notice] 1#1: start worker processes
-
 ...
 ```
 
