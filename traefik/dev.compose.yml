@@ -1,0 +1,82 @@
+services:
+  init-traefik-volumes:
+    restart: 'no'
+
+    image: 'docker.io/node:22-bookworm-slim'
+    profiles: [ init-volumes, frontend, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - traefik-acme-1:/home/node/acme-1
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        ls -ld /home/node/
+
+        for VOL in 'acme-1'
+        do
+          touch /home/node/$$VOL/.initialized
+          chown -R 1000:1000 /home/node/$$VOL
+          chmod -R 600 /home/node/$$VOL
+          ls -ld /home/node/$$VOL
+        done
+
+  traefik:
+    image: 'docker.io/traefik:v3.4'
+    profiles: [ frontend, all ]
+
+    ports:
+      - '15170:15170'
+      - '15173:15173'
+    networks:
+      - agent-poc
+    volumes:
+      # To populate HOST_USER_ID dynamically, use one of these methods:
+      # 1. Export before running: export HOST_USER_ID=$(id -u) && docker compose up
+      # 2. Inline: HOST_USER_ID=$(id -u) docker compose up  
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.dev.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic-dev:/etc/traefik/dynamic:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - traefik-acme-1:/acme
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+
+    entrypoint: ['/custom-docker-entrypoint.sh']
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    command: ['traefik']
+
+    healthcheck:
+      test:
+        # The langfuse/langfuse image does not have curl installed. And since the image is based on
+        # busybox, curl is not available.
+        # wget: -q    Turns off wget output, specifically the progress bar.
+        #       -S    Shows the server response, which includes the HTTP status code.
+        #       -O -  Writes the content to stdout.
+        # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use
+        # the IPv6 ::1 address where there is no listening port.
+        # grep: -q    Quiet. Exit code 0 if PATTERN is found, 1 otherwise
+        - CMD-SHELL
+        - >-
+          wget -qS -O - http://127.0.0.1:8082/ping 2>&1
+          | grep -q 'HTTP/1.1 200 OK'
+
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  traefik-acme-1:
+    driver: local

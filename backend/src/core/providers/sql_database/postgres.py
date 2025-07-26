@@ -30,7 +30,7 @@ def get_connection_str(db_schema: DataDomain):
         case DataDomain.ANSWERS:
             connection_url = config.postgres_answers_connection_url
         case DataDomain.VECTORS:
-            connection_url = config.postgres_vectors_connection_url
+            raise NotImplementedError
         case DataDomain.CHECKPOINTS:
             connection_url = config.postgres_checkpoints_connection_url
         case _:

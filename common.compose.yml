@@ -12,6 +12,7 @@ include:
   - presidio/compose.yml
   - prometheus/compose.yml
   - redis/compose.yml
+  - traefik/compose.yml
   - weaviate/compose.yml
 
 networks:

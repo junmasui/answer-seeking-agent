@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
 
     image: prom/prometheus:v3.4.2
-    profiles: [ prometheus, infrastructure, all ]
+    profiles: [ prometheus, infrastructure, telemetry, all ]
 
     ports:
       - 29090:9090
@@ -50,7 +50,7 @@ services:
     restart: unless-stopped
 
     image: prom/alertmanager:v0.28.1
-    profiles: [ prometheus, infrastructure, all ]
+    profiles: [ prometheus, infrastructure, telemetry, all ]
 
     ports:
       - 29093:9093

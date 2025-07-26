@@ -38,7 +38,7 @@ services:
     container_name: opensearch
     hostname: opensearch
     profiles:
-      - infrastructure-code
+      - infrastructure-core
       - infrastructure
       - all
 

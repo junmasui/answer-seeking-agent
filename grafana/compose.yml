@@ -2,7 +2,7 @@ services:
   grafana:
     restart: unless-stopped
 
-    profiles: [ grafana, infrastructure, all ]
+    profiles: [ grafana, infrastructure, telemetry, all ]
     image: grafana/grafana:12.1.0
 
     env_file:
