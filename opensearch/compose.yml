@@ -35,7 +35,6 @@ services:
     #     condition: service_completed_successfully
 
     image: opensearchproject/opensearch:2.9.0
-    container_name: opensearch
     hostname: opensearch
     profiles:
       - infrastructure-core
