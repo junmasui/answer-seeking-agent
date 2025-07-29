@@ -35,49 +35,55 @@ receivers:
     config:
       global:
         scrape_interval: 30s
-        scrape_timeout: 10s
+        scrape_timeout: 5s
       scrape_configs:
-        # # FastAPI application metrics
-        # - job_name: 'fastapi-integration-server'
-        #   static_configs:
-        #     - targets: ['fastapi-integration-server:8100']
-        #   metrics_path: /metrics
-        #   scrape_interval: 15s
-
-        # # FastAPI application metrics
-        # - job_name: 'fastapi-dev-server'
-        #   static_configs:
-        #     - targets: ['fastapi-dev-server:8100']
-        #   metrics_path: /metrics
-        #   scrape_interval: 15s
-
-        # # Celery worker metrics
-        # - job_name: 'celery-worker'
-        #   static_configs:
-        #     - targets: ['celery-worker:8989']
-        #   metrics_path: /metrics
-        #   scrape_interval: 15s
-
-        # # Celery exporter metrics
-        # - job_name: 'celery-exporter'
-        #   static_configs:
-        #     - targets: ['celery-exporter:9808']
-        #   metrics_path: /metrics
-        #   scrape_interval: 30s
-
-        # # Celery flower metrics
-        # - job_name: 'celery-flower'
-        #   static_configs:
-        #     - targets: ['celery-flower:5555']
-        #   metrics_path: /metrics
-        #   scrape_interval: 30s
-
-        # Grafana metrics (optional)
-        - job_name: 'grafana'
-          static_configs:
-            - targets: ['grafana:3000']
+        # FastAPI application metrics
+        - job_name: 'fastapi-dev-server'
+          dns_sd_configs:
+            - names: ['fastapi-dev-server']
+              type: 'A'
+              port: 8100
           metrics_path: /metrics
-          scrape_interval: 30s
+
+        # FastAPI application metrics
+        - job_name: 'fastapi-integration-server'
+          dns_sd_configs:
+            - names: ['fastapi-integration-server']
+              type: 'A'
+              port: 8100
+          metrics_path: /metrics
+
+        # Celery worker metrics
+        - job_name: 'celery-worker'
+          dns_sd_configs:
+            - names: ['celery-worker']
+              type: 'A'
+              port: 8989
+          metrics_path: /metrics
+
+        # Celery exporter metrics
+        - job_name: 'celery-exporter'
+          dns_sd_configs:
+            - names: ['celery-exporter']
+              type: 'A'
+              port: 9808
+          metrics_path: /metrics
+
+        # Celery flower metrics
+        - job_name: 'celery-flower'
+          dns_sd_configs:
+            - names: ['celery-flower']
+              type: 'A'
+              port: 5555
+          metrics_path: /metrics
+
+        # Grafana metrics
+        - job_name: 'grafana'
+          dns_sd_configs:
+            - names: ['grafana']
+              type: 'A'
+              port: 3000
+          metrics_path: /metrics
 
   # Host metrics receiver (optional - for system metrics)
   hostmetrics:
