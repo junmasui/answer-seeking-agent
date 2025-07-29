@@ -1,0 +1,20 @@
+services:
+  # Loki - Centralized Logging
+  loki:
+    image: grafana/loki:3.5
+    profiles: [loki, infrastructure, telemetry, all]
+    ports:
+      - "23100:3100"
+    volumes:
+      - ./local-config.yml:/etc/loki/local-config.yml
+    command:
+      - -config.file=/etc/loki/local-config.yml
+    networks:
+      - agent-poc
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

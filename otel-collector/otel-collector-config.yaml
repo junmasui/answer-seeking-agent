@@ -19,6 +19,12 @@ receivers:
             - "http://*"
             - "https://*"
 
+  # Raw TCP
+  tcplog/docker:
+    listen_address: "0.0.0.0:2255"
+    add_attributes: true     # adds net.peer.ip, etc.[52]
+    one_log_per_packet: false
+
   # Zipkin receiver for applications sending Zipkin-formatted traces
   zipkin:
     endpoint: 0.0.0.0:9411
@@ -31,12 +37,12 @@ receivers:
         scrape_interval: 30s
         scrape_timeout: 10s
       scrape_configs:
-        # FastAPI application metrics
-        - job_name: 'fastapi-integration-server'
-          static_configs:
-            - targets: ['fastapi-integration-server:8100']
-          metrics_path: /metrics
-          scrape_interval: 15s
+        # # FastAPI application metrics
+        # - job_name: 'fastapi-integration-server'
+        #   static_configs:
+        #     - targets: ['fastapi-integration-server:8100']
+        #   metrics_path: /metrics
+        #   scrape_interval: 15s
 
         # # FastAPI application metrics
         # - job_name: 'fastapi-dev-server'
@@ -107,9 +113,9 @@ processors:
     timeout: 1s
     send_batch_max_size: 512
   batch/logs:
-    send_batch_size: 1024
-    timeout: 5s
-    send_batch_max_size: 2048
+    send_batch_size: 1
+    timeout: 1s
+    send_batch_max_size: 1024
 
   # Resource processor to add common attributes
   resource:
@@ -154,10 +160,15 @@ exporters:
     tls:
       insecure: true
 
+  otlphttp/logs:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+
   # Debug exporter for traces
   debug/traces:
     # verbosity: basic, normal, or detailed
-    verbosity: detailed
+    verbosity: basic
     sampling_initial: 5
     sampling_thereafter: 200
 
@@ -199,14 +210,6 @@ service:
 
     # Logs pipeline (if needed)
     logs:
-      receivers: [otlp]
-      processors: [memory_limiter, resource, attributes, batch/logs]
-      exporters: [debug/logs]
-
-  # Telemetry configuration for the collector itself
-  telemetry:
-    logs:
-      level: "info"
-    metrics:
-      address: 0.0.0.0:8888
-      level: basic
+      receivers: [otlp, tcplog/docker]
+      processors: [memory_limiter, resource, attributes]
+      exporters: [otlphttp/logs, debug/logs]

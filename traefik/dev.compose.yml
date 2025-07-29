@@ -3,7 +3,7 @@ services:
     restart: 'no'
 
     image: 'docker.io/node:22-bookworm-slim'
-    profiles: [ init-volumes, frontend, all ]
+    profiles: [ init-volumes, infrastructure, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -31,7 +31,7 @@ services:
 
   traefik:
     image: 'docker.io/traefik:v3.4'
-    profiles: [ frontend, all ]
+    profiles: [ infrastructure, all ]
 
     ports:
       - '15170:15170'
