@@ -1,0 +1,53 @@
+extensions:
+  docker_observer:
+    # Observes Docker containers and reports them as targets
+    # which the filelog receiver can use for metadata.
+
+receivers:
+  filelog:
+    include: [ /var/lib/docker/containers/*/*-json.log ]
+    # exclude: [ /var/lib/docker/containers/*/*-json.log.* ]
+    include_file_path: true 
+    operators:
+      # Use the new "container" operator. This operator enriches the log messages with some metadata.
+      # See https://opentelemetry.io/blog/2024/otel-collector-container-log-parser/
+      # and https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/container.md
+      - id: container-parser
+        type: container
+        add_metadata_from_filepath: false
+        on_error: send
+      # The "container" operator does not have the capability to attach the compose service name (in a plain Docker environment)
+      # to the log message metadata. Other metadata will still be attached.
+      # 
+      # See https://docs.docker.com/engine/logging/log_tags/
+      - id: extract_metadata_from_docker_tag
+        type: regex_parser
+        parse_from: attributes.attrs.tag
+        regex: '^(?P<name>[^\|]+)\|(?P<image_name>[^\|]+)\|(?P<id>[^$]+)$'
+        if: 'attributes?.attrs?.tag != nil'
+      - type: move
+        from: attributes.name
+        to: resource["container.name"]
+        if: 'attributes?.name != nil'
+      - type: move  
+        from: attributes.image_name
+        to: resource["container.image.name"]
+        if: 'attributes?.image_name != nil'
+      - id: recombine
+        type: recombine
+        combine_field: body
+        is_first_entry: body matches "^(\\[?\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}|\\{\\\")"
+        combine_with: ""
+
+exporters:
+  otlphttp/logs:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+
+service:
+  extensions: [docker_observer]
+  pipelines:
+    logs:
+      receivers: [filelog]
+      exporters: [otlphttp/logs]

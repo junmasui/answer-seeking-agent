@@ -4,6 +4,7 @@ include:
   - frontend/compose.yml
   - grafana/compose.yml
   - jaeger/compose.yml
+  - loki/compose.yml
   - minio/compose.yml
   - opensearch/compose.yml
   - otel-collector/compose.yml
