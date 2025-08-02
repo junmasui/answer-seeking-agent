@@ -1,6 +1,6 @@
 include:
   - path:
       - common.compose.yml
-      - common-test.compose.yml
+      - dev-common.compose.yml
       - cpu-only.override.yml
       

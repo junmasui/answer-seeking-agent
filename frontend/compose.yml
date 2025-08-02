@@ -1,4 +1,4 @@
 include:
   - path:
-      - dev.compose.yml
+      - alpha.compose.yml
       - test.compose.yml
