@@ -27,9 +27,9 @@ JQ_3=$(cat << EOS
   | select( .State == "running"
             and
             ( .Name as \$name 
-              | [ "agent-vite-dev-server-1",
-                  "agent-vite-integration-server-1",
-                  "agent-integration-test-1",
+              | [ "agent-webui-server-1",
+                  "agent-dev-webui-server-1",
+                  "agent-automated-test-1",
                   "agent-langfuse-worker-1" ]
               | index(\$name)
             ) )
@@ -56,9 +56,9 @@ JQ_2=$(cat << EOS
   | select( ( .State == "running"
               and
               ( .Name as \$name 
-                | [ "agent-vite-dev-server-1",
-                    "agent-vite-integration-server-1",
-                    "agent-integration-test-1",
+                | [ "agent-webui-server-1",
+                    "agent-dev-webui-server-1",
+                    "agent-automated-test-1",
                     "agent-langfuse-worker-1" ]
                 | index(\$name)
               ) ) | not )

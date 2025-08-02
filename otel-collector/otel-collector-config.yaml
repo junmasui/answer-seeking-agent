@@ -38,17 +38,17 @@ receivers:
         scrape_timeout: 5s
       scrape_configs:
         # FastAPI application metrics
-        - job_name: 'fastapi-dev-server'
+        - job_name: 'fastapi-server'
           dns_sd_configs:
-            - names: ['fastapi-dev-server']
+            - names: ['fastapi-server']
               type: 'A'
               port: 8100
           metrics_path: /metrics
 
         # FastAPI application metrics
-        - job_name: 'fastapi-integration-server'
+        - job_name: 'dev-fastapi-server'
           dns_sd_configs:
-            - names: ['fastapi-integration-server']
+            - names: ['dev-fastapi-server']
               type: 'A'
               port: 8100
           metrics_path: /metrics

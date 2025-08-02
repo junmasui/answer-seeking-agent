@@ -30,7 +30,7 @@ services:
         done
 
 
-  traefik-integration:
+  secondary-traefik:
     image: 'docker.io/traefik:v3.4'
     profiles: [ infrastructure, all ]
 

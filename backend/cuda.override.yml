@@ -1,5 +1,5 @@
 services:
-  fastapi-dev-server:
+  fastapi-server:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:
@@ -16,7 +16,7 @@ services:
               count: 1
               capabilities: [gpu]
 
-  fastapi-integration-server:
+  dev-fastapi-server:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:
@@ -50,7 +50,7 @@ services:
               count: 1
               capabilities: [gpu]
 
-  celery-integration-worker:
+  dev-celery-worker:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:

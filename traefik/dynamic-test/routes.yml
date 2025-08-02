@@ -32,9 +32,9 @@ http:
     vite-service:
       loadBalancer:
         servers:
-          - url: "http://vite-integration-server:5173"
+          - url: "http://dev-webui-server:5173"
 
     fastapi-service:
       loadBalancer:
         servers:
-          - url: "http://fastapi-integration-server:8100"
+          - url: "http://dev-fastapi-server:8100"

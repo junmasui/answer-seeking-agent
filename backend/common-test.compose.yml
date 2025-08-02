@@ -8,17 +8,17 @@ services:
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - backend-test-home-1:/home/python/test-home-1
-      - backend-test-venv-1:/home/python/test-venv-1
-      - backend-test-staging-1:/home/python/test-staging-1
-      - backend-test-home-2:/home/python/test-home-2
-      - backend-test-venv-2:/home/python/test-venv-2
-      - backend-test-prometheus-2:/home/python/test-prometheus-2
-      - backend-test-staging-2:/home/python/test-staging-2
-      - backend-test-home-3:/home/python/test-home-3
-      - backend-test-venv-3:/home/python/test-venv-3
-      - backend-test-home-4:/home/python/test-home-4
-      - backend-test-venv-4:/home/python/test-venv-4
+      - dev-backend-home-1:/home/python/test-home-1
+      - dev-backend-venv-1:/home/python/test-venv-1
+      - dev-backend-staging-1:/home/python/test-staging-1
+      - dev-backend-home-2:/home/python/test-home-2
+      - dev-backend-venv-2:/home/python/test-venv-2
+      - dev-backend-prometheus-2:/home/python/test-prometheus-2
+      - dev-backend-staging-2:/home/python/test-staging-2
+      - dev-backend-home-3:/home/python/test-home-3
+      - dev-backend-venv-3:/home/python/test-venv-3
+      - dev-backend-home-4:/home/python/test-home-4
+      - dev-backend-venv-4:/home/python/test-venv-4
 
     entrypoint: 'bash'
     command:
@@ -51,12 +51,12 @@ services:
 
     env_file:
       - dependency-gate.env
-      - integration-test.env
+      - automated-test.env
     networks:
       - agent-poc
     volumes:
-      - backend-test-init-signal-1:/init-signal
-      - ./run_test_dependency_gate.sh:/run_test_dependency_gate.sh:ro
+      - dev-backend-init-signal-1:/init-signal
+      - ./run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
@@ -71,10 +71,10 @@ services:
     # set shared memory limit when using docker-compose
     shm_size: 128mb
     entrypoint: 'bash'
-    command: [ /run_test_dependency_gate.sh ]
+    command: [ /run_dev_dependency_gate.sh ]
 
 
-  fastapi-integration-server:
+  dev-fastapi-server:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
@@ -97,7 +97,7 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
     env_file:
-      - integration-test.env
+      - automated-test.env
     ports: # use if it is necessary to expose the container to the host machine
       - '8102:8100'
     networks:
@@ -107,13 +107,13 @@ services:
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_fastapi_dev_server.sh:/run_fastapi_dev_server.sh:ro
-      - backend-test-init-signal-1:/init-signal
+      - ./run_fastapi_server.sh:/run_fastapi_server.sh:ro
+      - dev-backend-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-test-home-1:/home/python
-      - backend-test-venv-1:/app/.venv
-      - backend-test-staging-1:/staging
+      - dev-backend-home-1:/home/python
+      - dev-backend-venv-1:/app/.venv
+      - dev-backend-staging-1:/staging
     secrets:
       - answers_test_secrets
       - answers_api_key_test_secrets
@@ -128,7 +128,7 @@ services:
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_fastapi_dev_server.sh' ]
+    command: [ '/run_fastapi_server.sh' ]
     deploy:
       resources:
         limits:
@@ -154,7 +154,7 @@ services:
       start_period: 5s
 
 
-  celery-integration-worker:
+  dev-celery-worker:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
@@ -176,7 +176,7 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
     env_file:
-      - integration-test.env
+      - automated-test.env
     ports: # use if it is necessary to expose the container to the host machine
       - '28991:8989'
     networks:
@@ -187,13 +187,13 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_worker.sh:/run_celery_worker.sh:ro
-      - backend-test-init-signal-1:/init-signal
+      - dev-backend-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-test-home-2:/home/python
-      - backend-test-venv-2:/app/.venv
-      - backend-test-staging-2:/staging
-      - backend-test-prometheus-2:/var/local/prometheus
+      - dev-backend-home-2:/home/python
+      - dev-backend-venv-2:/app/.venv
+      - dev-backend-staging-2:/staging
+      - dev-backend-prometheus-2:/var/local/prometheus
     secrets:
       - answers_test_secrets
       - answers_api_key_test_secrets
@@ -234,7 +234,7 @@ services:
       start_period: 5s
 
           
-  celery-integration-flower:
+  dev-celery-flower:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
@@ -264,11 +264,11 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_flower.sh:/run_celery_flower.sh:ro
-      - backend-test-init-signal-1:/init-signal
+      - dev-backend-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-test-home-3:/home/python
-      - backend-test-venv-3:/app/.venv
+      - dev-backend-home-3:/home/python
+      - dev-backend-venv-3:/app/.venv
     secrets:
       - answers_test_secrets
       - answers_api_key_test_secrets
@@ -301,7 +301,7 @@ services:
       start_period: 5s
 
 
-  integration-test:
+  automated-test:
     depends_on:
       init-backend-test-volumes:
         condition: service_completed_successfully
@@ -327,21 +327,21 @@ services:
       ##
       GPU_MODE: cpu
     env_file:
-      - integration-test.env
+      - automated-test.env
     networks:
       - agent-poc
     volumes:
-      - backend-test-init-signal-1:/init-signal
+      - dev-backend-init-signal-1:/init-signal
       # Mount the project directory to /app in the container
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_integration_test.sh:/run_integration_test.sh:ro
-      - backend-test-init-signal-1:/init-signal
+      - ./run_automated_test.sh:/run_automated_test.sh:ro
+      - dev-backend-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-test-home-4:/home/python
-      - backend-test-venv-4:/app/.venv
+      - dev-backend-home-4:/home/python
+      - dev-backend-venv-4:/app/.venv
     secrets:
       - answers_test_secrets
       - answers_api_key_test_secrets
@@ -356,7 +356,7 @@ services:
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_integration_test.sh' ]
+    command: [ '/run_automated_test.sh' ]
 
 
 #
@@ -364,27 +364,27 @@ services:
 # is started.
 #
 volumes:
-  backend-test-init-signal-1:
+  dev-backend-init-signal-1:
     driver: local
-  backend-test-home-1:
+  dev-backend-home-1:
     driver: local
-  backend-test-venv-1:
+  dev-backend-venv-1:
     driver: local
-  backend-test-staging-1:
+  dev-backend-staging-1:
     driver: local
-  backend-test-home-2:
+  dev-backend-home-2:
     driver: local
-  backend-test-venv-2:
+  dev-backend-venv-2:
     driver: local
-  backend-test-staging-2:
+  dev-backend-staging-2:
     driver: local
-  backend-test-prometheus-2:
+  dev-backend-prometheus-2:
     driver: local
-  backend-test-home-3:
+  dev-backend-home-3:
     driver: local
-  backend-test-venv-3:
+  dev-backend-venv-3:
     driver: local
-  backend-test-home-4:
+  dev-backend-home-4:
     driver: local
-  backend-test-venv-4:
+  dev-backend-venv-4:
     driver: local

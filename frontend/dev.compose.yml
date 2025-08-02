@@ -33,7 +33,7 @@ services:
 
 
 
-  vite-dev-server:
+  webui-server:
     depends_on:
       init-frontend-volumes:
         condition: service_completed_successfully

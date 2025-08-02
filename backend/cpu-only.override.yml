@@ -1,12 +1,12 @@
 services:
 
-  fastapi-dev-server:
+  fastapi-server:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
 
-  fastapi-integration-server:
+  dev-fastapi-server:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:
@@ -18,7 +18,7 @@ services:
     environment:
       GPU_MODE: cpu
 
-  celery-integration-worker:
+  dev-celery-worker:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:

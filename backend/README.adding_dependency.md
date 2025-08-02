@@ -3,7 +3,7 @@ To add a dependency, follow these steps:
 Log into container:
 
 ```
-docker compose --profile backend exec -it fastapi-dev-server bash
+docker compose --profile backend exec -it fastapi-server bash
 ```
 
 Activate the `uv` virtual environment.

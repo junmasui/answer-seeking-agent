@@ -9,8 +9,8 @@ services:
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - frontend-test-home-1:/home/node/home-1
-      - frontend-test-node-modules-1:/home/node/node-modules-1
+      - dev-frontend-home-1:/home/node/home-1
+      - dev-frontend-node-modules-1:/home/node/node-modules-1
 
     entrypoint: 'bash'
     command:
@@ -33,7 +33,7 @@ services:
 
 
 
-  vite-integration-server:
+  dev-webui-server:
     depends_on:
       init-frontend-test-volumes:
         condition: service_completed_successfully
@@ -62,17 +62,17 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_dev_server.sh:/run_dev_server.sh
       # Mounting a local area to use container-installed dependencies
-      - frontend-test-home-1:/home/node
-      - frontend-test-node-modules-1:/app/node_modules
+      - dev-frontend-home-1:/home/node
+      - dev-frontend-node-modules-1:/app/node_modules
 
     command: [ '/run_dev_server.sh' ]
     user: '1000:1000'
 
 
 volumes:
-  frontend-test-home-1:
+  dev-frontend-home-1:
     driver: local
-  frontend-test-node-modules-1:
+  dev-frontend-node-modules-1:
     driver: local
-  frontend-test-init-signal-1:
+  dev-frontend-init-signal-1:
     driver: local
