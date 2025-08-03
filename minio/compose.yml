@@ -85,7 +85,7 @@ services:
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_secrets
-      - answers_minio_dev_secrets
+      - answers_minio_secrets
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -112,7 +112,7 @@ services:
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_secrets
-      - answers_minio_test_secrets
+      - answers_minio_dev_secrets
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

@@ -57,9 +57,9 @@ services:
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_minio_secrets
+      - answers_postgres_secrets
+      - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -113,12 +113,12 @@ services:
       - backend-venv-1:/app/.venv
       - backend-staging-1:/staging
     secrets:
-      - answers_dev_secrets
-      - answers_api_key_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_api_key_secrets
+      - answers_jwt_secrets
+      - answers_minio_secrets
+      - answers_postgres_secrets
+      - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -194,11 +194,11 @@ services:
       - backend-staging-2:/staging
       - backend-prometheus-2:/var/local/prometheus
     secrets:
-      - answers_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_jwt_secrets
+      - answers_minio_secrets
+      - answers_postgres_secrets
+      - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -269,12 +269,12 @@ services:
       - backend-home-3:/home/python
       - backend-venv-3:/app/.venv
     secrets:
-      - answers_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - celery_flower_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_jwt_secrets
+      - answers_minio_secrets
+      - answers_postgres_secrets
+      - celery_flower_secrets
+      - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
 

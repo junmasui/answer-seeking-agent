@@ -5,7 +5,8 @@ logs/*
 !logs/.keep
 
 # secrets should never be committed
-secrets-*.env
+secrets.env
+secrets.*.env
 secrets/*
 # Allow the one placeholder file to cause the secrets directory to be created
 !secrets/.keep

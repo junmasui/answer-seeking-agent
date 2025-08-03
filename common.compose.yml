@@ -44,33 +44,33 @@ secrets:
   grafana_secrets:
     file: ./secrets/grafana.secrets.env
 
+  celery_flower_secrets:
+    file: ./secrets/celery-flower.secrets.env
   celery_flower_dev_secrets:
-    file: ./secrets/celery-flower-dev.secrets.env
-  celery_flower_test_secrets:
-    file: ./secrets/celery-flower-test.secrets.env
+    file: ./secrets/celery-flower.dev.secrets.env
+
+  answers_secrets:
+    file: ./secrets.env
+  answers_api_key_secrets:
+    file: ./secrets/answers.api-key.secrets.env
+  answers_jwt_secrets:
+    file: ./secrets/answers.jwt.secrets.env
+  answers_minio_secrets:
+    file: ./secrets/answers.minio.secrets.env
+  answers_postgres_secrets:
+    file: ./secrets/answers.postgres.secrets.env
+  checkpoints_postgres_secrets:
+    file: ./secrets/checkpoints.postgres.secrets.env
 
   answers_dev_secrets:
-    file: ./secrets-dev.env
+    file: ./secrets.dev.env
   answers_api_key_dev_secrets:
-    file: ./secrets/answers-dev.api-key.secrets.env
+    file: ./secrets/answers.api-key.dev.secrets.env
   answers_jwt_dev_secrets:
-    file: ./secrets/answers-dev.jwt.secrets.env
+    file: ./secrets/answers.jwt.dev.secrets.env
   answers_minio_dev_secrets:
-    file: ./secrets/answers-dev.minio.secrets.env
+    file: ./secrets/answers.minio.dev.secrets.env
   answers_postgres_dev_secrets:
-    file: ./secrets/answers-dev.postgres.secrets.env
+    file: ./secrets/answers.postgres.dev.secrets.env
   checkpoints_postgres_dev_secrets:
-    file: ./secrets/checkpoints-dev.postgres.secrets.env
-
-  answers_test_secrets:
-    file: ./secrets-test.env
-  answers_api_key_test_secrets:
-    file: ./secrets/answers-test.api-key.secrets.env
-  answers_jwt_test_secrets:
-    file: ./secrets/answers-test.jwt.secrets.env
-  answers_minio_test_secrets:
-    file: ./secrets/answers-test.minio.secrets.env
-  answers_postgres_test_secrets:
-    file: ./secrets/answers-test.postgres.secrets.env
-  checkpoints_postgres_test_secrets:
-    file: ./secrets/checkpoints-test.postgres.secrets.env
+    file: ./secrets/checkpoints.postgres.dev.secrets.env

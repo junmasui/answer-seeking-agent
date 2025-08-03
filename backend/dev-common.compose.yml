@@ -60,9 +60,9 @@ services:
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
-      - answers_minio_test_secrets
-      - answers_postgres_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_minio_dev_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -115,12 +115,12 @@ services:
       - dev-backend-venv-1:/app/.venv
       - dev-backend-staging-1:/staging
     secrets:
-      - answers_test_secrets
-      - answers_api_key_test_secrets
-      - answers_jwt_test_secrets
-      - answers_minio_test_secrets
-      - answers_postgres_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_dev_secrets
+      - answers_api_key_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -195,12 +195,12 @@ services:
       - dev-backend-staging-2:/staging
       - dev-backend-prometheus-2:/var/local/prometheus
     secrets:
-      - answers_test_secrets
-      - answers_api_key_test_secrets
-      - answers_jwt_test_secrets
-      - answers_minio_test_secrets
-      - answers_postgres_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_dev_secrets
+      - answers_api_key_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -270,13 +270,13 @@ services:
       - dev-backend-home-3:/home/python
       - dev-backend-venv-3:/app/.venv
     secrets:
-      - answers_test_secrets
-      - answers_api_key_test_secrets
-      - answers_jwt_test_secrets
-      - answers_minio_test_secrets
-      - answers_postgres_test_secrets
-      - celery_flower_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_dev_secrets
+      - answers_api_key_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_postgres_dev_secrets
+      - celery_flower_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -343,13 +343,13 @@ services:
       - dev-backend-home-4:/home/python
       - dev-backend-venv-4:/app/.venv
     secrets:
-      - answers_test_secrets
-      - answers_api_key_test_secrets
-      - answers_jwt_test_secrets
-      - answers_minio_test_secrets
-      - answers_postgres_test_secrets
-      - celery_flower_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_dev_secrets
+      - answers_api_key_dev_secrets
+      - answers_jwt_dev_secrets
+      - answers_minio_dev_secrets
+      - answers_postgres_dev_secrets
+      - celery_flower_dev_secrets
+      - checkpoints_postgres_dev_secrets
       - redis_secrets
 
     user: '1000:1000'

@@ -87,8 +87,8 @@ services:
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
       - postgres_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_postgres_secrets
+      - checkpoints_postgres_secrets
 
     entrypoint: [ '/bin/bash' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -113,8 +113,8 @@ services:
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
       - postgres_secrets
-      - answers_postgres_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_postgres_dev_secrets
+      - checkpoints_postgres_dev_secrets
 
     entrypoint: [ '/bin/bash' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

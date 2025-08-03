@@ -10,15 +10,15 @@ export HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}"
 export HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}"
 
 # Generate the manually managed secrets file.
-if [ ! -e secrets-dev.env ]
+if [ ! -e secrets.env ]
 then
-    envsubst < ./secrets.env.template > ./secrets-dev.env
+    envsubst < ./secrets.env.template > ./secrets.env
 fi
 
 # Generate the manually managed secrets file.
-if [ ! -e secrets-test.env ]
+if [ ! -e secrets.dev.env ]
 then
-    envsubst < ./secrets.env.template > ./secrets-test.env
+    envsubst < ./secrets.env.template > ./secrets.dev.env
 fi
 
 
@@ -62,54 +62,54 @@ function generate_secret ()  {
 
 # Answers JWT
 
-SECRETS_FILE=./secrets/answers-dev.jwt.secrets.env
+SECRETS_FILE=./secrets/answers.jwt.secrets.env
 VAR_NAME=APPLICATION_JWT_SECRET
 DESCR="$VAR_NAME is created thru openssl rand -hex 32."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
-SECRETS_FILE=./secrets/answers-test.jwt.secrets.env
+SECRETS_FILE=./secrets/answers.jwt.dev.secrets.env
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
 
 # Answers API keys
 
-SECRETS_FILE=./secrets/answers-dev.api-key.secrets.env
+SECRETS_FILE=./secrets/answers.api-key.secrets.env
 VAR_NAME=APPLICATION_API_KEY_1
-VALUE_PREFIX=answers_dev_1_
+VALUE_PREFIX=answers_1_
 DESCR="Answers API key."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers-test.api-key.secrets.env
-VALUE_PREFIX=answers_test_1_
+SECRETS_FILE=./secrets/answers.api-key.dev.secrets.env
+VALUE_PREFIX=answers_dev_1_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 VAR_NAME=APPLICATION_API_KEY_2
-VALUE_PREFIX=answers_test_2_
+VALUE_PREFIX=answers_dev_2_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 VAR_NAME=APPLICATION_API_KEY_3
-VALUE_PREFIX=answers_test_3_
+VALUE_PREFIX=answers_dev_3_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 # Celery Flower
 
-SECRETS_FILE=./secrets/celery-flower-dev.secrets.env
+SECRETS_FILE=./secrets/celery-flower.secrets.env
 VAR_NAME=CELERY_FLOWER_USER_PASSWORD
-VALUE_PREFIX=celery_flower_dev_
+VALUE_PREFIX=celery_flower_
 DESCR="Celery Flower basic auth account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/celery-flower-test.secrets.env
+SECRETS_FILE=./secrets/celery-flower.dev.secrets.env
 VAR_NAME=CELERY_FLOWER_USER_PASSWORD
-VALUE_PREFIX=celery_flower_test_
+VALUE_PREFIX=celery_flower_dev_
 DESCR="Celery Flower basic auth account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
@@ -136,15 +136,15 @@ DESCR="Minio's root account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/answers-dev.minio.secrets.env
+SECRETS_FILE=./secrets/answers.minio.secrets.env
 VAR_NAME=ANSWERS_MINIO_USER_PASSWORD
 VALUE_PREFIX=backend_minio_
 DESCR="Backend's Minio account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers-test.minio.secrets.env
-VALUE_PREFIX=backend_test_minio_
+SECRETS_FILE=./secrets/answers.minio.dev.secrets.env
+VALUE_PREFIX=backend_minio_dev_
 DESCR="Backend Test's Minio account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
@@ -161,29 +161,29 @@ DESCR="Postgres's root account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/answers-dev.postgres.secrets.env
+SECRETS_FILE=./secrets/answers.postgres.secrets.env
 VAR_NAME=ANSWERS_POSTGRES_USER_PASSWORD
 VALUE_PREFIX=answers_postgres_
 DESCR="backend's Answers Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers-test.postgres.secrets.env
-VALUE_PREFIX=answers_test_postgres_
+SECRETS_FILE=./secrets/answers.postgres.dev.secrets.env
+VALUE_PREFIX=answers_postgres_dev_
 DESCR="backend test's Answers Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/checkpoints-dev.postgres.secrets.env
+SECRETS_FILE=./secrets/checkpoints.postgres.secrets.env
 VAR_NAME=CHECKPOINTS_POSTGRES_USER_PASSWORD
 VALUE_PREFIX=checkpoints_postgres_
 DESCR="backend's checkpoints Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/checkpoints-test.postgres.secrets.env
-VALUE_PREFIX=checkpoints_test_postgres_
+SECRETS_FILE=./secrets/checkpoints.postgres.dev.secrets.env
+VALUE_PREFIX=checkpoints_postgres_dev_
 DESCR="backend test's checkpoints Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
