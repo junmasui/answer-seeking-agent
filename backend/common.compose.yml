@@ -147,8 +147,8 @@ services:
       # For now, we just check if python3 can run. Later, we will  try to come up  
       ## test: ['CMD', 'curl', '-f', 'http://localhost']
       test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
 
@@ -227,8 +227,8 @@ services:
       # For now, we just check if python3 can run. Later, we will  try to come up  
       ## test: ['CMD', 'curl', '-f', 'http://localhost']
       test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
 
@@ -293,8 +293,8 @@ services:
       # For now, we just check if python3 can run. Later, we will  try to come up  
       ## test: ['CMD', 'curl', '-f', 'http://localhost']
       test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
 
@@ -340,8 +340,8 @@ services:
         '-c',
         "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://localhost:9808/health').getcode() == 200 else sys.exit(1)"
       ]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
       

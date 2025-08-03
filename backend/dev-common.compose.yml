@@ -148,8 +148,8 @@ services:
       # For now, we just check if python3 can run. Later, we will  try to come up  
       ## test: ['CMD', 'curl', '-f', 'http://localhost']
       test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
 
@@ -228,8 +228,8 @@ services:
       # For now, we just check if python3 can run. Later, we will  try to come up  
       ## test: ['CMD', 'curl', '-f', 'http://localhost']
       test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
 
@@ -295,8 +295,8 @@ services:
       # For now, we just check if python3 can run. Later, we will  try to come up  
       ## test: ['CMD', 'curl', '-f', 'http://localhost']
       test: ['CMD', 'python3', '--version']
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
       start_period: 5s
 
