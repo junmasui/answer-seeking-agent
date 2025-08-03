@@ -1,0 +1,11 @@
+http:
+  middlewares:
+    strip-api-prefix:
+      stripPrefix:
+        prefixes:
+          - "/api"
+
+    add-api-prefix-header:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Prefix: "/api"

@@ -30,7 +30,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./display_processes.sh
+    ./scripts/display_processes.sh
     if [ $? -eq 0 ]
     then
         break
@@ -53,7 +53,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./display_processes.sh
+    ./scripts/display_processes.sh
     if [ $? -eq 0 ]
     then
         break
@@ -76,7 +76,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./display_processes.sh
+    ./scripts/display_processes.sh
     if [ $? -eq 0 ]
     then
         break

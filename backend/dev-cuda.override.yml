@@ -1,5 +1,5 @@
 services:
-  api-server:
+  dev-api-server:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:
@@ -16,7 +16,7 @@ services:
               count: 1
               capabilities: [gpu]
 
-  celery-worker:
+  dev-celery-worker:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:

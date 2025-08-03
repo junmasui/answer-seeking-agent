@@ -3,3 +3,6 @@ name: agent
 include:
   - common.compose.yml
   - backend/cuda.compose.yml
+  - backend/dev-cuda.compose.yml
+  - frontend/compose.yml
+  - frontend/dev.compose.yml

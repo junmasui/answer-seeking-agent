@@ -1,4 +1,76 @@
-include:
-  - path:
-      - alpha.compose.yml
-      - test.compose.yml
+
+services:
+  init-frontend-volumes:
+    restart: 'no'
+
+    image: 'docker.io/node:22-bookworm-slim'
+    profiles: [ init-volumes, frontend, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - frontend-home-1:/home/node/home-1
+      - frontend-node-modules-1:/home/node/node-modules-1
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        ls -ld /home/node/
+
+        for VOL in 'home-1' 'node-modules-1'
+        do
+          touch /home/node/$$VOL/.initialized
+          chown -R 1000:1000 /home/node/$$VOL
+          chmod -R 755 /home/node/$$VOL
+          ls -ld /home/node/$$VOL
+        done
+
+
+
+  webui-server:
+    depends_on:
+      init-frontend-volumes:
+        condition: service_completed_successfully
+
+    image: 'localhost/localhost/answers-frontend:node-22-bookworm'
+    profiles: [ frontend, all ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      CHOKIDAR_USEPOLLING: 'true'
+    #   - NODE_ENV=production
+    ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
+    ## traffic to go thru the reserve-proxy server at 15173.
+    # ports:
+    #   - '5173:5173'
+    networks:
+      - agent-poc
+    volumes:
+      ## - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      # # Mount the project directory to /app in the container
+      # - ./app:/app
+      # Mount important script into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      ## - ./run_webui_server.sh:/run_webui_server.sh
+      # Mounting a local area to use container-installed dependencies
+      - frontend-home-1:/home/node
+      - frontend-node-modules-1:/app/node_modules
+
+    command: [ '/run_webui_server.sh' ]
+    user: '1000:1000'
+
+volumes:
+  frontend-home-1:
+    driver: local
+  frontend-node-modules-1:
+    driver: local
+  frontend-init-signal-1:
+    driver: local

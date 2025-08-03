@@ -1,5 +1,5 @@
 services:
-  init-backend-test-volumes:
+  init-dev-backend-volumes:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
@@ -74,9 +74,9 @@ services:
     command: [ /run_dev_dependency_gate.sh ]
 
 
-  dev-fastapi-server:
+  dev-api-server:
     depends_on:
-      init-backend-test-volumes:
+      init-dev-backend-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
@@ -107,7 +107,7 @@ services:
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_fastapi_server.sh:/run_fastapi_server.sh:ro
+      - ./run_api_server.sh:/run_api_server.sh:ro
       - dev-backend-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
@@ -128,7 +128,7 @@ services:
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_fastapi_server.sh' ]
+    command: [ '/run_api_server.sh' ]
     deploy:
       resources:
         limits:
@@ -156,7 +156,7 @@ services:
 
   dev-celery-worker:
     depends_on:
-      init-backend-test-volumes:
+      init-dev-backend-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
@@ -236,7 +236,7 @@ services:
           
   dev-celery-flower:
     depends_on:
-      init-backend-test-volumes:
+      init-dev-backend-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
@@ -303,7 +303,7 @@ services:
 
   automated-test:
     depends_on:
-      init-backend-test-volumes:
+      init-dev-backend-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'

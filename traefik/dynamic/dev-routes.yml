@@ -1,0 +1,29 @@
+http:
+  routers:
+    dev-webui-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - dev-websecure
+      service: dev-webui-service
+      tls: {}
+
+    dev-api-router:
+      rule: "Host(`localhost`) && PathPrefix(`/api/`)"
+      entryPoints:
+        - dev-websecure
+      service: dev-api-service
+      middlewares:
+        - strip-api-prefix
+        - add-api-prefix-header
+      tls: {}
+
+  services:
+    dev-webui-service:
+      loadBalancer:
+        servers:
+          - url: "http://dev-webui-server:5173"
+
+    dev-api-service:
+      loadBalancer:
+        servers:
+          - url: "http://dev-api-server:8100"

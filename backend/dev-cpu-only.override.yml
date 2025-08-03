@@ -1,13 +1,14 @@
 services:
 
-  api-server:
+  dev-api-server:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
 
-  celery-worker:
+  dev-celery-worker:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
+

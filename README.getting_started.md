@@ -427,7 +427,7 @@ This will show logging output from
 the FastAPI developement-mode server.
 
 ```bash
-docker compose logs fastapi-server
+docker compose logs api-server
 ```
 
 Read the output.
@@ -436,19 +436,19 @@ and
 that the server is listening on port 8100 within the container.
 
 ```console
-fastapi-server-1  | Using Python 3.12.8 environment at: .local/venv
-fastapi-server-1  | Resolved 221 packages in 4.94s
-fastapi-server-1  | Prepared 221 packages in 2m 07s
-fastapi-server-1  | Installed 221 packages in 12.83s
+api-server-1  | Using Python 3.12.8 environment at: .local/venv
+api-server-1  | Resolved 221 packages in 4.94s
+api-server-1  | Prepared 221 packages in 2m 07s
+api-server-1  | Installed 221 packages in 12.83s
 
 ...
 
-fastapi-server-1  | Uninstalled 26 packages in 254ms
-fastapi-server-1  | Installed 32 packages in 367ms
-fastapi-server-1  | INFO:     Started server process [118]
-fastapi-server-1  | INFO:     Waiting for application startup.
-fastapi-server-1  | INFO:     Application startup complete.
-fastapi-server-1  | INFO:     Uvicorn running on http://0.0.0.0:8100 (Press CTRL+C to quit)
+api-server-1  | Uninstalled 26 packages in 254ms
+api-server-1  | Installed 32 packages in 367ms
+api-server-1  | INFO:     Started server process [118]
+api-server-1  | INFO:     Waiting for application startup.
+api-server-1  | INFO:     Application startup complete.
+api-server-1  | INFO:     Uvicorn running on http://0.0.0.0:8100 (Press CTRL+C to quit)
 ```
 
 #### Verify Celery Worker
@@ -578,7 +578,7 @@ the Celery worker,
 run the following command.
 
 ```bash
-docker compose logs -f webui-server fastapi-server celery-worker
+docker compose logs -f webui-server api-server celery-worker
 ```
 
 ## CHECK DOCKER HEALTH
@@ -594,7 +594,7 @@ The output should list all of the expected services
 
 ```console
 agent-celery-worker-1        celery-worker        Up About an hour
-agent-fastapi-server-1   fastapi-server   Up About an hour
+agent-api-server-1   api-server   Up About an hour
 agent-minio-1                minio                Up About an hour
 agent-pgvector-1             pgvector             Up About an hour
 agent-proxy-1                proxy                Up About an hour

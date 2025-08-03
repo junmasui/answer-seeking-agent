@@ -1,7 +1,6 @@
 name: agent
 
 include:
-  - frontend/compose.yml
   - grafana/compose.yml
   - jaeger/compose.yml
   - loki/compose.yml

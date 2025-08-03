@@ -65,7 +65,7 @@ RUN \
 COPY --from=parent-dir ./custom-docker-entrypoint.sh /
 COPY --from=parent-dir ./run_celery_worker.sh /
 COPY --from=parent-dir ./run_celery_flower.sh /
-COPY --from=parent-dir ./run_fastapi_server.sh /
+COPY --from=parent-dir ./run_api_server.sh /
 
 COPY --from=dependency-gate-dir ./wait_for_gate.sh /
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
@@ -73,11 +73,11 @@ COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /run_celery_worker.sh \
     && chmod a+x /run_celery_flower.sh \
-    && chmod a+x /run_fastapi_server.sh \
+    && chmod a+x /run_api_server.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_worker.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_flower.sh \
-    && chown ${USER_ID}:${GROUP_ID} /run_fastapi_server.sh
+    && chown ${USER_ID}:${GROUP_ID} /run_api_server.sh
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -97,4 +97,4 @@ USER ${USER_ID}:${GROUP_ID}
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the FastAPI development server
-CMD [ "/run_fastapi_server.sh" ]
+CMD [ "/run_api_server.sh" ]
