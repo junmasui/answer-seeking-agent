@@ -1,4 +1,0 @@
-include:
-  - path:
-      - dev-common.compose.yml
-      - dev-cpu-only.override.yml

@@ -14,7 +14,7 @@ set -o history # turn it back on
 #
 source /wait_for_gate.sh
 
-wait_for_dependency_gate /init-signal/dev-backend-gate
+wait_for_dependency_gate /init-signal/backend-autotest-gate
 
 if [ "$GPU_MODE" == "cuda12" ]; then
     nvidia-smi

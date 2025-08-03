@@ -1,24 +1,23 @@
 services:
-  init-dev-backend-volumes:
+  init-backend-autotest-volumes:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, dev-backend, all ]
+    profiles: [ init-volumes, backend-autotest, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - dev-backend-home-1:/home/python/test-home-1
-      - dev-backend-venv-1:/home/python/test-venv-1
-      - dev-backend-staging-1:/home/python/test-staging-1
-      - dev-backend-home-2:/home/python/test-home-2
-      - dev-backend-venv-2:/home/python/test-venv-2
-      - dev-backend-prometheus-2:/home/python/test-prometheus-2
-      - dev-backend-staging-2:/home/python/test-staging-2
-      - dev-backend-home-3:/home/python/test-home-3
-      - dev-backend-venv-3:/home/python/test-venv-3
-      - dev-backend-home-4:/home/python/test-home-4
-      - dev-backend-venv-4:/home/python/test-venv-4
+      - backend-autotest-home-1:/home/python/test-home-1
+      - backend-autotest-venv-1:/home/python/test-venv-1
+      - backend-autotest-staging-1:/home/python/test-staging-1
+      - backend-autotest-home-2:/home/python/test-home-2
+      - backend-autotest-venv-2:/home/python/test-venv-2
+      - backend-autotest-staging-2:/home/python/test-staging-2
+      - backend-autotest-home-3:/home/python/test-home-3
+      - backend-autotest-venv-3:/home/python/test-venv-3
+      - backend-autotest-home-4:/home/python/test-home-4
+      - backend-autotest-venv-4:/home/python/test-venv-4
 
     entrypoint: 'bash'
     command:
@@ -33,7 +32,7 @@ services:
 
         for VOL in \
           'test-home-1' 'test-venv-1' 'test-staging-1' \
-          'test-home-2' 'test-venv-2' 'test-staging-2' 'test-prometheus-2' \
+          'test-home-2' 'test-venv-2' 'test-staging-2' \
           'test-venv-3' 'test-home-3' \
           'test-venv-4' 'test-home-4'
         do
@@ -43,11 +42,11 @@ services:
           ls -ld /home/python/$$VOL
         done
 
-  dev-backend-dependency-gate:
+  backend-autotest-dependency-gate:
     restart: 'no'
 
     image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ dev-backend, infrastructure, all ]
+    profiles: [ backend-autotest, infrastructure, all ]
 
     env_file:
       - dependency-gate.env
@@ -55,14 +54,14 @@ services:
     networks:
       - agent-poc
     volumes:
-      - dev-backend-init-signal-1:/init-signal
+      - backend-autotest-init-signal-1:/init-signal
       - ./run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -74,13 +73,13 @@ services:
     command: [ /run_dev_dependency_gate.sh ]
 
 
-  dev-api-server:
+  api-server-autotest:
     depends_on:
-      init-dev-backend-volumes:
+      init-backend-autotest-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
-    profiles: [ dev-backend, all ]
+    profiles: [ backend-autotest, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -108,19 +107,19 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_api_server.sh:/run_api_server.sh:ro
-      - dev-backend-init-signal-1:/init-signal
+      - backend-autotest-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - dev-backend-home-1:/home/python
-      - dev-backend-venv-1:/app/.venv
-      - dev-backend-staging-1:/staging
+      - backend-autotest-home-1:/home/python
+      - backend-autotest-venv-1:/app/.venv
+      - backend-autotest-staging-1:/staging
     secrets:
-      - answers_dev_secrets
-      - answers_api_key_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -154,13 +153,13 @@ services:
       start_period: 5s
 
 
-  dev-celery-worker:
+  celery-worker-autotest:
     depends_on:
-      init-dev-backend-volumes:
+      init-backend-autotest-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
-    profiles: [ dev-backend, all ]
+    profiles: [ backend-autotest, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -187,20 +186,20 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_worker.sh:/run_celery_worker.sh:ro
-      - dev-backend-init-signal-1:/init-signal
+      - backend-autotest-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - dev-backend-home-2:/home/python
-      - dev-backend-venv-2:/app/.venv
-      - dev-backend-staging-2:/staging
-      - dev-backend-prometheus-2:/var/local/prometheus
+      - backend-autotest-home-2:/home/python
+      - backend-autotest-venv-2:/app/.venv
+      - backend-autotest-staging-2:/staging
+      - backend-autotest-prometheus-2:/var/local/prometheus
     secrets:
-      - answers_dev_secrets
-      - answers_api_key_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -234,13 +233,13 @@ services:
       start_period: 5s
 
           
-  dev-celery-flower:
+  celery-flower-autotest:
     depends_on:
-      init-dev-backend-volumes:
+      init-backend-autotest-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
-    profiles: [ dev-backend, all ]
+    profiles: [ backend-autotest, all ]
 
     environment:
       # Only environment variables that are important to a Docker environment
@@ -264,19 +263,19 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_flower.sh:/run_celery_flower.sh:ro
-      - dev-backend-init-signal-1:/init-signal
+      - backend-autotest-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - dev-backend-home-3:/home/python
-      - dev-backend-venv-3:/app/.venv
+      - backend-autotest-home-3:/home/python
+      - backend-autotest-venv-3:/app/.venv
     secrets:
-      - answers_dev_secrets
-      - answers_api_key_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - celery_flower_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - celery_flower_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
 
@@ -303,7 +302,7 @@ services:
 
   automated-test:
     depends_on:
-      init-dev-backend-volumes:
+      init-backend-autotest-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
@@ -331,25 +330,25 @@ services:
     networks:
       - agent-poc
     volumes:
-      - dev-backend-init-signal-1:/init-signal
+      - backend-autotest-init-signal-1:/init-signal
       # Mount the project directory to /app in the container
       - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_automated_test.sh:/run_automated_test.sh:ro
-      - dev-backend-init-signal-1:/init-signal
+      - backend-autotest-init-signal-1:/init-signal
       - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - dev-backend-home-4:/home/python
-      - dev-backend-venv-4:/app/.venv
+      - backend-autotest-home-4:/home/python
+      - backend-autotest-venv-4:/app/.venv
     secrets:
-      - answers_dev_secrets
-      - answers_api_key_dev_secrets
-      - answers_jwt_dev_secrets
-      - answers_minio_dev_secrets
-      - answers_postgres_dev_secrets
-      - celery_flower_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - celery_flower_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
       - redis_secrets
 
     user: '1000:1000'
@@ -364,27 +363,27 @@ services:
 # is started.
 #
 volumes:
-  dev-backend-init-signal-1:
+  backend-autotest-init-signal-1:
     driver: local
-  dev-backend-home-1:
+  backend-autotest-home-1:
     driver: local
-  dev-backend-venv-1:
+  backend-autotest-venv-1:
     driver: local
-  dev-backend-staging-1:
+  backend-autotest-staging-1:
     driver: local
-  dev-backend-home-2:
+  backend-autotest-home-2:
     driver: local
-  dev-backend-venv-2:
+  backend-autotest-venv-2:
     driver: local
-  dev-backend-staging-2:
+  backend-autotest-staging-2:
     driver: local
-  dev-backend-prometheus-2:
+  backend-autotest-prometheus-2:
     driver: local
-  dev-backend-home-3:
+  backend-autotest-home-3:
     driver: local
-  dev-backend-venv-3:
+  backend-autotest-venv-3:
     driver: local
-  dev-backend-home-4:
+  backend-autotest-home-4:
     driver: local
-  dev-backend-venv-4:
+  backend-autotest-venv-4:
     driver: local

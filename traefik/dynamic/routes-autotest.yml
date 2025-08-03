@@ -1,29 +1,29 @@
 http:
   routers:
-    dev-webui-router:
+    webui-autotest-router:
       rule: "Host(`localhost`)"
       entryPoints:
         - dev-websecure
-      service: dev-webui-service
+      service: webui-autotest-service
       tls: {}
 
-    dev-api-router:
+    api-autotest-router:
       rule: "Host(`localhost`) && PathPrefix(`/api/`)"
       entryPoints:
         - dev-websecure
-      service: dev-api-service
+      service: api-autotest-service
       middlewares:
         - strip-api-prefix
         - add-api-prefix-header
       tls: {}
 
   services:
-    dev-webui-service:
+    webui-autotest-service:
       loadBalancer:
         servers:
-          - url: "http://dev-webui-server:5173"
+          - url: "http://webui-server-autotest:5173"
 
-    dev-api-service:
+    api-autotest-service:
       loadBalancer:
         servers:
-          - url: "http://dev-api-server:8100"
+          - url: "http://api-server-autotest:8100"

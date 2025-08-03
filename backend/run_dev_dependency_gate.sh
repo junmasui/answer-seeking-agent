@@ -34,4 +34,4 @@ wait_for_postgres "$DATABASE_URL"
 
 
 open_dependency_gate /init-signal/backend-gate
-open_dependency_gate /init-signal/dev-backend-gate
+open_dependency_gate /init-signal/backend-autotest-gate

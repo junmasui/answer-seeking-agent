@@ -1,12 +1,12 @@
 services:
 
-  dev-api-server:
+  api-server-autotest:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu
 
-  dev-celery-worker:
+  celery-worker-autotest:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
 
     environment:

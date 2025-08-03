@@ -15,13 +15,6 @@ then
     envsubst < ./secrets.env.template > ./secrets.env
 fi
 
-# Generate the manually managed secrets file.
-if [ ! -e secrets.dev.env ]
-then
-    envsubst < ./secrets.env.template > ./secrets.dev.env
-fi
-
-
 # Auto-generate passwords that will never leave the local Docker environment.
 
 function generate_secret ()  {
@@ -68,7 +61,7 @@ DESCR="$VAR_NAME is created thru openssl rand -hex 32."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.jwt.dev.secrets.env
+SECRETS_FILE=./secrets/answers.jwt.autotest.secrets.env
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
@@ -82,7 +75,7 @@ DESCR="Answers API key."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.api-key.dev.secrets.env
+SECRETS_FILE=./secrets/answers.api-key.autotest.secrets.env
 VALUE_PREFIX=answers_dev_1_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
@@ -107,7 +100,7 @@ DESCR="Celery Flower basic auth account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/celery-flower.dev.secrets.env
+SECRETS_FILE=./secrets/celery-flower.autotest.secrets.env
 VAR_NAME=CELERY_FLOWER_USER_PASSWORD
 VALUE_PREFIX=celery_flower_dev_
 DESCR="Celery Flower basic auth account's password."
@@ -143,7 +136,7 @@ DESCR="Backend's Minio account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.minio.dev.secrets.env
+SECRETS_FILE=./secrets/answers.minio.autotest.secrets.env
 VALUE_PREFIX=backend_minio_dev_
 DESCR="Backend Test's Minio account's password."
 
@@ -168,7 +161,7 @@ DESCR="backend's Answers Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.postgres.dev.secrets.env
+SECRETS_FILE=./secrets/answers.postgres.autotest.secrets.env
 VALUE_PREFIX=answers_postgres_dev_
 DESCR="backend test's Answers Postgres account's password."
 
@@ -182,7 +175,7 @@ DESCR="backend's checkpoints Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/checkpoints.postgres.dev.secrets.env
+SECRETS_FILE=./secrets/checkpoints.postgres.autotest.secrets.env
 VALUE_PREFIX=checkpoints_postgres_dev_
 DESCR="backend test's checkpoints Postgres account's password."
 

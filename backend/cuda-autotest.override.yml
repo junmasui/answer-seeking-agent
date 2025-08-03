@@ -1,5 +1,5 @@
 services:
-  dev-api-server:
+  api-server-autotest:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:
@@ -16,7 +16,7 @@ services:
               count: 1
               capabilities: [gpu]
 
-  dev-celery-worker:
+  celery-worker-autotest:
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
 
     environment:

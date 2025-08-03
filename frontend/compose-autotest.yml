@@ -1,16 +1,16 @@
 
 services:
-  init-dev-frontend-volumes:
+  init-frontend-autotest-volumes:
     restart: 'no'
 
     image: 'docker.io/node:22-bookworm-slim'
-    profiles: [ init-volumes, dev-frontend, all ]
+    profiles: [ init-volumes, frontend-autotest, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - dev-frontend-home-1:/home/node/home-1
-      - dev-frontend-node-modules-1:/home/node/node-modules-1
+      - frontend-autotest-home-1:/home/node/home-1
+      - frontend-autotest-node-modules-1:/home/node/node-modules-1
 
     entrypoint: 'bash'
     command:
@@ -33,13 +33,13 @@ services:
 
 
 
-  dev-webui-server:
+  webui-server-autotest:
     depends_on:
-      init-dev-frontend-volumes:
+      init-frontend-autotest-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-frontend-dev:node-22-bookworm'
-    profiles: [ dev-frontend, all ]
+    profiles: [ frontend-autotest, all ]
 
     environment:
       # Only environment variables that are important to the Docker environment
@@ -62,17 +62,17 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_webui_server.sh:/run_webui_server.sh
       # Mounting a local area to use container-installed dependencies
-      - dev-frontend-home-1:/home/node
-      - dev-frontend-node-modules-1:/app/node_modules
+      - frontend-autotest-home-1:/home/node
+      - frontend-autotest-node-modules-1:/app/node_modules
 
     command: [ '/run_webui_server.sh' ]
     user: '1000:1000'
 
 
 volumes:
-  dev-frontend-home-1:
+  frontend-autotest-home-1:
     driver: local
-  dev-frontend-node-modules-1:
+  frontend-autotest-node-modules-1:
     driver: local
-  dev-frontend-init-signal-1:
+  frontend-autotest-init-signal-1:
     driver: local

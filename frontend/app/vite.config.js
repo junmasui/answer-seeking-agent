@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     allowedHosts: [
       'webui-server',
-      'dev-webui-server'
+      'webui-server-autotest'
     ],
   },
   plugins: [

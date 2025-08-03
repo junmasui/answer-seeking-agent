@@ -46,9 +46,9 @@ receivers:
           metrics_path: /metrics
 
         # FastAPI application metrics
-        - job_name: 'dev-api-server'
+        - job_name: 'api-server-autotest'
           dns_sd_configs:
-            - names: ['dev-api-server']
+            - names: ['api-server-autotest']
               type: 'A'
               port: 8100
           metrics_path: /metrics

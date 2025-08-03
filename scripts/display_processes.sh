@@ -28,7 +28,7 @@ JQ_3=$(cat << EOS
             and
             ( .Name as \$name 
               | [ "agent-webui-server-1",
-                  "agent-dev-webui-server-1",
+                  "agent-webui-server-autotest-1",
                   "agent-otel-collector-1",
                   "agent-otel-collector-docker-1",
                   "agent-automated-test-1",
@@ -59,7 +59,7 @@ JQ_2=$(cat << EOS
               and
               ( .Name as \$name 
                 | [ "agent-webui-server-1",
-                    "agent-dev-webui-server-1",
+                    "agent-webui-server-autotest-1",
                     "agent-otel-collector-1",
                     "agent-otel-collector-docker-1",
                     "agent-automated-test-1",

@@ -18,9 +18,12 @@ fi
 
 # Start up the system.
 #
-MAX_RETRIES=9
+MAX_RETRIES=15
 BACKOFF=1.5
 
+# Infrastructure
+#
+echo Launching infrastructure
 docker compose --profile infrastructure up -d
 if [ $? -ne 0 ]
 then
@@ -35,6 +38,7 @@ do
     then
         break
     fi
+    echo Give $SLEEP_TIME seconds for infrastructure
     sleep "$SLEEP_TIME"
     SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
 done
@@ -44,6 +48,9 @@ then
 fi
 
 
+# Backup
+#
+echo Launching backend
 docker compose --profile backend up -d
 if [ $? -ne 0 ]
 then
@@ -58,6 +65,7 @@ do
     then
         break
     fi
+    echo Give $SLEEP_TIME seconds for backend
     sleep "$SLEEP_TIME"
     SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
 done
@@ -66,8 +74,10 @@ then
     exit "$?"
 fi
 
-export HOST_USER_ID=$(id -u)
-docker compose up -d
+# Backup Autotest
+#
+echo Launching backend-autotest
+docker compose --profile backend-autotest up -d
 if [ $? -ne 0 ]
 then
     exit "$?"
@@ -81,6 +91,59 @@ do
     then
         break
     fi
+    echo Give $SLEEP_TIME seconds for backend-autotest
+    sleep "$SLEEP_TIME"
+    SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
+done
+if [ $? -ne 0 ]
+then
+    exit "$?"
+fi
+
+# Frontend
+#
+echo Launching frontend
+docker compose --profile frontend up -d
+if [ $? -ne 0 ]
+then
+    exit "$?"
+fi
+
+SLEEP_TIME=2
+for LOOP in $(seq 1 "$MAX_RETRIES")
+do
+    ./scripts/display_processes.sh
+    if [ $? -eq 0 ]
+    then
+        break
+    fi
+    echo Give $SLEEP_TIME seconds for frontend
+    sleep "$SLEEP_TIME"
+    SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
+done
+if [ $? -ne 0 ]
+then
+    exit "$?"
+fi
+
+# Frontend Autotest
+#
+echo Launching frontend-autotest
+docker compose --profile frontend-autotest up -d
+if [ $? -ne 0 ]
+then
+    exit "$?"
+fi
+
+SLEEP_TIME=2
+for LOOP in $(seq 1 "$MAX_RETRIES")
+do
+    ./scripts/display_processes.sh
+    if [ $? -eq 0 ]
+    then
+        break
+    fi
+    echo Give $SLEEP_TIME seconds for frontend-autotest
     sleep "$SLEEP_TIME"
     SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
 done

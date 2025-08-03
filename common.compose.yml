@@ -46,11 +46,12 @@ secrets:
 
   celery_flower_secrets:
     file: ./secrets/celery-flower.secrets.env
-  celery_flower_dev_secrets:
-    file: ./secrets/celery-flower.dev.secrets.env
+  celery_flower_autotest_secrets:
+    file: ./secrets/celery-flower.autotest.secrets.env
 
   answers_secrets:
     file: ./secrets.env
+
   answers_api_key_secrets:
     file: ./secrets/answers.api-key.secrets.env
   answers_jwt_secrets:
@@ -62,15 +63,13 @@ secrets:
   checkpoints_postgres_secrets:
     file: ./secrets/checkpoints.postgres.secrets.env
 
-  answers_dev_secrets:
-    file: ./secrets.dev.env
-  answers_api_key_dev_secrets:
-    file: ./secrets/answers.api-key.dev.secrets.env
-  answers_jwt_dev_secrets:
-    file: ./secrets/answers.jwt.dev.secrets.env
-  answers_minio_dev_secrets:
-    file: ./secrets/answers.minio.dev.secrets.env
-  answers_postgres_dev_secrets:
-    file: ./secrets/answers.postgres.dev.secrets.env
-  checkpoints_postgres_dev_secrets:
-    file: ./secrets/checkpoints.postgres.dev.secrets.env
+  answers_api_key_autotest_secrets:
+    file: ./secrets/answers.api-key.autotest.secrets.env
+  answers_jwt_autotest_secrets:
+    file: ./secrets/answers.jwt.autotest.secrets.env
+  answers_minio_autotest_secrets:
+    file: ./secrets/answers.minio.autotest.secrets.env
+  answers_postgres_autotest_secrets:
+    file: ./secrets/answers.postgres.autotest.secrets.env
+  checkpoints_postgres_autotest_secrets:
+    file: ./secrets/checkpoints.postgres.autotest.secrets.env
