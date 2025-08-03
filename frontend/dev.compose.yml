@@ -4,7 +4,7 @@ services:
     restart: 'no'
 
     image: 'docker.io/node:22-bookworm-slim'
-    profiles: [ init-volumes, frontend-test, all ]
+    profiles: [ init-volumes, dev-frontend, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -39,7 +39,7 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-frontend-dev:node-22-bookworm'
-    profiles: [ frontend-test, all ]
+    profiles: [ dev-frontend, all ]
 
     environment:
       # Only environment variables that are important to the Docker environment

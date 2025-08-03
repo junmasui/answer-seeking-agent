@@ -3,7 +3,7 @@ services:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, backend-test, all ]
+    profiles: [ init-volumes, dev-backend, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -43,11 +43,11 @@ services:
           ls -ld /home/python/$$VOL
         done
 
-  backend-test-dependency-gate:
+  dev-backend-dependency-gate:
     restart: 'no'
 
     image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ backend-test, infrastructure, all ]
+    profiles: [ dev-backend, infrastructure, all ]
 
     env_file:
       - dependency-gate.env
@@ -80,7 +80,7 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
-    profiles: [ backend-test, all ]
+    profiles: [ dev-backend, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -160,7 +160,7 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
-    profiles: [ backend-test, all ]
+    profiles: [ dev-backend, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -240,7 +240,7 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
-    profiles: [ backend-test, all ]
+    profiles: [ dev-backend, all ]
 
     environment:
       # Only environment variables that are important to a Docker environment
@@ -307,7 +307,7 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
-    profiles: [ backend-test, all ]
+    profiles: [ automated-test, all ]
 
     environment:
       DEBUGGER_LISTEN: true
