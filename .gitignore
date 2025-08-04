@@ -22,5 +22,8 @@ secrets/*
 *.key
 *.pem
 
+traefik/certs/*
+!traefik/certs/.keep
+
 # Redis configuration contains password. Should not be committed
 redis/redis.conf

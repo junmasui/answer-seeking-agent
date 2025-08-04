@@ -3,14 +3,14 @@ http:
     webui-autotest-router:
       rule: "Host(`localhost`)"
       entryPoints:
-        - dev-websecure
+        - websecure2
       service: webui-autotest-service
       tls: {}
 
     api-autotest-router:
       rule: "Host(`localhost`) && PathPrefix(`/api/`)"
       entryPoints:
-        - dev-websecure
+        - websecure2
       service: api-autotest-service
       middlewares:
         - strip-api-prefix
