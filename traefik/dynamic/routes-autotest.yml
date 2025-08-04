@@ -1,0 +1,29 @@
+http:
+  routers:
+    webui-autotest-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - websecure2
+      service: webui-autotest-service
+      tls: {}
+
+    api-autotest-router:
+      rule: "Host(`localhost`) && PathPrefix(`/api/`)"
+      entryPoints:
+        - websecure2
+      service: api-autotest-service
+      middlewares:
+        - strip-api-prefix
+        - add-api-prefix-header
+      tls: {}
+
+  services:
+    webui-autotest-service:
+      loadBalancer:
+        servers:
+          - url: "http://webui-server-autotest:5173"
+
+    api-autotest-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-server-autotest:8100"

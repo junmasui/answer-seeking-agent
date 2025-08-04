@@ -27,10 +27,12 @@ JQ_3=$(cat << EOS
   | select( .State == "running"
             and
             ( .Name as \$name 
-              | [ "agent-vite-dev-server-1",
-                  "agent-vite-integration-server-1",
-                  "agent-integration-test-1",
-                  "agent-langfuse-worker-1" ]
+              | [ "agent-webui-server-1",
+                  "agent-webui-server-autotest-1",
+                  "agent-otel-collector-1",
+                  "agent-otel-collector-docker-1",
+                  "agent-automated-test-1",
+                  "agent-loki-1" ]
               | index(\$name)
             ) )
   |  {Name: .Name, Health: .Health, State: .State, ExitCode: .ExitCode, Status: .Status}
@@ -56,10 +58,12 @@ JQ_2=$(cat << EOS
   | select( ( .State == "running"
               and
               ( .Name as \$name 
-                | [ "agent-vite-dev-server-1",
-                    "agent-vite-integration-server-1",
-                    "agent-integration-test-1",
-                    "agent-langfuse-worker-1" ]
+                | [ "agent-webui-server-1",
+                    "agent-webui-server-autotest-1",
+                    "agent-otel-collector-1",
+                    "agent-otel-collector-docker-1",
+                    "agent-automated-test-1",
+                    "agent-loki-1" ]
                 | index(\$name)
               ) ) | not )
   | select( ( .State == "exited" and .ExitCode != 0 ) | not )

@@ -7,8 +7,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   server: {
     allowedHosts: [
-      'vite-dev-server',
-      'vite-integration-server'
+      'webui-server',
+      'webui-server-autotest'
     ],
   },
   plugins: [

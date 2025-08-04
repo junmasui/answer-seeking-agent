@@ -29,18 +29,18 @@ RUN \
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 COPY --from=parent-dir ./custom-docker-entrypoint.sh /
-COPY --from=parent-dir ./run_dev_server.sh /
+COPY --from=parent-dir ./run_webui_server.sh /
 
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 
 
 
 ## RUN chmod a+x /custom-docker-entrypoint.sh \
-##     && chmod a+x /run_dev_server.sh \
+##     && chmod a+x /run_webui_server.sh \
 ##     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
-##     && chown ${USER_ID}:${GROUP_ID} /run_dev_server.sh
-RUN chmod a+x /run_dev_server.sh \
-    && chown ${USER_ID}:${GROUP_ID} /run_dev_server.sh
+##     && chown ${USER_ID}:${GROUP_ID} /run_webui_server.sh
+RUN chmod a+x /run_webui_server.sh \
+    && chown ${USER_ID}:${GROUP_ID} /run_webui_server.sh
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -61,4 +61,4 @@ USER ${USER_ID}:${GROUP_ID}
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the Vue.js development server
-CMD ["run_dev_server.sh"]
+CMD ["run_webui_server.sh"]

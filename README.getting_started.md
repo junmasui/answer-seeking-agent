@@ -427,7 +427,7 @@ This will show logging output from
 the FastAPI developement-mode server.
 
 ```bash
-docker compose logs fastapi-dev-server
+docker compose logs api-server
 ```
 
 Read the output.
@@ -436,19 +436,19 @@ and
 that the server is listening on port 8100 within the container.
 
 ```console
-fastapi-dev-server-1  | Using Python 3.12.8 environment at: .local/venv
-fastapi-dev-server-1  | Resolved 221 packages in 4.94s
-fastapi-dev-server-1  | Prepared 221 packages in 2m 07s
-fastapi-dev-server-1  | Installed 221 packages in 12.83s
+api-server-1  | Using Python 3.12.8 environment at: .local/venv
+api-server-1  | Resolved 221 packages in 4.94s
+api-server-1  | Prepared 221 packages in 2m 07s
+api-server-1  | Installed 221 packages in 12.83s
 
 ...
 
-fastapi-dev-server-1  | Uninstalled 26 packages in 254ms
-fastapi-dev-server-1  | Installed 32 packages in 367ms
-fastapi-dev-server-1  | INFO:     Started server process [118]
-fastapi-dev-server-1  | INFO:     Waiting for application startup.
-fastapi-dev-server-1  | INFO:     Application startup complete.
-fastapi-dev-server-1  | INFO:     Uvicorn running on http://0.0.0.0:8100 (Press CTRL+C to quit)
+api-server-1  | Uninstalled 26 packages in 254ms
+api-server-1  | Installed 32 packages in 367ms
+api-server-1  | INFO:     Started server process [118]
+api-server-1  | INFO:     Waiting for application startup.
+api-server-1  | INFO:     Application startup complete.
+api-server-1  | INFO:     Uvicorn running on http://0.0.0.0:8100 (Press CTRL+C to quit)
 ```
 
 #### Verify Celery Worker
@@ -507,7 +507,7 @@ This will show logging output from
 the ViteJS developement-mode server.
 
 ```bash
-docker compose logs vite-dev-server
+docker compose logs webui-server
 ```
 
 Read the output.
@@ -517,21 +517,21 @@ that the server
 is listening on post 5173 within the container.
 
 ```console
-vite-dev-server-1  | 
-vite-dev-server-1  | added 252 packages, and audited 253 packages in 7s
-vite-dev-server-1  | 
+webui-server-1  | 
+webui-server-1  | added 252 packages, and audited 253 packages in 7s
+webui-server-1  | 
 
 ...
 
-vite-dev-server-1  | > vite --host 0.0.0.0 --logLevel info
-vite-dev-server-1  | 
-vite-dev-server-1  | 
-vite-dev-server-1  |   VITE v5.4.11  ready in 885 ms
-vite-dev-server-1  | 
-vite-dev-server-1  |   ➜  Local:   http://localhost:5173/
-vite-dev-server-1  |   ➜  Network: http://172.31.1.7:5173/
-vite-dev-server-1  |   ➜  Vue DevTools: Open http://localhost:5173/__devtools__/ as a separate window
-vite-dev-server-1  |   ➜  Vue DevTools: Press Alt(⌥)+Shift(⇧)+D in App to toggle the Vue DevTools
+webui-server-1  | > vite --host 0.0.0.0 --logLevel info
+webui-server-1  | 
+webui-server-1  | 
+webui-server-1  |   VITE v5.4.11  ready in 885 ms
+webui-server-1  | 
+webui-server-1  |   ➜  Local:   http://localhost:5173/
+webui-server-1  |   ➜  Network: http://172.31.1.7:5173/
+webui-server-1  |   ➜  Vue DevTools: Open http://localhost:5173/__devtools__/ as a separate window
+webui-server-1  |   ➜  Vue DevTools: Press Alt(⌥)+Shift(⇧)+D in App to toggle the Vue DevTools
 
 ...
 ```
@@ -578,7 +578,7 @@ the Celery worker,
 run the following command.
 
 ```bash
-docker compose logs -f vite-dev-server fastapi-dev-server celery-worker
+docker compose logs -f webui-server api-server celery-worker
 ```
 
 ## CHECK DOCKER HEALTH
@@ -594,12 +594,12 @@ The output should list all of the expected services
 
 ```console
 agent-celery-worker-1        celery-worker        Up About an hour
-agent-fastapi-dev-server-1   fastapi-dev-server   Up About an hour
+agent-api-server-1   api-server   Up About an hour
 agent-minio-1                minio                Up About an hour
 agent-pgvector-1             pgvector             Up About an hour
 agent-proxy-1                proxy                Up About an hour
 agent-redis-1                redis                Up About an hour
-agent-vite-dev-server-1      vite-dev-server      Up About an hour
+agent-webui-server-1      webui-server      Up About an hour
 ```
 
 ## SECOND TIME AND ADDITIONAL START UP

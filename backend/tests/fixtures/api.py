@@ -130,7 +130,7 @@ async def api_server() -> AsyncGenerator[ApiClient, None]:
     start = time.time()
     delay = 1
 
-    api_client = ApiClient('http://fastapi-integration-server:8100')
+    api_client = ApiClient('http://api-server-autotest:8100')
     while True:
         delta = time.time() - start
         if delta > 60:

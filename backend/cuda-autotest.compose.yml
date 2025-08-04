@@ -1,0 +1,4 @@
+include:
+  - path:
+      - common-autotest.compose.yml
+      - cuda-autotest.override.yml

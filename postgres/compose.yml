@@ -37,7 +37,7 @@ services:
     healthcheck:
       # POSTGRES_USER is defined inside postgres.env
       test: [ 'CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}' ]
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 10
       start_period: 5s
@@ -87,8 +87,8 @@ services:
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
       - postgres_secrets
-      - answers_postgres_dev_secrets
-      - checkpoints_postgres_dev_secrets
+      - answers_postgres_secrets
+      - checkpoints_postgres_secrets
 
     entrypoint: [ '/bin/bash' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -96,14 +96,14 @@ services:
     command: [ /init-postgres.sh ]
 
 
-  postgres-test-init:
+  postgres-init-autotest:
 
     image: localhost/localhost/debian-slim-util:1.0
     # image: localhost/localhost/postgres:17.2-with-postgres
     profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
 
     env_file:
-      - postgres-test-init.env
+      - postgres-init.autotest.env
     networks:
       - agent-poc
     volumes:
@@ -113,8 +113,8 @@ services:
       - ./init-postgres.sh:/init-postgres.sh
     secrets:
       - postgres_secrets
-      - answers_postgres_test_secrets
-      - checkpoints_postgres_test_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
 
     entrypoint: [ '/bin/bash' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

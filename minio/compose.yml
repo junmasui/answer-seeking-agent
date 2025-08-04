@@ -85,14 +85,14 @@ services:
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_secrets
-      - answers_minio_dev_secrets
+      - answers_minio_secrets
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     command: /init-minio.sh
 
-  minio-test-init:
+  minio-init-autotest:
     restart: 'no'
 
     image: docker.io/minio/minio:RELEASE.2025-05-24T17-08-30Z-cpuv1
@@ -104,7 +104,7 @@ services:
       # to .env files for easier and more isolated management.
       MINIO_ENDPOINT_URL: http://minio:9000
     env_file:
-      - minio-test-init.env
+      - minio-init.autotest.env
     networks:
       - agent-poc
     volumes:
@@ -112,7 +112,7 @@ services:
       - ./init-minio.sh:/init-minio.sh
     secrets:
       - minio_secrets
-      - answers_minio_test_secrets
+      - answers_minio_autotest_secrets
 
     entrypoint: [ /bin/sh ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

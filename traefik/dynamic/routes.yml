@@ -1,0 +1,29 @@
+http:
+  routers:
+    webui-router:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - websecure1
+      service: webui-service
+      tls: {}
+
+    api-router:
+      rule: "Host(`localhost`) && PathPrefix(`/api/`)"
+      entryPoints:
+        - websecure1
+      service: api-service
+      middlewares:
+        - strip-api-prefix
+        - add-api-prefix-header
+      tls: {}
+
+  services:
+    webui-service:
+      loadBalancer:
+        servers:
+          - url: "http://webui-server:5173"
+
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-server:8100"

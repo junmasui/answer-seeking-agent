@@ -2,23 +2,24 @@ To add a dependency, follow these steps:
 
 Log into container:
 
-```
-docker compose --profile backend exec -it fastapi-dev-server bash
+```bash
+docker compose --profile backend exec -it api-server bash
 ```
 
 Activate the `uv` virtual environment.
-```
+
+```bash
 /custom-docker-entrypoint.sh
 ```
 
 Add the dependency
-```
+
+```bash
 uv add --no-sync mypackage
 ```
 
-Generate the requirements files
+Synchronize the environment to the specifications
 
-```
-uv pip compile pyproject.toml --extra cuda12 -o requirements-cuda12.compiled.txt --emit-index-url
-uv pip compile pyproject.toml --extra cpu -o requirements-cpu.compiled.txt --emit-index-url --index https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match --emit-index-annotation
+```bash
+uv sync  --extra cuda12 --dev
 ```

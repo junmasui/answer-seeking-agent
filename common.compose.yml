@@ -1,7 +1,6 @@
 name: agent
 
 include:
-  - frontend/compose.yml
   - grafana/compose.yml
   - jaeger/compose.yml
   - loki/compose.yml
@@ -45,33 +44,32 @@ secrets:
   grafana_secrets:
     file: ./secrets/grafana.secrets.env
 
-  celery_flower_dev_secrets:
-    file: ./secrets/celery-flower-dev.secrets.env
-  celery_flower_test_secrets:
-    file: ./secrets/celery-flower-test.secrets.env
+  celery_flower_secrets:
+    file: ./secrets/celery-flower.secrets.env
+  celery_flower_autotest_secrets:
+    file: ./secrets/celery-flower.autotest.secrets.env
 
-  answers_dev_secrets:
-    file: ./secrets-dev.env
-  answers_api_key_dev_secrets:
-    file: ./secrets/answers-dev.api-key.secrets.env
-  answers_jwt_dev_secrets:
-    file: ./secrets/answers-dev.jwt.secrets.env
-  answers_minio_dev_secrets:
-    file: ./secrets/answers-dev.minio.secrets.env
-  answers_postgres_dev_secrets:
-    file: ./secrets/answers-dev.postgres.secrets.env
-  checkpoints_postgres_dev_secrets:
-    file: ./secrets/checkpoints-dev.postgres.secrets.env
+  answers_secrets:
+    file: ./secrets.env
 
-  answers_test_secrets:
-    file: ./secrets-test.env
-  answers_api_key_test_secrets:
-    file: ./secrets/answers-test.api-key.secrets.env
-  answers_jwt_test_secrets:
-    file: ./secrets/answers-test.jwt.secrets.env
-  answers_minio_test_secrets:
-    file: ./secrets/answers-test.minio.secrets.env
-  answers_postgres_test_secrets:
-    file: ./secrets/answers-test.postgres.secrets.env
-  checkpoints_postgres_test_secrets:
-    file: ./secrets/checkpoints-test.postgres.secrets.env
+  answers_api_key_secrets:
+    file: ./secrets/answers.api-key.secrets.env
+  answers_jwt_secrets:
+    file: ./secrets/answers.jwt.secrets.env
+  answers_minio_secrets:
+    file: ./secrets/answers.minio.secrets.env
+  answers_postgres_secrets:
+    file: ./secrets/answers.postgres.secrets.env
+  checkpoints_postgres_secrets:
+    file: ./secrets/checkpoints.postgres.secrets.env
+
+  answers_api_key_autotest_secrets:
+    file: ./secrets/answers.api-key.autotest.secrets.env
+  answers_jwt_autotest_secrets:
+    file: ./secrets/answers.jwt.autotest.secrets.env
+  answers_minio_autotest_secrets:
+    file: ./secrets/answers.minio.autotest.secrets.env
+  answers_postgres_autotest_secrets:
+    file: ./secrets/answers.postgres.autotest.secrets.env
+  checkpoints_postgres_autotest_secrets:
+    file: ./secrets/checkpoints.postgres.autotest.secrets.env
