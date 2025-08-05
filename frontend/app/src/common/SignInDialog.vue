@@ -137,8 +137,6 @@ async function onConfirm() {
 
     const data = await response.json()
 
-    console.log(`DATA ${JSON.stringify(data, null, 2)}`)
-
     signedIn.value = true
 
     accessToken.value = data.access_token
