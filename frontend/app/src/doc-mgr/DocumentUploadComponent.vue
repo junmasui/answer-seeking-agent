@@ -103,7 +103,7 @@ async function onUpload() {
           const headers = {
             Accept: 'application/json'
           }
-          const auth = getAuthorization()
+          const auth = await getAuthorization()
           if (auth) {
             headers.Authorization = auth
           }
@@ -159,7 +159,7 @@ async function loadTableStats() {
     const headers = {
       Accept: 'application/json'
     }
-    const auth = getAuthorization()
+    const auth = await getAuthorization()
     if (auth) {
       headers.Authorization = auth
     }
@@ -194,7 +194,7 @@ async function loadDocumentSets() {
     const headers = {
       Accept: 'application/json'
     }
-    const auth = getAuthorization()
+    const auth = await getAuthorization()
     if (auth) {
       headers.Authorization = auth
     }
