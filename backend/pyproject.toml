@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Default template for PDM package"
 authors = [{ name = "", email = "" }]
 dependencies = [
-  ## "icecream>=2.1.4",
+  "icecream>=2.1.4",
   ## "python-dotenv>=1.0.1",
 ]
 requires-python = "==3.12.*"
@@ -30,12 +30,6 @@ cuda12 = [
   "torchaudio>=2.5.1",
   "torchvision>=0.20.0"
 ]
-
-
-
-# [build-system]
-# requires = ["hatchling"]
-# build-backend = "hatchling.build"
 
 
 [tool.ruff]
@@ -96,11 +90,13 @@ link-mode = "symlink"
 
 [tool.uv.workspace]
 members = [
+    "apps/alembic",
     "apps/core_app",
+    "apps/core_worker",
     "apps/sim_auth_app",
     "libs/core",
+    "libs/core_tasks",
     "libs/core_telemetry",
-    "libs/core_worker",
     "libs/early_init",
     "libs/log_config_monitor",
 ]
@@ -108,12 +104,14 @@ members = [
 [tool.uv.sources]
 # Define workspace dependencies
 
+migrations = { workspace = true }
 core-app = { workspace = true }
+core-worker = { workspace = true }
 sim-auth-app = { workspace = true }
 
 core = { workspace = true }
+core-tasks = { workspace = true }
 core-telemetry = { workspace = true }
-core-worker = { workspace = true }
 early-init = { workspace = true }
 log-config-monitor = { workspace = true }
 
