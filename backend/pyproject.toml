@@ -97,6 +97,7 @@ cuda12 = [
 ]
 
 
+
 # [build-system]
 # requires = ["hatchling"]
 # build-backend = "hatchling.build"
@@ -157,7 +158,32 @@ index-strategy = "unsafe-best-match"
 #
 link-mode = "symlink"
 
+
+[tool.uv.workspace]
+members = [
+    "apps/core_app",
+    "apps/sim_auth_app",
+    "libs/core",
+    "libs/core_telemetry",
+    "libs/core_worker",
+    "libs/early_init",
+    "libs/log_config_monitor",
+]
+
 [tool.uv.sources]
+# Define workspace dependencies
+
+core-app = { workspace = true }
+sim-auth-app = { workspace = true }
+
+core = { workspace = true }
+core-telemetry = { workspace = true }
+core-worker = { workspace = true }
+early-init = { workspace = true }
+log-config-monitor = { workspace = true }
+
+
+#
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cuda12", extra = "cuda12" }
