@@ -8,6 +8,11 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  "anyio>=4.9.0",
+  "celery[redis]>=5.4.0",
+  "flower>=2.0.1",
+  "psutil>=7.0.0",
+  "redis>=5.2.1",
 ]
 
 [build-system]

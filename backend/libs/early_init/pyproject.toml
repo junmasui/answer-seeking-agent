@@ -8,6 +8,8 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  # Implementation of the Debug Adapter Protocol for Python.
+  "debugpy>=1.8.13",
 ]
 
 [build-system]
