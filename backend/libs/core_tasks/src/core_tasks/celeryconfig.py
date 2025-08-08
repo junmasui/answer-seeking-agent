@@ -3,7 +3,7 @@
 
 import logging as _logging
 
-from .app_config import get_app_config as _get_app_config
+from .lib_config import get_lib_config as _get_lib_config
 
 _logger = _logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ _logger = _logging.getLogger(__name__)
 #
 
 # The backend used to store task results (tombstones)
-backend = str(_get_app_config().redis_dsn)
+backend = str(_get_lib_config().redis_dsn)
 
 #
 # Broker settings
@@ -26,7 +26,7 @@ backend = str(_get_app_config().redis_dsn)
 #
 
 # Default broker URL. Must be in the form: transport://userid:password@hostname:port/virtual_host
-broker_url = str(_get_app_config().redis_dsn)
+broker_url = str(_get_lib_config().redis_dsn)
 
 #
 # Message routing
@@ -37,7 +37,7 @@ broker_url = str(_get_app_config().redis_dsn)
 # The name of the default queue used by .apply_async if the message has no route or no
 # custom queue has been specified.
 # See https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-default-queue
-task_default_queue = _get_app_config().celery_task_queue
+task_default_queue = _get_lib_config().celery_task_queue
 
 #
 # Task results backend settings
@@ -47,7 +47,7 @@ task_default_queue = _get_app_config().celery_task_queue
 
 result_backend_transport_options = {
     # See https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html#global-keyprefix
-    'global_keyprefix': _get_app_config().celery_result_key_prefix
+    'global_keyprefix': _get_lib_config().celery_result_key_prefix
 }
 
 #

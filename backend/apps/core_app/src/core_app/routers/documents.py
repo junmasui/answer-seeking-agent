@@ -24,7 +24,7 @@ from core.public_models import (
     DocumentUploadFormData,
     IngestRequestBody,
 )
-from core_worker import ingest_task
+from core_tasks import ingest_task
 
 from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by

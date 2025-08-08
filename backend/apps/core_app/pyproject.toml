@@ -8,6 +8,9 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  "alembic>=1.15.1",
+  "alembic-postgresql-enum>=1.7.0",
+  "alembic-utils>=0.8.6",
   "fastapi[standard]>=0.115.6",
   "watchdog[watchmedo]>=6.0.0",
 ]

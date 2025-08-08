@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
 from core.signals import send_reset_data
-from core_worker import reset_data_task
+from core_tasks import reset_data_task
 
 from ..auth import Scope, User, get_scoped_current_user
 

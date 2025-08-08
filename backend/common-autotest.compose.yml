@@ -259,7 +259,7 @@ services:
       agent-poc: {}
     volumes:
       ### Mount the project directory to /app in the container
-      ##- .:/app
+      - .:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_flower.sh:/run_celery_flower.sh:ro

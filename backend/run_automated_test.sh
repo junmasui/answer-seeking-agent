@@ -23,9 +23,9 @@ fi
 # NOTE: Run compile_requirements.sh after changes to dependencies
 #
 if [ "$GPU_MODE" == "cuda12" ]; then
-    uv sync  --extra cuda12 --dev
+    uv sync  --extra cuda12 --dev --all-packages
 elif [ "$GPU_MODE" == "cpu" ]; then
-    uv sync  --extra cpu --dev
+    uv sync  --extra cpu --dev --all-packages
 else
     exit -1
 fi
@@ -63,13 +63,12 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
-PYTHONPATH=./src:./tests \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
    --no-restart-on-command-exit \
    --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
-   --directory=./src --directory=./tests  --recursive --pattern='*.py' \
+   --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
    -- \
-   pytest -v -v --capture=tee-sys tests
+   pytest -v -v --capture=tee-sys apps libs
 

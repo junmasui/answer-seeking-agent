@@ -21,7 +21,6 @@ members = [
     "core-worker",
     "early-init",
     "log-config-monitor",
-    "migrations",
     "sim-auth-app",
 ]
 
@@ -113,29 +112,29 @@ wheels = [
 
 [[package]]
 name = "alembic"
-version = "1.16.2"
+version = "1.16.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mako" },
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/35/116797ff14635e496bbda0c168987f5326a6555b09312e9b817e360d1f56/alembic-1.16.2.tar.gz", hash = "sha256:e53c38ff88dadb92eb22f8b150708367db731d58ad7e9d417c9168ab516cbed8", size = 1963563, upload-time = "2025-06-16T18:05:08.566Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/52/72e791b75c6b1efa803e491f7cbab78e963695e76d4ada05385252927e76/alembic-1.16.4.tar.gz", hash = "sha256:efab6ada0dd0fae2c92060800e0bf5c1dc26af15a10e02fb4babff164b4725e2", size = 1968161, upload-time = "2025-07-10T16:17:20.192Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/e2/88e425adac5ad887a087c38d04fe2030010572a3e0e627f8a6e8c33eeda8/alembic-1.16.2-py3-none-any.whl", hash = "sha256:5f42e9bd0afdbd1d5e3ad856c01754530367debdebf21ed6894e34af52b3bb03", size = 242717, upload-time = "2025-06-16T18:05:10.27Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/62/96b5217b742805236614f05904541000f55422a6060a90d7fd4ce26c172d/alembic-1.16.4-py3-none-any.whl", hash = "sha256:b05e51e8e82efc1abd14ba2af6392897e145930c3e0a2faf2b0da2f7f7fd660d", size = 247026, upload-time = "2025-07-10T16:17:21.845Z" },
 ]
 
 [[package]]
 name = "alembic-postgresql-enum"
-version = "1.7.0"
+version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "alembic" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f9/45/d3a66a8c7604baba5b498727539539120897fd8f931a6c89aa68ff0d7cb3/alembic_postgresql_enum-1.7.0.tar.gz", hash = "sha256:1a12a2b25f3f49440f419821888530496511573875438b6e9a08cbcb8a6f006f", size = 15637, upload-time = "2025-02-20T08:22:36.285Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/58/04/e465cb5c051fb056b7fadda7667b3e1fb4d32d7f19533e3bbff071c73788/alembic_postgresql_enum-1.8.0.tar.gz", hash = "sha256:132cd5fdc4a2a0b6498f3d89ea1c7b2a5ddc3281ddd84edae7259ec4c0a215a0", size = 15858, upload-time = "2025-07-20T12:25:50.626Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/9a/05d3f24be838af98f52e2a961f1f78f8575091198542a2add5cff7d62ef8/alembic_postgresql_enum-1.7.0-py3-none-any.whl", hash = "sha256:2a64260f3f1ed96f1bf984f55cb838e5d915693b8478b7b6ffea13cc09184ae0", size = 23516, upload-time = "2025-02-20T08:22:34.239Z" },
+    { url = "https://files.pythonhosted.org/packages/77/80/4e6e841f9a0403b520b8f28650c2cdf5905e25bd4ff403b43daec580fed3/alembic_postgresql_enum-1.8.0-py3-none-any.whl", hash = "sha256:0e62833f8d1aca2c58fa09cae1d4a52472fb32d2dde32b68c84515fffcf401d5", size = 23697, upload-time = "2025-07-20T12:25:49.048Z" },
 ]
 
 [[package]]
@@ -673,12 +672,18 @@ name = "core-app"
 version = "0.1.0"
 source = { editable = "apps/core_app" }
 dependencies = [
+    { name = "alembic" },
+    { name = "alembic-postgresql-enum" },
+    { name = "alembic-utils" },
     { name = "fastapi", extra = ["standard"] },
     { name = "watchdog", extra = ["watchmedo"] },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "alembic", specifier = ">=1.15.1" },
+    { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
+    { name = "alembic-utils", specifier = ">=0.8.6" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.6" },
     { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
 ]
@@ -767,6 +772,7 @@ dependencies = [
     { name = "flower" },
     { name = "psutil" },
     { name = "redis" },
+    { name = "watchdog", extra = ["watchmedo"] },
 ]
 
 [package.metadata]
@@ -776,6 +782,7 @@ requires-dist = [
     { name = "flower", specifier = ">=2.0.1" },
     { name = "psutil", specifier = ">=7.0.0" },
     { name = "redis", specifier = ">=5.2.1" },
+    { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
 ]
 
 [[package]]
@@ -1051,14 +1058,14 @@ wheels = [
 
 [[package]]
 name = "flupy"
-version = "1.2.2"
+version = "1.2.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e5/1f/ebbfcbaa4a117bfa2b334aac14d9d51570d0e8fee5d67426e80a80c15fc5/flupy-1.2.2.tar.gz", hash = "sha256:c28ff659b55800a26a64dd0ac1cc616355900718b87978c2db06f5e5cfb58535", size = 11971, upload-time = "2025-05-15T18:38:51.777Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fd/a5/15fe839297d761e04c4578b11013ed46353e63b44b5e42b59c2078602fa1/flupy-1.2.3.tar.gz", hash = "sha256:220b6d40dea238cd2d66784c0d4d2a5483447a48acd343385768e0c740af9609", size = 12327, upload-time = "2025-07-15T14:08:21.14Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/0c/9e3635262e8978882a76e8043fa178f907c2bb54132afaffa15ad720b6e5/flupy-1.2.2-py3-none-any.whl", hash = "sha256:df78e86a6b26ec1be558310b9dd967952d06cf138b1e8c0b422987fcd3d44ca0", size = 12143, upload-time = "2025-05-15T18:38:50.149Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/26/d4d1629f846ae2913e88f74955a3c3f41f3863e74c5fbc1cb79af9550717/flupy-1.2.3-py3-none-any.whl", hash = "sha256:be0f5a393bad2b3534697fbab17081993cd3f5817169dd3a61e8b2e0887612e6", size = 12512, upload-time = "2025-07-18T20:15:21.384Z" },
 ]
 
 [[package]]
@@ -1980,23 +1987,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
-]
-
-[[package]]
-name = "migrations"
-version = "0.1.0"
-source = { editable = "apps/alembic" }
-dependencies = [
-    { name = "alembic" },
-    { name = "alembic-postgresql-enum" },
-    { name = "alembic-utils" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", specifier = ">=1.15.1" },
-    { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
-    { name = "alembic-utils", specifier = ">=0.8.6" },
 ]
 
 [[package]]
