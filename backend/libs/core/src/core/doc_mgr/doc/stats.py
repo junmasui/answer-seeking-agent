@@ -1,10 +1,9 @@
 import logging
 
+from core_db.db_models import DbTrackedDocument
+from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_public import DocumentStats
 from sqlalchemy import func, select
-
-from ...db_models import DbTrackedDocument
-from ...providers.sql_database import DataDomain, get_sessionmaker
-from ...public_models import DocumentStats
 
 logger = logging.getLogger(__name__)
 

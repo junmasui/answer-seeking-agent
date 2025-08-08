@@ -2,11 +2,10 @@ import logging
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path, Query
-
 from core import list_document_sets
 from core.doc_mgr import add_document_set, delete_document_set, get_document_set_statistics, update_document_set
-from core.public_models import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
+from core_public import DocumentSetAddRequest, DocumentSetList, DocumentSetStats, DocumentSetUpdateRequest
+from fastapi import APIRouter, Body, Depends, Path, Query
 
 from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by

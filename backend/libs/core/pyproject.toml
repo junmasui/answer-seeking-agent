@@ -8,6 +8,8 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  "core-db",
+  "core-public",
   "blinker>=1.9.0",
   "cloudpathlib[s3]>=0.20.0",
   "httpx>=0.28.1",

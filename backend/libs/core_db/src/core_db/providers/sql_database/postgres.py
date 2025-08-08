@@ -2,13 +2,13 @@
 
 from functools import cache
 
+from core_public.status_models import PingResult, PingStatus
 from psycopg_pool import ConnectionPool
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from ...db_models.doc_mgr import DbTrackedDocument
 from ...lib_config import get_lib_config
-from ..status_models import PingResult, PingStatus
 from .base import DataDomain
 
 # Explicitly define the exported symbols: the exported symbols

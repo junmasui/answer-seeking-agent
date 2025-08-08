@@ -100,6 +100,8 @@ members = [
     "apps/core_worker",
     "apps/sim_auth_app",
     "libs/core",
+    "libs/core_db",
+    "libs/core_public",
     "libs/core_tasks",
     "libs/core_telemetry",
     "libs/early_init",
@@ -115,6 +117,8 @@ core-worker = { workspace = true }
 sim-auth-app = { workspace = true }
 
 core = { workspace = true }
+core-db = { workspace = true }
+core-public = { workspace = true }
 core-tasks = { workspace = true }
 core-telemetry = { workspace = true }
 early-init = { workspace = true }

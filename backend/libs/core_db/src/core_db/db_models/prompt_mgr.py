@@ -2,13 +2,12 @@ import datetime
 import logging
 import uuid
 
+from core_public import AgentPromptStatus, OwnerType
 from sqlalchemy import Boolean, DateTime, Integer, String, Uuid
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import current_timestamp
 
-from ..public_models import AgentPromptStatus
-from ..public_models.base import OwnerType
 from .base import Base, DbOwnerType
 
 logger = logging.getLogger(__name__)

@@ -1,6 +1,5 @@
+from core_public import SortDirection
 from pydantic.alias_generators import to_snake
-
-from core.public_models import SortDirection
 
 
 def parse_sort_by(str_val):

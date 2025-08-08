@@ -3,8 +3,6 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Optional, Union
 
-from fastapi import APIRouter, Body, Depends, Form, Path, Query, UploadFile
-
 from core import (
     delete_document,
     get_document_statistics,
@@ -15,7 +13,7 @@ from core import (
     upload_chunk,
     upload_document,
 )
-from core.public_models import (
+from core_public import (
     BulkDeleteRequestBody,
     DocumentList,
     DocumentStats,
@@ -25,6 +23,7 @@ from core.public_models import (
     IngestRequestBody,
 )
 from core_tasks import ingest_task
+from fastapi import APIRouter, Body, Depends, Form, Path, Query, UploadFile
 
 from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by

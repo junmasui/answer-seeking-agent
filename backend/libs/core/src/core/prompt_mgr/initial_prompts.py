@@ -2,8 +2,8 @@ import logging
 from pathlib import Path
 
 import yaml
+from core_public import OwnerType
 
-from ..public_models.base import OwnerType
 from ..signals import db_predefined_data_handler
 from .util import add_chat_prompt
 

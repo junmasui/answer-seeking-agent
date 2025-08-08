@@ -1,5 +1,5 @@
 from .agent import get_mermaid_graph, seek_answer
-from .db_models import event_handlers
+from .db_event_handlers import documents_startup, documents_reset
 from .doc_mgr import (
     delete_document,
     get_document_set_statistics,

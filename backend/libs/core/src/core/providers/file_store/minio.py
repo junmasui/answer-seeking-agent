@@ -2,10 +2,10 @@ import logging
 from functools import cache
 
 from cloudpathlib.s3 import S3Client, S3Path
+from core_public.status_models import PingResult, PingStatus
 
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
-from ..status_models import PingResult, PingStatus
 
 logger = logging.getLogger(__name__)
 

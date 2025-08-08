@@ -6,7 +6,7 @@ import uuid
 import pytest
 from sqlalchemy import func, select
 
-from core.public_models.doc import DocumentStatus
+from core_public import DocumentStatus
 
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)

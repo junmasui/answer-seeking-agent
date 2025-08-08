@@ -1,11 +1,11 @@
 import logging
 import uuid
 
+from core_db.db_models import DbTrackedDocument
+from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import delete
 
-from ...db_models import DbTrackedDocument
 from ...providers.file_store import get_s3_bucket
-from ...providers.sql_database import DataDomain, get_sessionmaker
 from ...providers.vector_store import delete_vectors_by_document_id
 from .query import get_documents
 

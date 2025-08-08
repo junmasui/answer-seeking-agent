@@ -1,11 +1,10 @@
 import logging
 from typing import Annotated
 
+from core import get_mermaid_graph, seek_answer
+from core_public import Answer, AnswerRequestBody
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import Response
-
-from core import get_mermaid_graph, seek_answer
-from core.public_models import Answer, AnswerRequestBody
 
 from ..auth import Scope, User, get_scoped_current_user
 

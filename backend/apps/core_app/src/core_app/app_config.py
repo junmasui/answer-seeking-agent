@@ -157,15 +157,18 @@ class ApplicationSettings(BaseSettings):
     disable_static_api_keys: bool = Field(default=False, validation_alias='DISABLE_APPLICATION_API_KEYS')
 
     static_api_key_1: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_1')
-    static_api_key_user_id_1: Optional[uuid.UUID] = Field(default=None, validation_alias='APPLICATION_API_KEY_USER_ID_1')
+    static_api_key_user_id_1: Optional[uuid.UUID] = Field(
+        default=None, validation_alias='APPLICATION_API_KEY_USER_ID_1')
     static_api_key_scope_1: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_SCOPE_1')
 
     static_api_key_2: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_2')
-    static_api_key_user_id_2: Optional[uuid.UUID] = Field(default=None, validation_alias='APPLICATION_API_KEY_USER_ID_2')
+    static_api_key_user_id_2: Optional[uuid.UUID] = Field(
+        default=None, validation_alias='APPLICATION_API_KEY_USER_ID_2')
     static_api_key_scope_2: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_SCOPE_2')
 
     static_api_key_3: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_3')
-    static_api_key_user_id_3: Optional[uuid.UUID] = Field(default=None, validation_alias='APPLICATION_API_KEY_USER_ID_3')
+    static_api_key_user_id_3: Optional[uuid.UUID] = Field(
+        default=None, validation_alias='APPLICATION_API_KEY_USER_ID_3')
     static_api_key_scope_3: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_SCOPE_3')
 
 

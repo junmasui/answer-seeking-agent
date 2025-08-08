@@ -4,6 +4,7 @@ import logging
 import uuid
 from functools import cache
 
+from core_public.status_models import PingResult, PingStatus
 from langchain_weaviate import WeaviateVectorStore
 from weaviate import connect_to_local
 from weaviate.classes.config import Configure, DataType, Property, Tokenization, VectorDistances, VectorFilterStrategy
@@ -13,7 +14,6 @@ from weaviate.classes.query import Filter
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
-from ..status_models import PingResult, PingStatus
 
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/

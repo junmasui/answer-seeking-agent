@@ -6,12 +6,12 @@ import uuid
 from functools import cache
 from typing import Optional
 
+from core_public import Answer, Citation
 from langgraph.errors import GraphRecursionError
 from langgraph.pregel import Pregel
 
 from ..doc_mgr import list_document_sets
 from ..lib_config import get_lib_config
-from ..public_models import Answer, Citation
 from .checkpointer import get_checkpointer
 from .rag_graph import get_agent_graph
 

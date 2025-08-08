@@ -1,10 +1,10 @@
 import logging
 import uuid
 
+from core_db.db_models import DbTrackedDocumentSet
+from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import delete
 
-from ...db_models import DbTrackedDocumentSet
-from ...providers.sql_database import DataDomain, get_sessionmaker
 from .query import get_document_sets
 
 logger = logging.getLogger(__name__)

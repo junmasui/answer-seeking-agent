@@ -1,9 +1,8 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-
 from core import health_check
+from fastapi import APIRouter, Depends
 
 from ..auth import Scope, User, get_scoped_current_user
 

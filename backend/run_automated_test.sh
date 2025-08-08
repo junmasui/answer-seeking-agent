@@ -60,7 +60,8 @@ set -o history # turn it back on
 #     arriving at PatternMatchingEventHandler (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/events.py#L292)
 #     then arriving at _match_path (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/utils/patterns.py#L24)
 if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
-    WATCH_DEBOUNCE_SECS=5.0
+    # Default de-bounce to 20 seconds.
+    WATCH_DEBOUNCE_SECS=20.0
 fi
 
 uv run --frozen --no-sync \

@@ -90,24 +90,35 @@ ERROR_TYPE: str = 'error.type'
 
 WRAPPED_METHODS = [
     {'module': 'core.ingest.ingest', 'object': '_ingest_one_document', 'method': None, 'span_name': '_ingest_one_document'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'add_documents', 'span_name': 'vectorstore.add_documents'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'add_documents', 'span_name': 'vectorstore.add_documents'},
     {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'search', 'span_name': 'vector.search'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search', 'span_name': 'vector.similarity_search'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search_with_score', 'span_name': 'vector.similarity_search_with_score'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search_with_relevance_scores', 'span_name': 'vector.similarity_search_with_relevance_scores'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'similarity_search', 'span_name': 'vector.similarity_search'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'similarity_search_with_score', 'span_name': 'vector.similarity_search_with_score'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'similarity_search_with_relevance_scores', 'span_name': 'vector.similarity_search_with_relevance_scores'},
 
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'similarity_search_by_vector', 'span_name': 'vector.similarity_search_by_vector'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'max_marginal_relevance_search', 'span_name': 'vector.max_marginal_relevance_search'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'max_marginal_relevance_search_by_vector', 'span_name': 'vector.max_marginal_relevance_search_by_vector'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'similarity_search_by_vector', 'span_name': 'vector.similarity_search_by_vector'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'max_marginal_relevance_search', 'span_name': 'vector.max_marginal_relevance_search'},
+    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
+        'method': 'max_marginal_relevance_search_by_vector', 'span_name': 'vector.max_marginal_relevance_search_by_vector'},
 
     {'module': 'langchain_core.retrievers', 'object': 'BaseRetriever', 'method': 'invoke', 'span_name': 'retriever.invoke'},
 
-    {'module': 'langchain_unstructured.document_loaders', 'object': 'UnstructuredLoader', 'method': 'lazy_load', 'span_name': 'unstructured_loader.lazy_load'},
-    {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader', 'method': 'lazy_load', 'span_name': 'single_doc_loader.lazy_load'},
+    {'module': 'langchain_unstructured.document_loaders', 'object': 'UnstructuredLoader',
+        'method': 'lazy_load', 'span_name': 'unstructured_loader.lazy_load'},
+    {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader',
+        'method': 'lazy_load', 'span_name': 'single_doc_loader.lazy_load'},
     {'module': 'unstructured.partition.auto', 'object': 'partition', 'method': None, 'span_name': 'unstructured.partition'},
 
-    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings', 'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
-    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings', 'method': 'embed_query', 'span_name': 'hf_embeddings_model.embed_query'},
+    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
+        'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
+    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
+        'method': 'embed_query', 'span_name': 'hf_embeddings_model.embed_query'},
 ]
 
 

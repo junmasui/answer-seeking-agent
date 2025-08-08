@@ -1,11 +1,10 @@
 import textwrap
 from functools import cache
 
+from core_public.status_models import PingResult, PingStatus
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
-
-from ..status_models import PingResult, PingStatus
 
 
 #

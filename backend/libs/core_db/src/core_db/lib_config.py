@@ -20,16 +20,12 @@ Configuration sources are processed in order of precedence:
 import os
 from functools import cache
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 from pydantic import (
-    AnyHttpUrl,
-    DirectoryPath,
     Field,
     FilePath,
-    HttpUrl,
-    NewPath,
-    RedisDsn,
+    PostgresDsn,
     StringConstraints,
 )
 
@@ -89,54 +85,13 @@ class LibrarySettings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
+    alembic_ini_path: Union[FilePath] = Field(default='./alembic.ini', validation_alias='ALEMBIC_INI_PATH')
 
-    redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
+    postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
+    postgres_vectors_schema: str = Field(default='vectors', validation_alias='POSTGRES_VECTORS_SCHEMA')
 
-
-    use_unstructured_cloud_api: bool = Field(default=False, validation_alias='USE_UNSTRUCTURED_API')
-
-    unstructured_api_key: str = Field(default='', validation_alias='UNSTRUCTURED_API_KEY')
-
-    open_api_key: Optional[str] = Field(default='', validation_alias='OPENAI_API_KEY')
-
-    presidio_analyzer_url: HttpUrl = Field(
-        default='http://presidio-analyzer:3000/analyze', validation_alias='PRESIDIO_ANALYZER_URL'
-    )
-
-    nemo_guardrails_url: HttpUrl = Field(
-        default='http://nemo-guardrails:8000/v1/chat/completions', validation_alias='NEMO_GUARDRAILS_URL'
-    )
-
-    vector_store_type: str = Field(default='weaviate', validation_alias='VECTOR_STORE_TYPE')
-
-    enable_langfuse_tracing: bool = Field(default=True, validation_alias='ENABLE_LANGFUSE_TRACKING')
-
-    chat_llm_type: LowerCaseStr = Field(default='', validation_alias='CHAT_LLM_TYPE')
-    llm_has_structured_output: bool = Field(default=False, validation_alias='LLM_HAS_STRUCTURED_OUTPUT')
-
-    weaviate_api_key: str = Field(default='', validation_alias='WEAVIATE_USER_API_KEY')
-    weaviate_host: str = Field(default='', validation_alias='WEAVIATE_HOST')
-    weaviate_http_port: int = Field(default=0, validation_alias='WEAVIATE_HTTP_PORT')
-    weaviate_grpc_port: int = Field(default=0, validation_alias='WEAVIATE_GRPC_PORT')
-
-    minio_endpoint_url: AnyHttpUrl = Field(default='', validation_alias='MINIO_ENDPOINT_URL')
-    minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
-    minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
-    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
-
-    chunk_root_dir: str = Field(default='upload_chunks')
-    doc_root_dir: str = Field(default='documents')
-
-    max_query_rewrites: int = Field(
-        default=2,
-        description='The maximum number of times a query can be rewritten.',
-        validation_alias='MAX_QUERY_REWRITES',
-    )
-    max_response_generation_attempts: int = Field(
-        default=2,
-        description='The maximum number of times a response can be regenerated.',
-        validation_alias='MAX_RESPONSE_GENERATION_TRIES',
+    postgres_checkpoints_connection_url: PostgresDsn = Field(
+        default='', validation_alias='POSTGRES_CHECKPOINTS_CONNECTION_URL'
     )
 
 

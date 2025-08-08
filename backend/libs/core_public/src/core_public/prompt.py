@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from core.public_models.base import OwnerType
+from core_public import OwnerType
 
 from .base import CamelModel
 

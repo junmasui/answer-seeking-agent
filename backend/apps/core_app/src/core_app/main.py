@@ -1,15 +1,14 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from prometheus_fastapi_instrumentator import Instrumentator
-from starlette.types import ASGIApp, Receive, Scope, Send
-
 import sim_auth_app
 from core.signals import configure_sender, send_start_up
 from core_telemetry import init_telemetry
+from fastapi import FastAPI
 from log_config_monitor import get_logging_conf_monitor
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .middlewares import ErrorLoggingMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware

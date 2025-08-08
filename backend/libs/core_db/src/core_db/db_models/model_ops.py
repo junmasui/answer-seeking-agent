@@ -1,17 +1,17 @@
 import logging
 
-from sqlalchemy import MetaData, text
-from sqlalchemy.exc import NoResultFound
-from sqlalchemy.orm import sessionmaker
-
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
+from sqlalchemy import MetaData, text
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import sessionmaker
+
+from core_db.providers.sql_database import DataDomain, get_engine
 
 from ..lib_config import get_lib_config
-from ..providers.sql_database import DataDomain, get_engine
 from .base import DECLARED_METADATA
 
 logger = logging.getLogger(__name__)

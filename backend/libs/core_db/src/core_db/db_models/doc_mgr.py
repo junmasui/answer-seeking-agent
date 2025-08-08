@@ -2,13 +2,13 @@ import datetime
 import logging
 import uuid
 
+from core_public import DocumentStatus
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Uuid
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
 
-from ..public_models import DocumentStatus
 from .base import Base
 
 logger = logging.getLogger(__name__)

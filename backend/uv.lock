@@ -16,6 +16,8 @@ members = [
     "app",
     "core",
     "core-app",
+    "core-db",
+    "core-public",
     "core-tasks",
     "core-telemetry",
     "core-worker",
@@ -605,6 +607,8 @@ source = { editable = "libs/core" }
 dependencies = [
     { name = "blinker" },
     { name = "cloudpathlib", extra = ["s3"] },
+    { name = "core-db" },
+    { name = "core-public" },
     { name = "httpx" },
     { name = "langchain" },
     { name = "langchain-anthropic" },
@@ -638,6 +642,8 @@ dependencies = [
 requires-dist = [
     { name = "blinker", specifier = ">=1.9.0" },
     { name = "cloudpathlib", extras = ["s3"], specifier = ">=0.20.0" },
+    { name = "core-db", editable = "libs/core_db" },
+    { name = "core-public", editable = "libs/core_public" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "langchain", specifier = ">=0.3.26" },
     { name = "langchain-anthropic", specifier = ">=0.3.15" },
@@ -687,6 +693,34 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.6" },
     { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
 ]
+
+[[package]]
+name = "core-db"
+version = "0.1.0"
+source = { editable = "libs/core_db" }
+dependencies = [
+    { name = "core-public" },
+    { name = "pydantic-settings" },
+    { name = "python-magic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "core-public", editable = "libs/core_public" },
+    { name = "pydantic-settings", specifier = ">=2.7.0" },
+    { name = "python-magic", specifier = ">=0.4.27" },
+]
+
+[[package]]
+name = "core-public"
+version = "0.1.0"
+source = { editable = "libs/core_public" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.11.7" }]
 
 [[package]]
 name = "core-tasks"

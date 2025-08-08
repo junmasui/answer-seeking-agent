@@ -60,10 +60,6 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
-env | sort
-
-ls .venv/bin
-
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \

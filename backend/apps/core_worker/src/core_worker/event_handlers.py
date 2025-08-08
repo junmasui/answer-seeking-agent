@@ -19,9 +19,8 @@ from uuid import UUID
 
 from celery import Celery
 from celery.signals import worker_init, worker_shutting_down
-
 from core import update_document_status
-from core.public_models import DocumentStatus
+from core_public import DocumentStatus
 
 logger = logging.getLogger(__name__)
 

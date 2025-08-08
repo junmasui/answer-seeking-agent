@@ -2,15 +2,15 @@ import logging
 import uuid
 from typing import Optional, Sequence
 
+from core_db.db_models import DbTrackedDocument
+from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_public import Document, DocumentList, SortDirection
 from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased, subqueryload
 
-from core.db_models.doc_mgr import DbTrackedDocumentSet
-from core.public_models.doc import DocumentStatus
+from core_db.db_models.doc_mgr import DbTrackedDocumentSet
+from core_public import DocumentStatus
 
-from ...db_models import DbTrackedDocument
-from ...providers.sql_database import DataDomain, get_sessionmaker
-from ...public_models import Document, DocumentList, SortDirection
 from .stats import get_document_statistics
 
 logger = logging.getLogger(__name__)

@@ -3,13 +3,11 @@ import uuid
 from contextlib import contextmanager
 from typing import Optional
 
+from core_db.db_models import DbAgentPrompt
+from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_public import AgentPromptStatus
 from sqlalchemy import and_, func, select, update
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
-
-from core.public_models.prompt import AgentPromptStatus
-
-from ...db_models import DbAgentPrompt
-from ...providers.sql_database import DataDomain, get_sessionmaker
 
 logger = logging.getLogger(__name__)
 

@@ -2,11 +2,10 @@ import logging
 import uuid
 from datetime import datetime
 
+from core_db.db_models import DbTrackedDocument
+from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_public import DocumentStatus
 from sqlalchemy import and_, select
-
-from ...db_models import DbTrackedDocument
-from ...providers.sql_database import DataDomain, get_sessionmaker
-from ...public_models import DocumentStatus
 
 logger = logging.getLogger(__name__)
 

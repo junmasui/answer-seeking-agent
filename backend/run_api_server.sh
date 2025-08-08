@@ -60,8 +60,6 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
-env | sort
-
 uv run --frozen --no-sync \
    -- \
    uv run --frozen --no-sync \

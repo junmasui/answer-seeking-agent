@@ -15,16 +15,21 @@ uvx autopep8 \
   --max-line-length=120 \
   --select=E402,E501,E502,W503,W504,W605 \
   --in-place --recursive \
-  src tests
+  apps/*/src/*/* apps/*/tests/* libs/*/src/*/* libs/*/tests/*
 
 # Sort the import statement
-uvx ruff check --select I --fix src tests
+uvx ruff check --select I --fix \
+  apps/*/src/*/* apps/*/tests/* libs/*/src/*/* libs/*/tests/*
 
 # D202 No blank lines after doc-strings
 # D213 Multi-line doc-string summary start on 2nd line
-uvx ruff check --select D202,D213 --fix src tests
+uvx ruff check --select D202,D213 --fix \
+  apps/*/src/*/* apps/*/tests/* libs/*/src/*/* libs/*/tests/*
 # One line doc-strings should be on one line
-uvx ruff check --select D200 --unsafe-fixes --fix src tests
+uvx ruff check --select D200 --unsafe-fixes --fix \
+  apps/*/src/*/* apps/*/tests/* libs/*/src/*/* libs/*/tests/*
 
-uvx ruff check --fix src tests
-uvx ruff format src tests
+uvx ruff check --fix \
+  apps/*/src/*/* apps/*/tests/* libs/*/src/*/* libs/*/tests/*
+uvx ruff format \
+  apps/*/src/*/* apps/*/tests/* libs/*/src/*/* libs/*/tests/*

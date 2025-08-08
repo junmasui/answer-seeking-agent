@@ -48,6 +48,7 @@ __all__ = [
     'DocumentSetStatus',
     'DocumentSetUpdateRequest',
     'IngestRequestBody',
+    'OwnerType',
     'AgentPrompt',
     'AgentPromptAddRequest',
     'AgentPromptList',

@@ -1,10 +1,9 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
-
 from core.signals import send_reset_data
 from core_tasks import reset_data_task
+from fastapi import APIRouter, Depends, Query
 
 from ..auth import Scope, User, get_scoped_current_user
 
