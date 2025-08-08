@@ -108,7 +108,7 @@ async def populate_doc_table(doc_table, populated_doc_set_table, api_server, sql
             'downloadTimeUtc': datetime.now(tz=timezone.utc).isoformat(timespec='minutes'),
         }
 
-        book_path = Path('./tests/data') / books[index]
+        book_path = Path(__file__).parent.parent / 'data' / books[index]
         with book_path.open('rb') as fin:
             content = fin.read()
         files = {'file': (books[index], content)}
@@ -203,10 +203,6 @@ async def ingested_doc_table(doc_table, readonly_doc_set_table, api_server, sql_
             ]
 
         logger.info('doc statuses after test: %s', [str(x) for x in statuses])
-
-        import os
-
-        os._exit()
 
     finally:
         # Clean up table after we are done.
