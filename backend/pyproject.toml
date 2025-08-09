@@ -4,77 +4,17 @@ version = "0.1.0"
 description = "Default template for PDM package"
 authors = [{ name = "", email = "" }]
 dependencies = [
-  "alembic>=1.15.1",
-  "alembic-postgresql-enum>=1.7.0",
-  "alembic-utils>=0.8.6",
-  "anyio>=4.9.0",
-  "blinker>=1.9.0",
-  "celery[redis]>=5.4.0",
-  "cloudpathlib[s3]>=0.20.0",
-  # Implementation of the Debug Adapter Protocol for Python.
-  "debugpy>=1.8.13",
-  "fastapi[standard]>=0.115.6",
-  "flower>=2.0.1",
-  "httpx>=0.28.1",
   "icecream>=2.1.4",
-  "langchain>=0.3.26",
-  "langchain-anthropic>=0.3.15",
-  "langchain-community>=0.3.26",
-  "langchain-google-genai>=2.1.6",
-  "langchain-huggingface>=0.3.0",
-  "langchain-ollama>=0.3.3",
-  "langchain-openai>=0.3.27",
-  "langchain-postgres>=0.0.12",
-  "langchain-unstructured>=0.1.6",
-  "langchain-weaviate>=0.0.5",
-  "langfuse>=2.58.2",
-  "langgraph>=0.5.1",
-  "langgraph-checkpoint-postgres>=2.0.9",
-  # Explicitly specifyin min-version. See https://github.com/nltk/nltk/issues/3266
-  "msgpack>=1.1.1",
-  "nltk>=3.9.1",
-  # onnx is implicit dependency of unstructured
-  "onnx>=1.17.0",
-  # layoutparser has incorrect versions in its metadata
-  "opentelemetry-exporter-jaeger-thrift>=1.21.0",
-  "opentelemetry-exporter-otlp>=1.34.1",
-  "opentelemetry-exporter-prometheus>=0.55b1",
-  "opentelemetry-instrumentation>=0.55b1",
-  "opentelemetry-instrumentation-botocore>=0.55b1",
-  "opentelemetry-instrumentation-celery>=0.55b1",
-  "opentelemetry-instrumentation-fastapi>=0.55b1",
-  "opentelemetry-instrumentation-google-generativeai>=0.40.14",
-  "opentelemetry-instrumentation-httpx>=0.55b1",
-  "opentelemetry-instrumentation-langchain>=0.40.14",
-  "opentelemetry-instrumentation-openai>=0.40.14",
-  "opentelemetry-instrumentation-redis>=0.55b1",
-  "opentelemetry-instrumentation-requests>=0.55b1",
-  "opentelemetry-instrumentation-sqlalchemy>=0.55b1",
-  "opentelemetry-instrumentation-system-metrics>=0.55b1",
-  "opentelemetry-instrumentation-transformers>=0.40.14",
-  "opentelemetry-instrumentation-weaviate>=0.40.14",
-  "pdfplumber>=0.11.5",
-  "prometheus-client>=0.21.1",
-  "prometheus-fastapi-instrumentator>=7.0.2",
-  "psutil>=7.0.0",
-  "psycopg[binary,pool]>=3.2.4",
-  "pydantic-settings>=2.7.0",
-  "pyjwt>=2.10.1",
-  "python-dotenv>=1.0.1",
-  "python-magic>=0.4.27",
-  "redis>=5.2.1",
-  "scikit-learn>=1.6.1",
-  "sentence-transformers>=3.4.1",
-  # OpenLLMetry for LLM-specific observability (preferred)
-  "traceloop-sdk>=0.40.14",
-  "transformers>=4.48.0",
-  "unstructured[all-docs,docx,pdf]>=0.16.13",
-  "watchdog[watchmedo]>=6.0.0",
-  "weaviate-client>=4.15.4"
+  ## "python-dotenv>=1.0.1",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = { text = "Apache-2.0" }
+
+# IMPORTANT!!
+#
+# Do not include [build-system] at the workspace level.
+#
 
 [dependency-groups]
 dev = [
@@ -95,11 +35,6 @@ cuda12 = [
   "torchaudio>=2.5.1",
   "torchvision>=0.20.0"
 ]
-
-
-# [build-system]
-# requires = ["hatchling"]
-# build-backend = "hatchling.build"
 
 
 [tool.ruff]
@@ -157,7 +92,40 @@ index-strategy = "unsafe-best-match"
 #
 link-mode = "symlink"
 
+
+[tool.uv.workspace]
+members = [
+    "apps/alembic",
+    "apps/core_app",
+    "apps/core_worker",
+    "apps/sim_auth_app",
+    "libs/core",
+    "libs/core_db",
+    "libs/core_public",
+    "libs/core_tasks",
+    "libs/core_telemetry",
+    "libs/early_init",
+    "libs/log_config_monitor",
+]
+
 [tool.uv.sources]
+# Define workspace dependencies
+
+migrations = { workspace = true }
+core-app = { workspace = true }
+core-worker = { workspace = true }
+sim-auth-app = { workspace = true }
+
+core = { workspace = true }
+core-db = { workspace = true }
+core-public = { workspace = true }
+core-tasks = { workspace = true }
+core-telemetry = { workspace = true }
+early-init = { workspace = true }
+log-config-monitor = { workspace = true }
+
+
+#
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cuda12", extra = "cuda12" }

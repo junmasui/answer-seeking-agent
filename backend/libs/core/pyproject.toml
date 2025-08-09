@@ -1,0 +1,49 @@
+[project]
+name = "core"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+  "core-db",
+  "core-public",
+  "blinker>=1.9.0",
+  "cloudpathlib[s3]>=0.20.0",
+  "httpx>=0.28.1",
+  "langchain>=0.3.26",
+  "langchain-anthropic>=0.3.15",
+  "langchain-community>=0.3.26",
+  "langchain-google-genai>=2.1.6",
+  "langchain-huggingface>=0.3.0",
+  "langchain-ollama>=0.3.3",
+  "langchain-openai>=0.3.27",
+  "langchain-postgres>=0.0.12",
+  "langchain-unstructured>=0.1.6",
+  "langchain-weaviate>=0.0.5",
+  "langfuse>=2.58.2",
+  "langgraph>=0.5.1",
+  "langgraph-checkpoint-postgres>=2.0.9",
+  # Explicitly specifyin min-version. See https://github.com/nltk/nltk/issues/3266
+  "msgpack>=1.1.1",
+  "nltk>=3.9.1",
+  # onnx is implicit dependency of unstructured
+  "onnx>=1.17.0",
+  # layoutparser has incorrect versions in its metadata
+  "pdfplumber>=0.11.5",
+  "psycopg[binary,pool]>=3.2.4",
+  "pydantic-settings>=2.7.0",
+  "python-magic>=0.4.27",
+  "redis>=5.2.1",
+  "scikit-learn>=1.6.1",
+  "sentence-transformers>=3.4.1",
+  "transformers>=4.48.0",
+  "unstructured[all-docs,docx,pdf]>=0.16.13",
+  "weaviate-client>=4.15.4"
+]
+
+[build-system]
+requires = ["uv_build>=0.8.4,<0.9.0"]
+build-backend = "uv_build"

@@ -1,0 +1,37 @@
+[project]
+name = "core-telemetry"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+  "opentelemetry-exporter-jaeger-thrift>=1.21.0",
+  "opentelemetry-exporter-otlp>=1.34.1",
+  "opentelemetry-exporter-prometheus>=0.55b1",
+  "opentelemetry-instrumentation>=0.55b1",
+  "opentelemetry-instrumentation-botocore>=0.55b1",
+  "opentelemetry-instrumentation-celery>=0.55b1",
+  "opentelemetry-instrumentation-fastapi>=0.55b1",
+  "opentelemetry-instrumentation-google-generativeai>=0.40.14",
+  "opentelemetry-instrumentation-httpx>=0.55b1",
+  "opentelemetry-instrumentation-langchain>=0.40.14",
+  "opentelemetry-instrumentation-openai>=0.40.14",
+  "opentelemetry-instrumentation-redis>=0.55b1",
+  "opentelemetry-instrumentation-requests>=0.55b1",
+  "opentelemetry-instrumentation-sqlalchemy>=0.55b1",
+  "opentelemetry-instrumentation-system-metrics>=0.55b1",
+  "opentelemetry-instrumentation-transformers>=0.40.14",
+  "opentelemetry-instrumentation-weaviate>=0.40.14",
+  "prometheus-client>=0.21.1",
+  "prometheus-fastapi-instrumentator>=7.0.2",
+  "redis>=5.2.1",
+  # OpenLLMetry for LLM-specific observability (preferred)
+  "traceloop-sdk>=0.40.14",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.4,<0.9.0"]
+build-backend = "uv_build"

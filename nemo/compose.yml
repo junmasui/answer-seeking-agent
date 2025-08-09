@@ -16,9 +16,11 @@ services:
     volumes:
       - ./config:/config
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      # - ./docker/nemoguardrails/pyproject.toml:/nemoguardrails/pyproject.toml
+      - ./docker/nemoguardrails/pyproject.toml:/nemoguardrails/pyproject.toml
       # - ./docker/nemoguardrails/poetry.lock:/nemoguardrails/poetry.lock
-      # - ./docker/nemoguardrails/nemoguardrails:/app/nemoguardrails
+      - ./docker/nemoguardrails/nemoguardrails:/app/nemoguardrails
+    secrets:
+      - answers_secrets
 
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]

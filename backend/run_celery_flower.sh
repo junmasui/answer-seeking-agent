@@ -23,9 +23,9 @@ fi
 # NOTE: Run compile_requirements.sh after changes to dependencies
 #
 if [ "$GPU_MODE" == "cuda12" ]; then
-    uv sync  --extra cuda12
+    uv sync  --extra cuda12 --all-packages
 elif [ "$GPU_MODE" == "cpu" ]; then
-    uv sync  --extra cpu
+    uv sync  --extra cpu --all-packages
 else
     exit -1
 fi
@@ -60,11 +60,10 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
-PYTHONPATH=./src \
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
    --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
-   --directory=.  --recursive --pattern='*.py;*.env' \
+   --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
    -- \
    celery --app=core_worker flower

@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.12.*"
 resolution-markers = [
     "sys_platform == 'darwin'",
@@ -10,6 +10,21 @@ conflicts = [[
     { package = "app", extra = "cpu" },
     { package = "app", extra = "cuda12" },
 ]]
+
+[manifest]
+members = [
+    "app",
+    "core",
+    "core-app",
+    "core-db",
+    "core-public",
+    "core-tasks",
+    "core-telemetry",
+    "core-worker",
+    "early-init",
+    "log-config-monitor",
+    "sim-auth-app",
+]
 
 [[package]]
 name = "accelerate"
@@ -99,29 +114,29 @@ wheels = [
 
 [[package]]
 name = "alembic"
-version = "1.16.2"
+version = "1.16.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mako" },
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/35/116797ff14635e496bbda0c168987f5326a6555b09312e9b817e360d1f56/alembic-1.16.2.tar.gz", hash = "sha256:e53c38ff88dadb92eb22f8b150708367db731d58ad7e9d417c9168ab516cbed8", size = 1963563, upload-time = "2025-06-16T18:05:08.566Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/52/72e791b75c6b1efa803e491f7cbab78e963695e76d4ada05385252927e76/alembic-1.16.4.tar.gz", hash = "sha256:efab6ada0dd0fae2c92060800e0bf5c1dc26af15a10e02fb4babff164b4725e2", size = 1968161, upload-time = "2025-07-10T16:17:20.192Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/e2/88e425adac5ad887a087c38d04fe2030010572a3e0e627f8a6e8c33eeda8/alembic-1.16.2-py3-none-any.whl", hash = "sha256:5f42e9bd0afdbd1d5e3ad856c01754530367debdebf21ed6894e34af52b3bb03", size = 242717, upload-time = "2025-06-16T18:05:10.27Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/62/96b5217b742805236614f05904541000f55422a6060a90d7fd4ce26c172d/alembic-1.16.4-py3-none-any.whl", hash = "sha256:b05e51e8e82efc1abd14ba2af6392897e145930c3e0a2faf2b0da2f7f7fd660d", size = 247026, upload-time = "2025-07-10T16:17:21.845Z" },
 ]
 
 [[package]]
 name = "alembic-postgresql-enum"
-version = "1.7.0"
+version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "alembic" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f9/45/d3a66a8c7604baba5b498727539539120897fd8f931a6c89aa68ff0d7cb3/alembic_postgresql_enum-1.7.0.tar.gz", hash = "sha256:1a12a2b25f3f49440f419821888530496511573875438b6e9a08cbcb8a6f006f", size = 15637, upload-time = "2025-02-20T08:22:36.285Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/58/04/e465cb5c051fb056b7fadda7667b3e1fb4d32d7f19533e3bbff071c73788/alembic_postgresql_enum-1.8.0.tar.gz", hash = "sha256:132cd5fdc4a2a0b6498f3d89ea1c7b2a5ddc3281ddd84edae7259ec4c0a215a0", size = 15858, upload-time = "2025-07-20T12:25:50.626Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/9a/05d3f24be838af98f52e2a961f1f78f8575091198542a2add5cff7d62ef8/alembic_postgresql_enum-1.7.0-py3-none-any.whl", hash = "sha256:2a64260f3f1ed96f1bf984f55cb838e5d915693b8478b7b6ffea13cc09184ae0", size = 23516, upload-time = "2025-02-20T08:22:34.239Z" },
+    { url = "https://files.pythonhosted.org/packages/77/80/4e6e841f9a0403b520b8f28650c2cdf5905e25bd4ff403b43daec580fed3/alembic_postgresql_enum-1.8.0-py3-none-any.whl", hash = "sha256:0e62833f8d1aca2c58fa09cae1d4a52472fb32d2dde32b68c84515fffcf401d5", size = 23697, upload-time = "2025-07-20T12:25:49.048Z" },
 ]
 
 [[package]]
@@ -204,68 +219,7 @@ name = "app"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "alembic" },
-    { name = "alembic-postgresql-enum" },
-    { name = "alembic-utils" },
-    { name = "anyio" },
-    { name = "blinker" },
-    { name = "celery", extra = ["redis"] },
-    { name = "cloudpathlib", extra = ["s3"] },
-    { name = "debugpy" },
-    { name = "fastapi", extra = ["standard"] },
-    { name = "flower" },
-    { name = "httpx" },
     { name = "icecream" },
-    { name = "langchain" },
-    { name = "langchain-anthropic" },
-    { name = "langchain-community" },
-    { name = "langchain-google-genai" },
-    { name = "langchain-huggingface" },
-    { name = "langchain-ollama" },
-    { name = "langchain-openai" },
-    { name = "langchain-postgres" },
-    { name = "langchain-unstructured" },
-    { name = "langchain-weaviate" },
-    { name = "langfuse" },
-    { name = "langgraph" },
-    { name = "langgraph-checkpoint-postgres" },
-    { name = "msgpack" },
-    { name = "nltk" },
-    { name = "onnx" },
-    { name = "opentelemetry-exporter-jaeger-thrift" },
-    { name = "opentelemetry-exporter-otlp" },
-    { name = "opentelemetry-exporter-prometheus" },
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-instrumentation-botocore" },
-    { name = "opentelemetry-instrumentation-celery" },
-    { name = "opentelemetry-instrumentation-fastapi" },
-    { name = "opentelemetry-instrumentation-google-generativeai" },
-    { name = "opentelemetry-instrumentation-httpx" },
-    { name = "opentelemetry-instrumentation-langchain" },
-    { name = "opentelemetry-instrumentation-openai" },
-    { name = "opentelemetry-instrumentation-redis" },
-    { name = "opentelemetry-instrumentation-requests" },
-    { name = "opentelemetry-instrumentation-sqlalchemy" },
-    { name = "opentelemetry-instrumentation-system-metrics" },
-    { name = "opentelemetry-instrumentation-transformers" },
-    { name = "opentelemetry-instrumentation-weaviate" },
-    { name = "pdfplumber" },
-    { name = "prometheus-client" },
-    { name = "prometheus-fastapi-instrumentator" },
-    { name = "psutil" },
-    { name = "psycopg", extra = ["binary", "pool"] },
-    { name = "pydantic-settings" },
-    { name = "pyjwt" },
-    { name = "python-dotenv" },
-    { name = "python-magic" },
-    { name = "redis" },
-    { name = "scikit-learn" },
-    { name = "sentence-transformers" },
-    { name = "traceloop-sdk" },
-    { name = "transformers" },
-    { name = "unstructured", extra = ["all-docs", "docx", "pdf"] },
-    { name = "watchdog", extra = ["watchmedo"] },
-    { name = "weaviate-client" },
 ]
 
 [package.optional-dependencies]
@@ -293,74 +247,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", specifier = ">=1.15.1" },
-    { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
-    { name = "alembic-utils", specifier = ">=0.8.6" },
-    { name = "anyio", specifier = ">=4.9.0" },
-    { name = "blinker", specifier = ">=1.9.0" },
-    { name = "celery", extras = ["redis"], specifier = ">=5.4.0" },
-    { name = "cloudpathlib", extras = ["s3"], specifier = ">=0.20.0" },
-    { name = "debugpy", specifier = ">=1.8.13" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.6" },
-    { name = "flower", specifier = ">=2.0.1" },
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "icecream", specifier = ">=2.1.4" },
-    { name = "langchain", specifier = ">=0.3.26" },
-    { name = "langchain-anthropic", specifier = ">=0.3.15" },
-    { name = "langchain-community", specifier = ">=0.3.26" },
-    { name = "langchain-google-genai", specifier = ">=2.1.6" },
-    { name = "langchain-huggingface", specifier = ">=0.3.0" },
-    { name = "langchain-ollama", specifier = ">=0.3.3" },
-    { name = "langchain-openai", specifier = ">=0.3.27" },
-    { name = "langchain-postgres", specifier = ">=0.0.12" },
-    { name = "langchain-unstructured", specifier = ">=0.1.6" },
-    { name = "langchain-weaviate", specifier = ">=0.0.5" },
-    { name = "langfuse", specifier = ">=2.58.2" },
-    { name = "langgraph", specifier = ">=0.5.1" },
-    { name = "langgraph-checkpoint-postgres", specifier = ">=2.0.9" },
-    { name = "msgpack", specifier = ">=1.1.1" },
-    { name = "nltk", specifier = ">=3.9.1" },
-    { name = "onnx", specifier = ">=1.17.0" },
-    { name = "opentelemetry-exporter-jaeger-thrift", specifier = ">=1.21.0" },
-    { name = "opentelemetry-exporter-otlp", specifier = ">=1.34.1" },
-    { name = "opentelemetry-exporter-prometheus", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-botocore", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-celery", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-google-generativeai", specifier = ">=0.40.14" },
-    { name = "opentelemetry-instrumentation-httpx", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-langchain", specifier = ">=0.40.14" },
-    { name = "opentelemetry-instrumentation-openai", specifier = ">=0.40.14" },
-    { name = "opentelemetry-instrumentation-redis", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-requests", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-sqlalchemy", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-system-metrics", specifier = ">=0.55b1" },
-    { name = "opentelemetry-instrumentation-transformers", specifier = ">=0.40.14" },
-    { name = "opentelemetry-instrumentation-weaviate", specifier = ">=0.40.14" },
-    { name = "pdfplumber", specifier = ">=0.11.5" },
-    { name = "prometheus-client", specifier = ">=0.21.1" },
-    { name = "prometheus-fastapi-instrumentator", specifier = ">=7.0.2" },
-    { name = "psutil", specifier = ">=7.0.0" },
-    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.4" },
-    { name = "pydantic-settings", specifier = ">=2.7.0" },
-    { name = "pyjwt", specifier = ">=2.10.1" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "python-magic", specifier = ">=0.4.27" },
-    { name = "redis", specifier = ">=5.2.1" },
-    { name = "scikit-learn", specifier = ">=1.6.1" },
-    { name = "sentence-transformers", specifier = ">=3.4.1" },
     { name = "torch", marker = "extra == 'cpu'", specifier = ">=2.5.1", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "app", extra = "cpu" } },
     { name = "torch", marker = "extra == 'cuda12'", specifier = ">=2.5.1", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "app", extra = "cuda12" } },
     { name = "torchaudio", marker = "extra == 'cpu'", specifier = ">=2.5.1", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "app", extra = "cpu" } },
     { name = "torchaudio", marker = "extra == 'cuda12'", specifier = ">=2.5.1", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "app", extra = "cuda12" } },
     { name = "torchvision", marker = "extra == 'cpu'", specifier = ">=0.20.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "app", extra = "cpu" } },
     { name = "torchvision", marker = "extra == 'cuda12'", specifier = ">=0.20.0", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "app", extra = "cuda12" } },
-    { name = "traceloop-sdk", specifier = ">=0.40.14" },
-    { name = "transformers", specifier = ">=4.48.0" },
-    { name = "unstructured", extras = ["all-docs", "docx", "pdf"], specifier = ">=0.16.13" },
-    { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
-    { name = "weaviate-client", specifier = ">=4.15.4" },
 ]
 provides-extras = ["cpu", "cuda12"]
 
@@ -708,6 +601,225 @@ wheels = [
 ]
 
 [[package]]
+name = "core"
+version = "0.1.0"
+source = { editable = "libs/core" }
+dependencies = [
+    { name = "blinker" },
+    { name = "cloudpathlib", extra = ["s3"] },
+    { name = "core-db" },
+    { name = "core-public" },
+    { name = "httpx" },
+    { name = "langchain" },
+    { name = "langchain-anthropic" },
+    { name = "langchain-community" },
+    { name = "langchain-google-genai" },
+    { name = "langchain-huggingface" },
+    { name = "langchain-ollama" },
+    { name = "langchain-openai" },
+    { name = "langchain-postgres" },
+    { name = "langchain-unstructured" },
+    { name = "langchain-weaviate" },
+    { name = "langfuse" },
+    { name = "langgraph" },
+    { name = "langgraph-checkpoint-postgres" },
+    { name = "msgpack" },
+    { name = "nltk" },
+    { name = "onnx" },
+    { name = "pdfplumber" },
+    { name = "psycopg", extra = ["binary", "pool"] },
+    { name = "pydantic-settings" },
+    { name = "python-magic" },
+    { name = "redis" },
+    { name = "scikit-learn" },
+    { name = "sentence-transformers" },
+    { name = "transformers" },
+    { name = "unstructured", extra = ["all-docs", "docx", "pdf"] },
+    { name = "weaviate-client" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "blinker", specifier = ">=1.9.0" },
+    { name = "cloudpathlib", extras = ["s3"], specifier = ">=0.20.0" },
+    { name = "core-db", editable = "libs/core_db" },
+    { name = "core-public", editable = "libs/core_public" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "langchain", specifier = ">=0.3.26" },
+    { name = "langchain-anthropic", specifier = ">=0.3.15" },
+    { name = "langchain-community", specifier = ">=0.3.26" },
+    { name = "langchain-google-genai", specifier = ">=2.1.6" },
+    { name = "langchain-huggingface", specifier = ">=0.3.0" },
+    { name = "langchain-ollama", specifier = ">=0.3.3" },
+    { name = "langchain-openai", specifier = ">=0.3.27" },
+    { name = "langchain-postgres", specifier = ">=0.0.12" },
+    { name = "langchain-unstructured", specifier = ">=0.1.6" },
+    { name = "langchain-weaviate", specifier = ">=0.0.5" },
+    { name = "langfuse", specifier = ">=2.58.2" },
+    { name = "langgraph", specifier = ">=0.5.1" },
+    { name = "langgraph-checkpoint-postgres", specifier = ">=2.0.9" },
+    { name = "msgpack", specifier = ">=1.1.1" },
+    { name = "nltk", specifier = ">=3.9.1" },
+    { name = "onnx", specifier = ">=1.17.0" },
+    { name = "pdfplumber", specifier = ">=0.11.5" },
+    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.4" },
+    { name = "pydantic-settings", specifier = ">=2.7.0" },
+    { name = "python-magic", specifier = ">=0.4.27" },
+    { name = "redis", specifier = ">=5.2.1" },
+    { name = "scikit-learn", specifier = ">=1.6.1" },
+    { name = "sentence-transformers", specifier = ">=3.4.1" },
+    { name = "transformers", specifier = ">=4.48.0" },
+    { name = "unstructured", extras = ["all-docs", "docx", "pdf"], specifier = ">=0.16.13" },
+    { name = "weaviate-client", specifier = ">=4.15.4" },
+]
+
+[[package]]
+name = "core-app"
+version = "0.1.0"
+source = { editable = "apps/core_app" }
+dependencies = [
+    { name = "alembic" },
+    { name = "alembic-postgresql-enum" },
+    { name = "alembic-utils" },
+    { name = "fastapi", extra = ["standard"] },
+    { name = "watchdog", extra = ["watchmedo"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", specifier = ">=1.15.1" },
+    { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
+    { name = "alembic-utils", specifier = ">=0.8.6" },
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.6" },
+    { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
+]
+
+[[package]]
+name = "core-db"
+version = "0.1.0"
+source = { editable = "libs/core_db" }
+dependencies = [
+    { name = "core-public" },
+    { name = "pydantic-settings" },
+    { name = "python-magic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "core-public", editable = "libs/core_public" },
+    { name = "pydantic-settings", specifier = ">=2.7.0" },
+    { name = "python-magic", specifier = ">=0.4.27" },
+]
+
+[[package]]
+name = "core-public"
+version = "0.1.0"
+source = { editable = "libs/core_public" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.11.7" }]
+
+[[package]]
+name = "core-tasks"
+version = "0.1.0"
+source = { editable = "libs/core_tasks" }
+dependencies = [
+    { name = "anyio" },
+    { name = "celery", extra = ["redis"] },
+    { name = "flower" },
+    { name = "psutil" },
+    { name = "redis" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4.9.0" },
+    { name = "celery", extras = ["redis"], specifier = ">=5.4.0" },
+    { name = "flower", specifier = ">=2.0.1" },
+    { name = "psutil", specifier = ">=7.0.0" },
+    { name = "redis", specifier = ">=5.2.1" },
+]
+
+[[package]]
+name = "core-telemetry"
+version = "0.1.0"
+source = { editable = "libs/core_telemetry" }
+dependencies = [
+    { name = "opentelemetry-exporter-jaeger-thrift" },
+    { name = "opentelemetry-exporter-otlp" },
+    { name = "opentelemetry-exporter-prometheus" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-botocore" },
+    { name = "opentelemetry-instrumentation-celery" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-google-generativeai" },
+    { name = "opentelemetry-instrumentation-httpx" },
+    { name = "opentelemetry-instrumentation-langchain" },
+    { name = "opentelemetry-instrumentation-openai" },
+    { name = "opentelemetry-instrumentation-redis" },
+    { name = "opentelemetry-instrumentation-requests" },
+    { name = "opentelemetry-instrumentation-sqlalchemy" },
+    { name = "opentelemetry-instrumentation-system-metrics" },
+    { name = "opentelemetry-instrumentation-transformers" },
+    { name = "opentelemetry-instrumentation-weaviate" },
+    { name = "prometheus-client" },
+    { name = "prometheus-fastapi-instrumentator" },
+    { name = "redis" },
+    { name = "traceloop-sdk" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "opentelemetry-exporter-jaeger-thrift", specifier = ">=1.21.0" },
+    { name = "opentelemetry-exporter-otlp", specifier = ">=1.34.1" },
+    { name = "opentelemetry-exporter-prometheus", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-botocore", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-celery", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-google-generativeai", specifier = ">=0.40.14" },
+    { name = "opentelemetry-instrumentation-httpx", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-langchain", specifier = ">=0.40.14" },
+    { name = "opentelemetry-instrumentation-openai", specifier = ">=0.40.14" },
+    { name = "opentelemetry-instrumentation-redis", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-requests", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-sqlalchemy", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-system-metrics", specifier = ">=0.55b1" },
+    { name = "opentelemetry-instrumentation-transformers", specifier = ">=0.40.14" },
+    { name = "opentelemetry-instrumentation-weaviate", specifier = ">=0.40.14" },
+    { name = "prometheus-client", specifier = ">=0.21.1" },
+    { name = "prometheus-fastapi-instrumentator", specifier = ">=7.0.2" },
+    { name = "redis", specifier = ">=5.2.1" },
+    { name = "traceloop-sdk", specifier = ">=0.40.14" },
+]
+
+[[package]]
+name = "core-worker"
+version = "0.1.0"
+source = { editable = "apps/core_worker" }
+dependencies = [
+    { name = "anyio" },
+    { name = "celery", extra = ["redis"] },
+    { name = "flower" },
+    { name = "psutil" },
+    { name = "redis" },
+    { name = "watchdog", extra = ["watchmedo"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4.9.0" },
+    { name = "celery", extras = ["redis"], specifier = ">=5.4.0" },
+    { name = "flower", specifier = ">=2.0.1" },
+    { name = "psutil", specifier = ">=7.0.0" },
+    { name = "redis", specifier = ">=5.2.1" },
+    { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
+]
+
+[[package]]
 name = "cryptography"
 version = "45.0.5"
 source = { registry = "https://pypi.org/simple" }
@@ -818,6 +930,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/b5/4a/263763cb2ba3816dd
 wheels = [
     { url = "https://files.pythonhosted.org/packages/68/1b/e0a87d256e40e8c888847551b20a017a6b98139178505dc7ffb96f04e954/dnspython-2.7.0-py3-none-any.whl", hash = "sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86", size = 313632, upload-time = "2024-10-05T20:14:57.687Z" },
 ]
+
+[[package]]
+name = "early-init"
+version = "0.1.0"
+source = { editable = "libs/early_init" }
+dependencies = [
+    { name = "debugpy" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "debugpy", specifier = ">=1.8.13" }]
 
 [[package]]
 name = "effdet"
@@ -969,14 +1092,14 @@ wheels = [
 
 [[package]]
 name = "flupy"
-version = "1.2.2"
+version = "1.2.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e5/1f/ebbfcbaa4a117bfa2b334aac14d9d51570d0e8fee5d67426e80a80c15fc5/flupy-1.2.2.tar.gz", hash = "sha256:c28ff659b55800a26a64dd0ac1cc616355900718b87978c2db06f5e5cfb58535", size = 11971, upload-time = "2025-05-15T18:38:51.777Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fd/a5/15fe839297d761e04c4578b11013ed46353e63b44b5e42b59c2078602fa1/flupy-1.2.3.tar.gz", hash = "sha256:220b6d40dea238cd2d66784c0d4d2a5483447a48acd343385768e0c740af9609", size = 12327, upload-time = "2025-07-15T14:08:21.14Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/0c/9e3635262e8978882a76e8043fa178f907c2bb54132afaffa15ad720b6e5/flupy-1.2.2-py3-none-any.whl", hash = "sha256:df78e86a6b26ec1be558310b9dd967952d06cf138b1e8c0b422987fcd3d44ca0", size = 12143, upload-time = "2025-05-15T18:38:50.149Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/26/d4d1629f846ae2913e88f74955a3c3f41f3863e74c5fbc1cb79af9550717/flupy-1.2.3-py3-none-any.whl", hash = "sha256:be0f5a393bad2b3534697fbab17081993cd3f5817169dd3a61e8b2e0887612e6", size = 12512, upload-time = "2025-07-18T20:15:21.384Z" },
 ]
 
 [[package]]
@@ -1773,6 +1896,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/20/c8/8d2e0fc438d2d3d8d
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1d/33/a3337eb70d795495a299a1640d7a75f17fb917155a64309b96106e7b9452/langsmith-0.4.4-py3-none-any.whl", hash = "sha256:014c68329bd085bd6c770a6405c61bb6881f82eb554ce8c4d1984b0035fd1716", size = 367687, upload-time = "2025-06-27T19:20:33.839Z" },
 ]
+
+[[package]]
+name = "log-config-monitor"
+version = "0.1.0"
+source = { editable = "libs/log_config_monitor" }
 
 [[package]]
 name = "lxml"
@@ -4024,6 +4152,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de", size = 10310, upload-time = "2023-10-24T04:13:40.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686", size = 9755, upload-time = "2023-10-24T04:13:38.866Z" },
+]
+
+[[package]]
+name = "sim-auth-app"
+version = "0.1.0"
+source = { editable = "apps/sim_auth_app" }
+dependencies = [
+    { name = "fastapi", extra = ["standard"] },
+    { name = "pyjwt" },
+    { name = "watchdog", extra = ["watchmedo"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.6" },
+    { name = "pyjwt", specifier = ">=2.10.1" },
+    { name = "watchdog", extras = ["watchmedo"], specifier = ">=6.0.0" },
 ]
 
 [[package]]

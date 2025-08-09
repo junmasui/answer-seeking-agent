@@ -163,6 +163,14 @@ async function loadTableStats() {
     if (auth) {
       headers.Authorization = auth
     }
+  else {
+    // Return "mock" data. Reduces unauthorized-access errors seen on the API server.
+    return {
+        totalItems: 0,
+        items: [],
+        tableUpdatedTime: '1970-01-01T00:00:00Z'
+    }
+  }
 
     const response = await fetch('/api/document-sets/stats', {
       method: 'GET',
@@ -197,6 +205,14 @@ async function loadDocumentSets() {
     const auth = await getAuthorization()
     if (auth) {
       headers.Authorization = auth
+    }
+    else {
+        // Return "mock" data. Reduces unauthorized-access errors seen on the API server.
+        return {
+            totalItems: 0,
+            items: [],
+            tableUpdatedTime: '1970-01-01T00:00:00Z'
+        }
     }
 
     const params = new URLSearchParams({})
