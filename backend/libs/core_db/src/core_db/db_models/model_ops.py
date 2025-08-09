@@ -83,7 +83,7 @@ def get_current_version(engine):
     session_maker = sessionmaker(bind=engine)
     with session_maker() as session:
         try:
-            if not session.execute(
+            result = session.execute(
                 text("""SELECT EXISTS (
                     SELECT FROM
                         information_schema.tables
@@ -91,8 +91,21 @@ def get_current_version(engine):
                         table_schema = 'answers' AND
                         table_name = 'alembic_version'
                 );""")
-            ):
+            )
+            if not result:
                 return None
+            rowcount = result.rowcount
+            if rowcount == 0:
+                # Table does not exist if it is not in information_schema.
+                return None
+            elif rowcount > 0:
+                # Something is horribly wrong if there are more than 1 row in the result.
+                return None
+            # Get first column of first row.
+            table_exists = result.scalar()
+            if not table_exists:
+                return None
+
             # There is not a lot of good official documentation at https://alembic.sqlalchemy.org/
             # regarding the table `alembic_version`. Specifically, there is a lack of documentation
             # regarding the number of records in the table `alembic_version`
@@ -101,7 +114,18 @@ def get_current_version(engine):
             # where the examples show the trace:
             #  * SELECT alembic_version.version_num FROM alembic_version
             # The lack of a WHERE clause suggests that this table has only one record.
-            return session.execute(text('SELECT version_num FROM alembic_version')).scalar()
+            result = session.execute(text('SELECT version_num FROM alembic_version'))
+            rowcount = result.rowcount
+            if rowcount == 0:
+                # No migrations if the table is empty.
+                return None
+            elif rowcount > 0:
+                # Something is horribly wrong in Alembic if there are more than 1 row in the result.
+                return None
+
+            # Get first column of first row.
+            current_version = result.scalar()
+            return current_version
         except NoResultFound:
             return None  # No migrations applied
 

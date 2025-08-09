@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  "core-db",
   "alembic>=1.15.1",
   "alembic-postgresql-enum>=1.7.0",
   "alembic-utils>=0.8.6",

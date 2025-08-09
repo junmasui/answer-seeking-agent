@@ -15,7 +15,7 @@ from alembic import context
 from core.lib_config import get_lib_config
 
 # This import will load our declared schema
-import core.db_models
+import core_db.db_models
 
 db_url = get_lib_config().postgres_answers_connection_url
 
@@ -25,7 +25,7 @@ config = context.config
 
 config.set_main_option('sqlalchemy.url', str(db_url))
 
-target_metadata = core.db_models.DECLARED_METADATA
+target_metadata = core_db.db_models.DECLARED_METADATA
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
