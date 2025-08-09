@@ -12,7 +12,7 @@ from sqlalchemy import inspect
 from alembic import context
 
 # Access to our configuration .. which includes the Postgres connection string
-from core.lib_config import get_lib_config
+from core_db.lib_config import get_lib_config
 
 # This import will load our declared schema
 import core_db.db_models
