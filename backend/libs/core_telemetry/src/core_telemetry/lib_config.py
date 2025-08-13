@@ -94,13 +94,19 @@ class TelemetrySettings(BaseModel):
     enable_tracing: Annotated[
         bool,
         Field(
-            default=True, validation_alias='OTEL_ENABLE_TRACING', description='Enable or disable OpenTelemetry tracing.'
+            default=True, validation_alias='MY_OTEL_ENABLE_TRACING', description='Enable or disable OpenTelemetry tracing.'
         ),
     ]
     enable_metrics: Annotated[
         bool,
         Field(
-            default=True, validation_alias='OTEL_ENABLE_METRICS', description='Enable or disable OpenTelemetry metrics.'
+            default=True, validation_alias='MY_OTEL_ENABLE_METRICS', description='Enable or disable OpenTelemetry metrics.'
+        ),
+    ]
+    enable_instrumentation: Annotated[
+        bool,
+        Field(
+            default=False, validation_alias='MY_OTEL_ENABLE_INSTRUMENT', description='Enable or disable OpenTelemetry instrumentation.'
         ),
     ]
     trace_sample_rate: Annotated[
@@ -179,3 +185,14 @@ def get_lib_config():
 
     """
     return LibrarySettings()
+
+def get_telemetry_config():
+    """
+    Retrieve telemetry configuration from environment variables.
+
+    Returns:
+        dict: Dictionary containing telemetry configuration values such as service name,
+        version, environment, endpoints, and feature flags.
+
+    """
+    return get_lib_config().otel

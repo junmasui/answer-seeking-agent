@@ -10,7 +10,7 @@ import time
 from contextlib import contextmanager
 from typing import Optional
 
-from .metrics import get_meter
+from ..metrics import get_meter
 
 logger = logging.getLogger(__name__)
 

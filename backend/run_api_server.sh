@@ -61,10 +61,19 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
 fi
 
 uv run --frozen --no-sync \
-   -- \
-   uv run --frozen --no-sync \
-   watchmedo auto-restart \
-   --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
-   --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
-   -- \
-   uvicorn core_app:app --host 0.0.0.0 --port 8100
+    -- \
+    uv run --frozen --no-sync \
+    watchmedo auto-restart \
+        --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
+        --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
+    -- \
+    opentelemetry-instrument \
+        --distro custom_otel \
+        --configurator custom_otel \
+    uvicorn core_app:app --host 0.0.0.0 --port 8100
+
+
+#    opentelemetry-instrument \
+#      --distro custom_otel \
+#      --configurator custom_otel \
+#    uvicorn core_app:app --host 0.0.0.0 --port 8100

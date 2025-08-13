@@ -16,12 +16,31 @@ from langchain_core.documents import Document
 from langchain_core.outputs import ChatGeneration, Generation, LLMResult
 from opentelemetry.trace import Status, StatusCode
 
-from .lib_config import get_lib_config
-from .metrics import get_meter
-from .span_tracker import SpanTracker, get_span_tracker
+from ..lib_config import get_lib_config
+from ..metrics import get_meter
+from ..tracing.span_tracker import SpanTracker, get_span_tracker
 
 logger = logging.getLogger(__name__)
 
+def get_callback_handler(session_id: Optional[str] = None, user_id: Optional[str] = None, **kwargs):
+    """
+    Get appropriate callback handler for LangChain integration.
+
+    Returns:
+        Callback handler or None (if using auto-instrumentation)
+
+    """
+    # if not _telemetry_initialized:
+    #     raise RuntimeError()
+
+    # if _telemetry_method == 'openllmetry':
+    #     from .openllmetry import get_opentelemetry_callback_handler
+
+    #     return get_opentelemetry_callback_handler(session_id=session_id, user_id=user_id, **kwargs)
+    # else:
+    #     from .langchain_handler import OpenTelemetryCallbackHandler
+
+    return OpenTelemetryCallbackHandler(session_id=session_id, user_id=user_id, **kwargs)
 
 class OpenTelemetryCallbackHandler(BaseCallbackHandler):
     """

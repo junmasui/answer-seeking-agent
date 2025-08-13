@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from functools import cache
 
 import opentelemetry.trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -11,7 +12,6 @@ from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
 logger = logging.getLogger(__name__)
 
 _tracer: Optional[opentelemetry.trace.Tracer] = None
-
 
 def get_tracer() -> opentelemetry.trace.Tracer:
     """

@@ -68,6 +68,13 @@ def configure_logging():
         logger2.propagate = False
     logger2.setLevel(logging.INFO)
 
+    logger2 = logging.getLogger('core_telemetry')
+    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger2.handlers)
+    if not has_rich_handler:
+        logger2.addHandler(rich_handler)
+        logger2.propagate = False
+    logger2.setLevel(logging.INFO)
+
     logger = logging.getLogger()
     has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger.handlers)
     if not has_rich_handler:
@@ -80,7 +87,7 @@ def configure_logging():
     if not has_rich_handler:
         sa_logger.addHandler(rich_handler)
         sa_logger.propagate = False
-    sa_logger.setLevel(logging.INFO)  # Use DEBUG for SQL + params
+    sa_logger.setLevel(logging.WARNING)  # .setLevel(logging.INFO)  # Use DEBUG for SQL + params
 
     # Enable HTTP request logging for requests (urllib3)
     urllib3_logger = logging.getLogger('urllib3.connectionpool')

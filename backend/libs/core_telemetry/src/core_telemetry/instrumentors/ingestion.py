@@ -14,7 +14,7 @@ from uuid import UUID
 from opentelemetry.trace import Status, StatusCode
 
 from .llm_metrics import get_llm_metrics
-from .tracing import get_tracer
+from ..tracing import get_tracer
 
 logger = logging.getLogger(__name__)
 

@@ -25,11 +25,11 @@ import logging
 from opentelemetry import metrics, trace
 from opentelemetry.sdk.resources import Resource
 
-from core_telemetry.instrumentation import setup_auto_instrumentation
 from core_telemetry.metrics import setup_metrics
 from core_telemetry.tracing import setup_tracing
 
-from .lib_config import get_lib_config
+from ..lib_config import get_telemetry_config
+from .instrumentation import setup_auto_instrumentation
 
 logger = logging.getLogger(__name__)
 
@@ -37,16 +37,6 @@ logger = logging.getLogger(__name__)
 _custom_telemetry_initialized = False
 
 
-def get_telemetry_config():
-    """
-    Retrieve telemetry configuration from environment variables.
-
-    Returns:
-        dict: Dictionary containing telemetry configuration values such as service name,
-        version, environment, endpoints, and feature flags.
-
-    """
-    return get_lib_config().otel
 
 
 def initialize_custom_telemetry(**kwargs):
@@ -92,7 +82,8 @@ def initialize_custom_telemetry(**kwargs):
         setup_metrics(resource, config)
 
     # Auto-instrument common libraries
-    setup_auto_instrumentation()
+    if config['enable_instrumentation']:
+        setup_auto_instrumentation()
 
     _custom_telemetry_initialized = True
     logger.info('Custom OpenTelemetry initialized successfully')
