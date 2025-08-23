@@ -1,16 +1,13 @@
+import os
+from opentelemetry.distro import OpenTelemetryConfigurator
 from opentelemetry.sdk.resources import Resource
 import logging
 
 from .lib_config import get_telemetry_config
-from .instrumentors import setup_auto_instrumentation
-
-from .lib_config import get_telemetry_config
-from .metrics import setup_metrics
-from .tracing import setup_tracing
 
 logger = logging.getLogger(__name__)
 
-class CustomConfigurator:
+class CustomConfigurator(OpenTelemetryConfigurator):
     """Custom configurator for OpenTelemetry components.
     
     A configurator is a more focused component that handles specific configuration aspects of the
@@ -21,8 +18,8 @@ class CustomConfigurator:
     def configure(self, **kwargs):
         """Configure OpenTelemetry SDK with custom settings."""
 
-        logger.info('CONFIGURATOR CONFIGURE %r', kwargs)
-        print('CONFIGURATOR CONFIGURE %r', kwargs)
+        logger.info('CONFIGURING CONFIGURATOR %s\n%s', type(self), kwargs)
+        print('CONFIGURING CONFIGURATOR %s\n%s' % (type(self), kwargs))
         
         # Create resource with service information
         config = get_telemetry_config().model_dump(mode='python')
@@ -36,21 +33,28 @@ class CustomConfigurator:
             }
         )
 
+        for k in sorted(os.environ.keys()):
+            if k.startswith('OTEL_'):
+                v = os.environ[k]
+                logger.info('%s: %s', k, v)
+                print(f'{k}: {v}')
+
+        super().configure(**kwargs)
 
         # Initialize tracing
-        if config['enable_tracing']:
-            setup_tracing(resource, config)
+        # if config['enable_tracing']:
+        #     setup_tracing(resource, config)
 
-            print('CONFIGURATOR CONFIGURED TRACING')
+        #     print('CONFIGURATOR CONFIGURED TRACING')
 
-        # Initialize metrics
-        if config['enable_metrics']:
-            setup_metrics(resource, config)
+        # # Initialize metrics
+        # if config['enable_metrics']:
+        #     setup_metrics(resource, config)
 
-            print('CONFIGURATOR CONFIGURED METRICS')
+        #     print('CONFIGURATOR CONFIGURED METRICS')
 
-        setup_auto_instrumentation()
-        print('CONFIGURATOR CONFIGURED INSTRUMENTATION')
+        # setup_auto_instrumentation()
+        # print('CONFIGURATOR CONFIGURED INSTRUMENTATION')
         # resource = Resource.create(
         #     {
         #         'service.name': config['service_name'],

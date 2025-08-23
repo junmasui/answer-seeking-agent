@@ -26,7 +26,10 @@ level = "DEBUG"
 [loggers."celery.worker"]
 level = "DEBUG"
 
-[loggers."core_telemetry"]
+[loggers."core_telemetry_distro"]
+level = "DEBUG"
+
+[loggers."core_telemetry_instrumentation"]
 level = "DEBUG"
 
 [loggers.fastapi]

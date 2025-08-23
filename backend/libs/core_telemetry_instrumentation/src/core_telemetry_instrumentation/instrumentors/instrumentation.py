@@ -1,12 +1,12 @@
 import logging
 
-from core_telemetry.instrumentors.custom_instrumentor import CustomInstrumentor
 from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.instrumentation.redis import RedisInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
+from .custom_instrumentor import CustomInstrumentor
 
 logger = logging.getLogger(__name__)
 

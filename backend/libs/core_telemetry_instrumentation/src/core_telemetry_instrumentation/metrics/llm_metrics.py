@@ -10,7 +10,7 @@ import time
 from contextlib import contextmanager
 from typing import Optional
 
-from ..metrics import get_meter
+from opentelemetry.metrics import get_meter
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class LLMMetrics:
 
     def __init__(self):
         """Initialize LLM metrics with OpenTelemetry meter."""
-        self.meter = get_meter()
+        self.meter = get_meter(__name__)
         self._init_metrics()
 
     def _init_metrics(self):

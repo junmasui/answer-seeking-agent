@@ -1,28 +1,22 @@
 #!/usr/bin/env bash
 
-set -e  # Exit immediately on error.
-set -u  # Unbound variables are errors.
-set -o pipefail  # Use right-most non-zero exit code from a pipe.
-
-if [ -d nemoguardrails ]
-then
-    rm -rf nemoguardrails
-fi
-
+set -eu
 
 #
-# See: https://docs.nvidia.com/nemo/guardrails/latest/user-guides/advanced/using-docker.html#build-the-docker-images
+# Build a nemo-guardrails image.
+#
+# NOTE: Use environment variables BUILDKIT_PROGRESS, BUILDKIT_COLOR, etc to
+#       control the progress output.
+# NOTE: Use `docker builder prune` to clean up the build cache.
 #
 
-git clone https://github.com/NVIDIA/NeMo-Guardrails.git nemoguardrails
+# DOCKER=podman
+DOCKER="docker buildx"
 
-(
-cd nemoguardrails
-docker build -f ../Dockerfile --build-context parent-dir=.. -t nemo-guardrails --progress plain .
-)
-
-# (
-# cd nemoguardrails/library/jailbreak_detection
-# docker build -t nemo-jailbreak-detection-heuristics .
-# docker build -t nemo-jailbreak-detection-heuristics-gpu .
-# )
+$DOCKER build \
+  --file Dockerfile \
+  --no-cache \
+  --build-context parent-dir=.. \
+  --tag localhost/localhost/nemo-guardrails:latest \
+  --progress plain \
+  . 2>&1

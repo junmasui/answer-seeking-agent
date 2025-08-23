@@ -1,5 +1,5 @@
 [project]
-name = "core-telemetry"
+name = "core-telemetry-distro"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -28,8 +28,6 @@ dependencies = [
     "opentelemetry-instrumentation-system-metrics>=0.56b0",
     "opentelemetry-instrumentation-transformers>=0.42.0",
     "opentelemetry-instrumentation-weaviate>=0.42.0",
-    "prometheus-client>=0.21.1",
-    "prometheus-fastapi-instrumentator>=7.0.2",
     "pydantic-settings>=2.7.0",
     "redis>=5.2.1",
     # OpenLLMetry for LLM-specific observability (preferred)
@@ -42,10 +40,8 @@ build-backend = "uv_build"
 
 
 [project.entry-points.opentelemetry_distro]
-custom_otel = "core_telemetry.distro:CustomDistro"
+custom_otel = "core_telemetry_distro.distro:CustomDistro"
 
 [project.entry-points.opentelemetry_configurator]
-custom_otel = "core_telemetry.configurator:CustomConfigurator"
+custom_otel = "core_telemetry_distro.configurator:CustomConfigurator"
 
-[project.entry-points.opentelemetry_instrumentor]
-custom_otel = "core_telemetry.instrumentors:CustomInstrumentor"

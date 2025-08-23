@@ -34,18 +34,26 @@ def configure_logging():
     Sets up a SafeRichHandler for core modules with Rich formatting, tracebacks, and proper console
     width. Prevents duplicate handlers and sets appropriate log levels.
     """
-    terminal_width = 120
+    terminal_width = 150
     console = Console(width=terminal_width) if terminal_width else None
     rich_handler = SafeRichHandler(
         show_time=False,
         rich_tracebacks=True,
-        tracebacks_code_width=110,
+        tracebacks_code_width=120,
         tracebacks_show_locals=False,
         markup=True,
         show_path=False,
         console=console,
     )
     rich_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
+
+    console.print('Initializing logging')
+
+    logger = logging.getLogger()
+    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger.handlers)
+    if not has_rich_handler:
+        logger.addHandler(rich_handler)
+    logger.setLevel(logging.INFO)
 
     logger = logging.getLogger('core')
     has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger.handlers)
@@ -68,18 +76,19 @@ def configure_logging():
         logger2.propagate = False
     logger2.setLevel(logging.INFO)
 
-    logger2 = logging.getLogger('core_telemetry')
+    logger2 = logging.getLogger('core_telemetry_distro')
     has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger2.handlers)
     if not has_rich_handler:
         logger2.addHandler(rich_handler)
         logger2.propagate = False
     logger2.setLevel(logging.INFO)
 
-    logger = logging.getLogger()
-    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger.handlers)
+    logger2 = logging.getLogger('core_telemetry_instrumentation')
+    has_rich_handler = any(isinstance(handler, SafeRichHandler) for handler in logger2.handlers)
     if not has_rich_handler:
-        logger.addHandler(rich_handler)
-    logger.setLevel(logging.INFO)
+        logger2.addHandler(rich_handler)
+        logger2.propagate = False
+    logger2.setLevel(logging.INFO)
 
     # Enable SQLAlchemy SQL statement logging
     sa_logger = logging.getLogger('sqlalchemy.engine')

@@ -15,9 +15,9 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.documents import Document
 from langchain_core.outputs import ChatGeneration, Generation, LLMResult
 from opentelemetry.trace import Status, StatusCode
+from opentelemetry.metrics import get_meter
 
 from ..lib_config import get_lib_config
-from ..metrics import get_meter
 from ..tracing.span_tracker import SpanTracker, get_span_tracker
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         self.sample_rate = sample_rate if sample_rate is not None else config.trace_sample_rate
 
         # Initialize telemetry
-        self.meter = get_meter()
+        self.meter = get_meter(__name__)
 
         # Create metrics
         self._init_metrics()

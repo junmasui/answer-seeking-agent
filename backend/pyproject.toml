@@ -103,7 +103,8 @@ members = [
     "libs/core_db",
     "libs/core_public",
     "libs/core_tasks",
-    "libs/core_telemetry",
+    "libs/core_telemetry_distro",
+    "libs/core_telemetry_instrumentation",
     "libs/early_init",
     "libs/log_config_monitor",
 ]
@@ -120,7 +121,8 @@ core = { workspace = true }
 core-db = { workspace = true }
 core-public = { workspace = true }
 core-tasks = { workspace = true }
-core-telemetry = { workspace = true }
+core-telemetry-distro = { workspace = true }
+core-telemetry-instrumentation = { workspace = true }
 early-init = { workspace = true }
 log-config-monitor = { workspace = true }
 

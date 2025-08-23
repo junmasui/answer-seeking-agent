@@ -202,11 +202,14 @@ class CustomInstrumentor(BaseInstrumentor):
     """
 
     def instrumentation_dependencies(self) -> typing.Collection[str]:
+        logger.info('CUSTOM INSTRUMENTATION DEPENDENCIES')
+        print('CUSTOM INSTRUMENTATION DEPENDENCIES')
         return []
 
     def _instrument(self, **kwargs):
         logger.info('CUSTOM INSTRUMENTING')
         print('CUSTOM INSTRUMENTING')
+
         tracer_provider = kwargs.get('tracer_provider')
         tracer = get_tracer(__name__, __version__, tracer_provider)
         for wrapped_method in WRAPPED_METHODS:
@@ -230,6 +233,9 @@ class CustomInstrumentor(BaseInstrumentor):
         print('CUSTOM INSTRUMENTED')
 
     def _uninstrument(self, **kwargs):
+        logger.info('CUSTOM UNINSTRUMENTING')
+        print('CUSTOM UNINSTRUMENTING')
+
         for wrapped_method in WRAPPED_METHODS:
             wrap_module = wrapped_method.get('module')
             wrap_object = wrapped_method.get('object')
@@ -238,4 +244,6 @@ class CustomInstrumentor(BaseInstrumentor):
 
             # if wrapped:
             #     unwrap(wrapped, wrapped_method.get('method'))
+
+        print('CUSTOM UNINSTRUMENTED')
 

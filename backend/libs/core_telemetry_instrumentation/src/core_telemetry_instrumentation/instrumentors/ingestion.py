@@ -11,10 +11,9 @@ from contextlib import contextmanager
 from typing import Optional
 from uuid import UUID
 
-from opentelemetry.trace import Status, StatusCode
+from opentelemetry.trace import Status, StatusCode, get_tracer
 
-from .llm_metrics import get_llm_metrics
-from ..tracing import get_tracer
+from ..metrics.llm_metrics import get_llm_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class IngestionInstrumentation:
 
     def __init__(self):
         """Initialize ingestion instrumentation."""
-        self.tracer = get_tracer()
+        self.tracer = get_tracer(__name__)
         self.metrics = get_llm_metrics()
 
     @contextmanager

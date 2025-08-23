@@ -8,6 +8,12 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+  "core",
+  "core-public",
+  "core-telemetry-distro",
+  "core-telemetry-instrumentation",
+  "early-init",
+  "log-config-monitor",
   "anyio>=4.9.0",
   "celery[redis]>=5.4.0",
   "flower>=2.0.1",
