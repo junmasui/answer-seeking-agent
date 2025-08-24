@@ -4,9 +4,11 @@ services:
   presidio-analyzer:
     restart: unless-stopped
 
-    image: mcr.microsoft.com/presidio-analyzer:latest
+    image: mcr.microsoft.com/presidio-analyzer:2.2.359
     profiles: [ presidio, infrastructure, all ]
 
+    env_file:
+      - opentelemetry-instrument.env
     ports:
       - '27600:3000'
     networks:
@@ -14,10 +16,14 @@ services:
     environment:
       - NLP_CONF_FILE=/conf/transformers.yaml
       - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
-
     volumes:
+      - ../backend/dist:/dist
+      - ./run_presidio_analyzer.sh:/run_presidio_analyzer.sh
+      - ./pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml 
       - ./conf:/conf
       - ./healthcheck.py:/healthcheck.py
+
+    command: ["bash", "/run_presidio_analyzer.sh"]
 
     healthcheck:
       test: ["CMD", "python3", "/healthcheck.py"]

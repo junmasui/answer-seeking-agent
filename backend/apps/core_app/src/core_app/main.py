@@ -46,9 +46,9 @@ async def lifespan(fastapi_app: FastAPI):
     logger.info('Logging config watcher starting')
     get_logging_conf_monitor().start()
 
-    # load_custom_distro_by_entry_point('distro')
-    # load_custom_distro_by_entry_point('custom_otel')
-    verify_distro()
+    ## load_custom_distro_by_entry_point('distro')
+    ## load_custom_distro_by_entry_point('custom_otel')
+    ## verify_distro()
 
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)

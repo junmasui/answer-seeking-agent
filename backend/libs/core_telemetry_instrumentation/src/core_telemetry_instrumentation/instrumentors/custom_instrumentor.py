@@ -189,6 +189,12 @@ WRAPPED_METHODS = [
 
     {'module': 'langgraph.pregel', 'object': 'Pregel',
         'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
+
+    {'module': 'langgraph.pregel', 'object': 'Pregel',
+        'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
+
+    {'module': 'spacy.language', 'object': 'Language',
+        'method': '__call__', 'span_name': 'spacy.language'},
 ]
 ERROR_TYPE: str = 'error.type'
 
