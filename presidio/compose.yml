@@ -5,7 +5,11 @@ services:
     restart: unless-stopped
 
     image: mcr.microsoft.com/presidio-analyzer:2.2.359
-    profiles: [ presidio, infrastructure, all ]
+    profiles: [
+      presidio,
+      # infrastructure,
+      # all
+    ]
 
     env_file:
       - opentelemetry-instrument.env
@@ -19,10 +23,12 @@ services:
     volumes:
       - ../backend/dist:/dist
       - ./run_presidio_analyzer.sh:/run_presidio_analyzer.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - ./pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml 
       - ./conf:/conf
       - ./healthcheck.py:/healthcheck.py
 
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: ["bash", "/run_presidio_analyzer.sh"]
 
     healthcheck:

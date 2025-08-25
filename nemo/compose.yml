@@ -5,7 +5,11 @@ services:
     restart: unless-stopped
 
     image: localhost/localhost/nemo-guardrails:latest
-    profiles: [ nemo, infrastructure, all ]
+    profiles: [
+      nemo,
+      # infrastructure,
+      # all
+    ]
 
     env_file:
       - nemo.env
