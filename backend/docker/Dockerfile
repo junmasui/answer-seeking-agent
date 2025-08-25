@@ -52,7 +52,7 @@ RUN \
     #
     # Install uv package manager
     #
-    && pip install uv
+    && pip install -no-cache-dir uv
 
 #
 # These script live in the parent of this dockerfile's directory, so we must define

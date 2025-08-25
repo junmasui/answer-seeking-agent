@@ -7,7 +7,6 @@ from uuid import UUID
 from cloudpathlib.s3 import S3Path
 from core_db.db_models import DbTrackedDocument
 from core_public import DocumentStatus
-from core_telemetry.openllmetry import annotate_workflow
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
@@ -220,7 +219,6 @@ def _ingest_one_document(
                 logger.warning('could not delete staged file %s', str(local_path), exc_info=ex)
 
 
-@annotate_workflow('ingest_documents')
 def ingest_documents(doc_ids):
     """
     Ingest cloud files.

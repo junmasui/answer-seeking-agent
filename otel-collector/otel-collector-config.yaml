@@ -37,37 +37,37 @@ receivers:
         scrape_interval: 30s
         scrape_timeout: 5s
       scrape_configs:
-        # FastAPI application metrics
-        - job_name: 'api-server'
-          dns_sd_configs:
-            - names: ['api-server']
-              type: 'A'
-              port: 8100
-          metrics_path: /metrics
+        # # FastAPI application metrics
+        # - job_name: 'api-server'
+        #   dns_sd_configs:
+        #     - names: ['api-server']
+        #       type: 'A'
+        #       port: 8100
+        #   metrics_path: /metrics
 
-        # FastAPI application metrics
-        - job_name: 'api-server-autotest'
-          dns_sd_configs:
-            - names: ['api-server-autotest']
-              type: 'A'
-              port: 8100
-          metrics_path: /metrics
+        # # FastAPI application metrics
+        # - job_name: 'api-server-autotest'
+        #   dns_sd_configs:
+        #     - names: ['api-server-autotest']
+        #       type: 'A'
+        #       port: 8100
+        #   metrics_path: /metrics
 
-        # Celery worker metrics
-        - job_name: 'celery-worker'
-          dns_sd_configs:
-            - names: ['celery-worker']
-              type: 'A'
-              port: 8989
-          metrics_path: /metrics
+        # # Celery worker metrics
+        # - job_name: 'celery-worker'
+        #   dns_sd_configs:
+        #     - names: ['celery-worker']
+        #       type: 'A'
+        #       port: 8989
+        #   metrics_path: /metrics
 
-        # Celery exporter metrics
-        - job_name: 'celery-exporter'
-          dns_sd_configs:
-            - names: ['celery-exporter']
-              type: 'A'
-              port: 9808
-          metrics_path: /metrics
+        # # Celery exporter metrics
+        # - job_name: 'celery-exporter'
+        #   dns_sd_configs:
+        #     - names: ['celery-exporter']
+        #       type: 'A'
+        #       port: 9808
+        #   metrics_path: /metrics
 
         # Celery flower metrics
         - job_name: 'celery-flower'

@@ -1,0 +1,27 @@
+[project]
+name = "core-telemetry-instrumentation"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "opentelemetry-api>=1.35.0",
+    "opentelemetry-sdk>=1.35.0",
+    "opentelemetry-instrumentation>=0.56b0",
+    "pydantic-settings>=2.7.0",
+    "redis>=5.2.1",
+    # OpenLLMetry for LLM-specific observability (preferred)
+    ## "traceloop-sdk>=0.42.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.4,<0.9.0"]
+build-backend = "uv_build"
+
+
+
+[project.entry-points.opentelemetry_instrumentor]
+custom_otel = "core_telemetry_instrumentation.instrumentors:CustomInstrumentor"

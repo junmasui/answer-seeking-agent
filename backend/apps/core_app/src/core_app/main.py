@@ -3,12 +3,12 @@ from contextlib import asynccontextmanager
 
 import sim_auth_app
 from core.signals import configure_sender, send_start_up
-from core_telemetry import init_telemetry
 from fastapi import FastAPI
 from log_config_monitor import get_logging_conf_monitor
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.types import ASGIApp, Receive, Scope, Send
+
+from early_init.load_otel import load_custom_distro_by_entry_point
+from core_telemetry_distro.verifier import verify_distro
 
 from .middlewares import ErrorLoggingMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
@@ -46,9 +46,9 @@ async def lifespan(fastapi_app: FastAPI):
     logger.info('Logging config watcher starting')
     get_logging_conf_monitor().start()
 
-    instrumentator.expose(fastapi_app, include_in_schema=False, should_gzip=False)
-
-    init_telemetry()
+    ## load_custom_distro_by_entry_point('distro')
+    ## load_custom_distro_by_entry_point('custom_otel')
+    ## verify_distro()
 
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)
@@ -64,10 +64,6 @@ app = FastAPI(lifespan=lifespan, title='Seeking Answers', version='1.0.0')
 
 app.add_middleware(DynamicRootPathMiddleware)
 app.add_middleware(ErrorLoggingMiddleware)
-
-instrumentator = Instrumentator().instrument(app)
-
-FastAPIInstrumentor.instrument_app(app, excluded_urls='health,status')
 
 app.include_router(router=admin.router, prefix='/admin')
 app.include_router(router=answer.router, prefix='/answer')

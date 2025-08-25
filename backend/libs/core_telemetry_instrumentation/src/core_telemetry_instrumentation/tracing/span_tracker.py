@@ -15,7 +15,7 @@ from opentelemetry import context as context_api
 from opentelemetry import trace
 from opentelemetry.trace import Status
 
-from .tracing import get_tracer
+from opentelemetry.trace import get_tracer
 
 
 @cache
@@ -27,7 +27,7 @@ def get_span_tracker():
         SpanTracker: A singleton SpanTracker instance.
 
     """
-    tracer = get_tracer()
+    tracer = get_tracer(__name__)
 
     return SpanTracker(tracer)
 

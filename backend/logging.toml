@@ -26,6 +26,12 @@ level = "DEBUG"
 [loggers."celery.worker"]
 level = "DEBUG"
 
+[loggers."core_telemetry_distro"]
+level = "DEBUG"
+
+[loggers."core_telemetry_instrumentation"]
+level = "DEBUG"
+
 [loggers.fastapi]
 level = "DEBUG"
 
@@ -51,7 +57,7 @@ level = "INFO"
 level = "WARNING"
 
 [loggers.sqlalchemy.engine]
-level = "INFO"
+level = "WARNING"
 
 [loggers.unstructured]
 level = "DEBUG"

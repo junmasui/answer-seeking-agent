@@ -1,0 +1,47 @@
+[project]
+name = "core-telemetry-distro"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "opentelemetry-api>=1.35.0",
+    "opentelemetry-sdk>=1.35.0",
+    "opentelemetry-distro>=0.56b0",
+    "opentelemetry-exporter-otlp>=1.35.0",
+    "opentelemetry-exporter-prometheus>=0.56b0",
+    "opentelemetry-instrumentation>=0.56b0",
+    "opentelemetry-instrumentation-botocore>=0.56b0",
+    "opentelemetry-instrumentation-celery>=0.56b0",
+    "opentelemetry-instrumentation-fastapi>=0.56b0",
+    "opentelemetry-instrumentation-google-generativeai>=0.42.0",
+    "opentelemetry-instrumentation-httpx>=0.56b0",
+    "opentelemetry-instrumentation-langchain>=0.42.0",
+    ## "opentelemetry-instrumentation-mcp>=0.43.0",
+    "opentelemetry-instrumentation-openai>=0.42.0",
+    "opentelemetry-instrumentation-redis>=0.56b0",
+    "opentelemetry-instrumentation-requests>=0.56b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.56b0",
+    "opentelemetry-instrumentation-system-metrics>=0.56b0",
+    "opentelemetry-instrumentation-transformers>=0.42.0",
+    "opentelemetry-instrumentation-weaviate>=0.42.0",
+    "pydantic-settings>=2.7.0",
+    "redis>=5.2.1",
+    # OpenLLMetry for LLM-specific observability (preferred)
+    ## "traceloop-sdk>=0.42.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.4,<0.9.0"]
+build-backend = "uv_build"
+
+
+[project.entry-points.opentelemetry_distro]
+custom_otel = "core_telemetry_distro.distro:CustomDistro"
+
+[project.entry-points.opentelemetry_configurator]
+custom_otel = "core_telemetry_distro.configurator:CustomConfigurator"
+
