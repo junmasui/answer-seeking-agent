@@ -23,6 +23,45 @@ dependencies = [
 
 [project.scripts]
 
+# Dependency groups following workspace DRY principles
+# Common groups are inherited from workspace-level constraints
+[dependency-groups]
+dev = [
+  # Core development tools (versions constrained at workspace level)
+  "pytest",
+  "pytest-asyncio", 
+  "ruff",
+  "autopep8",
+  # Project-specific dev tools
+  "httpx>=0.25.0",  # For testing FastAPI endpoints
+]
+
+test = [
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+  "httpx",  # For API testing
+]
+
+# Project-specific dependency groups
+api = [
+  "fastapi[standard]",
+  "uvicorn[standard]",
+  "pydantic",
+]
+
+[project.optional-dependencies]
+# Inherit from workspace CPU/CUDA options
+cpu = []  # Will use workspace-defined torch CPU variant
+cuda12 = []  # Will use workspace-defined torch CUDA variant
+
+# Project-specific optional dependencies
+monitoring = [
+  "prometheus-client",
+  "opentelemetry-api",
+  "opentelemetry-sdk",
+]
+
 [build-system]
 requires = ["uv_build>=0.8.4,<0.9.0"]
 build-backend = "uv_build"
