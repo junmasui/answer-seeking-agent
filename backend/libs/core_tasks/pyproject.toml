@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
 ]
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 dependencies = [
   "anyio>=4.9.0",
   "celery[redis]>=5.4.0",
@@ -14,6 +14,7 @@ dependencies = [
   "psutil>=7.0.0",
   "redis>=5.2.1",
 ]
+
 
 [build-system]
 requires = ["uv_build>=0.8.4,<0.9.0"]

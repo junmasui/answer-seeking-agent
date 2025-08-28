@@ -345,7 +345,44 @@ services:
       timeout: 15s
       retries: 5
       start_period: 5s
-      
+
+
+  python-build:
+    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    profiles: [
+    ]
+
+    environment:
+      # Only environment variables that are important to a Docker environment
+      # will be configured here. The reason is that changes to environment variables
+      # configured here do require a restart before they take effect:
+      # application-centric ones should be designed to avoiid a Docker container restart.
+      #
+      # The Python bytecode cache should be moved away from the bind-mount because
+      # there is no need for it shared with the host.
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      GPU_MODE: cpu
+    env_file:
+      - backend.env
+    networks:
+      agent-poc: {}
+    volumes:
+      # Mount the project directory to /app in the container
+      - .:/app
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - ./run_build_backend.sh:/run_build_backend.sh
+      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+
+    user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_build_backend.sh' ]
+
+
+
 #
 # Named volumes are not created until the dependent service
 # is started.

@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
 ]
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 dependencies = [
     "opentelemetry-api>=1.35.0",
     "opentelemetry-sdk>=1.35.0",

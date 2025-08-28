@@ -21,7 +21,7 @@ urls = {Homepage = "https://github.com/Microsoft/presidio"}
 readme = "README.md"
 include = ["conf/*",]
 
-requires-python = ">=3.12,<4.0"
+requires-python = "==3.12.*"
 dependencies = [
     "spacy (>=3.4.4, <4.0.0, !=3.7.0)",
     "regex",
@@ -32,7 +32,8 @@ dependencies = [
     "core-telemetry-instrumentation @ file:///dist/core_telemetry_instrumentation-0.1.0-py3-none-any.whl",
     "langchain-openai (>=0.3.31,<0.4.0)",
     "opentelemetry-instrumentation-wsgi (>=0.57b0,<0.58)",
-    "opentelemetry-instrumentation-flask (>=0.57b0,<0.58)"
+    "opentelemetry-instrumentation-flask (>=0.57b0,<0.58)",
+    "opentelemetry-instrumentation (>=0.57b0,<0.58)"
 ]
 
 [project.optional-dependencies]

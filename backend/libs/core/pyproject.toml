@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Jun Masui", email = "76625904+junmasui@users.noreply.github.com" }
 ]
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 dependencies = [
   "core-db",
   "core-public",
@@ -42,6 +42,31 @@ dependencies = [
   "transformers>=4.48.0",
   "unstructured[all-docs,docx,pdf]>=0.16.13",
   "weaviate-client>=4.15.4"
+]
+
+[project.optional-dependencies]
+cpu = [
+  "torch>=2.5.1",
+  "torchaudio>=2.5.1",
+  "torchvision>=0.20.0"
+]
+cuda12 = [
+  "torch>=2.5.1",
+  "torchaudio>=2.5.1",
+  "torchvision>=0.20.0"
+]
+
+
+[tool.uv]
+# Explicit declaration that the "cpu" and "cuda12" extras are in conflict
+#
+# See: https://github.com/astral-sh/uv/blob/main/docs/reference/settings.md#conflicts--conflicts-
+#
+conflicts = [
+    [
+      { extra = "cpu" },
+      { extra = "cuda12" },
+    ],
 ]
 
 [build-system]

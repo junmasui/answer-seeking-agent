@@ -7,6 +7,7 @@ services:
     image: mcr.microsoft.com/presidio-analyzer:2.2.359
     profiles: [
       presidio,
+      telemetry
       # infrastructure,
       # all
     ]

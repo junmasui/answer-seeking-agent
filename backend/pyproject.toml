@@ -1,20 +1,15 @@
-[project]
-name = "app"
-version = "0.1.0"
-description = "Default template for PDM package"
-authors = [{ name = "", email = "" }]
-dependencies = [
-  "icecream>=2.1.4",
-  ## "python-dotenv>=1.0.1",
-]
-requires-python = "==3.12.*"
-readme = "README.md"
-license = { text = "Apache-2.0" }
+# Root-level workspace configuration
+# This file defines the uv workspace and shared configurations
+# Individual projects are defined in their respective subdirectories
 
 # IMPORTANT!!
 #
-# Do not include [build-system] at the workspace level.
+# Do not include [build-system] or [project] at the workspace level.
+# Each workspace member should define its own project configuration.
 #
+
+# Workspace-wide tool configurations
+# These apply to all workspace members unless overridden
 
 [dependency-groups]
 dev = [
@@ -24,21 +19,8 @@ dev = [
   "ruff>=0.9.2",
 ]
 
-[project.optional-dependencies]
-cpu = [
-  "torch>=2.5.1",
-  "torchaudio>=2.5.1",
-  "torchvision>=0.20.0"
-]
-cuda12 = [
-  "torch>=2.5.1",
-  "torchaudio>=2.5.1",
-  "torchvision>=0.20.0"
-]
-
-
 [tool.ruff]
-include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py"]
+include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py", "apps/**/*.py", "libs/**/*.py"]
 line-length = 120
 
 [tool.ruff.format]
@@ -61,6 +43,18 @@ ignore = [
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 100
+
+# Workspace-wide pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["apps", "libs"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+]
 
 [tool.uv]
 # Explicit declaration that the "cpu" and "cuda12" extras are in conflict
@@ -92,10 +86,32 @@ index-strategy = "unsafe-best-match"
 #
 link-mode = "symlink"
 
+# Global dependency version constraints for consistency across workspace
+# These ensure all workspace members use compatible versions
+constraint-dependencies = [
+    # Core Python packages - ensure consistency
+    "pytest>=8.3.4",
+    "ruff>=0.9.2", 
+    "autopep8>=2.3.2",
+    
+    # FastAPI ecosystem - lock compatible versions
+    "fastapi>=0.104.0,<1.0.0",
+    "pydantic>=2.5.0,<3.0.0",
+    "uvicorn>=0.24.0",
+    
+    # Database - ensure compatible SQLAlchemy ecosystem
+    "sqlalchemy>=2.0.0,<3.0.0",
+    "alembic>=1.13.0",
+    
+    # ML/AI - ensure compatible versions
+    "numpy>=1.24.0,<2.0.0",
+    "pandas>=2.0.0,<3.0.0",
+]
+
 
 [tool.uv.workspace]
 members = [
-    "apps/alembic",
+    "apps/db_migration",
     "apps/core_app",
     "apps/core_worker",
     "apps/sim_auth_app",
@@ -111,8 +127,8 @@ members = [
 
 [tool.uv.sources]
 # Define workspace dependencies
+# Note: Only include packages that are actual workspace members
 
-migrations = { workspace = true }
 core-app = { workspace = true }
 core-worker = { workspace = true }
 sim-auth-app = { workspace = true }
@@ -126,8 +142,11 @@ core-telemetry-instrumentation = { workspace = true }
 early-init = { workspace = true }
 log-config-monitor = { workspace = true }
 
+# Alembic/migrations package
+migrations = { workspace = true }
 
-#
+
+# PyTorch package sources with CPU/CUDA variants
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cuda12", extra = "cuda12" }
