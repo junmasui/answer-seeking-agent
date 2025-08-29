@@ -22,7 +22,7 @@ services:
       - NLP_CONF_FILE=/conf/transformers.yaml
       - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
     volumes:
-      - ../backend/dist:/dist
+      - ../../backend/dist:/dist
       - ./run_presidio_analyzer.sh:/run_presidio_analyzer.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - ./pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml 

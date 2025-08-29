@@ -21,7 +21,7 @@ services:
       - agent-poc
     volumes:
       - ./config:/config
-      - ../backend/dist:/dist
+      - ../../backend/dist:/dist
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - ./docker/pyproject.toml:/app/pyproject.toml
       - ./docker/uv.lock:/app/uv.lock
