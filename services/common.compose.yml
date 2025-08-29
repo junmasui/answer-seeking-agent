@@ -1,19 +1,19 @@
 name: agent
 
 include:
-  - grafana/compose.yml
-  - jaeger/compose.yml
-  - loki/compose.yml
-  - minio/compose.yml
-  - opensearch/compose.yml
-  - otel-collector/compose.yml
-  - nemo/compose.yml
-  - postgres/compose.yml
-  - presidio/compose.yml
-  - prometheus/compose.yml
-  - redis/compose.yml
-  - traefik/compose.yml
-  - weaviate/compose.yml
+  - grafana/deploy/compose.yml
+  - jaeger/deploy/compose.yml
+  - loki/deploy/compose.yml
+  - minio/deploy/compose.yml
+  - opensearch/deploy/compose.yml
+  - otel-collector/deploy/compose.yml
+  - nemo/deploy/compose.yml
+  - postgres/deploy/compose.yml
+  - presidio/deploy/compose.yml
+  - prometheus/deploy/compose.yml
+  - redis/deploy/compose.yml
+  - traefik/deploy/compose.yml
+  - weaviate/deploy/compose.yml
 
 networks:
   agent-poc:

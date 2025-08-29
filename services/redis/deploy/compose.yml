@@ -3,6 +3,11 @@ name: redis
 services:
   init-redis-volumes:
     restart: 'no'
+    deploy:
+      mode: replicated-job
+      replicas: 1  # Run 1 instances of this job
+      restart_policy:
+        condition: none  # Don't restart after completion
 
     image: 'docker.io/debian:bookworm-slim'
     profiles: [ init-volumes, redis, infrastructure-core, infrastructure, all ]

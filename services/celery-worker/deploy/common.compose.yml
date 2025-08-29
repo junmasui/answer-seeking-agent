@@ -1,5 +1,5 @@
 services:
-  init-backend-volumes:
+  init-backend-volumes-2:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
@@ -8,9 +8,6 @@ services:
     # No network is needed to initialize named volumes
     network_mode: none
     volumes:
-      - backend-home-1:/home/python/home-1
-      - backend-venv-1:/home/python/venv-1
-      - backend-staging-1:/home/python/staging-1
       - backend-home-2:/home/python/home-2
       - backend-venv-2:/home/python/venv-2
       - backend-staging-2:/home/python/staging-2
@@ -29,7 +26,6 @@ services:
         ls -ld /home/python/
 
         for VOL in \
-          'home-1' 'venv-1' 'staging-1' \
           'home-2' 'venv-2' 'staging-2' \
           'home-3' 'venv-3'
         do
@@ -38,120 +34,6 @@ services:
           chmod -R 755 /home/python/$$VOL
           ls -ld /home/python/$$VOL
         done
-
-  backend-dependency-gate:
-    restart: 'no'
-
-    image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ backend, infrastructure, all ]
-
-    env_file:
-      - dependency-gate.env
-      - backend.env
-    networks:
-      - agent-poc
-    volumes:
-      - backend-init-signal-1:/init-signal
-      - ./run_dependency_gate.sh:/run_dependency_gate.sh
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
-    secrets:
-      - answers_minio_secrets
-      - answers_postgres_secrets
-      - checkpoints_postgres_secrets
-      - redis_secrets
-      - weaviate_secrets
-
-    mem_limit: 128m
-    memswap_limit: 128m
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
-    entrypoint: 'bash'
-    command: [ /run_dependency_gate.sh ]
-
-
-
-  api-server:
-    depends_on:
-      init-backend-volumes:
-        condition: service_completed_successfully
-
-    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
-
-    environment:
-      DEBUGGER_LISTEN: true
-      JWT_WRITE_CLAIM_MISSING_OK: true
-      # Only environment variables that are important to a Docker environment
-      # will be configured here. The reason is that changes to environment variables
-      # configured here do require a restart before they take effect:
-      # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
-      ##
-      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
-      ##
-    env_file:
-      - backend.env
-      - opentelemetry-instrument.env
-    ports: # use if it is necessary to expose the container to the host machine
-      - '8100:8100'
-    networks:
-      - agent-poc
-    volumes:
-      # Mount the project directory to /app in the container
-      - .:/app
-      # Mount important scripts into the container when we are
-      # avoiding rebuilding images to capture their latest version.
-      - ./run_api_server.sh:/run_api_server.sh
-      - backend-init-signal-1:/init-signal
-      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - backend-home-1:/home/python
-      - backend-venv-1:/app/.venv
-      - backend-staging-1:/staging
-    secrets:
-      - answers_secrets
-      - answers_api_key_secrets
-      - answers_jwt_secrets
-      - answers_minio_secrets
-      - answers_postgres_secrets
-      - checkpoints_postgres_secrets
-      - redis_secrets
-      - weaviate_secrets
-
-    user: '1000:1000'
-    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_api_server.sh' ]
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5' # 50% of available CPU resources
-          memory: 4G # Give enough to run local model
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
-    healthcheck:
-      # When this service start for the first time, there is multiple minutes while the
-      # python environment is sync'ed to the requirements file then when the FastAPI server
-      # is starting up. A health-check based on API pinging will fail during the sync and the
-      # start up.
-      #
-      # For now, we just check if python3 can run. Later, we will  try to come up  
-      ## test: ['CMD', 'curl', '-f', 'http://localhost']
-      test: ['CMD', 'python3', '--version']
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 5s
-
 
   celery-worker:
     depends_on:
@@ -347,54 +229,12 @@ services:
       start_period: 5s
 
 
-  python-build:
-    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
-    profiles: [
-    ]
-
-    environment:
-      # Only environment variables that are important to a Docker environment
-      # will be configured here. The reason is that changes to environment variables
-      # configured here do require a restart before they take effect:
-      # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
-      GPU_MODE: cpu
-    env_file:
-      - backend.env
-    networks:
-      agent-poc: {}
-    volumes:
-      # Mount the project directory to /app in the container
-      - .:/app
-      # Mount important scripts into the container when we are
-      # avoiding rebuilding images to capture their latest version.
-      - ./run_build_backend.sh:/run_build_backend.sh
-      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-
-    user: '1000:1000'
-    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
-    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    command: [ '/run_build_backend.sh' ]
-
-
-
 #
 # Named volumes are not created until the dependent service
 # is started.
 #
 volumes:
   backend-init-signal-1:
-    driver: local
-  backend-home-1:
-    driver: local
-  backend-venv-1:
-    driver: local
-  backend-staging-1:
     driver: local
   backend-home-2:
     driver: local

@@ -2,7 +2,8 @@ name: agent
 
 include:
   - common.compose.yml
-  - backend/cpu-only.compose.yml
-  - backend/cpu-only-autotest.compose.yml
-  - frontend/compose.yml
-  - frontend/compose-autotest.yml
+  - api-server/deploy/cpu-only.compose.yml
+  - api-server/deploy/cpu-only-autotest.compose.yml
+  - celery-worker/deploy/cpu-only.compose.yml
+  - webui-server/deploy/compose.yml
+  - webui-server/deploy/compose-autotest.yml
