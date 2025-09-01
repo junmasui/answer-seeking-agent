@@ -1,4 +1,17 @@
-include:
-  - path:
-      - common.compose.yml
-      - cuda.override.yml
+services:
+  celery-worker:
+    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
+
+    environment:
+      GPU_MODE: cuda12
+
+    # devices:
+    #   - nvidia.com/gpu=all
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

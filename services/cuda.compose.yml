@@ -1,9 +1,7 @@
 name: agent
 
 include:
-  - common.compose.yml
   - api-server/deploy/cuda.compose.yml
   - api-server/deploy/cuda-autotest.compose.yml
   - celery-worker/deploy/cuda.compose.yml
-  - webui-server/deploy/compose.yml
-  - webui-server/deploy/compose-autotest.yml
+  - celery-worker/deploy/cuda-autotest.compose.yml

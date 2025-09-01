@@ -1,4 +1,7 @@
-include:
-  - path:
-      - common-autotest.compose.yml
-      - cpu-only-autotest.override.yml
+services:
+
+  api-server-autotest:
+    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+
+    environment:
+      GPU_MODE: cpu

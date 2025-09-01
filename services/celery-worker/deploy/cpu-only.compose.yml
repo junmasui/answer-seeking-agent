@@ -1,5 +1,8 @@
-include:
-  - path:
-      - common.compose.yml
-      - cpu-only.override.yml
+services:
+
+  celery-worker:
+    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+
+    environment:
+      GPU_MODE: cpu
       
