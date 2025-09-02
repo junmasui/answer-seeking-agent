@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+GPU_MODE="$1"
+
+if [ -z "${GPU_MODE:-}" ]
+then
+    echo "GPU mode missing"
+    exit 1
+fi
+
+if [ "$GPU_MODE" == "cuda12" ]; then
+    export COMPOSE_FILE=common.compose.yml:cuda.compose.yml
+elif [ "$GPU_MODE" == "cpu" ]; then
+    export COMPOSE_FILE=common.compose.yml:cpu-only.compose.yml
+else
+    echo "invalid GPU mode: ${GPU_MODE}"
+    exit 1
+fi
+
+
 PROCESSES=$( docker compose ps --all --format json )
 
 echo "Healthy processes:"

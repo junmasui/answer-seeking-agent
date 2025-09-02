@@ -20,3 +20,6 @@ include:
   - weaviate/deploy/compose.yml
   - webui-server/deploy/compose.yml
   - webui-server/deploy/compose-autotest.yml
+
+  - ./components.compose.yml
+

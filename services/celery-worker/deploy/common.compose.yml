@@ -71,7 +71,7 @@ services:
       - ./run_celery_worker.sh:/run_celery_worker.sh
       - backend-init-signal-1:/init-signal
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - backend-home-2:/home/python
       - backend-venv-2:/app/.venv
       - backend-staging-2:/staging
@@ -147,7 +147,7 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_flower.sh:/run_celery_flower.sh
       - backend-init-signal-1:/init-signal
-      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - backend-home-3:/home/python
       - backend-venv-3:/app/.venv

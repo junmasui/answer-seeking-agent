@@ -54,7 +54,7 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
       # Mount the project directory to /app in the container
       - ./app:/app
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh

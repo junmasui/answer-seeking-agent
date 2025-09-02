@@ -46,8 +46,8 @@ services:
     volumes:
       - backend-init-signal-1:/init-signal
       - ./run_dependency_gate.sh:/run_dependency_gate.sh
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - answers_minio_secrets
       - answers_postgres_secrets
@@ -100,7 +100,7 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_api_server.sh:/run_api_server.sh
       - backend-init-signal-1:/init-signal
-      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - backend-home-1:/home/python
       - backend-venv-1:/app/.venv
@@ -149,6 +149,7 @@ services:
   python-build:
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
     profiles: [
+      python-build
     ]
 
     environment:
@@ -171,7 +172,7 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_build_backend.sh:/run_build_backend.sh
-      ## - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
 
     user: '1000:1000'

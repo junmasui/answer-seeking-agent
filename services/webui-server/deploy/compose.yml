@@ -56,7 +56,7 @@ services:
     volumes:
       # Mount the project directory to /app in the container
       - ./app:/app
-      ## - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      ## - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
       # Mount important script into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ./run_webui_server.sh:/run_webui_server.sh

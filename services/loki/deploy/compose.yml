@@ -6,7 +6,7 @@ services:
     ports:
       - "23100:3100"
     volumes:
-      - ./local-config.yml:/etc/loki/local-config.yml
+      - ./local-config.yml:/etc/loki/local-config.yml:ro
     command:
       - -config.file=/etc/loki/local-config.yml
     networks:

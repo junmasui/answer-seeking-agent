@@ -49,7 +49,7 @@ services:
       - agent-poc
     volumes:
       - redis-data-1:/data
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - redis_secrets
       - redis_conf

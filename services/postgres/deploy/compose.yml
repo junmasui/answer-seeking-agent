@@ -20,7 +20,7 @@ services:
       - agent-poc
     volumes:
       - postgres-data-1:/var/lib/postgresql/data
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - postgres_secrets
 
@@ -55,9 +55,9 @@ services:
       - agent-poc
     volumes:
       - postgres-init-signal-1:/init-signal
-      - ./run_dependency_gate.sh:/run_dependency_gate.sh
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ./run_dependency_gate.sh:/run_dependency_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
       - postgres_secrets
 
@@ -82,9 +82,9 @@ services:
       - agent-poc
     volumes:
       - postgres-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./init-db.sql.template:/init-db.sql.template
-      - ./init-postgres.sh:/init-postgres.sh
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ./init-db.sql.template:/init-db.sql.template:ro
+      - ./init-postgres.sh:/init-postgres.sh:ro
     secrets:
       - postgres_secrets
       - answers_postgres_secrets
@@ -108,9 +108,9 @@ services:
       - agent-poc
     volumes:
       - postgres-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./init-db.sql.template:/init-db.sql.template
-      - ./init-postgres.sh:/init-postgres.sh
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ./init-db.sql.template:/init-db.sql.template:ro
+      - ./init-postgres.sh:/init-postgres.sh:ro
     secrets:
       - postgres_secrets
       - answers_postgres_autotest_secrets

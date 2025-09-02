@@ -36,7 +36,7 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_worker.sh:/run_celery_worker.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-autotest-home-2:/home/python
       - backend-autotest-venv-2:/app/.venv
@@ -112,7 +112,7 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_celery_flower.sh:/run_celery_flower.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-autotest-home-3:/home/python
       - backend-autotest-venv-3:/app/.venv

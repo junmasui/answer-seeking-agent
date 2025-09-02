@@ -61,7 +61,7 @@ services:
       - agent-poc
     volumes:
       - weaviate-data-1:/var/lib/weaviate
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - weaviate_secrets
 

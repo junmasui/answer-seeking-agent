@@ -56,8 +56,8 @@ services:
     volumes:
       - backend-autotest-init-signal-1:/init-signal
       - ./run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
       - answers_minio_autotest_secrets
       - answers_postgres_autotest_secrets
@@ -109,7 +109,7 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_api_server.sh:/run_api_server.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-autotest-home-1:/home/python
       - backend-autotest-venv-1:/app/.venv
@@ -192,7 +192,7 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ./run_automated_test.sh:/run_automated_test.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-autotest-home-4:/home/python
       - backend-autotest-venv-4:/app/.venv

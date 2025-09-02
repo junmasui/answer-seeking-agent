@@ -52,8 +52,8 @@ services:
     volumes:
       - minio-init-signal-1:/init-signal
       - ./run_dependency_gate.sh:/run_dependency_gate.sh
-      - ../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
     secrets:
       - postgres_secrets
 
