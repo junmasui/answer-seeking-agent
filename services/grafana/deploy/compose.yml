@@ -8,9 +8,9 @@ services:
     env_file:
       - grafana.env
     volumes:
-      - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
       - grafana-data-1:/var/lib/grafana
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     ports:
       - 23000:3000
     networks:

@@ -16,7 +16,7 @@ services:
       - agent-poc
     volumes:
       - minio-data-2:/data
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - minio_secrets
 
@@ -51,9 +51,9 @@ services:
       - agent-poc
     volumes:
       - minio-init-signal-1:/init-signal
-      - ./run_dependency_gate.sh:/run_dependency_gate.sh
-      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ./run_dependency_gate.sh:/run_dependency_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
       - postgres_secrets
 
@@ -82,7 +82,7 @@ services:
       - agent-poc
     volumes:
       - minio-init-signal-1:/init-signal
-      - ./init-minio.sh:/init-minio.sh
+      - ./init-minio.sh:/init-minio.sh:ro
     secrets:
       - minio_secrets
       - answers_minio_secrets
@@ -109,7 +109,7 @@ services:
       - agent-poc
     volumes:
       - minio-init-signal-1:/init-signal
-      - ./init-minio.sh:/init-minio.sh
+      - ./init-minio.sh:/init-minio.sh:ro
     secrets:
       - minio_secrets
       - answers_minio_autotest_secrets

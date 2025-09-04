@@ -37,6 +37,7 @@ services:
     image: opensearchproject/opensearch:2.9.0
     hostname: opensearch
     profiles:
+      - opensearch
       - infrastructure-core
       - infrastructure
       - all

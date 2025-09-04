@@ -51,10 +51,17 @@ workspace_members=(
 failed_builds=()
 successful_builds=()
 
+if [ -d /dist ]; then
+    BUILD_OUTDIR="--out-dir /dist"
+else
+    BUILD_OUTDIR=
+fi
+
 for member in "${workspace_members[@]}"; do
     if [ -f "$member/pyproject.toml" ]; then
         echo "Building $member..."
-        if uv build "$member"; then
+        uv build $BUILD_OUTDIR "$member"
+        if [ $? -eq 0 ]; then
             echo "✓ Successfully built $member"
             successful_builds+=("$member")
         else

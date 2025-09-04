@@ -45,9 +45,9 @@ services:
       - agent-poc
     volumes:
       - backend-init-signal-1:/init-signal
-      - ./run_dependency_gate.sh:/run_dependency_gate.sh
-      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ../build/run_dependency_gate.sh:/run_dependency_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
       - answers_minio_secrets
       - answers_postgres_secrets
@@ -95,13 +95,13 @@ services:
       - agent-poc
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
+      - ../../../backend:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_api_server.sh:/run_api_server.sh
+      - ../build/run_api_server.sh:/run_api_server.sh:ro
       - backend-init-signal-1:/init-signal
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-home-1:/home/python
       - backend-venv-1:/app/.venv
       - backend-staging-1:/staging
@@ -168,12 +168,14 @@ services:
       agent-poc: {}
     volumes:
       # Mount the project directory to /app in the container
-      - .:/app
+      - ../../../backend:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_build_backend.sh:/run_build_backend.sh
+      - ../build/run_build_backend.sh:/run_build_backend.sh:ro
+      # Mount dist directory
+      - ../../dist:/dist
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      ## - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

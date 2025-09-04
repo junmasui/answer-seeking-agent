@@ -20,11 +20,11 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ./config:/config
-      - ../../backend/dist:/dist
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./docker/pyproject.toml:/app/pyproject.toml
-      - ./docker/uv.lock:/app/uv.lock
+      - ./config:/config:ro
+      - ../../dist:/dist:ro
+      - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../build/docker/pyproject.toml:/app/pyproject.toml
+      - ../build/docker/uv.lock:/app/uv.lock:ro
     secrets:
       - answers_secrets
 

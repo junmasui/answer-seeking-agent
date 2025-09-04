@@ -3,7 +3,7 @@ services:
     restart: 'no'
 
     image: 'docker.io/node:22-bookworm-slim'
-    profiles: [ init-volumes, infrastructure, all ]
+    profiles: [ init-volumes, traefik, infrastructure, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -31,7 +31,7 @@ services:
 
   traefik:
     image: 'docker.io/traefik:v3.4'
-    profiles: [ infrastructure, all ]
+    profiles: [ traefik, infrastructure, all ]
 
     ports:
       - '15170:15170'
@@ -41,7 +41,9 @@ services:
     networks:
       - agent-poc
     volumes:
+      # Local docker engine's UNIX socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      #
       - ./traefik.yml:/etc/traefik/traefik.yml:ro
       - ./dynamic:/etc/traefik/dynamic:ro
       - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro

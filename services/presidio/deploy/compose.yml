@@ -22,12 +22,12 @@ services:
       - NLP_CONF_FILE=/conf/transformers.yaml
       - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
     volumes:
-      - ../../backend/dist:/dist
-      - ./run_presidio_analyzer.sh:/run_presidio_analyzer.sh
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
-      - ./pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml 
-      - ./conf:/conf
-      - ./healthcheck.py:/healthcheck.py
+      - ../../dist:/dist:ro
+      - ./run_presidio_analyzer.sh:/run_presidio_analyzer.sh:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ./pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml
+      - ./conf:/conf:ro
+      - ./healthcheck.py:/healthcheck.py:ro
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: ["bash", "/run_presidio_analyzer.sh"]

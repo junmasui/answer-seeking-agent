@@ -16,7 +16,7 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ./otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
       ## - /mnt/bindfs/docker-containers-bindfs:/var/lib/docker/containers:ro
       ## - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -50,7 +50,7 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ./otel-collector-docker-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml
+      - ./otel-collector-docker-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 

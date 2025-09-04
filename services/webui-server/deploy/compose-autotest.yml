@@ -54,13 +54,13 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
       # Mount the project directory to /app in the container
-      - ./app:/app
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../../../frontend/app:/app:ro
+      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount important script into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ./run_webui_server.sh:/run_webui_server.sh
+      - ../build/run_webui_server.sh:/run_webui_server.sh:ro
       # Mounting a local area to use container-installed dependencies
       - frontend-autotest-home-1:/home/node
       - frontend-autotest-node-modules-1:/app/node_modules
