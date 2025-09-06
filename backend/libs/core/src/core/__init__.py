@@ -20,7 +20,7 @@ from .ingest import ingest_documents, reset_worker_data
 __all__ = [
     'get_mermaid_graph',
     'seek_answer',
-    'event_handlers',
+    'db_event_handlers',
     'delete_document',
     'get_document_set_statistics',
     'get_document_statistics',

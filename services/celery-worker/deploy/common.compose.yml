@@ -1,9 +1,9 @@
 services:
-  init-backend-volumes-2:
+  init-celery-volumes:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, backend, all ]
+    profiles: [ init-volumes, celery, backend, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -37,11 +37,11 @@ services:
 
   celery-worker:
     depends_on:
-      init-backend-volumes:
+      init-celery-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
+    profiles: [  celery, backend, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -65,17 +65,16 @@ services:
       - agent-poc
     volumes:
       # Mount the project directory to /app in the container
-      - ../../../backend:/app
+      ##SRC - ../../../backend:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ../build/run_celery_worker.sh:/run_celery_worker.sh:ro
+      ##SRC - ../build/run_celery_worker.sh:/run_celery_worker.sh:ro
       - backend-init-signal-1:/init-signal
-      - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - backend-home-2:/home/python
-      - backend-venv-2:/app/.venv
+      ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ##SRC - backend-home-2:/home/python
+      ##SRC - backend-venv-2:/app/.venv
       - backend-staging-2:/staging
-      - backend-prometheus-2:/var/local/prometheus
     secrets:
       - answers_secrets
       - answers_jwt_secrets
@@ -118,11 +117,11 @@ services:
           
   celery-flower:
     depends_on:
-      init-backend-volumes:
+      init-celery-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
-    profiles: [ backend, all ]
+    profiles: [ celery, backend, all ]
 
     environment:
       # Only environment variables that are important to a Docker environment
@@ -142,15 +141,15 @@ services:
       agent-poc: {}
     volumes:
       # Mount the project directory to /app in the container
-      - ../../../backend:/app
+      ##SRC - ../../../backend:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ../build/run_celery_flower.sh:/run_celery_flower.sh:ro
+      ##SRC - ../build/run_celery_flower.sh:/run_celery_flower.sh:ro
       - backend-init-signal-1:/init-signal
-      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-home-3:/home/python
-      - backend-venv-3:/app/.venv
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - backend-home-3:/home/python
+      ##SRC - backend-venv-3:/app/.venv
     secrets:
       - answers_secrets
       - answers_jwt_secrets
@@ -186,7 +185,7 @@ services:
   celery-exporter:
 
     image: 'docker.io/danihodovic/celery-exporter'
-    profiles: [ backend, all ]
+    profiles: [ celery, backend, all ]
 
     env_file:
       - backend.env
@@ -197,7 +196,7 @@ services:
       agent-poc: {}
     volumes:
       - backend-init-signal-1:/init-signal
-      - ../build/custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh:ro
+      ##SRC - ../build/custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh:ro
     secrets:
       - redis_secrets
 

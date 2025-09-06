@@ -3,7 +3,7 @@ services:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, backend, all ]
+    profiles: [ init-volumes, api-server, backend, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -36,7 +36,7 @@ services:
     restart: 'no'
 
     image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ backend, infrastructure, all ]
+    profiles: [ backend,  api-server, infrastructure, all ]
 
     env_file:
       - dependency-gate.env
@@ -70,7 +70,7 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
-    profiles: [ backend, all ]
+    profiles: [  api-server, backend, all ]
 
     environment:
       DEBUGGER_LISTEN: true
@@ -82,7 +82,7 @@ services:
       #
       # The Python bytecode cache should be moved away from the bind-mount because
       # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      ### PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
       ##
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
@@ -95,15 +95,15 @@ services:
       - agent-poc
     volumes:
       # Mount the project directory to /app in the container
-      - ../../../backend:/app
+      ### - ../../../backend:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ../build/run_api_server.sh:/run_api_server.sh:ro
+      ##SRC - ../build/run_api_server.sh:/run_api_server.sh:ro
       - backend-init-signal-1:/init-signal
-      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-home-1:/home/python
-      - backend-venv-1:/app/.venv
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
+      ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - backend-home-1:/home/python
+      ##SRC - backend-venv-1:/app/.venv
       - backend-staging-1:/staging
     secrets:
       - answers_secrets

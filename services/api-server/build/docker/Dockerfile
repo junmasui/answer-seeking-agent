@@ -1,4 +1,7 @@
-FROM docker.io/python:3.12.10-slim-bookworm
+#
+# STAGE: production
+#
+FROM docker.io/python:3.12.10-slim-bookworm AS production
 
 
 ARG USER_ID=1000
@@ -6,12 +9,16 @@ ARG GROUP_ID=1000
 
 RUN \
     set -eux ; \
-    \
+    #
     # Create a custom group with GROUP_ID
-    # Then create a custom user with USER_ID and GROUP_ID
+    # Then create a custom user with USER_ID and GROUP_ID and home directory.
     #
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
-    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ; \
+    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
+    
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
     #
     # Locally required Debian packages
     #
@@ -52,7 +59,7 @@ RUN \
     #
     # Install uv package manager
     #
-    && pip install -no-cache-dir uv
+    && pip install --no-cache-dir uv
 
 #
 # These script live in the parent of this dockerfile's directory, so we must define
@@ -63,9 +70,10 @@ RUN \
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 
 COPY --from=parent-dir ./custom-docker-entrypoint.sh /
-COPY --from=parent-dir ./run_celery_worker.sh /
-COPY --from=parent-dir ./run_celery_flower.sh /
 COPY --from=parent-dir ./run_api_server.sh /
+
+COPY --from=celery-parent-dir ./run_celery_worker.sh /
+COPY --from=celery-parent-dir ./run_celery_flower.sh /
 
 COPY --from=dependency-gate-dir ./wait_for_gate.sh /
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
@@ -82,19 +90,52 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
 # Set the working directory inside the container
 WORKDIR /app
 
-COPY --from=parent-dir ./pyproject.toml /app/pyproject.toml
+COPY --from=src-dir ./pyproject.toml /app/pyproject.toml
+COPY --from=src-dir ./uv.lock /app/uv.lock
 
-COPY --from=parent-dir ./alembic.ini /app/alembic.ini
-COPY --from=parent-dir ./logging.toml /app/logging.toml
-COPY --from=parent-dir ./uv.lock /app/uv.lock
-COPY --from=parent-dir ./src/ /app/src/
+COPY --from=src-dir ./alembic.ini /app/alembic.ini
+COPY --from=src-dir ./logging.toml /app/logging.toml
+COPY --from=src-dir ./apps/ /app/apps/
+COPY --from=src-dir ./libs/ /app/libs/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
+RUN \
+    set -eux ; \
+    uv venv --allow-existing ; \
+    uv sync --extra cpu --dev --all-packages
+
+
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the FastAPI development server
 CMD [ "/run_api_server.sh" ]
+
+#
+# STAGE: dev
+#
+FROM production AS dev
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+USER root
+
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git \
+        gnupg \
+        openssh-client \
+        patch \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}

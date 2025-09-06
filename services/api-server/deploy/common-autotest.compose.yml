@@ -104,15 +104,19 @@ services:
       - agent-poc
     volumes:
       # Mount the project directory to /app in the container
-      - ../../../backend:/app
+      - ../../../backend/apps:/app/apps
+      - ../../../backend/libs:/app/libs
+      - ../../../backend/alembic.ini:/app/alembic.ini
+      - ../../../backend/pyproject.toml:/app/pyproject.toml
+      - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ../build/run_api_server.sh:/run_api_server.sh:ro
+      ##SRC - ../build/run_api_server.sh:/run_api_server.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-autotest-home-1:/home/python
-      - backend-autotest-venv-1:/app/.venv
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - backend-autotest-home-1:/home/python
+      ##SRC - backend-autotest-venv-1:/app/.venv
       - backend-autotest-staging-1:/staging
     secrets:
       - answers_secrets
@@ -187,15 +191,19 @@ services:
     volumes:
       - backend-autotest-init-signal-1:/init-signal
       # Mount the project directory to /app in the container
-      - ../../../backend:/app
+      - ../../../backend/apps:/app/apps
+      - ../../../backend/libs:/app/libs
+      - ../../../backend/pytest.ini:/app/pytest.ini
+      - ../../../backend/pyproject.toml:/app/pyproject.toml
+      - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ../build/run_automated_test.sh:/run_automated_test.sh:ro
+      ##SRC - ../build/run_automated_test.sh:/run_automated_test.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-autotest-home-4:/home/python
-      - backend-autotest-venv-4:/app/.venv
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - backend-autotest-home-4:/home/python
+      ##SRC - backend-autotest-venv-4:/app/.venv
     secrets:
       - answers_secrets
       - answers_api_key_autotest_secrets

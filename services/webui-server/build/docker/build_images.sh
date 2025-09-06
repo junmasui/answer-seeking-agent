@@ -13,18 +13,25 @@ set -eu
 
 # DOCKER=podman
 DOCKER="docker buildx"
+DOCKER_BUILD_OPTS="--no-cache"
+DOCKER_BUILD_OPTS=
 
 $DOCKER build \
-  --no-cache \
+  $DOCKER_BUILD_OPTS \
   --file Dockerfile \
   --build-context parent-dir=.. \
-  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context dependency-gate-dir=../../../dependency-gate \
+  --build-context src-dir=../../../../frontend/ \
+  --target production \
   --tag localhost/localhost/answers-frontend:node-22-bookworm \
   .
 
 $DOCKER build \
-  --no-cache \
-  --file dev.Dockerfile \
+  $DOCKER_BUILD_OPTS \
+  --file Dockerfile \
   --build-context parent-dir=.. \
+  --build-context dependency-gate-dir=../../../dependency-gate \
+  --build-context src-dir=../../../../frontend/ \
+  --target dev \
   --tag localhost/localhost/answers-frontend-dev:node-22-bookworm \
   .

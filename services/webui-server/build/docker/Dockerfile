@@ -1,24 +1,23 @@
 # Use an official Node.js image as the base image
-FROM docker.io/node:22-bookworm-slim
+FROM docker.io/node:22-bookworm-slim AS production
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN \
-  apt-get update \
-  # Install Debian packages
-  && apt-get install -y --no-install-recommends \
-     curl \
-     wget \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  # Create a custom group with GROUP_ID
-  # Then create a custom user with USER_ID and GROUP_ID
-  && set -eux ; \
-    ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
-    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    # Install Debian packages
+    && apt-get install -y --no-install-recommends \
+        curl \
+        wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # Create a custom group with GROUP_ID
+    # Then create a custom user with USER_ID and GROUP_ID
+    && set -eux ; \
+        ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
+        ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
  
 # Copy the build-and-run script.
 #
@@ -45,20 +44,47 @@ RUN chmod a+x /run_webui_server.sh \
 # Set the working directory inside the container
 WORKDIR /app
 
-COPY --from=parent-dir ./app/index.html /app/index.html
-COPY --from=parent-dir ./app/jsconfig.json /app/jsconfig.json
-COPY --from=parent-dir ./app/package-lock.json /app/package-lock.json
-COPY --from=parent-dir ./app/package.json /app/package.json
-COPY --from=parent-dir ./app/vite.config.js /app/vite.config.js
+COPY --from=src-dir ./app/index.html /app/index.html
+COPY --from=src-dir ./app/jsconfig.json /app/jsconfig.json
+COPY --from=src-dir ./app/package-lock.json /app/package-lock.json
+COPY --from=src-dir ./app/package.json /app/package.json
+COPY --from=src-dir ./app/vite.config.js /app/vite.config.js
 
-COPY --from=parent-dir ./app/src/ /app/src/
+COPY --from=src-dir ./app/src/ /app/src/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
+RUN \
+    set -eux ; \
+    npm install
+
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the Vue.js development server
 CMD ["run_webui_server.sh"]
+
+
+FROM production AS dev
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+USER root
+
+RUN \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git \
+        gnupg \
+        openssh-client \
+        patch \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}
