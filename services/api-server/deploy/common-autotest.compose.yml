@@ -198,7 +198,7 @@ services:
       - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      ##SRC - ../config/run_automated_test.sh:/run_automated_test.sh:ro
+      - ../config/run_automated_test.sh:/run_automated_test.sh:ro
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - backend-autotest-home-4:/home/python
