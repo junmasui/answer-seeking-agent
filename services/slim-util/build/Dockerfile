@@ -5,7 +5,7 @@ FROM docker.io/debian:12.9-slim
 #
 
 RUN apt-get update \
-    && apt-get install -y \
+    && apt-get --no-install-recommends install -y \
         bind9-dnsutils \
         curl \
         gettext-base \

@@ -49,7 +49,7 @@ RUN \
     #
     # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
     #
-    && curl -L -O --proto "=https" \
+    && curl -O -sS -f --proto "=https" -L \
         https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
     && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
     && cd pandoc-3.7.0.2 \
