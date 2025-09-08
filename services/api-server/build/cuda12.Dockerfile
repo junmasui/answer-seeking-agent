@@ -14,7 +14,7 @@ RUN \
         curl \
         gnupg2 \
     && apt-get clean \
-    && curl -sS -f --proto "=https" -L \
+    && curl -sS -f --proto "=https" --proto-redir "=https" -L \
         https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
         | apt-key add - \
     && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
@@ -205,7 +205,7 @@ RUN \
     #
     # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
     #
-    && curl -O -sS -f --proto "=https" -L \
+    && curl -O -sS -f --proto "=https" --proto-redir "=https" -L \
         https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
     && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
     && cd pandoc-3.7.0.2 \
