@@ -44,10 +44,10 @@ services:
       # Local docker engine's UNIX socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
       #
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./dynamic:/etc/traefik/dynamic:ro
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ./certs:/certs:ro
+      - ../config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ../config/dynamic:/etc/traefik/dynamic:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/certs:/certs:ro
       # Let’s Encrypt has rate limits, so always persist the acme.json file to avoid repeated requests
       - traefik-acme-1:/acme
     security_opt:

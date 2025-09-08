@@ -49,7 +49,7 @@ services:
       - agent-poc
     volumes:
       - opensearch-data-1:/usr/share/opensearch/data
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - opensearch_secrets
 

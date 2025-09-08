@@ -23,6 +23,7 @@ WORKDIR /app
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./pyproject.toml ./pyproject.toml
 COPY --from=config-dir ./uv.lock ./uv.lock
+COPY --from=config-dir ./config/  /config/
 
 RUN uv sync
 

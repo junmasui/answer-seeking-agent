@@ -11,10 +11,10 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - ../config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../config/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
       - prometheus-data-1:/prometheus
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
 
     entrypoint: [ '/bin/sh',  '/custom-docker-entrypoint.sh' ]
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -57,7 +57,7 @@ services:
     networks:
       - agent-poc
     volumes:
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ../config/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
 
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'

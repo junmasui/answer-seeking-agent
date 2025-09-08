@@ -23,11 +23,11 @@ services:
       - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
     volumes:
       - ../../dist:/dist:ro
-      - ./run_presidio_analyzer.sh:/run_presidio_analyzer.sh:ro
-      - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ./pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml
-      - ./conf:/conf:ro
-      - ./healthcheck.py:/healthcheck.py:ro
+      - ../config/run_presidio_analyzer.sh:/run_presidio_analyzer.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml
+      - ../config/conf:/conf:ro
+      - ../config/healthcheck.py:/healthcheck.py:ro
 
     entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: ["bash", "/run_presidio_analyzer.sh"]
@@ -44,7 +44,8 @@ services:
 
     image: mcr.microsoft.com/presidio-anonymizer:latest
     profiles: [
-      presidio,
+      none
+      # presidio,
       # infrastructure,
       # all
     ]
@@ -53,6 +54,16 @@ services:
       - '27601:5001'
     networks:
       - agent-poc
+    volumes:
+      - ../../dist:/dist:ro
+      - ../config/run_presidio_anonymizer.sh:/run_presidio_anonymizer.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/pyproject.toml://usr/bin/presidio-anonymizer/pyproject.toml
+      - ../config/conf:/conf:ro
+      - ../config/healthcheck.py:/healthcheck.py:ro
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    command: ["bash", "/run_presidio_anonymizer.sh"]
 
     healthcheck:
       test: ["CMD", "python3", "/healthcheck.py"]

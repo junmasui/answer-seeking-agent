@@ -12,10 +12,12 @@ set -eu
 
 # DOCKER=podman
 DOCKER="docker buildx"
+DOCKER_BUILD_OPTS="--no-cache"
+#DOCKER_BUILD_OPTS=
 
 $DOCKER build \
   --file Dockerfile \
-  --no-cache \
+  $DOCKER_BUILD_OPTS \
   --build-context parent-dir=.. \
   --tag localhost/localhost/debian-slim-util:1.0 \
   . 2>&1
