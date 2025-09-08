@@ -3,7 +3,7 @@ FROM python:3.12-slim-bookworm
 
 # Install gcc/g++ for annoy
 RUN apt-get update && \
-    apt-get install -y gcc g++
+    apt-get --no-install-recommends install -y gcc g++
 
 # ##ENV UV_SYSTEM_PYTHON=1
 

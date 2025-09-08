@@ -49,14 +49,6 @@ then
     exit -1
 fi
 
-./scripts/build_python_packages.sh
-
-EXIT_CODE="$?"
-if [ "$EXIT_CODE" != 0 ]
-then
-    echo "Error building Python packages"
-    exit -1
-fi
 
 ./scripts/update_secrets.sh
 

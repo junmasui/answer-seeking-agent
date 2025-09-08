@@ -59,7 +59,7 @@ USER ${USER_ID}:${GROUP_ID}
 
 RUN \
     set -eux ; \
-    npm install
+    npm install --ignore-scripts
 
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
