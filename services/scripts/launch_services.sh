@@ -4,15 +4,27 @@
 set -u  # Unbound variables are errors.
 set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
-GPU_MODE="$1"
+GPU_MODE=""
 
-if [ -z "${GPU_MODE:-}" ]
-then
+# Parse GNU-style long options
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --gpu-mode=* )
+      GPU_MODE="${1#*=}"
+      ;;
+    # Add more long options here as needed
+    * )
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [ -z "${GPU_MODE:-}" ]; then
     echo "GPU mode missing"
     exit 1
-fi
-
-if [ "$GPU_MODE" == "cuda12" ]; then
+elif [ "$GPU_MODE" == "cuda12" ]; then
     export COMPOSE_FILE=common.compose.yml:cuda.compose.yml
 elif [ "$GPU_MODE" == "cpu" ]; then
     export COMPOSE_FILE=common.compose.yml:cpu-only.compose.yml
@@ -39,7 +51,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./scripts/display_processes.sh
+    ./scripts/display_processes.sh --gpu-mode=$GPU_MODE
     if [ $? -eq 0 ]
     then
         break
@@ -66,7 +78,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./scripts/display_processes.sh
+    ./scripts/display_processes.sh --gpu-mode=$GPU_MODE
     if [ $? -eq 0 ]
     then
         break
@@ -92,7 +104,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./scripts/display_processes.sh
+    ./scripts/display_processes.sh --gpu-mode=$GPU_MODE
     if [ $? -eq 0 ]
     then
         break
@@ -118,7 +130,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./scripts/display_processes.sh
+    ./scripts/display_processes.sh --gpu-mode=$GPU_MODE
     if [ $? -eq 0 ]
     then
         break
@@ -144,7 +156,7 @@ fi
 SLEEP_TIME=2
 for LOOP in $(seq 1 "$MAX_RETRIES")
 do
-    ./scripts/display_processes.sh
+    ./scripts/display_processes.sh --gpu-mode=$GPU_MODE
     if [ $? -eq 0 ]
     then
         break

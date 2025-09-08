@@ -1,14 +1,29 @@
 #!/usr/bin/env bash
 
-GPU_MODE="$1"
+GPU_MODE=""
 
-if [ -z "${GPU_MODE:-}" ]
-then
+# Parse GNU-style long options
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --gpu-mode=* )
+        # This extracts the option value from $1.
+        #   '#' is the parameter expansion operator for removing a prefix
+        #   '*=' matches everything up to and including the first '='
+        GPU_MODE="${1#*=}"
+        ;;
+        # Add more long options here as needed
+        * )
+        echo "Unknown option: $1" >&2
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+if [ -z "${GPU_MODE:-}" ]; then
     echo "GPU mode missing"
     exit 1
-fi
-
-if [ "$GPU_MODE" == "cuda12" ]; then
+elif [ "$GPU_MODE" == "cuda12" ]; then
     export COMPOSE_FILE=common.compose.yml:cuda.compose.yml
 elif [ "$GPU_MODE" == "cpu" ]; then
     export COMPOSE_FILE=common.compose.yml:cpu-only.compose.yml

@@ -196,7 +196,7 @@ services:
       agent-poc: {}
     volumes:
       - backend-init-signal-1:/init-signal
-      ##SRC - ../build/custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh:ro
+      - ../config/custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh:ro
     secrets:
       - redis_secrets
 

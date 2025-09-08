@@ -7,9 +7,8 @@ services:
     image: localhost/localhost/nemo-guardrails:latest
     profiles: [
       nemo,
-      telemetry
-      # infrastructure,
-      # all
+      backend,
+      all
     ]
 
     env_file:
