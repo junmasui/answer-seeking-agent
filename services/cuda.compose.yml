@@ -1,0 +1,7 @@
+name: agent
+
+include:
+  - ./api-server/deploy/cuda.compose.yml
+  - ./api-server/deploy/cuda-autotest.compose.yml
+  - ./celery-worker/deploy/cuda.compose.yml
+  - ./celery-worker/deploy/cuda-autotest.compose.yml

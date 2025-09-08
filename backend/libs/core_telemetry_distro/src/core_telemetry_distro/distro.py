@@ -34,9 +34,8 @@ class CustomDistro(OpenTelemetryDistro):
         print('CONFIGURING DISTRO %s\n%s' % (type(self), kwargs))
         print(''.join(traceback.format_stack()))
 
-        for k,v in os.environ.items():
-            if k.startswith('OTEL_'):
-                logger.info('%s: %s', k, v)
+        for k in sorted([k for k in os.environ if k.startswith('OTEL_')]):
+            logger.info('%s: %s', k, os.environ[k])
 
         # The OTEL_SERVICE_NAME environment variable is the canonical way to
         # specify the service name.
@@ -96,6 +95,9 @@ class CustomDistro(OpenTelemetryDistro):
             self._auto_instrument(wanted=wanted, **kwargs)
         except Exception:
             logger.exception("auto-instrumentation failed")
+
+        logger.info('CONFIGURED DISTRO %s\n%s', type(self), kwargs)
+        print('CONFIGURED DISTRO %s\n%s' % (type(self), kwargs))
 
 
     @property

@@ -1,0 +1,40 @@
+name: nemo
+
+services:
+  nemo-guardrails:
+    restart: unless-stopped
+
+    image: localhost/localhost/nemo-guardrails:latest
+    profiles: [
+      nemo,
+      backend,
+      all
+    ]
+
+    env_file:
+      - nemo.env
+      - opentelemetry-instrument.env
+    ports:
+      - '27500:8000'
+    networks:
+      - agent-poc
+    volumes:
+      - ../../dist:/dist:ro
+      ##SRC - ../config/config:/config:ro
+      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - ../config/docker/pyproject.toml:/app/pyproject.toml
+      ##SRC - ../config/docker/uv.lock:/app/uv.lock:ro
+    secrets:
+      - answers_secrets
+
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # The option --config=/config is required for multi-config support.
+    command: ["server", "--config=/config"]
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

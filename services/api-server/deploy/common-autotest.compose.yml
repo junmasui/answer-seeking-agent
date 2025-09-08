@@ -1,0 +1,251 @@
+services:
+  init-backend-autotest-volumes:
+    restart: 'no'
+
+    image: 'docker.io/python:3.12.8-slim-bookworm'
+    profiles: [ init-volumes, backend-autotest, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - backend-autotest-home-1:/home/python/test-home-1
+      - backend-autotest-venv-1:/home/python/test-venv-1
+      - backend-autotest-staging-1:/home/python/test-staging-1
+      - backend-autotest-home-2:/home/python/test-home-2
+      - backend-autotest-venv-2:/home/python/test-venv-2
+      - backend-autotest-staging-2:/home/python/test-staging-2
+      - backend-autotest-home-3:/home/python/test-home-3
+      - backend-autotest-venv-3:/home/python/test-venv-3
+      - backend-autotest-home-4:/home/python/test-home-4
+      - backend-autotest-venv-4:/home/python/test-venv-4
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        ls -ld /home/python/
+
+        for VOL in \
+          'test-home-1' 'test-venv-1' 'test-staging-1' \
+          'test-home-2' 'test-venv-2' 'test-staging-2' \
+          'test-venv-3' 'test-home-3' \
+          'test-venv-4' 'test-home-4'
+        do
+          touch /home/python/$$VOL/.initialized
+          chown -R 1000:1000 /home/python/$$VOL
+          chmod -R 755 /home/python/$$VOL
+          ls -ld /home/python/$$VOL
+        done
+
+  backend-autotest-dependency-gate:
+    restart: 'no'
+
+    image: localhost/localhost/debian-slim-util:1.0
+    profiles: [ backend-autotest, infrastructure, all ]
+
+    env_file:
+      - dependency-gate.env
+      - automated-test.env
+    networks:
+      - agent-poc
+    volumes:
+      - backend-autotest-init-signal-1:/init-signal
+      - ../config/run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
+      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
+    secrets:
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
+      - redis_secrets
+      - weaviate_secrets
+
+    mem_limit: 128m
+    memswap_limit: 128m
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    entrypoint: 'bash'
+    command: [ /run_dev_dependency_gate.sh ]
+
+
+  api-server-autotest:
+    depends_on:
+      init-backend-autotest-volumes:
+        condition: service_completed_successfully
+
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
+    profiles: [ backend-autotest, all ]
+
+    environment:
+      DEBUGGER_LISTEN: true
+      JWT_WRITE_CLAIM_MISSING_OK: true
+      # Only environment variables that are important to a Docker environment
+      # will be configured here. The reason is that changes to environment variables
+      # configured here do require a restart before they take effect:
+      # application-centric ones should be designed to avoiid a Docker container restart.
+      #
+      # The Python bytecode cache should be moved away from the bind-mount because
+      # there is no need for it shared with the host.
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
+    env_file:
+      - automated-test.env
+      - opentelemetry-instrument.env
+    ports: # use if it is necessary to expose the container to the host machine
+      - '8102:8100'
+    networks:
+      - agent-poc
+    volumes:
+      # Mount the project directory to /app in the container
+      - ../../../backend/apps:/app/apps
+      - ../../../backend/libs:/app/libs
+      - ../../../backend/alembic.ini:/app/alembic.ini
+      - ../../../backend/pyproject.toml:/app/pyproject.toml
+      - ../../../backend/pytest.ini:/app/pytest.ini
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro
+      - backend-autotest-init-signal-1:/init-signal
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - backend-autotest-home-1:/home/python
+      ##SRC - backend-autotest-venv-1:/app/.venv
+      - backend-autotest-staging-1:/staging
+    secrets:
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
+      - redis_secrets
+      - weaviate_secrets
+
+    user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_api_server.sh' ]
+    deploy:
+      resources:
+        limits:
+          memory: 4G # Give enough to run local model
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    healthcheck:
+      # When this service start for the first time, there is multiple minutes while the
+      # python environment is sync'ed to the requirements file then when the FastAPI server
+      # is starting up. A health-check based on API pinging will fail during the sync and the
+      # start up.
+      #
+      # For now, we just check if python3 can run. Later, we will  try to come up  
+      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      test: ['CMD', 'python3', '--version']
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+
+
+
+  automated-test:
+    depends_on:
+      init-backend-autotest-volumes:
+        condition: service_completed_successfully
+
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
+    profiles: [ automated-test, all ]
+
+    environment:
+      DEBUGGER_LISTEN: true
+      # Only environment variables that are important to a Docker environment
+      # will be configured here. The reason is that changes to environment variables
+      # configured here do require a restart before they take effect:
+      # application-centric ones should be designed to avoiid a Docker container restart.
+      #
+      # The Python bytecode cache should be moved away from the bind-mount because
+      # there is no need for it shared with the host.
+      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+
+      # https://github.com/docker/compose/issues/6029
+      PYTHONUNBUFFERED: 1
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
+      GPU_MODE: cpu
+    env_file:
+      - automated-test.env
+    networks:
+      - agent-poc
+    volumes:
+      - backend-autotest-init-signal-1:/init-signal
+      # Mount the project directory to /app in the container
+      - ../../../backend/apps:/app/apps
+      - ../../../backend/libs:/app/libs
+      - ../../../backend/pytest.ini:/app/pytest.ini
+      - ../../../backend/pyproject.toml:/app/pyproject.toml
+      - ../../../backend/pytest.ini:/app/pytest.ini
+      # Mount important scripts into the container when we are
+      # avoiding rebuilding images to capture their latest version.
+      - ../config/run_automated_test.sh:/run_automated_test.sh:ro
+      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - backend-autotest-home-4:/home/python
+      ##SRC - backend-autotest-venv-4:/app/.venv
+    secrets:
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - celery_flower_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
+      - redis_secrets
+
+    user: '1000:1000'
+    # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+    # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_automated_test.sh' ]
+
+
+#
+# Named volumes are not created until the dependent service
+# is started.
+#
+volumes:
+  backend-autotest-init-signal-1:
+    driver: local
+  backend-autotest-home-1:
+    driver: local
+  backend-autotest-venv-1:
+    driver: local
+  backend-autotest-staging-1:
+    driver: local
+  backend-autotest-home-2:
+    driver: local
+  backend-autotest-venv-2:
+    driver: local
+  backend-autotest-staging-2:
+    driver: local
+  backend-autotest-prometheus-2:
+    driver: local
+  backend-autotest-home-3:
+    driver: local
+  backend-autotest-venv-3:
+    driver: local
+  backend-autotest-home-4:
+    driver: local
+  backend-autotest-venv-4:
+    driver: local

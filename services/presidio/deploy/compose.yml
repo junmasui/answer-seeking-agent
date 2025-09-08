@@ -1,0 +1,72 @@
+name: presidio
+
+services:
+  presidio-analyzer:
+    restart: unless-stopped
+
+    image: mcr.microsoft.com/presidio-analyzer:2.2.359
+    profiles: [
+      presidio,
+      backend,
+      all
+    ]
+
+    env_file:
+      - opentelemetry-instrument.env
+    ports:
+      - '27600:3000'
+    networks:
+      - agent-poc
+    environment:
+      - NLP_CONF_FILE=/conf/transformers.yaml
+      - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
+    volumes:
+      - ../../dist:/dist:ro
+      - ../config/run_presidio_analyzer.sh:/run_presidio_analyzer.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/pyproject.toml://usr/bin/presidio-analyzer/pyproject.toml
+      - ../config/conf:/conf:ro
+      - ../config/healthcheck.py:/healthcheck.py:ro
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    command: ["bash", "/run_presidio_analyzer.sh"]
+
+    healthcheck:
+      test: ["CMD", "python3", "/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  presidio-anonymizer:
+    restart: unless-stopped
+
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    profiles: [
+      none
+      # presidio,
+      # infrastructure,
+      # all
+    ]
+
+    ports:
+      - '27601:5001'
+    networks:
+      - agent-poc
+    volumes:
+      - ../../dist:/dist:ro
+      - ../config/run_presidio_anonymizer.sh:/run_presidio_anonymizer.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/pyproject.toml://usr/bin/presidio-anonymizer/pyproject.toml
+      - ../config/conf:/conf:ro
+      - ../config/healthcheck.py:/healthcheck.py:ro
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    command: ["bash", "/run_presidio_anonymizer.sh"]
+
+    healthcheck:
+      test: ["CMD", "python3", "/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

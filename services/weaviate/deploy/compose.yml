@@ -1,0 +1,91 @@
+services:
+  init-weaviate-volumes:
+    restart: 'no'
+
+    image: 'docker.io/debian:bookworm-slim'
+    profiles: [ init-volumes, weaviate, infrastructure-core, infrastructure, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - weaviate-data-1:/data-1
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        for VOL in 'data-1'
+        do
+          touch /$$VOL/.initialized
+          chown -R 999:999 /$$VOL
+          chmod -R 777 /$$VOL
+          ls -ld /$$VOL
+        done
+
+  weaviate:
+    restart: unless-stopped
+    depends_on:
+      init-weaviate-volumes:
+        condition: service_completed_successfully
+
+    image: cr.weaviate.io/semitechnologies/weaviate:1.30.3
+    profiles: [ weaviate, infrastructure-core, infrastructure, all ]
+    healthcheck:
+      # The weaviate image does not have curl installed. And since the image is based on
+      # busybox, curl is not available.
+      # wget: -q    Turns off wget output, specifically the progress bar.
+      #       -S    Shows the server response, which includes the HTTP status code.
+      #       -O -  Writes the content to stdout.
+      # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use
+      # the IPv6 ::1 address where there is no listening port.
+      # grep: -q    Quiet. Exit code 0 if PATTERN is found, 1 otherwise
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qS -O - http://127.0.0.1:25080/v1/.well-known/live 2>&1
+          | grep -q 'HTTP/1.1 200 OK'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+    ports:
+    - 25080:25080
+    - 25051:25051
+    networks:
+      - agent-poc
+    volumes:
+      - weaviate-data-1:/var/lib/weaviate
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+    secrets:
+      - weaviate_secrets
+
+    #user: 'redis:redis'
+    entrypoint: [ '/custom-docker-entrypoint.sh']
+
+    command: [
+        '--host',
+        '0.0.0.0',
+        '--port',
+        '25080',
+        '--scheme',
+        'http'
+    ]
+
+    environment:
+      # Only environment variables that are important to the Docker environment
+      # will be configured here. All other environment variables are extracted
+      # to .env files for easier and more isolated management.
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      GRPC_PORT: 25051
+    env_file:
+      - weaviate.env
+
+volumes:
+  weaviate-data-1:
+    driver: local

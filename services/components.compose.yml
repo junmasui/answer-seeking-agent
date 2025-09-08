@@ -1,0 +1,59 @@
+
+networks:
+  agent-poc:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: 'true'
+      com.docker.network.driver.mtu: 1500
+    ipam:
+      config:
+        - subnet: 172.31.1.0/24
+          gateway: 172.31.1.1
+
+secrets:
+  minio_secrets:
+    file: ./secrets/minio.secrets.env
+  postgres_secrets:
+    file: ./secrets/postgres.secrets.env
+  redis_secrets:
+    file: ./secrets/redis.secrets.env
+  weaviate_secrets:
+    file: ./secrets/weaviate.secrets.env
+  opensearch_secrets:
+    file: ./secrets/opensearch.secrets.env
+
+  redis_conf:
+    file: ./secrets/redis.conf
+
+  grafana_secrets:
+    file: ./secrets/grafana.secrets.env
+
+  celery_flower_secrets:
+    file: ./secrets/celery-flower.secrets.env
+  celery_flower_autotest_secrets:
+    file: ./secrets/celery-flower.autotest.secrets.env
+
+  answers_secrets:
+    file: ./secrets.env
+
+  answers_api_key_secrets:
+    file: ./secrets/answers.api-key.secrets.env
+  answers_jwt_secrets:
+    file: ./secrets/answers.jwt.secrets.env
+  answers_minio_secrets:
+    file: ./secrets/answers.minio.secrets.env
+  answers_postgres_secrets:
+    file: ./secrets/answers.postgres.secrets.env
+  checkpoints_postgres_secrets:
+    file: ./secrets/checkpoints.postgres.secrets.env
+
+  answers_api_key_autotest_secrets:
+    file: ./secrets/answers.api-key.autotest.secrets.env
+  answers_jwt_autotest_secrets:
+    file: ./secrets/answers.jwt.autotest.secrets.env
+  answers_minio_autotest_secrets:
+    file: ./secrets/answers.minio.autotest.secrets.env
+  answers_postgres_autotest_secrets:
+    file: ./secrets/answers.postgres.autotest.secrets.env
+  checkpoints_postgres_autotest_secrets:
+    file: ./secrets/checkpoints.postgres.autotest.secrets.env

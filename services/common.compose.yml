@@ -1,0 +1,25 @@
+name: agent
+
+services: {}
+
+include:
+  - ./api-server/deploy/common.compose.yml
+  - ./api-server/deploy/common-autotest.compose.yml
+  - ./celery-worker/deploy/common.compose.yml
+  - ./celery-worker/deploy/common-autotest.compose.yml
+  - ./grafana/deploy/compose.yml
+  - ./jaeger/deploy/compose.yml
+  - ./loki/deploy/compose.yml
+  - ./minio/deploy/compose.yml
+  - ./opensearch/deploy/compose.yml
+  - ./otel-collector/deploy/compose.yml
+  - ./nemo/deploy/compose.yml
+  - ./postgres/deploy/compose.yml
+  - ./presidio/deploy/compose.yml
+  - ./prometheus/deploy/compose.yml
+  - ./redis/deploy/compose.yml
+  - ./traefik/deploy/compose.yml
+  - ./weaviate/deploy/compose.yml
+  - ./webui-server/deploy/compose.yml
+  - ./webui-server/deploy/compose-autotest.yml
+  - ./components.compose.yml

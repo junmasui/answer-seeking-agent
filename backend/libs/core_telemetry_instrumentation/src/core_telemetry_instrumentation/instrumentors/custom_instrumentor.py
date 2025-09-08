@@ -225,15 +225,19 @@ class CustomInstrumentor(BaseInstrumentor):
             span_name = wrapped_method.get('span_name')
 
             logger.info('WRAPPING %s', wrap_module)
-            module = importlib.import_module(wrap_module)
-            if getattr(module, wrap_object, None):
-                fname = f'{wrap_object}.{wrap_method}' if wrap_method is not None else wrap_object
-                logger.info('WRAPPING %s', fname)
+            try:
+                module = importlib.import_module(wrap_module)
+                if getattr(module, wrap_object, None):
+                    fname = f'{wrap_object}.{wrap_method}' if wrap_method is not None else wrap_object
+                    logger.info('WRAPPING %s', fname)
 
-                wrapper_func = wrapped_method.get('wrapper', _handle_request_wrapper)
-                wrapper_func = partial(wrapper_func, tracer=tracer, span_name=span_name)
+                    wrapper_func = wrapped_method.get('wrapper', _handle_request_wrapper)
+                    wrapper_func = partial(wrapper_func, tracer=tracer, span_name=span_name)
 
-                wrap_function_wrapper(wrap_module, fname, wrapper_func)
+                    wrap_function_wrapper(wrap_module, fname, wrapper_func)
+            except ModuleNotFoundError as ex:
+                print(f'CANNOT WRAP MODULE {wrap_module}')
+                logger.info('Module not wrapped', exc_info=ex)
 
         logger.info('CUSTOM INSTRUMENTED')
         print('CUSTOM INSTRUMENTED')
@@ -245,11 +249,15 @@ class CustomInstrumentor(BaseInstrumentor):
         for wrapped_method in WRAPPED_METHODS:
             wrap_module = wrapped_method.get('module')
             wrap_object = wrapped_method.get('object')
-            module = importlib.import_module(wrap_module)
-            wrapped = getattr(module, wrap_object, None)
+            try:
+                module = importlib.import_module(wrap_module)
+                wrapped = getattr(module, wrap_object, None)
 
-            # if wrapped:
-            #     unwrap(wrapped, wrapped_method.get('method'))
+                # if wrapped:
+                #     unwrap(wrapped, wrapped_method.get('method'))
+            except ModuleNotFoundError as ex:
+                print(f'CANNOT FIND MODULE {wrap_module}')
+                logger.info('Module not wrapped', exc_info=ex)
 
         print('CUSTOM UNINSTRUMENTED')
 
