@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+## set -e: Exit immediately if a command exits with a non-zero status.
+## set -u: Treat unset variables as an error and exit immediately.
 set -eu
 
 
@@ -14,14 +16,14 @@ set -eu
 # DOCKER=podman
 DOCKER="docker buildx"
 DOCKER_BUILD_OPTS="--no-cache"
-DOCKER_BUILD_OPTS=
+# DOCKER_BUILD_OPTS=
 
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   --file Dockerfile \
-  --build-context parent-dir=.. \
-  --build-context dependency-gate-dir=../../../dependency-gate \
-  --build-context src-dir=../../../../frontend/ \
+  --build-context config-dir=../config/ \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context src-dir=../../../frontend/ \
   --target production \
   --tag localhost/localhost/answers-frontend:node-22-bookworm \
   .
@@ -29,9 +31,9 @@ $DOCKER build \
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   --file Dockerfile \
-  --build-context parent-dir=.. \
-  --build-context dependency-gate-dir=../../../dependency-gate \
-  --build-context src-dir=../../../../frontend/ \
+  --build-context config-dir=../config/ \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context src-dir=../../../frontend/ \
   --target dev \
   --tag localhost/localhost/answers-frontend-dev:node-22-bookworm \
   .

@@ -12,11 +12,13 @@ set -eu
 
 # DOCKER=podman
 DOCKER="docker buildx"
+DOCKER_BUILD_OPTS="--no-cache"
+#DOCKER_BUILD_OPTS=
 
 $DOCKER build \
   --file Dockerfile \
-  --no-cache \
-  --build-context parent-dir=.. \
+  ${DOCKER_BUILD_OPTS} \
+  --build-context config-dir=../config \
   --tag localhost/localhost/nemo-guardrails:latest \
   --progress plain \
   . 2>&1

@@ -45,7 +45,7 @@ services:
       - agent-poc
     volumes:
       - backend-init-signal-1:/init-signal
-      - ../build/run_dependency_gate.sh:/run_dependency_gate.sh:ro
+      - ../config/run_dependency_gate.sh:/run_dependency_gate.sh:ro
       - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
@@ -98,10 +98,10 @@ services:
       ### - ../../../backend:/app
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      ##SRC - ../build/run_api_server.sh:/run_api_server.sh:ro
+      ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - backend-home-1:/home/python
       ##SRC - backend-venv-1:/app/.venv
       - backend-staging-1:/staging
@@ -168,10 +168,14 @@ services:
       agent-poc: {}
     volumes:
       # Mount the project directory to /app in the container
-      - ../../../backend:/app
+      - ../../../backend/apps:/app/apps
+      - ../../../backend/libs:/app/libs
+      - ../../../backend/alembic.ini:/app/alembic.ini
+      - ../../../backend/pyproject.toml:/app/pyproject.toml
+      - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      - ../build/run_build_backend.sh:/run_build_backend.sh:ro
+      ##SRC - ../config/run_build_backend.sh:/run_build_backend.sh:ro
       # Mount dist directory
       - ../../dist:/dist
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh

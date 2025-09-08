@@ -69,11 +69,11 @@ RUN \
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 
-COPY --from=parent-dir ./custom-docker-entrypoint.sh /
-COPY --from=parent-dir ./run_api_server.sh /
+COPY --from=config-dir ./custom-docker-entrypoint.sh /
+COPY --from=config-dir ./run_api_server.sh /
 
-COPY --from=celery-parent-dir ./run_celery_worker.sh /
-COPY --from=celery-parent-dir ./run_celery_flower.sh /
+COPY --from=celery-config-dir ./run_celery_worker.sh /
+COPY --from=celery-config-dir ./run_celery_flower.sh /
 
 COPY --from=dependency-gate-dir ./wait_for_gate.sh /
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
@@ -85,7 +85,9 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_worker.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_flower.sh \
-    && chown ${USER_ID}:${GROUP_ID} /run_api_server.sh
+    && chown ${USER_ID}:${GROUP_ID} /run_api_server.sh \
+    && mkdir /staging \
+    && chown ${USER_ID}:${GROUP_ID} /staging
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -105,8 +107,8 @@ USER ${USER_ID}:${GROUP_ID}
 
 RUN \
     set -eux ; \
-    uv venv --allow-existing ; \
-    uv sync --extra cpu --dev --all-packages
+    uv venv --allow-existing \
+    && uv sync --extra cpu --dev --all-packages
 
 
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]

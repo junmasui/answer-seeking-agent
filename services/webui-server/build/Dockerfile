@@ -27,8 +27,8 @@ RUN \
 # Copy in Dockerfile has a slightly different syntax. When copying a file to
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
-COPY --from=parent-dir ./custom-docker-entrypoint.sh /
-COPY --from=parent-dir ./run_webui_server.sh /
+COPY --from=config-dir ./custom-docker-entrypoint.sh /
+COPY --from=config-dir ./run_webui_server.sh /
 
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 

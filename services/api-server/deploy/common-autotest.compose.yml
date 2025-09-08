@@ -55,7 +55,7 @@ services:
       - agent-poc
     volumes:
       - backend-autotest-init-signal-1:/init-signal
-      - ../build/run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
+      - ../config/run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
       - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
@@ -111,7 +111,7 @@ services:
       - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      ##SRC - ../build/run_api_server.sh:/run_api_server.sh:ro
+      ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
@@ -198,8 +198,7 @@ services:
       - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      ##SRC - ../build/run_automated_test.sh:/run_automated_test.sh:ro
-      - backend-autotest-init-signal-1:/init-signal
+      ##SRC - ../config/run_automated_test.sh:/run_automated_test.sh:ro
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - backend-autotest-home-4:/home/python

@@ -16,7 +16,7 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # DOCKER=podman
 DOCKER="docker buildx"
 DOCKER_BUILD_OPTS="--no-cache"
-DOCKER_BUILD_OPTS=
+#DOCKER_BUILD_OPTS=
 
 #
 # Build an image with CUDA12 installed on Python 3.12 on Debian 12
@@ -35,10 +35,10 @@ $DOCKER build \
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   --file Dockerfile \
-  --build-context parent-dir=.. \
-  --build-context celery-parent-dir=../../../celery-worker/build \
-  --build-context dependency-gate-dir=../../../dependency-gate \
-  --build-context src-dir=../../../../backend \
+  --build-context config-dir=../config \
+  --build-context celery-config-dir=../../celery-worker/config \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context src-dir=../../../backend \
   --target production \
   --tag localhost/localhost/answers-backend:python-3.12-cpu \
   . 2>&1 \
@@ -47,10 +47,10 @@ $DOCKER build \
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   --file Dockerfile \
-  --build-context parent-dir=.. \
-  --build-context celery-parent-dir=../../../celery-worker/build \
-  --build-context dependency-gate-dir=../../../dependency-gate \
-  --build-context src-dir=../../../../backend \
+  --build-context config-dir=../config \
+  --build-context celery-config-dir=../../celery-worker/config \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context src-dir=../../../backend \
   --target dev \
   --tag localhost/localhost/answers-backend-dev:python-3.12-cpu \
   . 2>&1 \
@@ -63,10 +63,10 @@ $DOCKER build \
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   --file cuda12.Dockerfile \
-  --build-context parent-dir=.. \
-  --build-context celery-parent-dir=../../../celery-worker/build \
-  --build-context dependency-gate-dir=../../../dependency-gate \
-  --build-context src-dir=../../../../backend \
+  --build-context config-dir=../config \
+  --build-context celery-config-dir=../../celery-worker/config \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context src-dir=../../../backend \
   --target production \
   --tag localhost/localhost/answers-backend:python-3.12-cuda12 \
   . 2>&1 \
@@ -75,10 +75,10 @@ $DOCKER build \
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   --file cuda12.Dockerfile \
-  --build-context parent-dir=.. \
-  --build-context celery-parent-dir=../../../celery-worker/build \
-  --build-context dependency-gate-dir=../../../dependency-gate \
-  --build-context src-dir=../../../../backend \
+  --build-context config-dir=../config \
+  --build-context celery-config-dir=../../celery-worker/config \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context src-dir=../../../backend \
   --target dev \
   --tag localhost/localhost/answers-backend-dev:python-3.12-cuda12 \
   . 2>&1 \
