@@ -53,10 +53,15 @@ services:
     #   - '5173:5173'
     networks:
       - agent-poc
-    volumes: []
+    volumes:
       ##SRC - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
       # Mount the project directory to /app in the container
-      ##SRC - ../../../frontend/app:/app:ro
+      - ../../../frontend/app/index.html:/app/index.html
+      - ../../../frontend/app/jsconfig.json:/app/jsconfig.json
+      - ../../../frontend/app/package-lock.json:/app/package-lock.json
+      - ../../../frontend/app/package.json:/app/package.json
+      - ../../../frontend/app/src/:/app/src/
+      - ../../../frontend/app/vite.config.js:/app/vite.config.js
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount important script into the container when we are
       # avoiding rebuilding images to capture their latest version.
