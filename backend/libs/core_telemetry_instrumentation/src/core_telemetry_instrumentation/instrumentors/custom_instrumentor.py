@@ -180,7 +180,23 @@ WRAPPED_METHODS = [
         'method': 'lazy_load', 'span_name': 'unstructured_loader.lazy_load'},
     {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader',
         'method': 'lazy_load', 'span_name': 'single_doc_loader.lazy_load'},
+
     {'module': 'unstructured.partition.auto', 'object': 'partition', 'method': None, 'span_name': 'unstructured.partition'},
+
+    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_layout_elements_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_layout_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_text_from_image', 'span_name': 'unstructured.ocr-agent.get_text_from_image'},
+
+    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_layout_elements_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_layout_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_text_from_image', 'span_name': 'unstructured.ocr-agent.get_text_from_image'},
+
+    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'image_to_pdf_or_hocr', 'method': None, 'span_name': 'unstructured_pytesseract.image_to_pdf_or_hocr'},
+    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'image_to_string', 'method': None, 'span_name': 'unstructured_pytesseract.image_to_string'},
+    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'run_tesseract', 'method': None, 'span_name': 'unstructured_pytesseract.run_tesseract'},
+
+    {'module': 'pdfminer.pdfinterp', 'object': 'PDFPageInterpreter', 'method': 'process_page', 'span_name': 'pdfminer.PDFPageInterpreter.process_page'},
+    {'module': 'pdfminer.converter', 'object': 'PDFPageAggregator', 'method': 'get_result', 'span_name': 'pdfminer.PDFPageAggregator.get_result'},
 
     {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
         'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
@@ -192,6 +208,14 @@ WRAPPED_METHODS = [
 
     {'module': 'langgraph.pregel', 'object': 'Pregel',
         'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
+        
+    {'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine', 'object': 'SpacyNlpEngine',
+        'method': 'process_text', 'span_name': 'spacy_nlp_engine.process_text'},
+    {'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine', 'object': 'SpacyNlpEngine',
+        'method': 'process_batch', 'span_name': 'spacy_nlp_engine.process_batch'},
+
+    {'module': 'transformers', 'object': 'TextGenerationPipeline',
+        'method': '__call__', 'span_name': 'transformers_text_generation_pipeline.call'},
 
     {'module': 'spacy.language', 'object': 'Language',
         'method': '__call__', 'span_name': 'spacy.language'},

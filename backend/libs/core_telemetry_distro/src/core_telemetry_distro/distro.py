@@ -87,12 +87,12 @@ class CustomDistro(OpenTelemetryDistro):
             "langchain",
             "openai",
             "system-metrics",
-            "transformers",
+            # "transformers",
             # "weaviate",
         }
 
         try:
-            self._auto_instrument(wanted=wanted, **kwargs)
+            self._auto_instrument_entrypoints(wanted=wanted, **kwargs)
         except Exception:
             logger.exception("auto-instrumentation failed")
 
@@ -123,10 +123,24 @@ class CustomDistro(OpenTelemetryDistro):
         logger.info('loading instrumentor %s', entry_point.name)
         print('LOADING INSTRUMENTOR %s'% entry_point.name)
 
-        instrumentor: BaseInstrumentor = entry_point.load()
-        instrumentor().instrument(skip_dep_check=skip_dep_check, **kwargs)
+        instrumentor_cls: type[BaseInstrumentor] = entry_point.load()
+        self._auto_instrument(instrumentor_cls, skip_dep_check=skip_dep_check, **kwargs)
 
-    def _auto_instrument(self, wanted: set[str], **kwargs) -> None:
+    def _auto_instrument(self, instrumentor_cls, **kwargs):
+        """Instantiate an instrumentor class and call its instrument() method.
+
+        Centralizes error handling and logging for instantiation+instrument calls.
+        """
+        try:
+            instrumentor = instrumentor_cls()
+            instrumentor.instrument(**kwargs)
+        except Exception:
+            logger.exception(
+                "failed instantiating/instrumenting %s",
+                getattr(instrumentor_cls, "__name__", str(instrumentor_cls)),
+            )
+
+    def _auto_instrument_entrypoints(self, wanted: set[str], **kwargs) -> None:
         """Discover installed opentelemetry instrumentors and instrument the
         ones listed in `wanted` unless they are excluded by env.
 
@@ -163,10 +177,11 @@ class CustomDistro(OpenTelemetryDistro):
                 logger.info("no instrumentor entry point found for %s; skipping", lname)
                 continue
 
+            logger.info("instrumenting %s via entry point", lname)
             try:
-                logger.info("instrumenting %s via entry point", lname)
                 instrumentor_cls = ep.load()
-                instrumentor = instrumentor_cls()
-                instrumentor.instrument(**kwargs)
             except Exception:
-                logger.exception("failed instrumenting %s via entry point", lname)
+                logger.exception("failed to load entry point %s", lname)
+                continue
+
+            self._auto_instrument(instrumentor_cls, **kwargs)
