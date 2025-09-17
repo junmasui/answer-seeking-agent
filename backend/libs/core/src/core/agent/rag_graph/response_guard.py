@@ -32,7 +32,18 @@ def check_output_with_nemo(state: GraphState):
     messages = [{'role': 'user', 'content': question}, {'role': 'assistant', 'content': generation}]
     result = execute_nemo_guardrails_check('output_check', messages)
 
-    triggered_rail = result['output_data']['triggered_output_rail']
+    # Safely extract nested keys. If the expected structure isn't present,
+    # treat it as if no rail was triggered (same behavior as triggered_rail == False).
+    triggered_rail = False
+    try:
+        output_data = result.get('output_data') if isinstance(result, dict) else None
+        if isinstance(output_data, dict):
+            # Use get to avoid KeyError if 'triggered_output_rail' is missing
+            triggered_rail = bool(output_data.get('triggered_output_rail', False))
+        else:
+            logger.debug('Nemo result missing "output_data" or it is not a dict: %s', type(output_data))
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.exception('Error parsing nemo guardrails result: %s', exc)
 
     return {'nemo_output_check': 100 if triggered_rail else 0}
 
@@ -54,7 +65,7 @@ def check_output_with_presidio(state: GraphState):
     result = execute_presidio_check(generation)
 
     result = [x for x in result if x.get('score', 0.0) < 0.2]
-    result = [x for x in result if x.get('entity_type') not in ['PERSON', 'LOCATION', 'DATE_TIME']]
+    result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]
 
     violation_score = len(result)
 

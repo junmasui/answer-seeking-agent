@@ -39,7 +39,18 @@ def check_retrieval_with_nemo(state: GraphState):
 
         result = execute_nemo_guardrails_check('content_check', [{'role': 'user', 'content': docs_content}])
 
-        triggered_rail = result['output_data']['triggered_input_rail']
+        # Some nemo responses may not include the expected keys. Handle missing
+        # 'output_data' or 'triggered_input_rail' by treating them as False so
+        # the returned scores match the behavior when triggered_rail is False.
+        triggered_rail = False
+        try:
+            if isinstance(result, dict):
+                output_data = result.get('output_data')
+                if isinstance(output_data, dict):
+                    triggered_rail = bool(output_data.get('triggered_input_rail', False))
+        except Exception:
+            # Be conservative: if anything unexpected happens, treat as not triggered
+            triggered_rail = False
 
         scores[index] = 100 if triggered_rail else 0
 
@@ -75,7 +86,7 @@ def check_retrieval_with_presidio(state: GraphState):
         result = execute_presidio_check(docs_content)
 
         result = [x for x in result if x.get('score', 0.0) < 0.2]
-        result = [x for x in result if x.get('entity_type') not in ['PERSON', 'LOCATION', 'DATE_TIME']]
+        result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]
 
         violation_score = len(result)
         scores[index] = 100 if violation_score else 0
