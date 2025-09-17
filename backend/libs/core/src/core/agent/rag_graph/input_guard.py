@@ -30,7 +30,16 @@ def check_input_with_nemo(state: GraphState):
 
     result = execute_nemo_guardrails_check('input_check', [{'role': 'user', 'content': question}])
 
-    triggered_rail = result['output_data']['triggered_input_rail']
+    # Guard against missing keys. If 'output_data' or 'triggered_input_rail' are missing,
+    # treat as if no rail was triggered (same behavior as triggered_rail == False).
+    triggered_rail = False
+    try:
+        output_data = result.get('output_data') if isinstance(result, dict) else None
+        if isinstance(output_data, dict):
+            triggered_rail = bool(output_data.get('triggered_input_rail', False))
+    except Exception:
+        # If any unexpected structure is returned, default to False to preserve previous behavior.
+        triggered_rail = False
 
     return {'nemo_input_check': 100 if triggered_rail else 0}
 
@@ -53,7 +62,7 @@ def check_input_with_presidio(state: GraphState):
     result = execute_presidio_check(question)
 
     result = [x for x in result if x.get('score', 0.0) < 0.2]
-    result = [x for x in result if x.get('entity_type') not in ['PERSON', 'LOCATION', 'DATE_TIME']]
+    result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]
 
     violation_score = len(result)
 

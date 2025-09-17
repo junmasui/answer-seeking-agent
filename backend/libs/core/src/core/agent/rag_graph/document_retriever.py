@@ -83,6 +83,13 @@ def query_documents(state: GraphState):
 
     documents = [_clean_up_retrieved(x) for x in documents]
 
+    def _contains_content(doc: Document) -> bool:
+        """Return True when the Document's page_content contains non-whitespace characters."""
+        content = getattr(doc, "page_content", "") or ""
+        return content.strip() != ""
+
+    documents = [x for x in documents if _contains_content(x)]
+
     logger.info('---RETRIEVED %d DOCUMENTS---', len(documents))
 
     for idx, doc in enumerate(documents):

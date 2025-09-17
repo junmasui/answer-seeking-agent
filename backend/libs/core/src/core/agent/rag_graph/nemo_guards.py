@@ -13,6 +13,32 @@ def execute_nemo_guardrails_check(config_id: str, messages: list) -> dict:
     openai_api_key = config.open_api_key
     guardrails_url = str(config.nemo_guardrails_url)
 
+    # Validate messages early to avoid calling the external Nemo Guardrails service
+    if not messages:
+        # No messages supplied — return a consistent structure similar to the exception path
+        return {
+            'messages': [
+                {
+                    'role': 'assistant',
+                    'content': 'No input messages provided for content checking.'
+                }
+            ]
+        }
+
+    # Ensure last message has meaningful content
+    last_item = messages[-1]
+    last_content = last_item.get('content', None) if isinstance(last_item, dict) else None
+    if not last_content:
+        # Last message has no content — return without calling Nemo
+        return {
+            'messages': [
+                {
+                    'role': 'assistant',
+                    'content': 'Last message contains no content to check.'
+                }
+            ]
+        }
+
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {openai_api_key}',  # Note: Nemo server can use this for its own OpenAI calls

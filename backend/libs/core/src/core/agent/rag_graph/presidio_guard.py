@@ -11,6 +11,12 @@ def execute_presidio_check(text: str) -> dict:
     """Helper function to call the Presidio server."""
     config = get_lib_config()
     presidio_analyzer_url = str(config.presidio_analyzer_url)
+    # If text is empty or only whitespace, skip the external call and return
+    # an empty result immediately. This avoids unnecessary network calls
+    # and prevents sending invalid payloads to the Presidio analyzer.
+    if not text or not str(text).strip():
+        logger.debug('empty or whitespace-only text received; returning empty result')
+        return {}
 
     payload = {'text': text, 'language': 'en'}
     try:
