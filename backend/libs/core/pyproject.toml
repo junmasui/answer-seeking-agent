@@ -39,7 +39,7 @@ dependencies = [
   "redis>=5.2.1",
   "scikit-learn>=1.6.1",
   "sentence-transformers>=3.4.1",
-  "transformers>=4.48.0",
+  "transformers>=4.56.1",
   "unstructured[all-docs,docx,pdf]>=0.16.13",
   "weaviate-client>=4.15.4"
 ]

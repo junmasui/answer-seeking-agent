@@ -12,7 +12,8 @@ from celery.signals import (
 from core.signals import configure_sender, send_start_up
 from log_config_monitor import get_logging_conf_monitor
 
-from early_init.load_otel import load_custom_distro_by_entry_point
+from core_telemetry_distro.verifier import verify_distro
+from early_init.load_otel import load_custom_distro_by_entry_point, load_custom_configurator_by_entry_point
 
 from .metrics import child_exit, start_metrics
 
@@ -79,6 +80,9 @@ def handle_worker_process_init(**_kwargs):
     logger.info('INITIALIZING TELEMETRY')
 
     load_custom_distro_by_entry_point('custom_otel')
+    load_custom_configurator_by_entry_point('custom_otel')
+
+    verify_distro()
 
     start_metrics(is_main_worker=False)
 

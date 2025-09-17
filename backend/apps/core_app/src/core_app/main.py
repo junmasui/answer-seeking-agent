@@ -48,7 +48,7 @@ async def lifespan(fastapi_app: FastAPI):
 
     ## load_custom_distro_by_entry_point('distro')
     ## load_custom_distro_by_entry_point('custom_otel')
-    ## verify_distro()
+    verify_distro()
 
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)

@@ -1,7 +1,9 @@
 import os
+import logging
+
 from opentelemetry.distro import OpenTelemetryConfigurator
 from opentelemetry.sdk.resources import Resource
-import logging
+
 
 from .lib_config import get_telemetry_config
 
@@ -33,74 +35,33 @@ class CustomConfigurator(OpenTelemetryConfigurator):
             }
         )
 
-        for k in sorted(os.environ.keys()):
-            if k.startswith('OTEL_'):
-                v = os.environ[k]
-                logger.info('%s: %s', k, v)
-                print(f'{k}: {v}')
+        otel_env_vars = sorted([k for k in os.environ if k.startswith('OTEL_')])
+        for k in otel_env_vars:
+            v = os.environ[k]
+            logger.info('%s: %s', k, v)
+            print(f'ENV VAR {k}: {v}')
+
+        # The OTEL_SERVICE_NAME environment variable is the canonical way to
+        # specify the service name.
+        # See: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
+        #
+        # The opentelemetry-instrument command wrapper will read this and other
+        # environment variables and configure the OpenTelemetry SDK accordingly.
+        # The call to super().configure() will perform this configuration.
+        #
 
         super().configure(**kwargs)
 
-        # Initialize tracing
-        # if config['enable_tracing']:
-        #     setup_tracing(resource, config)
+        # We do not want a repeat of these issues. They were created because a dependency was
+        # calling set_tracer_provider and set_meter_provider outside of the normal
+        # SDK OpenTelemetry initialization flow:
+        #   https://github.com/huggingface/transformers/issues/39143
+        #   https://github.com/huggingface/transformers/issues/39115
+        #   https://github.com/huggingface/transformers/pull/39422
+        #
 
-        #     print('CONFIGURATOR CONFIGURED TRACING')
+        logger.info('CONFIGURED PROVIDERS %s', type(self))
 
-        # # Initialize metrics
-        # if config['enable_metrics']:
-        #     setup_metrics(resource, config)
-
-        #     print('CONFIGURATOR CONFIGURED METRICS')
-
-        # setup_auto_instrumentation()
-        # print('CONFIGURATOR CONFIGURED INSTRUMENTATION')
-        # resource = Resource.create(
-        #     {
-        #         'service.name': config['service_name'],
-        #         'service.version': config['service_version'],
-        #         'deployment.environment': config['environment'],
-        #         'telemetry.sdk.name': 'opentelemetry',
-        #         'telemetry.sdk.language': 'python',
-        #     }
-        # )
-        # resource = Resource.create({
-        #     "service.name": os.getenv("OTEL_SERVICE_NAME", "unknown-service"),
-        #     "service.version": os.getenv("SERVICE_VERSION", "0.1.0"),
-        #     "deployment.environment": os.getenv("DEPLOYMENT_ENV", "development"),
-        # })
-        
-
-        # # Configure tracing
-        # tracer_provider = TracerProvider(resource=resource)
-        
-        # # Add span processor with OTLP exporter
-        # otlp_exporter = OTLPSpanExporter(
-        #     endpoint=os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4317"),
-        #     headers=self._parse_headers(os.getenv("OTEL_EXPORTER_OTLP_HEADERS", "")),
-        # )
-        
-        # span_processor = BatchSpanProcessor(otlp_exporter)
-        # tracer_provider.add_span_processor(span_processor)
-        
-        # # Set global tracer provider
-        # trace.set_tracer_provider(tracer_provider)
-        
-        # # Configure metrics
-        # metric_reader = PeriodicExportingMetricReader(
-        #     OTLPMetricExporter(
-        #         endpoint=os.getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "http://localhost:4317"),
-        #         headers=self._parse_headers(os.getenv("OTEL_EXPORTER_OTLP_HEADERS", "")),
-        #     ),
-        #     export_interval_millis=30000,  # 30 seconds
-        # )
-        
-        # meter_provider = MeterProvider(
-        #     resource=resource,
-        #     metric_readers=[metric_reader]
-        # )
-        
-        # metrics.set_meter_provider(meter_provider)
     
     def _parse_headers(self, headers_str: str) -> dict:
         """Parse OTLP headers from environment variable."""

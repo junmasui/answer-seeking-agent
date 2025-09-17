@@ -1,6 +1,5 @@
 from opentelemetry.distro import OpenTelemetryDistro
 
-from opentelemetry.sdk.resources import Resource
 from opentelemetry.instrumentation.environment_variables import OTEL_PYTHON_DISABLED_INSTRUMENTATIONS
 from typing import Collection
 import os
@@ -32,39 +31,20 @@ class CustomDistro(OpenTelemetryDistro):
 
         logger.info('CONFIGURING DISTRO %s\n%s', type(self), kwargs)
         print('CONFIGURING DISTRO %s\n%s' % (type(self), kwargs))
-        print(''.join(traceback.format_stack()))
+        print(f'CALL STACK\n{''.join(traceback.format_stack())}')
 
-        for k in sorted([k for k in os.environ if k.startswith('OTEL_')]):
-            logger.info('%s: %s', k, os.environ[k])
 
-        # The OTEL_SERVICE_NAME environment variable is the canonical way to
-        # specify the service name.
-        # See: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
-        #
-        # The opentelemetry-instrument command wrapper will read this and other
-        # environment variables and configure the OpenTelemetry SDK accordingly.
-        # The call to super()._configure() will perform this configuration.
-        #
-        # The following code is no longer needed because we can rely on the
-        # standard environment variable handling.
-        #
-        # if not os.getenv("OTEL_SERVICE_NAME"):
-        #     os.environ["OTEL_SERVICE_NAME"] = "answers_api_server"
-        # print(f'ENVIRON OTEL_SERVICE_NAME {os.environ["OTEL_SERVICE_NAME"]}')
-        # os.environ["OTEL_SERVICE_NAME"] = "answers_api_server"
+        # Add "transformers" to the disabled list to prevent it from overriding the service name.
+        disabled_instrumentations = os.environ.get("OTEL_PYTHON_DISABLED_INSTRUMENTATIONS", "").split(',')
+        disabled_instrumentations = [item for item in disabled_instrumentations if item]  # Remove empty strings
+        if "transformers" not in disabled_instrumentations:
+            disabled_instrumentations.append("transformers")
+        if "google_generativeai" not in disabled_instrumentations:
+            disabled_instrumentations.append("google_generativeai")
+        if "weaviate_client" not in disabled_instrumentations:
+            disabled_instrumentations.append("weaviate_client")
+        os.environ["OTEL_PYTHON_DISABLED_INSTRUMENTATIONS"] = ",".join(disabled_instrumentations)
             
-        # if not os.getenv("OTEL_RESOURCE_ATTRIBUTES"):
-        #     os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "service.name=answers_api_server,service.version=1.0.0"
-        # print(f'ENVIRON OTEL_RESOURCE_ATTRIBUTES {os.environ["OTEL_RESOURCE_ATTRIBUTES"]}')
-        # os.environ["OTEL_RESOURCE_ATTRIBUTES"] = "service.name=answers_api_server,service.version=1.0.0"
-            
-        # Configure default exporters if not set
-        if not os.getenv("OTEL_TRACES_EXPORTER"):
-            os.environ["OTEL_TRACES_EXPORTER"] = "otlp"
-            
-        if not os.getenv("OTEL_METRICS_EXPORTER"):
-            os.environ["OTEL_METRICS_EXPORTER"] = "otlp"
-
         # The DefaultDistro implementation already understands the standard OTEL environment variables
         # and will wire exporters, span processors, exporters endpoints, and sampling according
         # to those env vars.
@@ -74,7 +54,7 @@ class CustomDistro(OpenTelemetryDistro):
         # This list is derived from the package dependencies declared in pyproject.toml
         # and includes common instrumentations we want enabled automatically.
         # Honor OTEL_PYTHON_DISABLED_INSTRUMENTATIONS via _excluded_instrumentations.
-        wanted = {
+        wanted = [
             "custom_otel",
             "fastapi",
             "sqlalchemy",
@@ -83,13 +63,13 @@ class CustomDistro(OpenTelemetryDistro):
             "redis",
             "celery",
             "botocore",
-            # "google-generativeai",
+            # "google_generativeai",
             "langchain",
             "openai",
             "system-metrics",
             # "transformers",
-            # "weaviate",
-        }
+            # "weaviate_client",
+        ]
 
         try:
             self._auto_instrument_entrypoints(wanted=wanted, **kwargs)
@@ -104,7 +84,9 @@ class CustomDistro(OpenTelemetryDistro):
     def _excluded_instrumentations(self) -> Collection[str]:
         """Return instrumentations to exclude by default."""
         disabled = os.getenv(OTEL_PYTHON_DISABLED_INSTRUMENTATIONS, "")
-        return disabled.split(",") if disabled else []
+        disabled_list = disabled.split(",") if disabled else []
+        disabled_list.append("transformers")
+        return disabled_list
 
     def load_instrumentor(
         self, entry_point: EntryPoint, skip_dep_check: bool =True, **kwargs
