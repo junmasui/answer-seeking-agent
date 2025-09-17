@@ -109,6 +109,7 @@ services:
       - ../../../backend/alembic.ini:/app/alembic.ini
       - ../../../backend/pyproject.toml:/app/pyproject.toml
       - ../../../backend/pytest.ini:/app/pytest.ini
+      - ../../../backend/uv.lock:/app/uv.lock
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro

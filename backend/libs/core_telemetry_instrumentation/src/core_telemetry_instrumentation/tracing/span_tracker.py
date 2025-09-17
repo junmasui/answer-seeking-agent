@@ -8,15 +8,16 @@ management.
 """
 
 import time
+import logging
 from functools import cache
 from typing import Any, Dict, Optional
 
 from opentelemetry import context as context_api
 from opentelemetry import trace
-from opentelemetry.trace import Status
+from opentelemetry.trace import Status, set_span_in_context, get_tracer
 
-from opentelemetry.trace import get_tracer
 
+logger = logging.getLogger(__name__)
 
 @cache
 def get_span_tracker():
@@ -28,7 +29,6 @@ def get_span_tracker():
 
     """
     tracer = get_tracer(__name__)
-
     return SpanTracker(tracer)
 
 
@@ -79,15 +79,14 @@ class SpanTracker:
         # Set parent context for child span propagation
         parent_context = trace.set_span_in_context(parent_span) if parent_span else None
         # Start a new span using the tracer, with optional parent context and custom attributes
+
         span = self.tracer.start_span(name=name, attributes=attributes, context=parent_context)
         self._spans[run_id] = span
         self._run_start_times[run_id] = time.time()
 
         # Attach the span to the OpenTelemetry context, so it becomes the current active span
         # This is necessary for context propagation across async boundaries and threads
-        # _SPAN_KEY is the internal key used by OpenTelemetry to store the current span in the
-        # context object
-        token = context_api.attach(context_api.set_value(trace.propagation._SPAN_KEY, span))
+        token = context_api.attach(set_span_in_context(span))
         self._tokens[run_id] = token
 
         return span

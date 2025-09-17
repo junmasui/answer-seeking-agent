@@ -13,6 +13,7 @@ from timeit import default_timer
 import typing
 import importlib
 import importlib_metadata
+import inspect
 
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.trace import SpanKind, Tracer, get_tracer
@@ -72,6 +73,8 @@ async def _handle_async_request_wrapper(
 
     with tracer.start_as_current_span(span_name, kind=SpanKind.INTERNAL, attributes=span_attributes) as span:
         exception = None
+
+        logger.info('WRAPPED ASYNC REQUEST %s', wrapped.__name__)
 
         start_time = default_timer()
 
@@ -180,18 +183,74 @@ WRAPPED_METHODS = [
         'method': 'lazy_load', 'span_name': 'unstructured_loader.lazy_load'},
     {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader',
         'method': 'lazy_load', 'span_name': 'single_doc_loader.lazy_load'},
+
     {'module': 'unstructured.partition.auto', 'object': 'partition', 'method': None, 'span_name': 'unstructured.partition'},
+    # internal functions decorated with @requires_dependencies
+    {'module': 'unstructured.partition.pdf', 'object': '_partition_pdf_or_image_local', 'method': None, 'span_name': 'unstructured.pdf._partition_pdf_or_image_local'},
+
+    {'module': 'unstructured.partition.pdf', 'object': 'check_pdf_hi_res_max_pages_exceeded', 'method': None, 'span_name': 'unstructured.pdf.check_pdf_hi_res_max_pages_exceeded'},
+
+    {'module': 'unstructured.partition.pdf_image.ocr', 'object': 'process_data_with_ocr', 'method': None, 'span_name': 'unstructured.process_data_with_ocr'},
+    {'module': 'unstructured.partition.pdf_image.ocr', 'object': 'process_file_with_ocr', 'method': None, 'span_name': 'unstructured.process_file_with_ocr'},
+
+    {'module': 'unstructured.partition.pdf_image.pdfminer_processing', 'object': 'process_data_with_pdfminer', 'method': None, 'span_name': 'unstructured.process_data_with_pdfminer'},
+    {'module': 'unstructured.partition.pdf_image.pdfminer_processing', 'object': 'process_file_with_pdfminer', 'method': None, 'span_name': 'unstructured.process_file_with_pdfminer'},
+
+    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_layout_elements_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_layout_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_text_from_image', 'span_name': 'unstructured.ocr-agent.get_text_from_image'},
+
+    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_layout_elements_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_layout_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_from_image'},
+    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_text_from_image', 'span_name': 'unstructured.ocr-agent.get_text_from_image'},
+
+    {'module': 'unstructured_inference.inference.layout', 'object': 'process_data_with_model', 'method': None, 'span_name': 'unstructured.process_data_with_model'},
+    {'module': 'unstructured_inference.inference.layout', 'object': 'process_file_with_model', 'method': None, 'span_name': 'unstructured.process_file_with_model'},
+
+    {'module': 'unstructured_inference.models.detectron2onnx', 'object': 'UnstructuredDetectronONNXModel', 'method': 'initialize', 'span_name': 'UnstructuredDetectronONNXModel.initialize'},
+    {'module': 'unstructured_inference.models.detectron2onnx', 'object': 'UnstructuredDetectronONNXModel', 'method': 'predict', 'span_name': 'UnstructuredDetectronONNXModel.predict'},
+    {'module': 'unstructured_inference.models.yolox', 'object': 'UnstructuredYoloXModel', 'method': 'initialize', 'span_name': 'UnstructuredYoloXModel.initialize'},
+    {'module': 'unstructured_inference.models.yolox', 'object': 'UnstructuredYoloXModel', 'method': 'image_processing', 'span_name': 'UnstructuredYoloXModel.image_processing'},
+
+
+    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'image_to_pdf_or_hocr', 'method': None, 'span_name': 'unstructured_pytesseract.image_to_pdf_or_hocr'},
+    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'image_to_string', 'method': None, 'span_name': 'unstructured_pytesseract.image_to_string'},
+    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'run_tesseract', 'method': None, 'span_name': 'unstructured_pytesseract.run_tesseract'},
+
+    # {'module': 'pdfminer.pdfinterp', 'object': 'PDFPageInterpreter', 'method': 'process_page', 'span_name': 'pdfminer.PDFPageInterpreter.process_page'},
+    # {'module': 'pdfminer.converter', 'object': 'PDFPageAggregator', 'method': 'get_result', 'span_name': 'pdfminer.PDFPageAggregator.get_result'},
 
     {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
         'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
     {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
         'method': 'embed_query', 'span_name': 'hf_embeddings_model.embed_query'},
 
+    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
+        'method': 'add_texts', 'span_name': 'WeaviateVectorStore.add_texts'},
+    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
+        'method': 'similarity_search', 'span_name': 'WeaviateVectorStore.similarity_search'},
+    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
+        'method': 'similarity_search_with_score', 'span_name': 'WeaviateVectorStore.similarity_search_with_score'},
+    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
+        'method': 'max_marginal_relevance_search', 'span_name': 'WeaviateVectorStore.max_marginal_relevance_search'},
+    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
+        'method': 'max_marginal_relevance_search_by_vector', 'span_name': 'WeaviateVectorStore.max_marginal_relevance_search_by_vector'},
+    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
+        'method': 'delete', 'span_name': 'WeaviateVectorStore.delete'},
+
     {'module': 'langgraph.pregel', 'object': 'Pregel',
         'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
 
     {'module': 'langgraph.pregel', 'object': 'Pregel',
         'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
+        
+    {'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine', 'object': 'SpacyNlpEngine',
+        'method': 'process_text', 'span_name': 'spacy_nlp_engine.process_text'},
+    {'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine', 'object': 'SpacyNlpEngine',
+        'method': 'process_batch', 'span_name': 'spacy_nlp_engine.process_batch'},
+
+    # {'module': 'transformers', 'object': 'TextGenerationPipeline',
+    #     'method': '__call__', 'span_name': 'transformers_text_generation_pipeline.call'},
 
     {'module': 'spacy.language', 'object': 'Language',
         'method': '__call__', 'span_name': 'spacy.language'},
@@ -219,25 +278,59 @@ class CustomInstrumentor(BaseInstrumentor):
         tracer_provider = kwargs.get('tracer_provider')
         tracer = get_tracer(__name__, __version__, tracer_provider)
         for wrapped_method in WRAPPED_METHODS:
-            wrap_module = wrapped_method.get('module')
-            wrap_object = wrapped_method.get('object')
-            wrap_method = wrapped_method.get('method')
+            module_name = wrapped_method.get('module')
+            object_name = wrapped_method.get('object')
+            method_name = wrapped_method.get('method')
             span_name = wrapped_method.get('span_name')
 
-            logger.info('WRAPPING %s', wrap_module)
+            logger.info('WRAPPING %s', module_name)
             try:
-                module = importlib.import_module(wrap_module)
-                if getattr(module, wrap_object, None):
-                    fname = f'{wrap_object}.{wrap_method}' if wrap_method is not None else wrap_object
-                    logger.info('WRAPPING %s', fname)
-
-                    wrapper_func = wrapped_method.get('wrapper', _handle_request_wrapper)
-                    wrapper_func = partial(wrapper_func, tracer=tracer, span_name=span_name)
-
-                    wrap_function_wrapper(wrap_module, fname, wrapper_func)
+                wrap_module = importlib.import_module(module_name)
+                print(f'WRAPPED {module_name}')
             except ModuleNotFoundError as ex:
-                print(f'CANNOT WRAP MODULE {wrap_module}')
-                logger.info('Module not wrapped', exc_info=ex)
+                print(f'CANNOT WRAP MODULE {module_name}')
+                logger.info('Module not found %s', module_name)
+                continue
+
+            wrap_object = getattr(wrap_module, object_name, None)
+            if wrap_object is None:
+                logger.info('Object not found %s', object_name)
+                continue
+
+            if method_name is not None:
+                fname = f'{object_name}.{method_name}'
+                # Wrap object is a function.
+                fobj = getattr(wrap_object, method_name, None)
+            else:
+                fname = object_name
+                fobj = wrap_object
+
+            
+            logger.info('WRAPPING %s', fname)
+
+            # detect if the target object/function is asynchronous
+            is_async = False
+            is_gen = False
+            is_asyncgen = False
+            if fobj is not None:
+                try:
+                    is_async = inspect.iscoroutinefunction(fobj)
+                    is_gen = inspect.isgeneratorfunction(fobj)
+                    is_asyncgen = inspect.isasyncgenfunction(fobj)
+                except Exception:
+                    is_async = False
+                    is_gen = False
+                    is_asyncgen = False
+
+            # choose provided wrapper if present, otherwise pick async/sync handler
+            wrapper_func = wrapped_method.get('wrapper')
+            if wrapper_func is None:
+                wrapper_func = _handle_async_request_wrapper if is_async else _handle_request_wrapper
+
+            wrapper_func = partial(wrapper_func, tracer=tracer, span_name=span_name)
+
+            wrap_function_wrapper(wrap_module, fname, wrapper_func)
+
 
         logger.info('CUSTOM INSTRUMENTED')
         print('CUSTOM INSTRUMENTED')
