@@ -227,7 +227,6 @@ RUN \
 
 COPY --from=config-dir ./custom-docker-entrypoint.sh /
 COPY --from=config-dir ./run_api_server.sh /
-
 COPY --from=celery-config-dir ./run_celery_worker.sh /
 COPY --from=celery-config-dir ./run_celery_flower.sh /
 
@@ -270,7 +269,7 @@ RUN \
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the Vue.js development server
-CMD ["run_api_server.sh"]
+CMD ["/run_api_server.sh"]
 
 
 #

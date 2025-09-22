@@ -175,7 +175,7 @@ services:
       - ../../../backend/pytest.ini:/app/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      ##SRC - ../config/run_build_backend.sh:/run_build_backend.sh:ro
+      - ../config/run_build_backend.sh:/run_build_backend.sh:ro
       # Mount dist directory
       - ../../dist:/dist
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
