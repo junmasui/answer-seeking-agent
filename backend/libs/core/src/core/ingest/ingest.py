@@ -6,12 +6,13 @@ from uuid import UUID
 
 from cloudpathlib.s3 import S3Path
 from core_db.db_models import DbTrackedDocument
+from core_db.doc_mgr.doc.update import update_tracking_record
 from core_public import DocumentStatus
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
 
-from ..doc_mgr import get_documents, update_tracking_record
+from core_db.doc_mgr.doc.query import get_documents
 from ..lib_config import get_lib_config
 from ..providers.doc_loader import get_doc_loader
 from ..providers.file_store import get_s3_bucket

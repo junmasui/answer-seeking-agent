@@ -1,10 +1,12 @@
 import logging
 from pathlib import Path
 
+from core_db.doc_mgr.doc_set.query import get_document_sets
+
 from ...lib_config import get_lib_config
 from ...providers.file_store import get_s3_bucket, get_s3_directory
 from ..doc.add import add_document
-from ..doc_set.query import get_document_sets, list_document_sets
+from ..doc_set.query import list_document_sets
 
 logger = logging.getLogger(__name__)
 
