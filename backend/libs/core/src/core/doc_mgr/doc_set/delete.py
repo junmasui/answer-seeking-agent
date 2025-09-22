@@ -1,14 +1,10 @@
 import logging
-import uuid
 
-from core_db.db_models import DbTrackedDocumentSet
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
-from sqlalchemy import delete
+from core_db.doc_mgr.doc_set.delete import delete_tracking_record
 
-from .query import get_document_sets
+from core_db.doc_mgr.doc_set.query import get_document_sets
 
 logger = logging.getLogger(__name__)
-
 
 def delete_document_set(document_set_id):
     """Delete document set."""
@@ -22,23 +18,8 @@ def delete_document_set(document_set_id):
 
     # Delete tracking record.
 
-    _delete_tracking_record(doc_set_record.id)
+    delete_tracking_record(doc_set_record.id)
 
     return True
 
 
-def _delete_tracking_record(doc_set_uuid):
-    """Deletes the tracking record."""
-    if isinstance(doc_set_uuid, str):
-        doc_set_uuid = uuid.UUID(hex=doc_set_uuid)
-
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
-
-    with sessionmaker() as session, session.begin():
-        stmt = delete(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id == doc_set_uuid)
-        result = session.execute(stmt)
-
-    if result.rowcount == 0:
-        logger.warning('No document set found with UUID %s', doc_set_uuid)
-    else:
-        logger.debug('Successfully deleted document set with UUID %s', doc_set_uuid)

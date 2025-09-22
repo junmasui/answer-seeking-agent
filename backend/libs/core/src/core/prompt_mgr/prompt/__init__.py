@@ -1,7 +1,8 @@
+from core_db.prompt_mgr.prompt.query import get_prompt
 from .add import add_prompt
 from .delete import delete_prompt
 from .helper import add_chat_prompt
-from .query import get_prompt, list_prompts
+from .query import list_prompts
 from .stats import get_prompt_statistics
 from .update import update_prompt
 

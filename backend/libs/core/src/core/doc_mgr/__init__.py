@@ -1,18 +1,18 @@
+from core_db.doc_mgr.doc.query import get_documents
+from core_db.doc_mgr.doc_set.query import get_document_sets
+from core_db.doc_mgr.doc.update import update_tracking_record
 from .doc import (
     add_document,
     delete_document,
     get_document_statistics,
-    get_documents,
     list_documents,
     update_document,
     update_document_status,
-    update_tracking_record,
 )
 from .doc_set import (
     add_document_set,
     delete_document_set,
     get_document_set_statistics,
-    get_document_sets,
     list_document_sets,
     update_document_set,
 )

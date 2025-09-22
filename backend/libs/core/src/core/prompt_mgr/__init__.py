@@ -1,9 +1,9 @@
+from core_db.prompt_mgr.prompt.query import get_prompt
 from . import initial_prompts
 from .prompt import (
     add_chat_prompt,
     add_prompt,
     delete_prompt,
-    get_prompt,
     get_prompt_statistics,
     list_prompts,
     update_prompt,
