@@ -1,12 +1,12 @@
 import logging
+import uuid
+from contextlib import contextmanager
+
 from core_db.db_models import DbTrackedDocument
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import select
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
-
-import uuid
-from contextlib import contextmanager
 logger = logging.getLogger(__name__)
 
 

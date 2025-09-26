@@ -1,6 +1,8 @@
 """
-This is a very small custom module that provides early logging configuration, early environment
-variables configuration, and debugger initialization.
+Provide early initialization for logging, environment, and debugger.
+
+This module provides early configuration for logging, environment variables, and debugger
+initialization.
 """
 
 from . import config_env, config_logging

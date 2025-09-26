@@ -21,8 +21,10 @@ def documents_startup(sender):
 @reset_data_handler
 def documents_reset(sender):
     """
-    Drop and recreate document-related database tables and predefined data when a reset event is
-    triggered.
+    Drop and recreate document-related database tables on reset.
+
+    This handler, triggered by a reset event, drops and recreates all document-related database
+    tables and their predefined data.
     """
     if sender.is_worker:
         return

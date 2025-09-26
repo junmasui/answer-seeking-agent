@@ -7,17 +7,17 @@ for distributed tracing. Use get_span_tracker() to obtain a singleton instance f
 management.
 """
 
-import time
 import logging
+import time
 from functools import cache
 from typing import Any, Dict, Optional
 
 from opentelemetry import context as context_api
 from opentelemetry import trace
-from opentelemetry.trace import Status, set_span_in_context, get_tracer
-
+from opentelemetry.trace import Status, get_tracer, set_span_in_context
 
 logger = logging.getLogger(__name__)
+
 
 @cache
 def get_span_tracker():

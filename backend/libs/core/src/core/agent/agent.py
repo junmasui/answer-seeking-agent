@@ -103,7 +103,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     #
     # if otel_handler:
     #     callback_handlers.append(otel_handler)
-    
+
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
     logger.info('\n=============================\n=\n=\n=\n=')

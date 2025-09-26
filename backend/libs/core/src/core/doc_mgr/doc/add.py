@@ -39,5 +39,7 @@ def add_document(
         content_type=content_type,
         download_time_utc=download_time_utc,
         user_id=user_id,
-        size_bytes=size_bytes, file_modification_time=file_modification_time, s3_rel_path=s3_rel_path)
-
+        size_bytes=size_bytes,
+        file_modification_time=file_modification_time,
+        s3_rel_path=s3_rel_path,
+    )

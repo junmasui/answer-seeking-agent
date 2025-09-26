@@ -36,18 +36,44 @@ class ResponseCitationParser(BaseGenerationOutputParser[dict[str, str]]):
         return 'citation_parser'
 
     def parse(self, text: str) -> dict[str, str]:
+        """
+        Parse the output of an LLM call.
+
+        Args:
+            text: The text to parse.
+
+        Raises:
+            NotImplementedError: This parser can only be called by the `parse_with_prompt` method.
+
+        """
         raise NotImplementedError('This OutputParser can only be called by the `parse_with_prompt` method.')
 
     def invoke(
         self, input: Union[str, BaseMessage], config: Optional[RunnableConfig] = None, **kwargs: Any
     ) -> dict[str, str]:
         """
-        Critical override to bypass an internal lambda function that is preventing the
-        parse_result method from seeing the config object.
+        Invoke the parser on an input.
 
-        See v0.3.41 codebase: https://github.com/langchain-ai/langchain/blob/langchain-core%3D%3D0.3.41/libs/core/langchain_core/output_parsers/base.py#L90
-        Monitor the latest to see if the internal lambda function is removed:
-        https://github.com/langchain-ai/langchain/blob/master/libs/core/langchain_core/output_parsers/base.py#L90
+        This is a critical override to bypass an internal lambda function that is
+        preventing the parse_result method from seeing the config object.
+
+        Args:
+            input: The input to the parser, which can be a string or a BaseMessage.
+            config: The configuration for the runnable.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            A dictionary containing the parsed output.
+
+        Raises:
+            TypeError: If the input is not a BaseMessage.
+
+        See Also:
+            - v0.3.41 codebase:
+              https://github.com/langchain-ai/langchain/blob/langchain-core%3D%3D0.3.41/libs/core/langchain_core/output_parsers/base.py#L90
+            - Monitor the latest to see if the internal lambda function is removed:
+              https://github.com/langchain-ai/langchain/blob/master/libs/core/langchain_core/output_parsers/base.py#L90
+
         """
         if not isinstance(input, BaseMessage):
             raise TypeError(f'Input must be a BaseMessage, but got {type(input).__name__}.')
@@ -57,8 +83,8 @@ class ResponseCitationParser(BaseGenerationOutputParser[dict[str, str]]):
     def parse_result(self, result: list[Generation], *, partial: bool = False, config: dict = None) -> dict[str, str]:
         """Parse the output of an LLM call."""
         documents = config['configurable'].get('documents', [])
-        # Create a dict with keys of type str. When we parse out the document ID from the LLM generation,
-        # the parsed ID will be of type str.
+        # Create a dict with keys of type str. When we parse out the document ID from
+        # the LLM generation, the parsed ID will be of type str.
         documents_by_id = {str(doc.metadata['document_id']): doc for doc in documents}
 
         text = result[0].text

@@ -1,10 +1,9 @@
+import uuid
+
 from core_db.db_models import DbAgentPrompt
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import AgentPromptStatus, OwnerType
 from sqlalchemy import and_, select, update
-
-
-import uuid
 
 
 def add_or_update_agent_prompt(

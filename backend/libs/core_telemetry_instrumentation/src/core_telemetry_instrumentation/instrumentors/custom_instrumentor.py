@@ -6,14 +6,12 @@ which is built on top of OpenTelemetry and provides automatic instrumentation fo
 LLM applications including LangChain, vector stores, and LLM providers.
 """
 
-from functools import partial
-import logging
-import os
-from timeit import default_timer
-import typing
 import importlib
-import importlib_metadata
 import inspect
+import logging
+import typing
+from functools import partial
+from timeit import default_timer
 
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.trace import SpanKind, Tracer, get_tracer
@@ -60,6 +58,7 @@ def _handle_request_wrapper(
 
     return response
 
+
 async def _handle_async_request_wrapper(
     wrapped: typing.Callable[..., typing.Awaitable[typing.Any]],
     instance: typing.Any,
@@ -105,8 +104,8 @@ def _handle_lang_graph_wrapper(
     span_attributes = {}
     metric_attributes = {}
 
-    # When Pregel.stream is called, its `config` argument will be positional with index 2 or key-word.
-    # The `config` arugment will have type RunnableConfig
+    # When Pregel.stream is called, its `config` argument will be positional with
+    # index 2 or key-word. The `config` arugment will have type RunnableConfig
     if len(args) > 2:
         config = args[2]
     else:
@@ -128,7 +127,6 @@ def _handle_lang_graph_wrapper(
             callback = get_callback_handler(session_id=session_id, user_id=user_id)
             callbacks.append(callback)
             config['callbacks'] = callbacks
-
 
     with tracer.start_as_current_span(span_name, kind=SpanKind.INTERNAL, attributes=span_attributes) as span:
         exception = None
@@ -159,101 +157,290 @@ def _handle_lang_graph_wrapper(
 
 
 WRAPPED_METHODS = [
-    {'module': 'core.ingest.ingest', 'object': '_ingest_one_document', 'method': None, 'span_name': '_ingest_one_document'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'add_documents', 'span_name': 'vectorstore.add_documents'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore', 'method': 'search', 'span_name': 'vector.search'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'similarity_search', 'span_name': 'vector.similarity_search'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'similarity_search_with_score', 'span_name': 'vector.similarity_search_with_score'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'similarity_search_with_relevance_scores', 'span_name': 'vector.similarity_search_with_relevance_scores'},
-
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'similarity_search_by_vector', 'span_name': 'vector.similarity_search_by_vector'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'max_marginal_relevance_search', 'span_name': 'vector.max_marginal_relevance_search'},
-    {'module': 'langchain_core.vectorstores.base', 'object': 'VectorStore',
-        'method': 'max_marginal_relevance_search_by_vector', 'span_name': 'vector.max_marginal_relevance_search_by_vector'},
-
-    {'module': 'langchain_core.retrievers', 'object': 'BaseRetriever', 'method': 'invoke', 'span_name': 'retriever.invoke'},
-
-    {'module': 'langchain_unstructured.document_loaders', 'object': 'UnstructuredLoader',
-        'method': 'lazy_load', 'span_name': 'unstructured_loader.lazy_load'},
-    {'module': 'langchain_unstructured.document_loaders', 'object': '_SingleDocumentLoader',
-        'method': 'lazy_load', 'span_name': 'single_doc_loader.lazy_load'},
-
-    {'module': 'unstructured.partition.auto', 'object': 'partition', 'method': None, 'span_name': 'unstructured.partition'},
+    {
+        'module': 'core.ingest.ingest',
+        'object': '_ingest_one_document',
+        'method': None,
+        'span_name': '_ingest_one_document',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'add_documents',
+        'span_name': 'vectorstore.add_documents',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'search',
+        'span_name': 'vector.search',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'similarity_search',
+        'span_name': 'vector.similarity_search',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'similarity_search_with_score',
+        'span_name': 'vector.similarity_search_with_score',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'similarity_search_with_relevance_scores',
+        'span_name': 'vector.similarity_search_with_relevance_scores',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'similarity_search_by_vector',
+        'span_name': 'vector.similarity_search_by_vector',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'max_marginal_relevance_search',
+        'span_name': 'vector.max_marginal_relevance_search',
+    },
+    {
+        'module': 'langchain_core.vectorstores.base',
+        'object': 'VectorStore',
+        'method': 'max_marginal_relevance_search_by_vector',
+        'span_name': 'vector.max_marginal_relevance_search_by_vector',
+    },
+    {
+        'module': 'langchain_core.retrievers',
+        'object': 'BaseRetriever',
+        'method': 'invoke',
+        'span_name': 'retriever.invoke',
+    },
+    {
+        'module': 'langchain_unstructured.document_loaders',
+        'object': 'UnstructuredLoader',
+        'method': 'lazy_load',
+        'span_name': 'unstructured_loader.lazy_load',
+    },
+    {
+        'module': 'langchain_unstructured.document_loaders',
+        'object': '_SingleDocumentLoader',
+        'method': 'lazy_load',
+        'span_name': 'single_doc_loader.lazy_load',
+    },
+    {
+        'module': 'unstructured.partition.auto',
+        'object': 'partition',
+        'method': None,
+        'span_name': 'unstructured.partition',
+    },
     # internal functions decorated with @requires_dependencies
-    {'module': 'unstructured.partition.pdf', 'object': '_partition_pdf_or_image_local', 'method': None, 'span_name': 'unstructured.pdf._partition_pdf_or_image_local'},
-
-    {'module': 'unstructured.partition.pdf', 'object': 'check_pdf_hi_res_max_pages_exceeded', 'method': None, 'span_name': 'unstructured.pdf.check_pdf_hi_res_max_pages_exceeded'},
-
-    {'module': 'unstructured.partition.pdf_image.ocr', 'object': 'process_data_with_ocr', 'method': None, 'span_name': 'unstructured.process_data_with_ocr'},
-    {'module': 'unstructured.partition.pdf_image.ocr', 'object': 'process_file_with_ocr', 'method': None, 'span_name': 'unstructured.process_file_with_ocr'},
-
-    {'module': 'unstructured.partition.pdf_image.pdfminer_processing', 'object': 'process_data_with_pdfminer', 'method': None, 'span_name': 'unstructured.process_data_with_pdfminer'},
-    {'module': 'unstructured.partition.pdf_image.pdfminer_processing', 'object': 'process_file_with_pdfminer', 'method': None, 'span_name': 'unstructured.process_file_with_pdfminer'},
-
-    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_layout_elements_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image'},
-    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_layout_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_from_image'},
-    {'module': 'unstructured.partition.utils.ocr_models.paddle_ocr', 'object': 'OCRAgentPaddle', 'method': 'get_text_from_image', 'span_name': 'unstructured.ocr-agent.get_text_from_image'},
-
-    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_layout_elements_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image'},
-    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_layout_from_image', 'span_name': 'unstructured.ocr-agent.get_layout_from_image'},
-    {'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr', 'object': 'OCRAgentTesseract', 'method': 'get_text_from_image', 'span_name': 'unstructured.ocr-agent.get_text_from_image'},
-
-    {'module': 'unstructured_inference.inference.layout', 'object': 'process_data_with_model', 'method': None, 'span_name': 'unstructured.process_data_with_model'},
-    {'module': 'unstructured_inference.inference.layout', 'object': 'process_file_with_model', 'method': None, 'span_name': 'unstructured.process_file_with_model'},
-
-    {'module': 'unstructured_inference.models.detectron2onnx', 'object': 'UnstructuredDetectronONNXModel', 'method': 'initialize', 'span_name': 'UnstructuredDetectronONNXModel.initialize'},
-    {'module': 'unstructured_inference.models.detectron2onnx', 'object': 'UnstructuredDetectronONNXModel', 'method': 'predict', 'span_name': 'UnstructuredDetectronONNXModel.predict'},
-    {'module': 'unstructured_inference.models.yolox', 'object': 'UnstructuredYoloXModel', 'method': 'initialize', 'span_name': 'UnstructuredYoloXModel.initialize'},
-    {'module': 'unstructured_inference.models.yolox', 'object': 'UnstructuredYoloXModel', 'method': 'image_processing', 'span_name': 'UnstructuredYoloXModel.image_processing'},
-
-
-    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'image_to_pdf_or_hocr', 'method': None, 'span_name': 'unstructured_pytesseract.image_to_pdf_or_hocr'},
-    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'image_to_string', 'method': None, 'span_name': 'unstructured_pytesseract.image_to_string'},
-    {'module': 'unstructured_pytesseract.pytesseract', 'object': 'run_tesseract', 'method': None, 'span_name': 'unstructured_pytesseract.run_tesseract'},
-
+    {
+        'module': 'unstructured.partition.pdf',
+        'object': '_partition_pdf_or_image_local',
+        'method': None,
+        'span_name': 'unstructured.pdf._partition_pdf_or_image_local',
+    },
+    {
+        'module': 'unstructured.partition.pdf',
+        'object': 'check_pdf_hi_res_max_pages_exceeded',
+        'method': None,
+        'span_name': 'unstructured.pdf.check_pdf_hi_res_max_pages_exceeded',
+    },
+    {
+        'module': 'unstructured.partition.pdf_image.ocr',
+        'object': 'process_data_with_ocr',
+        'method': None,
+        'span_name': 'unstructured.process_data_with_ocr',
+    },
+    {
+        'module': 'unstructured.partition.pdf_image.ocr',
+        'object': 'process_file_with_ocr',
+        'method': None,
+        'span_name': 'unstructured.process_file_with_ocr',
+    },
+    {
+        'module': 'unstructured.partition.pdf_image.pdfminer_processing',
+        'object': 'process_data_with_pdfminer',
+        'method': None,
+        'span_name': 'unstructured.process_data_with_pdfminer',
+    },
+    {
+        'module': 'unstructured.partition.pdf_image.pdfminer_processing',
+        'object': 'process_file_with_pdfminer',
+        'method': None,
+        'span_name': 'unstructured.process_file_with_pdfminer',
+    },
+    {
+        'module': 'unstructured.partition.utils.ocr_models.paddle_ocr',
+        'object': 'OCRAgentPaddle',
+        'method': 'get_layout_elements_from_image',
+        'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image',
+    },
+    {
+        'module': 'unstructured.partition.utils.ocr_models.paddle_ocr',
+        'object': 'OCRAgentPaddle',
+        'method': 'get_layout_from_image',
+        'span_name': 'unstructured.ocr-agent.get_layout_from_image',
+    },
+    {
+        'module': 'unstructured.partition.utils.ocr_models.paddle_ocr',
+        'object': 'OCRAgentPaddle',
+        'method': 'get_text_from_image',
+        'span_name': 'unstructured.ocr-agent.get_text_from_image',
+    },
+    {
+        'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr',
+        'object': 'OCRAgentTesseract',
+        'method': 'get_layout_elements_from_image',
+        'span_name': 'unstructured.ocr-agent.get_layout_elements_from_image',
+    },
+    {
+        'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr',
+        'object': 'OCRAgentTesseract',
+        'method': 'get_layout_from_image',
+        'span_name': 'unstructured.ocr-agent.get_layout_from_image',
+    },
+    {
+        'module': 'unstructured.partition.utils.ocr_models.tesseract_ocr',
+        'object': 'OCRAgentTesseract',
+        'method': 'get_text_from_image',
+        'span_name': 'unstructured.ocr-agent.get_text_from_image',
+    },
+    {
+        'module': 'unstructured_inference.inference.layout',
+        'object': 'process_data_with_model',
+        'method': None,
+        'span_name': 'unstructured.process_data_with_model',
+    },
+    {
+        'module': 'unstructured_inference.inference.layout',
+        'object': 'process_file_with_model',
+        'method': None,
+        'span_name': 'unstructured.process_file_with_model',
+    },
+    {
+        'module': 'unstructured_inference.models.detectron2onnx',
+        'object': 'UnstructuredDetectronONNXModel',
+        'method': 'initialize',
+        'span_name': 'UnstructuredDetectronONNXModel.initialize',
+    },
+    {
+        'module': 'unstructured_inference.models.detectron2onnx',
+        'object': 'UnstructuredDetectronONNXModel',
+        'method': 'predict',
+        'span_name': 'UnstructuredDetectronONNXModel.predict',
+    },
+    {
+        'module': 'unstructured_inference.models.yolox',
+        'object': 'UnstructuredYoloXModel',
+        'method': 'initialize',
+        'span_name': 'UnstructuredYoloXModel.initialize',
+    },
+    {
+        'module': 'unstructured_inference.models.yolox',
+        'object': 'UnstructuredYoloXModel',
+        'method': 'image_processing',
+        'span_name': 'UnstructuredYoloXModel.image_processing',
+    },
+    {
+        'module': 'unstructured_pytesseract.pytesseract',
+        'object': 'image_to_pdf_or_hocr',
+        'method': None,
+        'span_name': 'unstructured_pytesseract.image_to_pdf_or_hocr',
+    },
+    {
+        'module': 'unstructured_pytesseract.pytesseract',
+        'object': 'image_to_string',
+        'method': None,
+        'span_name': 'unstructured_pytesseract.image_to_string',
+    },
+    {
+        'module': 'unstructured_pytesseract.pytesseract',
+        'object': 'run_tesseract',
+        'method': None,
+        'span_name': 'unstructured_pytesseract.run_tesseract',
+    },
     # {'module': 'pdfminer.pdfinterp', 'object': 'PDFPageInterpreter', 'method': 'process_page', 'span_name': 'pdfminer.PDFPageInterpreter.process_page'},
     # {'module': 'pdfminer.converter', 'object': 'PDFPageAggregator', 'method': 'get_result', 'span_name': 'pdfminer.PDFPageAggregator.get_result'},
-
-    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
-        'method': 'embed_documents', 'span_name': 'hf_embeddings_model.embed_documents'},
-    {'module': 'langchain_huggingface.embeddings.huggingface', 'object': 'HuggingFaceEmbeddings',
-        'method': 'embed_query', 'span_name': 'hf_embeddings_model.embed_query'},
-
-    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
-        'method': 'add_texts', 'span_name': 'WeaviateVectorStore.add_texts'},
-    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
-        'method': 'similarity_search', 'span_name': 'WeaviateVectorStore.similarity_search'},
-    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
-        'method': 'similarity_search_with_score', 'span_name': 'WeaviateVectorStore.similarity_search_with_score'},
-    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
-        'method': 'max_marginal_relevance_search', 'span_name': 'WeaviateVectorStore.max_marginal_relevance_search'},
-    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
-        'method': 'max_marginal_relevance_search_by_vector', 'span_name': 'WeaviateVectorStore.max_marginal_relevance_search_by_vector'},
-    {'module': 'langchain_weaviate.vectorstores', 'object': 'WeaviateVectorStore',
-        'method': 'delete', 'span_name': 'WeaviateVectorStore.delete'},
-
-    {'module': 'langgraph.pregel', 'object': 'Pregel',
-        'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
-
-    {'module': 'langgraph.pregel', 'object': 'Pregel',
-        'method': 'stream', 'span_name': 'graph.stream', 'wrapper': _handle_lang_graph_wrapper},
-        
-    {'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine', 'object': 'SpacyNlpEngine',
-        'method': 'process_text', 'span_name': 'spacy_nlp_engine.process_text'},
-    {'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine', 'object': 'SpacyNlpEngine',
-        'method': 'process_batch', 'span_name': 'spacy_nlp_engine.process_batch'},
-
+    {
+        'module': 'langchain_huggingface.embeddings.huggingface',
+        'object': 'HuggingFaceEmbeddings',
+        'method': 'embed_documents',
+        'span_name': 'hf_embeddings_model.embed_documents',
+    },
+    {
+        'module': 'langchain_huggingface.embeddings.huggingface',
+        'object': 'HuggingFaceEmbeddings',
+        'method': 'embed_query',
+        'span_name': 'hf_embeddings_model.embed_query',
+    },
+    {
+        'module': 'langchain_weaviate.vectorstores',
+        'object': 'WeaviateVectorStore',
+        'method': 'add_texts',
+        'span_name': 'WeaviateVectorStore.add_texts',
+    },
+    {
+        'module': 'langchain_weaviate.vectorstores',
+        'object': 'WeaviateVectorStore',
+        'method': 'similarity_search',
+        'span_name': 'WeaviateVectorStore.similarity_search',
+    },
+    {
+        'module': 'langchain_weaviate.vectorstores',
+        'object': 'WeaviateVectorStore',
+        'method': 'similarity_search_with_score',
+        'span_name': 'WeaviateVectorStore.similarity_search_with_score',
+    },
+    {
+        'module': 'langchain_weaviate.vectorstores',
+        'object': 'WeaviateVectorStore',
+        'method': 'max_marginal_relevance_search',
+        'span_name': 'WeaviateVectorStore.max_marginal_relevance_search',
+    },
+    {
+        'module': 'langchain_weaviate.vectorstores',
+        'object': 'WeaviateVectorStore',
+        'method': 'max_marginal_relevance_search_by_vector',
+        'span_name': 'WeaviateVectorStore.max_marginal_relevance_search_by_vector',
+    },
+    {
+        'module': 'langchain_weaviate.vectorstores',
+        'object': 'WeaviateVectorStore',
+        'method': 'delete',
+        'span_name': 'WeaviateVectorStore.delete',
+    },
+    {
+        'module': 'langgraph.pregel',
+        'object': 'Pregel',
+        'method': 'stream',
+        'span_name': 'graph.stream',
+        'wrapper': _handle_lang_graph_wrapper,
+    },
+    {
+        'module': 'langgraph.pregel',
+        'object': 'Pregel',
+        'method': 'stream',
+        'span_name': 'graph.stream',
+        'wrapper': _handle_lang_graph_wrapper,
+    },
+    {
+        'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine',
+        'object': 'SpacyNlpEngine',
+        'method': 'process_text',
+        'span_name': 'spacy_nlp_engine.process_text',
+    },
+    {
+        'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine',
+        'object': 'SpacyNlpEngine',
+        'method': 'process_batch',
+        'span_name': 'spacy_nlp_engine.process_batch',
+    },
     # {'module': 'transformers', 'object': 'TextGenerationPipeline',
     #     'method': '__call__', 'span_name': 'transformers_text_generation_pipeline.call'},
-
-    {'module': 'spacy.language', 'object': 'Language',
-        'method': '__call__', 'span_name': 'spacy.language'},
+    {'module': 'spacy.language', 'object': 'Language', 'method': '__call__', 'span_name': 'spacy.language'},
 ]
 ERROR_TYPE: str = 'error.type'
 
@@ -261,12 +448,13 @@ ERROR_TYPE: str = 'error.type'
 class CustomInstrumentor(BaseInstrumentor):
     # pylint: disable=protected-access,attribute-defined-outside-init
     """
-    An instrumentor for httpx Client and AsyncClient
+    An instrumentor for httpx Client and AsyncClient.
 
     See `BaseInstrumentor`
     """
 
     def instrumentation_dependencies(self) -> typing.Collection[str]:
+        """Return a collection of instrumentation dependencies."""
         logger.info('CUSTOM INSTRUMENTATION DEPENDENCIES')
         print('CUSTOM INSTRUMENTATION DEPENDENCIES')
         return []
@@ -287,7 +475,7 @@ class CustomInstrumentor(BaseInstrumentor):
             try:
                 wrap_module = importlib.import_module(module_name)
                 print(f'WRAPPED {module_name}')
-            except ModuleNotFoundError as ex:
+            except ModuleNotFoundError:
                 print(f'CANNOT WRAP MODULE {module_name}')
                 logger.info('Module not found %s', module_name)
                 continue
@@ -305,7 +493,6 @@ class CustomInstrumentor(BaseInstrumentor):
                 fname = object_name
                 fobj = wrap_object
 
-            
             logger.info('WRAPPING %s', fname)
 
             # detect if the target object/function is asynchronous
@@ -331,7 +518,6 @@ class CustomInstrumentor(BaseInstrumentor):
 
             wrap_function_wrapper(wrap_module, fname, wrapper_func)
 
-
         logger.info('CUSTOM INSTRUMENTED')
         print('CUSTOM INSTRUMENTED')
 
@@ -353,4 +539,3 @@ class CustomInstrumentor(BaseInstrumentor):
                 logger.info('Module not wrapped', exc_info=ex)
 
         print('CUSTOM UNINSTRUMENTED')
-

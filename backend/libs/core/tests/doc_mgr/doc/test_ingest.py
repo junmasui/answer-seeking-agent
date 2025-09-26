@@ -4,9 +4,8 @@ import pprint
 import uuid
 
 import pytest
-from sqlalchemy import func, select
-
 from core_public import DocumentStatus
+from sqlalchemy import func, select
 
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)

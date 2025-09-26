@@ -16,5 +16,3 @@ def get_prompt_statistics():
     table_stats = get_agent_prompt_stats()
 
     return AgentPromptStats(prompt_count=table_stats['prompt_count'], table_updated_time=table_stats['max_update_time'])
-
-

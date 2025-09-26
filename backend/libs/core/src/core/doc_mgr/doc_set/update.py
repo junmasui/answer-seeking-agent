@@ -6,6 +6,7 @@ from ...lib_config import get_lib_config
 
 logger = logging.getLogger(__name__)
 
+
 def update_document_set(doc_set_uuid, name=None, is_new_doc_default=None, is_public_viewable=None, last_user_id=None):
     """
     Update specific fields of a document set record.
@@ -29,5 +30,3 @@ def update_document_set(doc_set_uuid, name=None, is_new_doc_default=None, is_pub
 
         if last_user_id:
             record.last_user_id = last_user_id
-
-

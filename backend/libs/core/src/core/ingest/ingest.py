@@ -6,13 +6,13 @@ from uuid import UUID
 
 from cloudpathlib.s3 import S3Path
 from core_db.db_models import DbTrackedDocument
+from core_db.doc_mgr.doc.query import get_documents
 from core_db.doc_mgr.doc.update import update_tracking_record
 from core_public import DocumentStatus
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
 
-from core_db.doc_mgr.doc.query import get_documents
 from ..lib_config import get_lib_config
 from ..providers.doc_loader import get_doc_loader
 from ..providers.file_store import get_s3_bucket
@@ -84,12 +84,10 @@ def _ingest_one_document(
     detached_record: DbTrackedDocument, bucket: S3Path, vector_store: VectorStore, staging_dir: Path
 ) -> None:
     """
-    Ingest a single tracked document by downloading, processing, and storing it in the vector
-    store.
+    Ingest a single tracked document into the vector store.
 
-    Downloads the document from cloud storage to local staging, extracts text chunks using document
-    loaders, generates and stores semantic vectors, and updates the tracking record with ingestion
-    status.
+    This function ingests a single tracked document by downloading it, processing it, and storing it
+    in the vector store. It also updates the document's tracking record with the ingestion status.
     """
     with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
         if updateable_record is None:

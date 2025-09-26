@@ -1,11 +1,5 @@
 import logging
 
-from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-from opentelemetry.instrumentation.redis import RedisInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-
 from .custom_instrumentor import CustomInstrumentor
 
 logger = logging.getLogger(__name__)
@@ -72,13 +66,6 @@ def setup_auto_instrumentation():
         CustomInstrumentor().instrument(skip_dep_check=True)
         logger.debug('Custom instrumentation enabled')
     except Exception as e:
-        logger.warning(f'Failed to instrument Custom:', exc_info=e)
+        logger.warning('Failed to instrument Custom:', exc_info=e)
 
     logger.info('INSTRUMENTED')
-
-
-
-
-
-
-

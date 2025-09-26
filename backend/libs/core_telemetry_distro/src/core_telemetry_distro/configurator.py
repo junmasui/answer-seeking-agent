@@ -1,28 +1,28 @@
-import os
 import logging
+import os
 
 from opentelemetry.distro import OpenTelemetryConfigurator
 from opentelemetry.sdk.resources import Resource
-
 
 from .lib_config import get_telemetry_config
 
 logger = logging.getLogger(__name__)
 
+
 class CustomConfigurator(OpenTelemetryConfigurator):
-    """Custom configurator for OpenTelemetry components.
-    
+    """
+    Custom configurator for OpenTelemetry components.
+
     A configurator is a more focused component that handles specific configuration aspects of the
     OpenTelemetry setup. It's responsible for fine-tuning how telemetry data is collected,
     processed, and exported.
     """
-    
+
     def configure(self, **kwargs):
         """Configure OpenTelemetry SDK with custom settings."""
-
         logger.info('CONFIGURING CONFIGURATOR %s\n%s', type(self), kwargs)
         print('CONFIGURING CONFIGURATOR %s\n%s' % (type(self), kwargs))
-        
+
         # Create resource with service information
         config = get_telemetry_config().model_dump(mode='python')
         resource = Resource.create(
@@ -62,13 +62,11 @@ class CustomConfigurator(OpenTelemetryConfigurator):
 
         logger.info('CONFIGURED PROVIDERS %s', type(self))
 
-    
     def _parse_headers(self, headers_str: str) -> dict:
         """Parse OTLP headers from environment variable."""
         headers = {}
         if headers_str:
-            for header in headers_str.split(","):
-                key, value = header.split("=", 1)
+            for header in headers_str.split(','):
+                key, value = header.split('=', 1)
                 headers[key.strip()] = value.strip()
         return headers
-

@@ -22,16 +22,7 @@ from functools import cache
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic import (
-    AnyHttpUrl,
-    DirectoryPath,
-    Field,
-    FilePath,
-    HttpUrl,
-    NewPath,
-    RedisDsn,
-    StringConstraints,
-)
+from pydantic import AnyHttpUrl, DirectoryPath, Field, HttpUrl, NewPath, RedisDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -92,7 +83,6 @@ class LibrarySettings(BaseSettings):
     staging_dir: Union[DirectoryPath, NewPath] = Field(default='/staging', validation_alias='WORKER_STAGING_DIR')
 
     redis_dsn: RedisDsn = Field(default='', validation_alias='REDIS_URL')
-
 
     use_unstructured_cloud_api: bool = Field(default=False, validation_alias='USE_UNSTRUCTURED_API')
 

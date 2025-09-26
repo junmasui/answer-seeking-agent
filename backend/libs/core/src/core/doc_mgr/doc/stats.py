@@ -16,5 +16,3 @@ def get_document_statistics():
     table_stats = get_tracking_stats()
 
     return DocumentStats(document_count=table_stats['doc_count'], table_updated_time=table_stats['max_update_time'])
-
-

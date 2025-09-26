@@ -1,13 +1,12 @@
-
 import logging
+import uuid
+
 from core_db.db_models import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import delete
 
-
-import uuid
-
 logger = logging.getLogger(__name__)
+
 
 def delete_tracking_record(doc_set_uuid):
     """Deletes the tracking record."""

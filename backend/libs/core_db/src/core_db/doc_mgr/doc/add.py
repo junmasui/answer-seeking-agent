@@ -1,13 +1,24 @@
+import uuid
+
 from core_db.db_models import DbTrackedDocument
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import DocumentStatus
 from sqlalchemy import and_, select
 
 
-import uuid
-
-
-def add_or_update_document(*, document_set_uuid, file_dir, file_name, source_url, content_type, download_time_utc, user_id, size_bytes, file_modification_time, s3_rel_path):
+def add_or_update_document(
+    *,
+    document_set_uuid,
+    file_dir,
+    file_name,
+    source_url,
+    content_type,
+    download_time_utc,
+    user_id,
+    size_bytes,
+    file_modification_time,
+    s3_rel_path,
+):
     """
     Add or update a document tracking record in the database.
 

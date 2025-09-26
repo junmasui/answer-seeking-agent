@@ -1,7 +1,8 @@
 """
-This module provides decorators and utility classes for wrapping synchronous and asynchronous
-functions as LangChain Runnables. Use these wrappers to integrate custom logic with LangChain's
-execution framework. Both synchronous and asynchronous workflows are supported.
+Provide decorators to wrap functions as LangChain Runnables.
+
+Use these wrappers to integrate custom logic with LangChain's execution framework.
+Both synchronous and asynchronous workflows are supported.
 """
 
 import logging

@@ -5,10 +5,6 @@ from urllib.parse import urlparse
 
 import pytest
 
-from ..fixtures.doc import doc_table, empty_doc_table, populated_doc_table, ingested_doc_table
-from ..fixtures.doc_set import doc_set_table, empty_doc_set_table, populated_doc_set_table, readonly_doc_set_table
-from ..fixtures.prompt import prompt_table, empty_prompt_table, populated_prompt_table
-
 logger = logging.getLogger(__name__)
 pp = pprint.PrettyPrinter(indent=2, width=120)
 

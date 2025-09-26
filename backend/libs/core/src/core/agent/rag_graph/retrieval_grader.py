@@ -1,6 +1,7 @@
 """
-This module provides the node that evaluates whether the retrieved documents are relevent to
-addressing the user question.
+Evaluate if retrieved documents are relevant to the user's question.
+
+This module provides a node that evaluates whether retrieved documents are relevant to the user's question.
 
 See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """

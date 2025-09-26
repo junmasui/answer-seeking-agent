@@ -1,9 +1,9 @@
 import logging
 import logging.config
-import tomllib
 from functools import cache
 from pathlib import Path
 
+import tomllib
 from watchdog.events import FileSystemEvent, PatternMatchingEventHandler
 from watchdog.observers import Observer
 

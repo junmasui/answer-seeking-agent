@@ -43,5 +43,3 @@ def list_prompts(
     return AgentPromptList(
         prompts=prompt_list, prompt_count=table_stats.prompt_count, table_updated_time=table_stats.table_updated_time
     )
-
-

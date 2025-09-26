@@ -1,15 +1,13 @@
 import logging
+import uuid
+from typing import Optional, Sequence
 
 from core_db.db_models import DbTrackedDocument
 from core_db.db_models.doc_mgr import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import DocumentStatus, SortDirection
 from sqlalchemy import and_, column, func, select
-import uuid
-from typing import Optional, Sequence
-
 from sqlalchemy.orm import aliased, subqueryload
-
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +142,7 @@ def list_tracking_records(
 
     return existing_objs
 
+
 def _should_join_document_set(sort_by):
     """
     Determine if the query should explicitly join the document set table for sorting.
@@ -273,4 +272,3 @@ def _build_order_by(sort_by: Optional[list] = None):
 
     order_by = [y for x in sort_by if (y := _to_col(x)) is not None]
     return order_by
-
