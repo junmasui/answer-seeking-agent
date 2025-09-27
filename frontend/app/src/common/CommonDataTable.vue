@@ -207,12 +207,30 @@ const shouldRefresh = defineModel('shouldRefresh', { type: Boolean })
  * @property {Function} loadTableStats The function to call to load the stats for the data table.
  */
 const props = defineProps({
-  headers: Array,
-  itemsPerPageOptions: Array,
-  deleteSingleItem: Function,
-  deleteMultipleItems: Function,
-  loadItems: Function,
-  loadTableStats: Function
+  headers: {
+    type: Array,
+    default: () => []
+  },
+  itemsPerPageOptions: {
+    type: Array,
+    default: () => [10, 25, 50]
+  },
+  deleteSingleItem: {
+    type: Function,
+    default: () => async (/* id */) => {}
+  },
+  deleteMultipleItems: {
+    type: Function,
+    default: () => async (/* ids */) => {}
+  },
+  loadItems: {
+    type: Function,
+    default: () => async () => ({ totalItems: 0, items: [], tableUpdatedTime: null })
+  },
+  loadTableStats: {
+    type: Function,
+    default: () => async () => ({ totalItems: 0, tableUpdatedTime: null })
+  }
 })
 
 /**
