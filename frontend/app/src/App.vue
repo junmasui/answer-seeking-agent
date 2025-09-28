@@ -64,6 +64,7 @@
         <v-list-item title="Document Manager" to="/doc-mgr"></v-list-item>
         <v-list-item title="Conversational" to="/conversational"></v-list-item>
         <v-list-item title="Administrator" to="/admin"></v-list-item>
+        <v-list-item title="Diagram" to="/diagram"></v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-app>
