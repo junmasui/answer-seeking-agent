@@ -18,5 +18,3 @@ def get_document_set_statistics():
     return DocumentSetStats(
         document_set_count=table_stats['doc_set_count'], table_updated_time=table_stats['max_update_time']
     )
-
-

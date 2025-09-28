@@ -31,5 +31,3 @@ def update_prompt(
 
         if last_user_id:
             record.last_user_id = last_user_id
-
-

@@ -4,13 +4,12 @@ from typing import Optional
 
 from core_db.db_models import DbTrackedDocument
 from core_db.doc_mgr.doc.query import list_tracking_records
-from core_public import Document, DocumentList
-
-from core_public import DocumentStatus
+from core_public import Document, DocumentList, DocumentStatus
 
 from .stats import get_document_statistics
 
 logger = logging.getLogger(__name__)
+
 
 def list_documents(
     *,
@@ -95,5 +94,3 @@ def list_documents(
         document_count=table_stats.document_count,
         table_updated_time=table_stats.table_updated_time,
     )
-
-

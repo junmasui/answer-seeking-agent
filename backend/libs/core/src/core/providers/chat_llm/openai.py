@@ -46,7 +46,8 @@ def ping_chat_llm() -> PingResult:
         llm = get_chat_llm()
         message_content = """Please provide:
 
-        Your current operational status on a scale of 0 to 10, where 10 means fully operational with no errors and 0 means completely non-functional.
+        Your current operational status on a scale of 0 to 10, where 10 means fully operational with no errors
+        and 0 means completely non-functional.
 
         The current date and time in the following format: YYYY-MM-DD HH:MM (include your time zone).
         """

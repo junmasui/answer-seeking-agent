@@ -77,6 +77,13 @@ import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
 import EditDocDialog from './EditDocDialog.vue'
 
+const props = defineProps({
+  documentSet: {
+    type: Object,
+    default: null
+  }
+})
+
 const documentStore = useDocumentStore()
 
 const {
@@ -156,10 +163,6 @@ const itemsPerPageOptions = [
   { value: 50, title: '50' },
   { value: 100, title: '100' }
 ]
-
-const selectedItemCount = computed(() => {
-  return selectedItems.value.length
-})
 
 const targetIndex = ref(-1)
 const targetItem = ref({})
@@ -512,13 +515,12 @@ async function loadTableStats() {
   const auth = await getAuthorization()
   if (auth) {
     headers.Authorization = auth
-  }
-  else {
+  } else {
     // Return "mock" data. Reduces unauthorized-access errors seen on the API server.
     return {
-        totalItems: 0,
-        items: [],
-        tableUpdatedTime: '1970-01-01T00:00:00Z'
+      totalItems: 0,
+      items: [],
+      tableUpdatedTime: '1970-01-01T00:00:00Z'
     }
   }
 
@@ -550,13 +552,12 @@ async function loadItems() {
   const auth = await getAuthorization()
   if (auth) {
     headers.Authorization = auth
-  }
-  else {
+  } else {
     // Return "mock" data. Reduces unauthorized-access errors seen on the API server.
     return {
-        totalItems: 0,
-        items: [],
-        tableUpdatedTime: '1970-01-01T00:00:00Z'
+      totalItems: 0,
+      items: [],
+      tableUpdatedTime: '1970-01-01T00:00:00Z'
     }
   }
 

@@ -14,12 +14,14 @@ import { marked } from 'marked'
 
 const props = defineProps({
   message: {
-    type: String
+    type: String,
+    default: ''
   }
 })
 
 const transformed = computed(() => {
-  return marked(props.message)
+  // props.message has a safe default, but guard just in case it's ever null/undefined
+  return marked(props.message || '')
 })
 </script>
 

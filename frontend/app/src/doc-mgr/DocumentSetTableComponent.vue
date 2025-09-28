@@ -88,12 +88,6 @@ const itemsPerPageOptions = [
   { value: 50, title: '50' }
 ]
 
-const selectedItemCount = computed(() => {
-  return selectedItems.value.length
-})
-
-const targetIndex = ref(-1)
-
 const activeFilterEdit = ref({})
 
 //
@@ -350,13 +344,12 @@ async function loadTableStats() {
   const auth = await getAuthorization()
   if (auth) {
     headers.Authorization = auth
-  }
-  else {
+  } else {
     // Return "mock" data. Reduces unauthorized-access errors seen on the API server.
     return {
-        totalItems: 0,
-        items: [],
-        tableUpdatedTime: '1970-01-01T00:00:00Z'
+      totalItems: 0,
+      items: [],
+      tableUpdatedTime: '1970-01-01T00:00:00Z'
     }
   }
 
@@ -412,13 +405,12 @@ async function loadItems() {
   const auth = await getAuthorization()
   if (auth) {
     headers.Authorization = auth
-  }
-  else {
+  } else {
     // Return "mock" data. Reduces unauthorized-access errors seen on the API server.
     return {
-        totalItems: 0,
-        items: [],
-        tableUpdatedTime: '1970-01-01T00:00:00Z'
+      totalItems: 0,
+      items: [],
+      tableUpdatedTime: '1970-01-01T00:00:00Z'
     }
   }
 

@@ -12,10 +12,10 @@ from ...signals import start_up_handler
 @cache
 def get_embeddings():
     """
-    Return a HuggingFaceEmbeddings instance using the 'sentence-transformers/all-mpnet-base-v2'
-    model.
+    Return a cached HuggingFaceEmbeddings instance.
 
-    This function is cached to ensure only one embeddings model is loaded.
+    This function, which is cached to ensure a single instance, returns a HuggingFaceEmbeddings
+    instance that uses the 'sentence-transformers/all-mpnet-base-v2' model.
     """
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-mpnet-base-v2')
 

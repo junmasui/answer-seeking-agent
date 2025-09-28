@@ -1,6 +1,7 @@
 from core_db.doc_mgr.doc.query import get_documents
-from core_db.doc_mgr.doc_set.query import get_document_sets
 from core_db.doc_mgr.doc.update import update_tracking_record
+from core_db.doc_mgr.doc_set.query import get_document_sets
+
 from .doc import (
     add_document,
     delete_document,

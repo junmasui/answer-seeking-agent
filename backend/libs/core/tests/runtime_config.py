@@ -99,7 +99,9 @@ class RuntimeSettings(BaseSettings):
     static_api_key_scope_2: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_2')
 
     static_api_key_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_3')
-    # static_api_key_scope_3: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_3')
+    # static_api_key_scope_3: Optional[str] = Field(
+    #     default='', validation_alias='APPLICATION_API_KEY_SCOPE_3'
+    # )
 
 
 @cache

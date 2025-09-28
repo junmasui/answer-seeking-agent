@@ -1,6 +1,7 @@
 """
-This module provides the node that rewrites the user questions so that the document retrieval
-returns with better relevancy.
+Rewrite user questions for better document retrieval relevancy.
+
+This module provides the node that rewrites the user questions for more relevant document retrieval.
 
 See: Question Re-writer in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """

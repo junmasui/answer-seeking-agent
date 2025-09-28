@@ -1,14 +1,12 @@
 import logging
+import uuid
 from typing import Optional
 
 from core_db.db_models import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import SortDirection
 from sqlalchemy import and_, column, func, select
-import uuid
-
 from sqlalchemy.orm import aliased
-
 
 logger = logging.getLogger(__name__)
 
@@ -167,4 +165,3 @@ def _build_order_by(sort_by: Optional[list] = None):
 
     order_by = [_to_col(x) for x in sort_by]
     return order_by
-

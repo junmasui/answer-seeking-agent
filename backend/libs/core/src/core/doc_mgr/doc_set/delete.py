@@ -1,10 +1,10 @@
 import logging
 
 from core_db.doc_mgr.doc_set.delete import delete_tracking_record
-
 from core_db.doc_mgr.doc_set.query import get_document_sets
 
 logger = logging.getLogger(__name__)
+
 
 def delete_document_set(document_set_id):
     """Delete document set."""
@@ -21,5 +21,3 @@ def delete_document_set(document_set_id):
     delete_tracking_record(doc_set_record.id)
 
     return True
-
-

@@ -3,12 +3,10 @@ from contextlib import asynccontextmanager
 
 import sim_auth_app
 from core.signals import configure_sender, send_start_up
+from core_telemetry_distro.verifier import verify_distro
 from fastapi import FastAPI
 from log_config_monitor import get_logging_conf_monitor
 from starlette.types import ASGIApp, Receive, Scope, Send
-
-from early_init.load_otel import load_custom_distro_by_entry_point
-from core_telemetry_distro.verifier import verify_distro
 
 from .middlewares import ErrorLoggingMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
@@ -26,10 +24,27 @@ class SubAppRootPathFixer:
     """
 
     def __init__(self, app: ASGIApp, root_path: str):
+        """
+        Initialize the middleware.
+
+        Args:
+            app: The ASGI application.
+            root_path: The root path to set for the application.
+
+        """
         self.app = app
         self.root_path = root_path
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """
+        Call the middleware.
+
+        Args:
+            scope: The ASGI scope.
+            receive: The ASGI receive channel.
+            send: The ASGI send channel.
+
+        """
         scope['root_path'] = self.root_path
         await self.app(scope, receive, send)
 

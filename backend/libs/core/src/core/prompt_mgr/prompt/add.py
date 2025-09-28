@@ -31,5 +31,3 @@ def add_prompt(
         include_history=include_history,
         user_id=user_id,
     )
-
-

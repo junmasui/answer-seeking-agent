@@ -35,28 +35,28 @@
       <template
         v-for="header in headers"
         :key="header.value"
-        #[`header.${header.value}`]="{ column, isSorted, sortBy }"
+        #[`header.${header.value}`]="{ column, isSorted, sortBy: tableSortBy }"
       >
         <div
           style="display: flex; align-items: center"
           :width="column.width"
-          :aria-sort="sortDirection(header.value, isSorted, sortBy)"
+          :aria-sort="sortDirection(header.value, isSorted, tableSortBy)"
         >
           <!-- Display text -->
           <span>{{ header.title }}</span>
 
           <!-- up/down badge for sorting -->
           <v-icon v-if="header.sortable" class="ms-1">
-            {{ sortIcon(header.value, isSorted, sortBy) }}
+            {{ sortIcon(header.value, isSorted, tableSortBy) }}
           </v-icon>
 
           <!-- number badge for sorting precedence -->
           <span
-            v-if="header.sortable && sortNumber(header.value, sortBy)"
+            v-if="header.sortable && sortNumber(header.value, tableSortBy)"
             class="v-badge ms-1"
             style="font-size: 0.75em; color: #1976d2"
           >
-            {{ sortNumber(header.value, isSorted, sortBy) }}
+            {{ sortNumber(header.value, isSorted, tableSortBy) }}
           </span>
           <!-- filter badge -->
           <v-menu
@@ -64,8 +64,8 @@
             v-model="activeFilterEdit[header.value]"
             :close-on-content-click="false"
           >
-            <template #activator="{ props }">
-              <v-icon v-bind="props" small class="ms-1">
+            <template #activator="{ props: activatorProps }">
+              <v-icon v-bind="activatorProps" small class="ms-1">
                 {{ header.filterModel ? 'mdi-filter-variant-plus' : 'mdi-filter-variant' }}
               </v-icon>
             </template>
@@ -93,7 +93,7 @@
       </template>
 
       <!-- Customize the contents of the "actions" column for every row. -->
-      <template #item.actions="{ item, index }">
+      <template #[`item.actions`]="{ item, index }">
         <div class="action-icons">
           <slot name="more-action-icons" :item="item" :index="index"> </slot>
           <v-icon size="small" @click="openDeleteDialog(item, index)">mdi-delete</v-icon>
@@ -207,12 +207,30 @@ const shouldRefresh = defineModel('shouldRefresh', { type: Boolean })
  * @property {Function} loadTableStats The function to call to load the stats for the data table.
  */
 const props = defineProps({
-  headers: Array,
-  itemsPerPageOptions: Array,
-  deleteSingleItem: Function,
-  deleteMultipleItems: Function,
-  loadItems: Function,
-  loadTableStats: Function
+  headers: {
+    type: Array,
+    default: () => []
+  },
+  itemsPerPageOptions: {
+    type: Array,
+    default: () => [10, 25, 50]
+  },
+  deleteSingleItem: {
+    type: Function,
+    default: () => async (/* id */) => {}
+  },
+  deleteMultipleItems: {
+    type: Function,
+    default: () => async (/* ids */) => {}
+  },
+  loadItems: {
+    type: Function,
+    default: () => async () => ({ totalItems: 0, items: [], tableUpdatedTime: null })
+  },
+  loadTableStats: {
+    type: Function,
+    default: () => async () => ({ totalItems: 0, tableUpdatedTime: null })
+  }
 })
 
 /**

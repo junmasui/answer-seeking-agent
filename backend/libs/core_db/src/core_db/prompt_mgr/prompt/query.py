@@ -1,16 +1,15 @@
 import logging
+import uuid
 from typing import Optional
+
 from core_db.db_models import DbAgentPrompt
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import AgentPromptStatus, OwnerType, SortDirection
 from sqlalchemy import and_, column, func, select
-
-
-import uuid
-
 from sqlalchemy.orm import aliased
 
 logger = logging.getLogger(__name__)
+
 
 def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPromptStatus] = AgentPromptStatus.ACTIVE):
     """Return tracking records when matched to specified prommpt UUID."""
@@ -170,5 +169,3 @@ def list_agent_prompts(
 
     # The returned objects are detached from the closed session.
     return existing_objs
-
-

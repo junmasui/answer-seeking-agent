@@ -9,6 +9,7 @@ from .stats import get_document_set_statistics
 
 logger = logging.getLogger(__name__)
 
+
 def list_document_sets(
     *,
     name: Optional[str] = None,
@@ -41,5 +42,3 @@ def list_document_sets(
         document_set_count=table_stats.document_set_count,
         table_updated_time=table_stats.table_updated_time,
     )
-
-

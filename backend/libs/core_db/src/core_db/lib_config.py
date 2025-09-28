@@ -22,12 +22,7 @@ from functools import cache
 from pathlib import Path
 from typing import Union
 
-from pydantic import (
-    Field,
-    FilePath,
-    PostgresDsn,
-    StringConstraints,
-)
+from pydantic import Field, FilePath, PostgresDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource

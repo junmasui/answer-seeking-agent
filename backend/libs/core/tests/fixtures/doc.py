@@ -6,9 +6,8 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import func, select, text
-
 from core_public import DocumentStatus
+from sqlalchemy import func, select, text
 
 from ..runtime_config import get_test_config
 

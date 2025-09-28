@@ -58,5 +58,16 @@ module.exports = [
         ...globals.es2021
       }
     }
+  },
+
+  // Configuration for CJS files
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node
+      }
+    }
   }
 ];

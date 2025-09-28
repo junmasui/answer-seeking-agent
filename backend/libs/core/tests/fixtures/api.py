@@ -12,6 +12,7 @@ from ..runtime_config import get_test_config
 
 logger = logging.getLogger(__name__)
 
+
 class ApiClient:
     """
     HTTP client for testing API endpoints with support for various request types.

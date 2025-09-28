@@ -8,6 +8,7 @@ from ...providers.vector_store import delete_vectors_by_document_id
 
 logger = logging.getLogger(__name__)
 
+
 def delete_document(document_id):
     """Delete tracking record, document from file store, and embeddings from vector store."""
     # Retrieve tracking record.
@@ -39,5 +40,3 @@ def delete_document(document_id):
     delete_tracking_record(tracking_record.id)
 
     return success
-
-

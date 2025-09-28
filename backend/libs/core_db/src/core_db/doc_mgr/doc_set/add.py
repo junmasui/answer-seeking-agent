@@ -1,10 +1,9 @@
+import uuid
+
 from core.lib_config import get_lib_config
 from core_db.db_models import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import select
-
-
-import uuid
 
 
 def add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID):

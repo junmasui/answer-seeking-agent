@@ -10,10 +10,9 @@ from celery.signals import (
     worker_shutting_down,
 )
 from core.signals import configure_sender, send_start_up
-from log_config_monitor import get_logging_conf_monitor
-
 from core_telemetry_distro.verifier import verify_distro
-from early_init.load_otel import load_custom_distro_by_entry_point, load_custom_configurator_by_entry_point
+from early_init.load_otel import load_custom_configurator_by_entry_point, load_custom_distro_by_entry_point
+from log_config_monitor import get_logging_conf_monitor
 
 from .metrics import child_exit, start_metrics
 
