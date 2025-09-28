@@ -88,12 +88,6 @@ const itemsPerPageOptions = [
   { value: 50, title: '50' }
 ]
 
-const selectedItemCount = computed(() => {
-  return selectedItems.value.length
-})
-
-const targetIndex = ref(-1)
-
 const activeFilterEdit = ref({})
 
 //

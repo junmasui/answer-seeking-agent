@@ -164,10 +164,6 @@ const itemsPerPageOptions = [
   { value: 100, title: '100' }
 ]
 
-const selectedItemCount = computed(() => {
-  return selectedItems.value.length
-})
-
 const targetIndex = ref(-1)
 const targetItem = ref({})
 
