@@ -2,6 +2,7 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 import HomeView from './core/HomeView.vue'
 // Reinsert when we have meaningful info: import AboutView from './core/AboutView.vue'
+import AgentDiagramView from './conversational/AgentDiagramView.vue'
 import ConversationalView from './conversational/ConversationalView.vue'
 import DocManagerView from './doc-mgr/DocManagerView.vue'
 import DocManagerDocSetTab from './doc-mgr/DocManagerDocSetTab.vue'
@@ -24,6 +25,7 @@ const routes = [
     ]
   },
   { path: '/status', component: StatusCheckView },
+  { path: '/diagram', component: AgentDiagramView },
   { path: '/admin', component: AdminCheckView }
 ]
 
