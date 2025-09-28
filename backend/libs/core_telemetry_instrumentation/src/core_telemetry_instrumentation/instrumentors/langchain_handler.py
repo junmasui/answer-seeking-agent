@@ -37,7 +37,9 @@ def get_callback_handler(session_id: Optional[str] = None, user_id: Optional[str
     # if _telemetry_method == 'openllmetry':
     #     from .openllmetry import get_opentelemetry_callback_handler
 
-    #     return get_opentelemetry_callback_handler(session_id=session_id, user_id=user_id, **kwargs)
+    #     return get_opentelemetry_callback_handler(
+    #         session_id=session_id, user_id=user_id, **kwargs
+    #     )
     # else:
     #     from .langchain_handler import OpenTelemetryCallbackHandler
 

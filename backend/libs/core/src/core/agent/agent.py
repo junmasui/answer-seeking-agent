@@ -88,7 +88,9 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     # if config.enable_langfuse_tracing:
     #     callback_kwargs = {'session_id': thread_id.hex, 'sample_rate': 1.0}
     #     if user_id is not None:
-    #         callback_kwargs['user_id'] = user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+    #         callback_kwargs['user_id'] = (
+    #             user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+    #         )
     #     # Currently commented out for migration
     #     # langfuse_handler = CallbackHandler(**callback_kwargs)
     #     # callback_handlers.append(langfuse_handler)
@@ -98,7 +100,8 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
     #
     # # Get callback handler
     # otel_handler = get_callback_handler(
-    #      session_id=thread_id.hex, user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
+    #      session_id=thread_id.hex,
+    #      user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
     # )
     #
     # if otel_handler:

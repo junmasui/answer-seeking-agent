@@ -77,6 +77,13 @@ import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
 import EditDocDialog from './EditDocDialog.vue'
 
+const props = defineProps({
+  documentSet: {
+    type: Object,
+    default: null
+  }
+})
+
 const documentStore = useDocumentStore()
 
 const {

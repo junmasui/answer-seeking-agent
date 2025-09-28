@@ -362,8 +362,18 @@ WRAPPED_METHODS = [
         'method': None,
         'span_name': 'unstructured_pytesseract.run_tesseract',
     },
-    # {'module': 'pdfminer.pdfinterp', 'object': 'PDFPageInterpreter', 'method': 'process_page', 'span_name': 'pdfminer.PDFPageInterpreter.process_page'},
-    # {'module': 'pdfminer.converter', 'object': 'PDFPageAggregator', 'method': 'get_result', 'span_name': 'pdfminer.PDFPageAggregator.get_result'},
+    # {
+    #     'module': 'pdfminer.pdfinterp',
+    #     'object': 'PDFPageInterpreter',
+    #     'method': 'process_page',
+    #     'span_name': 'pdfminer.PDFPageInterpreter.process_page'
+    # },
+    # {
+    #     'module': 'pdfminer.converter',
+    #     'object': 'PDFPageAggregator',
+    #     'method': 'get_result',
+    #     'span_name': 'pdfminer.PDFPageAggregator.get_result'
+    # },
     {
         'module': 'langchain_huggingface.embeddings.huggingface',
         'object': 'HuggingFaceEmbeddings',

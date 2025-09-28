@@ -70,6 +70,8 @@ def generate_object_tree(
     if visited is None:
         visited = set()
 
+    obj_id = id(obj)
+
     # Prevent infinite recursion
     if current_depth >= max_depth:
         try:
@@ -82,7 +84,6 @@ def generate_object_tree(
         return {'type': type(obj).__name__, 'value': representation, '_truncated': 'max_depth_reached'}
 
     # Handle circular references
-    obj_id = id(obj)
     if obj_id in visited:
         try:
             # Try to get a simple representation
