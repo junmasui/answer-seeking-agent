@@ -21,12 +21,19 @@ from .doc_set import (
 )
 from .ingest import IngestRequestBody
 from .prompt import (
-    AgentPrompt,
-    AgentPromptAddRequest,
-    AgentPromptList,
-    AgentPromptStats,
-    AgentPromptStatus,
-    AgentPromptUpdateRequest,
+    Prompt,
+    PromptAddRequest,
+    PromptList,
+    PromptStats,
+    PromptUpdateRequest,
+)
+from .prompt_version import (
+    PromptStatus,
+    PromptVersion,
+    PromptVersionStats,
+    PromptVersionList,
+    PromptVersionAddRequest,
+    PromptVersionUpdateRequest,
 )
 
 # Explicitly define the exported names: these names are the contract of this module.
@@ -49,12 +56,17 @@ __all__ = [
     'DocumentSetUpdateRequest',
     'IngestRequestBody',
     'OwnerType',
-    'AgentPrompt',
-    'AgentPromptAddRequest',
-    'AgentPromptList',
-    'AgentPromptStats',
-    'AgentPromptStatus',
-    'AgentPromptUpdateRequest',
+    'Prompt',
+    'PromptAddRequest',
+    'PromptList',
+    'PromptStats',
+    'PromptStatus',
+    'PromptUpdateRequest',
+    'PromptVersion',
+    'PromptVersionStats',
+    'PromptVersionList',
+    'PromptVersionAddRequest',
+    'PromptVersionUpdateRequest',
     'OwnerType',
     'SortDirection',
 ]

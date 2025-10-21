@@ -1,6 +1,6 @@
 import logging
 
-from core_public import AgentPromptStatus
+from core_public import PromptStatus
 from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -9,7 +9,7 @@ from langchain_core.prompts import (
 )
 
 from ...lib_config import get_lib_config
-from ...prompt_mgr import list_prompts
+from ...prompt_mgr import list_prompts, list_prompt_versions
 from ..internal_models import AgentPromptName
 
 logger = logging.getLogger(__name__)
@@ -20,14 +20,23 @@ def get_chat_prompt(prompt_name: str):
     if prompt_name not in AgentPromptName:
         raise TypeError(f'prompt_name must be a valid AgentPromptName, got {prompt_name}')
 
-    result = list_prompts(name=prompt_name, status=AgentPromptStatus.ACTIVE)
+    result = list_prompts(name=prompt_name)
     if not result.prompts:
         raise ValueError(f"Prompt '{prompt_name}' not found in database.")
 
     prompt = result.prompts[0]
-    system_message = prompt.system_message
-    human_message = prompt.human_message
-    include_history = prompt.include_history
+
+    prompt_id = prompt.id
+
+    result = list_prompt_versions(prompt_id=prompt_id, status=PromptStatus.ACTIVE)
+    if not result.prompt_versions:
+        raise ValueError(f"Prompt versions '{prompt_name}' not found in database.")
+
+    prompt_version = result.prompt_versions[0]
+
+    include_history = prompt_version.include_history
+    system_message = prompt_version.system_message
+    human_message = prompt_version.human_message
 
     messages = []
     if system_message:

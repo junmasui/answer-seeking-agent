@@ -71,10 +71,10 @@ def list_tracking_document_sets(
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedTrackedDocumentSet = aliased(element=DbTrackedDocumentSet, alias=cte)
+            cte_alias_type = aliased(element=DbTrackedDocumentSet, alias=cte)
 
             # Query the CTE
-            query = select(WindowedTrackedDocumentSet).where(
+            query = select(cte_alias_type).where(
                 # NOTE: Use the `column` function to directly reference the CTE column
                 #   labeled 'row_num'. The reason is that 'row_num' is not a part of
                 #   the model.

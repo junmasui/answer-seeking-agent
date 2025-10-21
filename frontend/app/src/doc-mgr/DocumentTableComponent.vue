@@ -279,9 +279,8 @@ async function closeEditDialog() {
  * Calls the editDocument function and closes the dialog.
  */
 async function applyEditDoc() {
-  if (props.editDocument && targetItem.value.id) {
-    await props.editDocument(targetItem.value.id)
-  }
+  await props.editDocument(targetItem.value)
+
   await closeEditDialog()
 }
 
@@ -364,7 +363,8 @@ async function editDocument(_doc_uuid) {
  * Sends a request to the server to delete a specific document.
  * @param {string} doc_uuid - The unique identifier of the document to delete
  */
-async function deleteSingleDocument(doc_uuid) {
+async function deleteSingleDocument(doc) {
+  const doc_uuid = doc.id
   try {
     const headers = {
       Accept: 'application/json',
@@ -468,7 +468,8 @@ async function closeIngestSelected() {
  * Sends a request to the server to delete all currently selected documents.
  * Clears the selection after successful deletion and logs the operation.
  */
-async function deleteMultipleDocuments(docUuids) {
+async function deleteMultipleDocuments(docs) {
+  const docUuids = docs.map((x) => x.id)
   try {
     const headers = {
       Accept: 'application/json',

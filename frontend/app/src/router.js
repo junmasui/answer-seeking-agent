@@ -8,6 +8,9 @@ import DocManagerView from './doc-mgr/DocManagerView.vue'
 import DocManagerDocSetTab from './doc-mgr/DocManagerDocSetTab.vue'
 import DocManagerIngestTab from './doc-mgr/DocManagerIngestTab.vue'
 import DocManagerUploadTab from './doc-mgr/DocManagerUploadTab.vue'
+import PromptManagerView from './prompt-mgr/PromptManagerView.vue'
+import PromptManagerPromptsTab from './prompt-mgr/PromptManagerPromptsTab.vue'
+import PromptManagerPromptVersionsTab from './prompt-mgr/PromptManagerPromptVersionsTab.vue'
 import StatusCheckView from './core/StatusCheckView.vue'
 import AdminCheckView from './core/AdminView.vue'
 
@@ -22,6 +25,14 @@ const routes = [
       { name: 'doc-sets', path: '', component: DocManagerDocSetTab, alias: 'doc-sets' },
       { name: 'upload-files', path: 'upload-files', component: DocManagerUploadTab },
       { name: 'docs', path: 'docs', component: DocManagerIngestTab }
+    ]
+  },
+  {
+    path: '/prompt-mgr',
+    component: PromptManagerView,
+    children: [
+      { name: 'prompts', path: '', component: PromptManagerPromptsTab, alias: 'prompts' },
+      { name: 'prompt-versions', path: 'prompt-versions', component: PromptManagerPromptVersionsTab }
     ]
   },
   { path: '/status', component: StatusCheckView },

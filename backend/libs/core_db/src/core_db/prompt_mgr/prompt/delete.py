@@ -1,14 +1,14 @@
 import logging
 import uuid
 
-from core_db.db_models import DbAgentPrompt
+from core_db.db_models import DbPrompt
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import delete
 
 logger = logging.getLogger(__name__)
 
 
-def delete_agent_prompt(prompt_uuid):
+def delete_prompt(prompt_uuid):
     """Deletes the prompt record."""
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)
@@ -16,7 +16,7 @@ def delete_agent_prompt(prompt_uuid):
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session, session.begin():
-        stmt = delete(DbAgentPrompt).where(DbAgentPrompt.id == prompt_uuid)
+        stmt = delete(DbPrompt).where(DbPrompt.id == prompt_uuid)
         result = session.execute(stmt)
 
     if result.rowcount == 0:

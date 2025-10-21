@@ -189,7 +189,7 @@ function openEditDialog(item, _index) {
  * Calls the editDocumentSet function with the target item's ID.
  */
 async function applyEditDocSet() {
-  await editDocumentSet(targetDocSet.value.id)
+  await editDocumentSet(targetDocSet.value)
   logger.info('edited doc set')
 
   await closeEditDocSet()
@@ -199,7 +199,8 @@ async function applyEditDocSet() {
  * Sends a request to the server to update an existing document set.
  * @param {string} doc_set_uuid - The unique identifier of the document set to edit
  */
-async function editDocumentSet(doc_set_uuid) {
+async function editDocumentSet(edittedDocSet) {
+  const doc_set_uuid = edittedDocSet.id
   try {
     const headers = {
       Accept: 'application/json',
@@ -211,9 +212,9 @@ async function editDocumentSet(doc_set_uuid) {
     }
 
     const body = {
-      name: targetDocSet.value.name,
-      isNewDocDefault: targetDocSet.value.isNewDocDefault,
-      isPublicViewable: targetDocSet.value.isPublicViewable
+      name: edittedDocSet.name,
+      isNewDocDefault: edittedDocSet.isNewDocDefault,
+      isPublicViewable: edittedDocSet.isPublicViewable
     }
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
@@ -248,9 +249,10 @@ async function closeEditDocSet() {
 
 /**
  * Sends a request to the server to delete a specific document set.
- * @param {string} docSetUuid - The unique identifier of the document set to delete
+ * @param {string} docSet - The document set to delete
  */
-async function deleteSingleDocumentSet(docSetUuid) {
+async function deleteSingleDocumentSet(docSet) {
+  const docSetUuid = docSet.id
   try {
     const headers = {
       Accept: 'application/json',
@@ -285,7 +287,9 @@ async function deleteSingleDocumentSet(docSetUuid) {
  * Sends a request to the server to delete a specific document set.
  * @param {string} doc_set_uuid - The unique identifier of the document set to delete
  */
-async function deleteMultipleDocumentSets(docSetUuids) {
+async function deleteMultipleDocumentSets(docSets) {
+  const docSetUuids = docSets.map((x) => x.id)
+
   try {
     const headers = {
       Accept: 'application/json',

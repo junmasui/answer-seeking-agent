@@ -13,15 +13,15 @@ logger = logging.getLogger(__name__)
 def verify_distro():
     logger_provider = get_logger_provider()
     tree = print_object_tree(logger_provider)
-    logger.info('logger_provider\n%s', tree.getvalue())
+    ##TODO logger.info('logger_provider\n%s', tree.getvalue())
 
     meter_provider = get_meter_provider()
     tree = print_object_tree(meter_provider)
-    logger.info('meter_provider\n%s', tree.getvalue())
+    ##TODO logger.info('meter_provider\n%s', tree.getvalue())
 
     tracer_provider = get_tracer_provider()
     tree = print_object_tree(tracer_provider)
-    logger.info('tracer_provider\n%s', tree.getvalue())
+    ##TODO logger.info('tracer_provider\n%s', tree.getvalue())
 
     event_logger_provider = get_event_logger_provider()
 

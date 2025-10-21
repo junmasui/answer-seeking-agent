@@ -86,15 +86,15 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     #     )
     #     metadata.tables['answers.tracked_documents'] = reflected_table
 
-    # if 'answers.agent_prompt' in metadata.tables:
+    # if 'answers.prompt' in metadata.tables:
     #     reflected_table = Table(
-    #         'agent_prompt',
+    #         'prompt',
     #         metadata,
     #         Column('status', type_=DbPromptStatus),
     #         autoload_with=sql_engine,
     #         extend_existing=True
     #     )
-    #     metadata.tables['answers.agent_prompt'] = reflected_table
+    #     metadata.tables['answers.prompt'] = reflected_table
 
     yield metadata
 
@@ -103,12 +103,12 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
 def auto_mapped_classes(reflected_metadata) -> Generator[dict[str, type], None, None]:
     """Returns the default automap base class for an automap schema."""
     # produce a set of mappings from this MetaData.
-    Base = automap_base(metadata=reflected_metadata)
+    BaseType = automap_base(metadata=reflected_metadata)
 
     # calling prepare() just sets up mapped classes and relationships.
-    Base.prepare()
+    BaseType.prepare()
 
-    classes = dict(Base.classes.items())
+    classes = dict(BaseType.classes.items())
 
     # Use yield so that we do clean up during the test tear-down.
     yield classes

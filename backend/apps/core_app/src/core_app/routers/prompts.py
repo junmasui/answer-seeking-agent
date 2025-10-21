@@ -4,25 +4,27 @@ from typing import Annotated
 
 from core.prompt_mgr import add_prompt, delete_prompt, get_prompt_statistics, list_prompts, update_prompt
 from core_public import (
-    AgentPromptAddRequest,
-    AgentPromptList,
-    AgentPromptStats,
-    AgentPromptStatus,
-    AgentPromptUpdateRequest,
+    PromptAddRequest,
+    PromptList,
+    PromptStats,
+    PromptStatus,
+    PromptUpdateRequest,
     OwnerType,
 )
 from fastapi import APIRouter, Body, Depends, Path, Query
 
 from ..auth import Scope, User, get_scoped_current_user
 from .util import parse_sort_by
+from .prompt_versions import versions_router
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix='/prompts')
 
+router.include_router(versions_router)
 
-@router.get('', response_model=AgentPromptList)  # Empty path handles no trailing slash without using 307 redirect.
-@router.get('/', response_model=AgentPromptList)
+@router.get('', response_model=PromptList)  # Empty path handles no trailing slash without using 307 redirect.
+@router.get('/', response_model=PromptList)
 async def handle_list_prompts(
     name: Annotated[str, Query(..., description='Prompt name')] = None,
     page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
@@ -45,27 +47,22 @@ async def handle_list_prompts(
 
 @router.post('/')
 async def handle_single_insert(
-    body: Annotated[AgentPromptAddRequest, Body(...)],
+    body: Annotated[PromptAddRequest, Body(...)],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Add document set."""
-    status = AgentPromptStatus.ACTIVE
     user_id = current_user.userid if current_user is not None else None
 
     add_prompt(
         name=body.name,
         owner_type=OwnerType.USER,
-        status=status,
-        system_message=body.system_message,
-        human_message=body.human_message,
-        include_history=body.include_history,
         user_id=user_id,
     )
 
     return {}
 
 
-@router.get('/stats', response_model=AgentPromptStats)
+@router.get('/stats', response_model=PromptStats)
 async def handle_table_stats(
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ))] = None,
 ):
@@ -75,7 +72,7 @@ async def handle_table_stats(
 
 @router.patch('/{prompt_uuid}')
 async def handle_single_update(
-    body: Annotated[AgentPromptUpdateRequest, Body(...)],
+    body: Annotated[PromptUpdateRequest, Body(...)],
     prompt_uuid: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
@@ -84,10 +81,6 @@ async def handle_single_update(
 
     update_prompt(
         prompt_uuid,
-        status=None,
-        system_message=body.system_message,
-        human_message=body.human_message,
-        include_history=body.include_history,
         last_user_id=user_id,
     )
 
