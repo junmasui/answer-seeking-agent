@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime
-from typing import Optional
+from typing import Annotated, Optional
 from uuid import UUID
 
 from pydantic import Field
@@ -29,11 +29,11 @@ class DocumentSet(CamelModel):
     visibility.
     """
 
-    id: UUID
-    name: str = Field(description='Name of document set.')
-    status: DocumentSetStatus = Field(description='Status.')
-    is_new_doc_default: bool = Field(description='True if default document set for new documents')
-    is_public_viewable: bool = Field(description='True if documents are publicly visible')
+    id: Annotated[UUID, Field(description='ID of the document set.')]
+    name: Annotated[str, Field(description='Name of document set.')]
+    status: Annotated[DocumentSetStatus, Field(description='Status.')]
+    is_new_doc_default: Annotated[bool, Field(description='True if default document set for new documents')]
+    is_public_viewable: Annotated[bool, Field(description='True if documents are publicly visible')]
 
 
 class DocumentSetStats(CamelModel):
@@ -43,8 +43,10 @@ class DocumentSetStats(CamelModel):
     The statistics include the total count and last update time.
     """
 
-    document_set_count: int = None
-    table_updated_time: Optional[datetime] = None
+    document_set_count: Annotated[Optional[int], Field(description='Total number of document sets.', default=None)]
+    table_updated_time: Annotated[
+        Optional[datetime], Field(description='Last time the document set table was updated.', default=None)
+    ]
 
 
 #
@@ -59,9 +61,11 @@ class DocumentSetList(CamelModel):
     Additional information is the optional total count and update time information.
     """
 
-    document_sets: list[DocumentSet]
-    document_set_count: Optional[int] = None
-    table_updated_time: Optional[datetime] = None
+    document_sets: Annotated[list[DocumentSet], Field(description='List of document sets.')]
+    document_set_count: Annotated[Optional[int], Field(description='Total number of document sets.', default=None)]
+    table_updated_time: Annotated[
+        Optional[datetime], Field(description='Last time the document set table was updated.', default=None)
+    ]
 
 
 #
@@ -72,16 +76,18 @@ class DocumentSetList(CamelModel):
 class DocumentSetAddRequest(CamelModel):
     """Represents a request to add a new document set."""
 
-    name: str = Field(description='Name of document set.')
-    is_new_doc_default: bool = Field(description='True if default document set for new documents')
-    is_public_viewable: bool = Field(description='True if documents are publicly visible')
+    name: Annotated[str, Field(description='Name of document set.')]
+    is_new_doc_default: Annotated[bool, Field(description='True if default document set for new documents')]
+    is_public_viewable: Annotated[bool, Field(description='True if documents are publicly visible')]
 
 
 class DocumentSetUpdateRequest(CamelModel):
     """Represents a request to update an existing document set."""
 
-    name: Optional[str] = Field(description='Name of document set.', default=None)
-    is_new_doc_default: Optional[bool] = Field(
-        description='True if default document set for new documents', default=None
-    )
-    is_public_viewable: Optional[bool] = Field(description='True if documents are publicly visible', default=None)
+    name: Annotated[Optional[str], Field(description='Name of document set.', default=None)]
+    is_new_doc_default: Annotated[
+        Optional[bool], Field(description='True if default document set for new documents', default=None)
+    ]
+    is_public_viewable: Annotated[
+        Optional[bool], Field(description='True if documents are publicly visible', default=None)
+    ]

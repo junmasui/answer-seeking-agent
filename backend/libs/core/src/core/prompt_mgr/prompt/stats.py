@@ -1,7 +1,7 @@
 import logging
 
-from core_db.prompt_mgr.prompt.stats import get_agent_prompt_stats
-from core_public import AgentPromptStats
+from core_db.prompt_mgr.prompt.stats import get_prompt_stats
+from core_public import PromptStats
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +13,6 @@ def get_prompt_statistics():
     Returns an AgentPromptStats object containing the total count of prompts and the last update
     time from the tracking table.
     """
-    table_stats = get_agent_prompt_stats()
+    table_stats = get_prompt_stats()
 
-    return AgentPromptStats(prompt_count=table_stats['prompt_count'], table_updated_time=table_stats['max_update_time'])
+    return PromptStats(prompt_count=table_stats['prompt_count'], table_updated_time=table_stats['max_update_time'])

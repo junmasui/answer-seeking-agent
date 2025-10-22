@@ -7,7 +7,7 @@ from core_db.db_models.doc_mgr import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import DocumentStatus, SortDirection
 from sqlalchemy import and_, column, func, select
-from sqlalchemy.orm import aliased, subqueryload
+from sqlalchemy.orm import aliased, subqueryload, selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -118,13 +118,15 @@ def list_tracking_records(
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedTrackedDocument = aliased(element=DbTrackedDocument, alias=cte)
+            cte_alias_type = aliased(element=DbTrackedDocument, alias=cte)
 
             # Query the CTE
             query = (
-                select(WindowedTrackedDocument)
-                # Eager load the document set records in a single query.
-                .options(subqueryload(WindowedTrackedDocument.document_set))
+                select(cte_alias_type)
+                # Eager load the parent document-set records in a single 2nd query.
+                # The parent records are loaded using a WHERE IN clause using
+                # the results of the 1st query.
+                .options(selectinload(cte_alias_type.document_set))
                 .where(
                     # NOTE: Use the `column` function to directly reference the CTE column
                     #   labeled 'row_num'. The reason is that 'row_num' is not a part of
@@ -134,8 +136,10 @@ def list_tracking_records(
                 )
             )
         else:
-            # Eager load the document set records in a single query.
-            query = core_query.options(subqueryload(DbTrackedDocument.document_set))
+                # Eager load the parent document-set records in a single 2nd query.
+                # The parent records are loaded using a WHERE IN clause using
+                # the results of the 1st query.
+            query = core_query.options(selectinload(DbTrackedDocument.document_set))
 
         result = session.execute(query)
         existing_objs = result.scalars().all()

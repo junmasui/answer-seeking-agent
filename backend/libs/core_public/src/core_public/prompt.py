@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime
-from typing import Optional
+from typing import Annotated, Optional
 from uuid import UUID
 
 from pydantic import Field
@@ -10,44 +10,29 @@ from core_public import OwnerType
 from .base import CamelModel
 
 
-class AgentPromptStatus(enum.StrEnum):
+class Prompt(CamelModel):
     """
-    Defines the lifecycle status of agent prompt templates.
-
-    Controls whether a prompt version is currently active for use or has been deactivated in favor
-    of a newer version.
-    """
-
-    ACTIVE = 'active'
-    DEACTIVATED = 'deactivated'
-
-
-class AgentPrompt(CamelModel):
-    """
-    Represents an agent prompt.
+    Represents an LLM prompt.
 
     The data includes its name, status, messages, and version.
     """
 
-    id: UUID
-    name: str = Field(description='Name of prompt.')
-    status: AgentPromptStatus = Field(description='Status.')
-    system_message: Optional[str] = Field(description='Prompt')
-    human_message: Optional[str] = Field(description='Prompt')
-    include_history: Optional[bool] = Field(description='Include chat history')
-    owner_type: OwnerType = Field(description='Record owner type')
-    version: int = Field(description='Version number of prompt.')
+    id: Annotated[UUID, Field(description='ID of the prompt.')]
+    name: Annotated[str, Field(description='Name of prompt.')]
+    owner_type: Annotated[OwnerType, Field(description='Record owner type')]
 
 
-class AgentPromptStats(CamelModel):
+class PromptStats(CamelModel):
     """
-    Provides statistics about agent prompts.
+    Provides statistics about LLM prompts.
 
     The statistics include the total count and last update time.
     """
 
-    prompt_count: int = None
-    table_updated_time: Optional[datetime] = None
+    prompt_count: Annotated[Optional[int], Field(description='Total number of prompts.', default=None)]
+    table_updated_time: Annotated[
+        Optional[datetime], Field(description='Last time the prompt table was updated.', default=None)
+    ]
 
 
 #
@@ -55,16 +40,18 @@ class AgentPromptStats(CamelModel):
 #
 
 
-class AgentPromptList(CamelModel):
+class PromptList(CamelModel):
     """
     Represents a list of agent prompts.
 
     Addtional information include an optional count and update time information.
     """
 
-    prompts: list[AgentPrompt]
-    prompt_count: Optional[int] = None
-    table_updated_time: Optional[datetime] = None
+    prompts: Annotated[list[Prompt], Field(description='List of prompts.')]
+    prompt_count: Annotated[Optional[int], Field(description='Total number of prompts.', default=None)]
+    table_updated_time: Annotated[
+        Optional[datetime], Field(description='Last time the prompt table was updated.', default=None)
+    ]
 
 
 #
@@ -72,19 +59,13 @@ class AgentPromptList(CamelModel):
 #
 
 
-class AgentPromptAddRequest(CamelModel):
+class PromptAddRequest(CamelModel):
     """Represents a request to add a new agent prompt."""
 
-    name: str = Field(description='Name of prompt.')
-    system_message: str = Field(description='Prompt')
-    human_message: str = Field(description='Prompt')
-    include_history: bool = Field(description='Include chat history')
+    name: Annotated[str, Field(description='Name of prompt.')]
 
 
-class AgentPromptUpdateRequest(CamelModel):
+class PromptUpdateRequest(CamelModel):
     """Represents a request to update an existing agent prompt."""
 
-    name: Optional[str] = Field(description='Name of prompt.', default=None)
-    system_message: str = Field(description='Prompt')
-    human_message: str = Field(description='Prompt')
-    include_history: bool = Field(description='Include chat history')
+    name: Annotated[Optional[str], Field(description='Name of prompt.', default=None)]

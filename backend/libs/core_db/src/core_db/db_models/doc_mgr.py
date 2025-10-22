@@ -4,7 +4,7 @@ import uuid
 
 from core_public import DocumentStatus
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Uuid
-from sqlalchemy.dialects.postgresql import ARRAY, ENUM
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
@@ -54,9 +54,6 @@ class DbTrackedDocumentSet(Base):
     )
 
 
-DbDocumentStatus = ENUM(DocumentStatus)
-
-
 class DbTrackedDocument(Base):
     """
     SQLAlchemy model representing a tracked document in the database.
@@ -69,7 +66,7 @@ class DbTrackedDocument(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     document_set_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey(f'{DbTrackedDocumentSet.__tablename__}.id'))
-    status: Mapped[DocumentStatus] = mapped_column(DbDocumentStatus, nullable=False)
+    status: Mapped[DocumentStatus] = mapped_column(String(20), nullable=False)
     filedir: Mapped[str] = mapped_column(String(800), nullable=False)
     filename: Mapped[str] = mapped_column(String(800), nullable=False)
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -1,6 +1,4 @@
-from core_public import OwnerType
 from sqlalchemy import MetaData
-from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import DeclarativeBase, registry
 
 DECLARED_METADATA = MetaData()
@@ -16,6 +14,3 @@ class Base(DeclarativeBase):
 
     metadata = DECLARED_METADATA
     registry = DECLARED_REGISTRY
-
-
-DbOwnerType = ENUM(OwnerType)

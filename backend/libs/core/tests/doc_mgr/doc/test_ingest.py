@@ -2,6 +2,7 @@ import asyncio
 import logging
 import pprint
 import uuid
+import os
 
 import pytest
 from core_public import DocumentStatus

@@ -13,6 +13,7 @@ from ..runtime_config import get_test_config
 
 logger = logging.getLogger(__name__)
 
+DOCUMENT_TABLE_NAME = 'tracked_documents'
 
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
     """Return count of recods in 'tracked_documents'."""
@@ -45,11 +46,10 @@ def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker, force: bool
 @pytest.fixture(scope='module')
 def doc_table(auto_mapped_classes, sql_engine, sql_sessionmaker):
     """Return the SQLAlchemy reflected table 'tracked_documents'."""
-    full_name = 'tracked_documents'
-    auto_mapped_table = auto_mapped_classes.get(full_name, None)
+    auto_mapped_table = auto_mapped_classes.get(DOCUMENT_TABLE_NAME, None)
 
     if auto_mapped_table is None:
-        raise RuntimeError(f'Table {full_name} is absent')
+        raise RuntimeError(f'Table {DOCUMENT_TABLE_NAME} is absent')
 
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.

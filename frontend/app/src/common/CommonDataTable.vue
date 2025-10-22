@@ -369,8 +369,8 @@ function openDeleteDialog(item) {
  * Handles confirmation of delete dialog by applying the delete operation.
  */
 async function confirmDelete() {
-  if (props.deleteSingleItem && targetItem.value.id) {
-    await props.deleteSingleItem(targetItem.value.id)
+  if (props.deleteSingleItem) {
+    await props.deleteSingleItem(targetItem.value)
   }
   await closeDeleteDialog()
 }
@@ -411,7 +411,7 @@ function deleteSelectedItems() {
  * Calls the deleteSelectedDocuments function to process all selected items.
  */
 async function applyDeleteSelected() {
-  await props.deleteMultipleItems(selectedItems.value.map((x) => x.id))
+  await props.deleteMultipleItems([...selectedItems.value])
 
   // Clear the selections
   selectedItems.value = []

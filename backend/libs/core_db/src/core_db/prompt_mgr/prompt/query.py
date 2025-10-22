@@ -2,16 +2,16 @@ import logging
 import uuid
 from typing import Optional
 
-from core_db.db_models import DbAgentPrompt
+from core_db.db_models import DbPrompt
 from core_db.providers.sql_database import DataDomain, get_sessionmaker
-from core_public import AgentPromptStatus, OwnerType, SortDirection
+from core_public import OwnerType, SortDirection
 from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased
 
 logger = logging.getLogger(__name__)
 
 
-def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPromptStatus] = AgentPromptStatus.ACTIVE):
+def get_prompt(prompt_uuid_list: list[str | uuid.UUID], owner_type: Optional[OwnerType] = None):
     """Return tracking records when matched to specified prommpt UUID."""
 
     def _ensure_uuid(item):
@@ -23,16 +23,16 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPr
     sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
 
     with sessionmaker() as session:
-        where = [DbAgentPrompt.id.in_(prompt_uuid_list)]
-        if status is not None:
-            where.append(DbAgentPrompt.status == status)
+        where = [DbPrompt.id.in_(prompt_uuid_list)]
+        if owner_type is not None:
+            where.append(DbPrompt.owner_type == owner_type)
 
         if len(where) > 1:
-            stmt = select(DbAgentPrompt).where(and_(*where))
+            stmt = select(DbPrompt).where(and_(*where))
         elif len(where) == 1:
-            stmt = select(DbAgentPrompt).where(where[0])
+            stmt = select(DbPrompt).where(where[0])
         else:
-            stmt = select(DbAgentPrompt)
+            stmt = select(DbPrompt)
         result = session.execute(stmt)
         existing_objs = result.scalars().all()
 
@@ -40,15 +40,13 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID], status: Optional[AgentPr
     return existing_objs
 
 
-def _build_query_filter(name: Optional[str], status: Optional[AgentPromptStatus], owner_type: Optional[OwnerType]):
+def _build_query_filter(name: Optional[str], owner_type: Optional[OwnerType]):
     """
     Build WHERE clause conditions for filtering agent prompts.
 
     Args:
         name: Optional string to filter prompts by name using case-insensitive matching.
               If provided, uses SQL ILIKE for partial matching.
-        status: Optional AgentPromptStatus to filter prompts by their current status.
-                If provided, performs exact equality match.
         owner_type: Optional OwnerType to filter prompts by their owner type.
                    If provided, performs exact equality match.
 
@@ -60,11 +58,9 @@ def _build_query_filter(name: Optional[str], status: Optional[AgentPromptStatus]
     """
     where = []
     if name is not None:
-        where.append(DbAgentPrompt.name.ilike(name))
-    if status is not None:
-        where.append(DbAgentPrompt.status == status)
+        where.append(DbPrompt.name.ilike(name))
     if owner_type is not None:
-        where.append(DbAgentPrompt.owner_type == owner_type)
+        where.append(DbPrompt.owner_type == owner_type)
     return where
 
 
@@ -75,7 +71,7 @@ def _build_order_by(sort_by: Optional[list] = None):
     Args:
         sort_by: List or tuple of (field_name, direction) tuples specifying sort criteria.
                 If None, defaults to [('name', SortDirection.ASC)].
-                Supported field names: 'name', 'status'
+                Supported field names: 'name'
                 Direction should be SortDirection.ASC or SortDirection.DESC
 
     Returns:
@@ -99,9 +95,9 @@ def _build_order_by(sort_by: Optional[list] = None):
         expr = None
         match name:
             case 'name':
-                expr = DbAgentPrompt.name
-            case 'status':
-                expr = DbAgentPrompt.status
+                expr = DbPrompt.name
+            case 'ownerType':
+                expr = DbPrompt.owner_type
             case _:
                 raise ValueError('unknown field name', name)
         expr = expr.desc() if direction == SortDirection.DESC else expr.asc()
@@ -111,10 +107,9 @@ def _build_order_by(sort_by: Optional[list] = None):
     return return_value
 
 
-def list_agent_prompts(
+def list_prompts(
     *,
     name: Optional[str] = None,
-    status: Optional[AgentPromptStatus] = None,
     owner_type: Optional[OwnerType] = None,
     start: Optional[int] = None,
     length: Optional[int] = None,
@@ -129,10 +124,10 @@ def list_agent_prompts(
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
-        core_query = select(DbAgentPrompt)
+        core_query = select(DbPrompt)
 
         # Apply query filters
-        where = _build_query_filter(name, status, owner_type)
+        where = _build_query_filter(name, owner_type)
 
         if len(where) > 1:
             core_query = core_query.where(and_(*where))
@@ -151,10 +146,10 @@ def list_agent_prompts(
             cte = cte_query.cte(name='row_numbered')
 
             # Alias the CTE
-            WindowedAgentPrompt = aliased(element=DbAgentPrompt, alias=cte)
+            cte_alias_type = aliased(element=DbPrompt, alias=cte)
 
             # Query the CTE
-            query = select(WindowedAgentPrompt).where(
+            query = select(cte_alias_type).where(
                 # NOTE: Use the `column` function to directly reference the CTE column
                 #   labeled 'row_num'. The reason is that 'row_num' is not a part of
                 #   the model.

@@ -10,7 +10,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .middlewares import ErrorLoggingMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
-from .routers import admin, answer, document_sets, documents, health, prompts, status, tasks
+from .routers import admin, answer, document_sets, documents, health, prompts, prompt_versions, status, tasks
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,8 @@ app.include_router(router=document_sets.router, prefix='/document-sets')
 app.include_router(router=documents.router, prefix='/documents')
 app.include_router(router=health.router, prefix='/health')
 app.include_router(router=status.router, prefix='/status')
-app.include_router(router=prompts.router, prefix='/prompts')
+app.include_router(router=prompts.router)
+app.include_router(router=prompt_versions.router)
 app.include_router(router=tasks.router, prefix='/tasks')
 
 app.mount('/sim_auth/', SubAppRootPathFixer(sim_auth_app.app, root_path='/sim_auth'))
