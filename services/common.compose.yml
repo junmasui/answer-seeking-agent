@@ -14,6 +14,7 @@ include:
   - ./opensearch/deploy/compose.yml
   - ./otel-collector/deploy/compose.yml
   - ./nemo/deploy/compose.yml
+  - ./nfs-ganesha/deploy/compose.yml
   - ./postgres/deploy/compose.yml
   - ./presidio/deploy/compose.yml
   - ./prometheus/deploy/compose.yml

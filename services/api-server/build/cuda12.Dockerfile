@@ -181,7 +181,11 @@ RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
-        dnsutils \
+        bind9-dnsutils \
+        iproute2 \
+        psmisc \
+        tree \
+        nfs-common \
         libgl1 \
         libgl1-mesa-dri \
         libglu1-mesa \

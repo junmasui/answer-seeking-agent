@@ -25,6 +25,10 @@ RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
         bind9-dnsutils \
+        iproute2 \
+        psmisc \
+        tree \
+        nfs-common \
         curl \
         libgl1 \
         libgl1-mesa-dri \

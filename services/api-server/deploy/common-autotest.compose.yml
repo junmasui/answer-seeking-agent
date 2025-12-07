@@ -80,6 +80,7 @@ services:
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-autotest, all ]
+    privileged: true
 
     environment:
       DEBUGGER_LISTEN: true
