@@ -103,7 +103,7 @@ services:
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - backend-home-1:/home/python
-      ##SRC - backend-venv-1:/app/.venv
+      ##SRC - backend-venv-1:/app/backend/.venv
       - backend-staging-1:/staging
     secrets:
       - answers_secrets
@@ -157,10 +157,8 @@ services:
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+
+
       GPU_MODE: cpu
     env_file:
       - backend.env
@@ -168,11 +166,11 @@ services:
       agent-poc: {}
     volumes:
       # Mount the project directory to /app in the container
-      - ../../../backend/apps:/app/apps
-      - ../../../backend/libs:/app/libs
-      - ../../../backend/alembic.ini:/app/alembic.ini
-      - ../../../backend/pyproject.toml:/app/pyproject.toml
-      - ../../../backend/pytest.ini:/app/pytest.ini
+      - ../../../backend/apps:/app/backend/apps
+      - ../../../backend/libs:/app/backend/libs
+      - ../../../backend/alembic.ini:/app/backend/alembic.ini
+      - ../../../backend/pyproject.toml:/app/backend/pyproject.toml
+      - ../../../backend/pytest.ini:/app/backend/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_build_backend.sh:/run_build_backend.sh:ro

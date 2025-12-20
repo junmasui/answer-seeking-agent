@@ -15,10 +15,8 @@ services:
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+
+
       ##
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
@@ -99,10 +97,8 @@ services:
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+
+
       GPU_MODE: cpu
     env_file:
       - backend.env

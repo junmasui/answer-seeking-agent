@@ -56,14 +56,14 @@ services:
     volumes:
       ##SRC - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
       # Mount the project directory to /app in the container
-      - ../../../frontend/app/frontend/index.html:/app/frontend/index.html
-      - ../../../frontend/app/frontend/jsconfig.json:/app/frontend/jsconfig.json
-      - ../../../frontend/app/frontend/package-lock.json:/app/frontend/package-lock.json
-      - ../../../frontend/app/frontend/package.json:/app/frontend/package.json
-      - ../../../frontend/app/frontend/src/:/app/frontend/src/
-      - ../../../frontend/app/frontend/vite.config.js:/app/frontend/vite.config.js
-      - ../../../frontend/app/frontend/eslint.config.cjs:/app/frontend/eslint.config.cjs
-      - ../../../frontend/app/frontend/run_lint.sh:/app/frontend/run_lint.sh
+      - ../../../frontend/index.html:/app/frontend/index.html
+      - ../../../frontend/jsconfig.json:/app/frontend/jsconfig.json
+      - ../../../frontend/package-lock.json:/app/frontend/package-lock.json
+      - ../../../frontend/package.json:/app/frontend/package.json
+      - ../../../frontend/src/:/app/frontend/src/
+      - ../../../frontend/vite.config.js:/app/frontend/vite.config.js
+      - ../../../frontend/eslint.config.cjs:/app/frontend/eslint.config.cjs
+      - ../../../frontend/run_lint.sh:/app/frontend/run_lint.sh
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount important script into the container when we are
       # avoiding rebuilding images to capture their latest version.
