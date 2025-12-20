@@ -1,11 +1,11 @@
 set -eu
 
-# if ! grep -q 'nfs-ganesha:/' /etc/fstab; then
-#     sudo cp -p /etc/fstab /etc/fstab.bak
-#     echo "nfs-ganesha:/ /data nfs nfsvers=4.1,rw 0 0" | sudo tee -a /etc/fstab
-# fi
+if [ "$USE_NFS_SRC_DIR" = "true" ]; then
+    # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
+    sudo /usr/bin/mount /app/backend
+fi
 
-cd /app
+cd /app/backend
 
 # Create the virtual environment only once.
 #

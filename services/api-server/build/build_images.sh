@@ -66,7 +66,7 @@ $DOCKER build \
   --build-context config-dir=../config \
   --build-context celery-config-dir=../../celery-worker/config \
   --build-context dependency-gate-dir=../../dependency-gate \
-  --build-context src-dir=../../../backend \
+  --build-context backend-dir=../../../backend \
   --target production \
   --tag localhost/localhost/answers-backend:python-3.12-cuda12 \
   . 2>&1 \
@@ -78,7 +78,7 @@ $DOCKER build \
   --build-context config-dir=../config \
   --build-context celery-config-dir=../../celery-worker/config \
   --build-context dependency-gate-dir=../../dependency-gate \
-  --build-context src-dir=../../../backend \
+  --build-context backend-dir=../../../backend \
   --target dev \
   --tag localhost/localhost/answers-backend-dev:python-3.12-cuda12 \
   . 2>&1 \

@@ -10,13 +10,13 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        gnupg2 \
+    ca-certificates \
+    curl \
+    gnupg2 \
     && apt-get clean \
     && curl -sS -f --proto "=https" --proto-redir "=https" -L \
-        https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
-        | apt-key add - \
+    https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
+    | apt-key add - \
     && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
     && rm -rf /var/lib/apt/lists/*
 ##    && apt-get purge --autoremove -y curl \
@@ -35,8 +35,8 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        cuda-compat-12-6 \
-        cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
+    cuda-compat-12-6 \
+    cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -124,11 +124,11 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        cuda-libraries-12-6=${NV_CUDA_LIB_VERSION} \
-        cuda-nvtx-12-6=${NV_NVTX_VERSION} \
-        libcublas-12-6=${NV_LIBCUBLAS_VERSION} \
-        libcusparse-12-6=${NV_LIBCUSPARSE_VERSION} \
-        libnpp-12-6=${NV_LIBNPP_VERSION} \
+    cuda-libraries-12-6=${NV_CUDA_LIB_VERSION} \
+    cuda-nvtx-12-6=${NV_NVTX_VERSION} \
+    libcublas-12-6=${NV_LIBCUBLAS_VERSION} \
+    libcusparse-12-6=${NV_LIBCUSPARSE_VERSION} \
+    libnpp-12-6=${NV_LIBNPP_VERSION} \
     && apt-get clean \
     && apt-mark hold libcublas-12-6 \
     && rm -rf /var/lib/apt/lists/*
@@ -148,10 +148,10 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        libcudnn9-cuda-12=${NV_CUDNN_VERSION} \
+    libcudnn9-cuda-12=${NV_CUDNN_VERSION} \
     && apt-get clean \
     && apt-mark hold \
-        libcudnn9-cuda-12 \
+    libcudnn9-cuda-12 \
     && rm -rf /var/lib/apt/lists/*
 
 #
@@ -180,28 +180,28 @@ RUN \
     #
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        curl \
-        bind9-dnsutils \
-        iproute2 \
-        psmisc \
-        tree \
-        nfs-common \
-        libgl1 \
-        libgl1-mesa-dri \
-        libglu1-mesa \
-        libglx-mesa0 \
-        libx11-6 \
-        libxext6 \
+    curl \
+    bind9-dnsutils \
+    iproute2 \
+    psmisc \
+    tree \
+    nfs-common \
+    libgl1 \
+    libgl1-mesa-dri \
+    libglu1-mesa \
+    libglx-mesa0 \
+    libx11-6 \
+    libxext6 \
     #
     # Install unstructured dependencies
     #
     # See: https://docs.unstructured.io/open-source/introduction/quick-start
     #
     && apt-get install -y --no-install-recommends \
-        libmagic1 \
-        libreoffice \
-        poppler-utils \
-        tesseract-ocr \
+    libmagic1 \
+    libreoffice \
+    poppler-utils \
+    tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     #
@@ -210,7 +210,7 @@ RUN \
     # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
     #
     && curl -O -sS -f --proto "=https" --proto-redir "=https" -L \
-        https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
+    https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
     && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
     && cd pandoc-3.7.0.2 \
     && cp bin/pandoc /usr/local/bin/ \
@@ -249,17 +249,27 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /staging
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/backend/
 
-COPY --from=src-dir ./pyproject.toml /app/pyproject.toml
-COPY --from=src-dir ./uv.lock /app/uv.lock
+COPY --from=backend-dir ./pyproject.toml /app/backend/pyproject.toml
+COPY --from=backend-dir ./uv.lock /app/backend/uv.lock
 
-COPY --from=src-dir ./alembic.ini /app/alembic.ini
-COPY --from=src-dir ./logging.toml /app/logging.toml
-COPY --from=src-dir ./apps/ /app/apps/
-COPY --from=src-dir ./libs/ /app/libs/
+COPY --from=backend-dir ./alembic.ini /app/backend/alembic.ini
+COPY --from=backend-dir ./logging.toml /app/backend/logging.toml
+COPY --from=backend-dir ./apps/ /app/backend/apps/
+COPY --from=backend-dir ./libs/ /app/backend/libs/
 
-RUN chown -R ${USER_ID}:${GROUP_ID} /app/
+RUN chown -R ${USER_ID}:${GROUP_ID} /app/backend/
+
+# This is to allow the container user to mount the directory from the NFS server.
+# The user will run the following command:
+#   sudo mount /app/backend
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo "nfs:/backend /app/backend nfs defaults,noauto 0 0" >> /etc/fstab \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
@@ -291,11 +301,11 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        git \
-        gnupg \
-        openssh-client \
-        patch \
+    ca-certificates \
+    git \
+    gnupg \
+    openssh-client \
+    patch \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

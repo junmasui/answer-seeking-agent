@@ -15,7 +15,7 @@ RUN \
     #
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
     ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
-    
+
 RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
@@ -24,28 +24,28 @@ RUN \
     #
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        bind9-dnsutils \
-        iproute2 \
-        psmisc \
-        tree \
-        nfs-common \
-        curl \
-        libgl1 \
-        libgl1-mesa-dri \
-        libglu1-mesa \
-        libglx-mesa0 \
-        libx11-6 \
-        libxext6 \
+    bind9-dnsutils \
+    iproute2 \
+    psmisc \
+    tree \
+    nfs-common \
+    curl \
+    libgl1 \
+    libgl1-mesa-dri \
+    libglu1-mesa \
+    libglx-mesa0 \
+    libx11-6 \
+    libxext6 \
     #
     # Install unstructured dependencies
     #
     # See: https://docs.unstructured.io/open-source/introduction/quick-start
     #
     && apt-get install -y --no-install-recommends \
-        libmagic1 \
-        libreoffice \
-        poppler-utils \
-        tesseract-ocr \
+    libmagic1 \
+    libreoffice \
+    poppler-utils \
+    tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     #
@@ -54,7 +54,7 @@ RUN \
     # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
     #
     && curl -O -sS -f --proto "=https" --proto-redir "=https" -L \
-        https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
+    https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
     && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
     && cd pandoc-3.7.0.2 \
     && cp bin/pandoc /usr/local/bin/ \
@@ -106,6 +106,16 @@ COPY --from=src-dir ./libs/ /app/libs/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
+# This is to allow the container user to mount the directory from the NFS server.
+# The user will run the following command:
+#   sudo mount /app/backend
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo "nfs:/backend /app/backend nfs defaults,noauto 0 0" >> /etc/fstab \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
+
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
@@ -135,11 +145,11 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        git \
-        gnupg \
-        openssh-client \
-        patch \
+    ca-certificates \
+    git \
+    gnupg \
+    openssh-client \
+    patch \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

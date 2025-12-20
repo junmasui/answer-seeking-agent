@@ -9,16 +9,16 @@ RUN \
     apt-get update \
     # Install Debian packages
     && apt-get install -y --no-install-recommends \
-        curl \
-        wget \
+    curl \
+    wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     # Create a custom group with GROUP_ID
     # Then create a custom user with USER_ID and GROUP_ID
     && set -eux ; \
-        ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
-        ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
- 
+    ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
+    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
+
 # Copy the build-and-run script.
 #
 # These script live in the parent of this dockerfile's directory, so we must define
@@ -42,17 +42,29 @@ RUN chmod a+x /run_webui_server.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_webui_server.sh
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/frontend/
 
-COPY --from=src-dir ./app/index.html /app/index.html
-COPY --from=src-dir ./app/jsconfig.json /app/jsconfig.json
-COPY --from=src-dir ./app/package-lock.json /app/package-lock.json
-COPY --from=src-dir ./app/package.json /app/package.json
-COPY --from=src-dir ./app/vite.config.js /app/vite.config.js
+COPY --from=src-dir ./app/frontend/index.html /app/frontend/index.html
+COPY --from=src-dir ./app/frontend/jsconfig.json /app/frontend/jsconfig.json
+COPY --from=src-dir ./app/frontend/package-lock.json /app/frontend/package-lock.json
+COPY --from=src-dir ./app/frontend/package.json /app/frontend/package.json
+COPY --from=src-dir ./app/frontend/vite.config.js /app/frontend/vite.config.js
 
-COPY --from=src-dir ./app/src/ /app/src/
+COPY --from=src-dir ./app/frontend/src/ /app/frontend/src/
 
-RUN chown -R ${USER_ID}:${GROUP_ID} /app/
+RUN chown -R ${USER_ID}:${GROUP_ID} /app/frontend/
+
+# This is to allow the container user to mount the directory from the NFS server.
+# The user will run the following command:
+#   sudo mount /app/frontend
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo "nfs:/frontend /app/frontend nfs defaults,noauto 0 0" >> /etc/fstab \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount -t tmpfs tmpfs /app/frontend/node_modules' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
@@ -78,11 +90,11 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        git \
-        gnupg \
-        openssh-client \
-        patch \
+    ca-certificates \
+    git \
+    gnupg \
+    openssh-client \
+    patch \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

@@ -1,10 +1,10 @@
 services:
-  nfs-ganesha:
+  nfs:
     ## restart: unless-stopped
     restart: no
 
-    image: localhost/localhost/nfs-ganesha:latest
-    profiles: [ nfs-ganesha, infrastructure-core-2, infrastructure-2, all-2 ]
+    image: localhost/localhost/nfs:latest
+    profiles: [ nfs, infrastructure-core, infrastructure, all ]
     privileged: true
 
     ports:

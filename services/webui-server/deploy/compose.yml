@@ -62,7 +62,7 @@ services:
       ##SRC - ../build/run_webui_server.sh:/run_webui_server.sh:ro
       # Mounting a local area to use container-installed dependencies
       ##SRC - frontend-home-1:/home/node
-      ##SRC - frontend-node-modules-1:/app/node_modules
+      ##SRC - frontend-node-modules-1:/app/frontend/node_modules
 
     command: [ '/run_webui_server.sh' ]
     user: '1000:1000'

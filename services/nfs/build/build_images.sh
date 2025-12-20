@@ -3,7 +3,7 @@
 set -eu
 
 #
-# Build a nfs-ganesha image.
+# Build a nfs image.
 #
 # NOTE: Use environment variables BUILDKIT_PROGRESS, BUILDKIT_COLOR, etc to
 #       control the progress output.
@@ -19,6 +19,6 @@ $DOCKER build \
   --file Dockerfile \
   ${DOCKER_BUILD_OPTS} \
   --build-context config-dir=../config \
-  --tag localhost/localhost/nfs-ganesha:latest \
+  --tag localhost/localhost/nfs:latest \
   --progress plain \
   . 2>&1

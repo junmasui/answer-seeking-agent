@@ -23,7 +23,7 @@ $DOCKER build \
   --file Dockerfile \
   --build-context config-dir=../config/ \
   --build-context dependency-gate-dir=../../dependency-gate \
-  --build-context src-dir=../../../frontend/ \
+  --build-context frontend-dir=../../../frontend/ \
   --target production \
   --tag localhost/localhost/answers-frontend:node-22-bookworm \
   .
@@ -33,7 +33,7 @@ $DOCKER build \
   --file Dockerfile \
   --build-context config-dir=../config/ \
   --build-context dependency-gate-dir=../../dependency-gate \
-  --build-context src-dir=../../../frontend/ \
+  --build-context frontend-dir=../../../frontend/ \
   --target dev \
   --tag localhost/localhost/answers-frontend-dev:node-22-bookworm \
   .
