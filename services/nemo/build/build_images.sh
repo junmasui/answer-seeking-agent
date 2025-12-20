@@ -12,8 +12,8 @@ set -eu
 
 # DOCKER=podman
 DOCKER="docker buildx"
-DOCKER_BUILD_OPTS="--no-cache"
-#DOCKER_BUILD_OPTS=
+#DOCKER_BUILD_OPTS="--no-cache"
+DOCKER_BUILD_OPTS=
 
 $DOCKER build \
   --file Dockerfile \

@@ -4,7 +4,7 @@ services:
     restart: no
 
     image: localhost/localhost/nfs-ganesha:latest
-    profiles: [ nfs-ganesha, infrastructure-core, infrastructure, all ]
+    profiles: [ nfs-ganesha, infrastructure-core-2, infrastructure-2, all-2 ]
     privileged: true
 
     ports:

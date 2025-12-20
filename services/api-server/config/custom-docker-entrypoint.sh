@@ -1,5 +1,10 @@
 set -eu
 
+# if ! grep -q 'nfs-ganesha:/' /etc/fstab; then
+#     sudo cp -p /etc/fstab /etc/fstab.bak
+#     echo "nfs-ganesha:/ /data nfs nfsvers=4.1,rw 0 0" | sudo tee -a /etc/fstab
+# fi
+
 cd /app
 
 # Create the virtual environment only once.

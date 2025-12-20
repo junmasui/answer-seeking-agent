@@ -15,8 +15,8 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 # DOCKER=podman
 DOCKER="docker buildx"
-DOCKER_BUILD_OPTS="--no-cache"
-#DOCKER_BUILD_OPTS=
+#DOCKER_BUILD_OPTS="--no-cache"
+DOCKER_BUILD_OPTS=
 
 #
 # Build an image with CUDA12 installed on Python 3.12 on Debian 12

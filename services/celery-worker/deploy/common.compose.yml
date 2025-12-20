@@ -184,7 +184,7 @@ services:
 
   celery-exporter:
 
-    image: 'docker.io/danihodovic/celery-exporter'
+    image: 'docker.io/danihodovic/celery-exporter:0.12.2'
     profiles: [ celery, backend, all ]
 
     env_file:

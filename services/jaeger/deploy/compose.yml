@@ -1,7 +1,7 @@
 services:
   # Jaeger - Distributed Tracing
   jaeger:
-    image: jaegertracing/all-in-one:1.58
+    image: jaegertracing/all-in-one:1.74.0
     profiles: [jaeger, infrastructure, telemetry, all]
     ports:
       - "16686:16686"  # Jaeger UI

@@ -40,7 +40,7 @@ services:
       init-redis-volumes:
         condition: service_completed_successfully
 
-    image: redis:latest
+    image: redis:7.4.1-bookworm
     profiles: [ redis, infrastructure-core, infrastructure, all ]
 
     ports:

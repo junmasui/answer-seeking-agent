@@ -73,11 +73,11 @@ RUN \
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 
-COPY --from=config-dir ./custom-docker-entrypoint.sh /
-COPY --from=config-dir ./run_api_server.sh /
+COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
+COPY --from=config-dir ./run_api_server.sh /run_api_server.sh
 
-COPY --from=celery-config-dir ./run_celery_worker.sh /
-COPY --from=celery-config-dir ./run_celery_flower.sh /
+COPY --from=celery-config-dir ./run_celery_worker.sh /run_celery_worker.sh
+COPY --from=celery-config-dir ./run_celery_flower.sh /run_celery_flower.sh
 
 COPY --from=dependency-gate-dir ./wait_for_gate.sh /
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /

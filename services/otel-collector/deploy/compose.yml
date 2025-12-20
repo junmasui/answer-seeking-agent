@@ -1,7 +1,7 @@
 services:
   # OpenTelemetry Collector - Central telemetry collection and processing
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.130.0
+    image: otel/opentelemetry-collector-contrib:0.142.0
     profiles: [infrastructure, telemetry, all]
 
     ports:
@@ -40,7 +40,7 @@ services:
 
   # OpenTelemetry Collector - Central telemetry collection and processing
   otel-collector-docker:
-    image: otel/opentelemetry-collector-contrib:0.130.0
+    image: otel/opentelemetry-collector-contrib:0.142.0
     profiles: [infrastructure, telemetry, all]
 
     # ports:

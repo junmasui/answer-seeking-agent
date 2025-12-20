@@ -1,0 +1,31 @@
+{
+  "identities": [
+    {
+      "name": "admin",
+      "credentials": [
+        {
+          "accessKey": "${SEAWEEDFS_ROOT_USER}",
+          "secretKey": "${SEAWEEDFS_ROOT_PASSWORD}"
+        }
+      ],
+      "actions": [
+        "Admin",
+        "Read",
+        "Write"
+      ]
+    },
+    {
+      "name": "app-user",
+      "credentials": [
+        {
+          "accessKey": "${SEAWEEDFS_APP_USER_NAME}",
+          "secretKey": "${SEAWEEDFS_APP_USER_PASSWORD}"
+        }
+      ],
+      "actions": [
+        "Read",
+        "Write"
+      ]
+    }
+  ]
+}

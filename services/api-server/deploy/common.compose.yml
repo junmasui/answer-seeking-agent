@@ -179,7 +179,7 @@ services:
       # Mount dist directory
       - ../../dist:/dist
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      ## - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
 
     user: '1000:1000'
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
