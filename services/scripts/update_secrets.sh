@@ -210,16 +210,3 @@ VALUE_PREFIX=opensearch_admin_
 DESCR="OpenSearch's initial admin password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-#=======
-
-
-#
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "./secrets/config/redis.secrets.env" | xargs -n1 )
-
-RELPATH=redis/config/redis.conf
-envsubst < "${RELPATH}.template" > "secrets/redis.conf"
-
-

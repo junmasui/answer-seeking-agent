@@ -22,8 +22,6 @@ secrets:
   opensearch_secrets:
     file: ./secrets/opensearch.secrets.env
 
-  redis_conf:
-    file: ./secrets/redis.conf
 
   grafana_secrets:
     file: ./secrets/grafana.secrets.env

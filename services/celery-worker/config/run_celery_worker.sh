@@ -54,6 +54,23 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
+# NOTE regarding OpenTelemetry and Celery:
+#   Celery uses a prefork model where the main process forks child worker processes.
+#   The standard `opentelemetry-instrument` wrapper initializes the SDK in the main process.
+#   When the process forks, the SDK state (including background threads for batch processors)
+#   is duplicated in an unsafe way, leading to deadlocks and duplicate spans.
+#
+#   THE INCORRECT APPROACH:
+#     wrapping the celery command with `opentelemetry-instrument` (like we do for api-server).
+#
+#   THE CORRECT APPROACH:
+#     Programmatic instrumentation using the `worker_process_init` signal.
+#     This ensures the SDK is initialized *after* the fork, separately in each child process.
+#
+#   IMPLEMENTATION:
+#     See `apps/core_worker/src/core_worker/signal_handlers.py` where `handle_worker_process_init`
+#     calls `load_custom_distro_by_entry_point` to initialize OpenTelemetry.
+
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
@@ -61,3 +78,4 @@ uv run --frozen --no-sync \
    --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
    -- \
    celery --app=core_worker worker -l INFO
+

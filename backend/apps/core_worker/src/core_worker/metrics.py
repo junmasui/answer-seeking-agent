@@ -25,12 +25,31 @@ def start_metrics(is_main_worker: bool):
         # Instrument system metrics (CPU, memory, etc.)
         SystemMetricsInstrumentor().instrument(meter_provider=provider)
 
-    # GC objects count
-    def gc_objects_callback(options):
-        return [Observation(len(gc.get_objects()))]
+    # GC stats (lighter weight than specific object counts)
+    def gc_stats_callback(options):
+        # gc.get_stats() returns a list of 3 dicts (one for each generation)
+        # keys: 'collections', 'collected', 'uncollectable'
+        stats = gc.get_stats()
+        observations = []
+        for generation, stat in enumerate(stats):
+            observations.append(
+                Observation(
+                    stat['collected'],
+                    {"generation": str(generation), "type": "collected"}
+                )
+            )
+            observations.append(
+                Observation(
+                    stat['collections'],
+                    {"generation": str(generation), "type": "collections"}
+                )
+            )
+        return observations
 
-    meter.create_observable_gauge(
-        'python_gc_objects', callbacks=[gc_objects_callback], description='Number of objects tracked by Python GC'
+    meter.create_observable_counter(
+        'python_gc_stats',
+        callbacks=[gc_stats_callback],
+        description='Statistics from the Python Garbage Collector (collections and items collected)',
     )
 
     # Memory usage (RSS)

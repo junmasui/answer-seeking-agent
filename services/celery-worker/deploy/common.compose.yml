@@ -90,7 +90,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.1' # 10% of available CPU resources
+          cpus: '0.5' # 50% of available CPU resources
           memory: 8G # Give enough to run Tesseract and local model
         reservations:
           devices:
