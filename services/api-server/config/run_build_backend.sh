@@ -28,9 +28,13 @@ else
     exit -1
 fi
 
-
 # Build all workspace members
 echo "Building all workspace members..."
+
+pwd
+ls -la
+pwd
+ls -la ..
 
 # List of workspace members from pyproject.toml
 workspace_members=(
@@ -47,6 +51,8 @@ workspace_members=(
     "libs/early_init"
     "libs/log_config_monitor"
 )
+
+ls -la
 
 failed_builds=()
 successful_builds=()

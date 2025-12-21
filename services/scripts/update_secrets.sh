@@ -6,6 +6,7 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 [ ! -d ./secrets ] && mkdir ./secrets
 
+HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-}"
 export HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}"
 export HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}"
 
@@ -216,9 +217,9 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 #
 # shellcheck disable=SC2046
-export $( grep -h -v "^#" "./secrets/redis.secrets.env" | xargs -n1 )
+export $( grep -h -v "^#" "./secrets/config/redis.secrets.env" | xargs -n1 )
 
-RELPATH=redis/redis.conf
+RELPATH=redis/config/redis.conf
 envsubst < "${RELPATH}.template" > "secrets/redis.conf"
 
 

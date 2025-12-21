@@ -96,6 +96,7 @@ JQ_2=$(cat << EOS
                     "agent-otel-collector-1",
                     "agent-otel-collector-docker-1",
                     "agent-automated-test-1",
+                    "agent-nfs-1",
                     "agent-loki-1" ]
                 | index(\$name)
               ) ) | not )

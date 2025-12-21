@@ -96,13 +96,13 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
 # Set the working directory inside the container
 WORKDIR /app/backend/
 
-COPY --from=backend-dir ./pyproject.toml /app/pyproject.toml
-COPY --from=backend-dir ./uv.lock /app/uv.lock
+COPY --from=backend-dir ./pyproject.toml /app/backend/pyproject.toml
+COPY --from=backend-dir ./uv.lock /app/backend/uv.lock
 
-COPY --from=backend-dir ./alembic.ini /app/alembic.ini
-COPY --from=backend-dir ./logging.toml /app/logging.toml
-COPY --from=backend-dir ./apps/ /app/apps/
-COPY --from=backend-dir ./libs/ /app/libs/
+COPY --from=backend-dir ./alembic.ini /app/backend/alembic.ini
+COPY --from=backend-dir ./logging.toml /app/backend/logging.toml
+COPY --from=backend-dir ./apps/ /app/backend/apps/
+COPY --from=backend-dir ./libs/ /app/backend/libs/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 

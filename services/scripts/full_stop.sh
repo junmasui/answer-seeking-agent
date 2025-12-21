@@ -30,51 +30,13 @@ else
     exit 1
 fi
 
-
-./scripts/pull_images.sh
+docker compose --profile=all down
 
 EXIT_CODE="$?"
 if [ "$EXIT_CODE" != 0 ]
 then
-    echo "Error pulling public images"
+    echo "Error stopping"
     exit -1
 fi
-
-./scripts/build_images.sh
-
-EXIT_CODE="$?"
-if [ "$EXIT_CODE" != 0 ]
-then
-    echo "Error building images"
-    exit -1
-fi
-
-
-./scripts/update_secrets.sh
-
-EXIT_CODE="$?"
-if [ "$EXIT_CODE" != 0 ]
-then
-    echo "Error setting up docker compose secrets"
-    exit -1
-fi
-
-./scripts/launch_services.sh --gpu-mode=$GPU_MODE
-
-EXIT_CODE="$?"
-if [ "$EXIT_CODE" != 0 ]
-then
-    echo "Error launching. Retrying"
-
-    ./scripts/launch_services.sh --gpu-mode=$GPU_MODE
-
-    EXIT_CODE="$?"
-    if [ "$EXIT_CODE" != 0 ]
-    then
-        echo "Error launching."
-        exit -1
-    fi
-fi
-
 
 ./scripts/display_processes.sh --gpu-mode=$GPU_MODE

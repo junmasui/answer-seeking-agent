@@ -94,6 +94,8 @@ services:
       ##
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
+      # Mount the NFS directory into this container
+      USE_NFS_SRC_DIR: true
     env_file:
       - automated-test.env
       - opentelemetry-instrument.env
@@ -102,14 +104,6 @@ services:
     networks:
       - agent-poc
     volumes:
-      # Mount the project directory to /app in the container
-      - ../../../backend/apps:/app/backend/apps
-      - ../../../backend/libs:/app/backend/libs
-      - ../../../backend/alembic.ini:/app/backend/alembic.ini
-      - ../../../backend/pyproject.toml:/app/backend/pyproject.toml
-      - ../../../backend/pytest.ini:/app/backend/pytest.ini
-      - ../../../backend/uv.lock:/app/backend/uv.lock
-      - ../../../backend/run_lint.sh:/app/backend/run_lint.sh
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro
@@ -183,18 +177,14 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       GPU_MODE: cpu
+      # Mount the NFS directory into this container
+      USE_NFS_SRC_DIR: true
     env_file:
       - automated-test.env
     networks:
       - agent-poc
     volumes:
       - backend-autotest-init-signal-1:/init-signal
-      # Mount the project directory to /app in the container
-      - ../../../backend/apps:/app/backend/apps
-      - ../../../backend/libs:/app/backend/libs
-      - ../../../backend/pytest.ini:/app/backend/pytest.ini
-      - ../../../backend/pyproject.toml:/app/backend/pyproject.toml
-      - ../../../backend/pytest.ini:/app/backend/pytest.ini
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_automated_test.sh:/run_automated_test.sh:ro

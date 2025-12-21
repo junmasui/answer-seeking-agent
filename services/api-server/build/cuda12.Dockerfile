@@ -259,7 +259,7 @@ COPY --from=backend-dir ./logging.toml /app/backend/logging.toml
 COPY --from=backend-dir ./apps/ /app/backend/apps/
 COPY --from=backend-dir ./libs/ /app/backend/libs/
 
-RUN chown -R ${USER_ID}:${GROUP_ID} /app/backend/
+RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
 # This is to allow the container user to mount the directory from the NFS server.
 # The user will run the following command:
