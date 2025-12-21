@@ -94,15 +94,15 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /staging
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/backend/
 
-COPY --from=src-dir ./pyproject.toml /app/pyproject.toml
-COPY --from=src-dir ./uv.lock /app/uv.lock
+COPY --from=backend-dir ./pyproject.toml /app/pyproject.toml
+COPY --from=backend-dir ./uv.lock /app/uv.lock
 
-COPY --from=src-dir ./alembic.ini /app/alembic.ini
-COPY --from=src-dir ./logging.toml /app/logging.toml
-COPY --from=src-dir ./apps/ /app/apps/
-COPY --from=src-dir ./libs/ /app/libs/
+COPY --from=backend-dir ./alembic.ini /app/alembic.ini
+COPY --from=backend-dir ./logging.toml /app/logging.toml
+COPY --from=backend-dir ./apps/ /app/apps/
+COPY --from=backend-dir ./libs/ /app/libs/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
@@ -112,8 +112,12 @@ RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 RUN apt-get update \
     && apt-get install -y sudo \
     && echo "nfs:/backend /app/backend nfs defaults,noauto 0 0" >> /etc/fstab \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
+    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && rm -rf /var/lib/apt/lists/*
 
 # Switch to the custom user

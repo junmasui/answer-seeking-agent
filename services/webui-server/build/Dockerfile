@@ -44,13 +44,13 @@ RUN chmod a+x /run_webui_server.sh \
 # Set the working directory inside the container
 WORKDIR /app/frontend/
 
-COPY --from=src-dir ./app/frontend/index.html /app/frontend/index.html
-COPY --from=src-dir ./app/frontend/jsconfig.json /app/frontend/jsconfig.json
-COPY --from=src-dir ./app/frontend/package-lock.json /app/frontend/package-lock.json
-COPY --from=src-dir ./app/frontend/package.json /app/frontend/package.json
-COPY --from=src-dir ./app/frontend/vite.config.js /app/frontend/vite.config.js
+COPY --from=frontend-dir ./index.html /app/frontend/index.html
+COPY --from=frontend-dir ./jsconfig.json /app/frontend/jsconfig.json
+COPY --from=frontend-dir ./package-lock.json /app/frontend/package-lock.json
+COPY --from=frontend-dir ./package.json /app/frontend/package.json
+COPY --from=frontend-dir ./vite.config.js /app/frontend/vite.config.js
 
-COPY --from=src-dir ./app/frontend/src/ /app/frontend/src/
+COPY --from=frontend-dir ./src/ /app/frontend/src/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/frontend/
 

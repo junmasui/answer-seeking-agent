@@ -267,8 +267,12 @@ RUN chown -R ${USER_ID}:${GROUP_ID} /app/backend/
 RUN apt-get update \
     && apt-get install -y sudo \
     && echo "nfs:/backend /app/backend nfs defaults,noauto 0 0" >> /etc/fstab \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
+    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && rm -rf /var/lib/apt/lists/*
 
 # Switch to the custom user
