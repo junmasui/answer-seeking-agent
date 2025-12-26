@@ -5,3 +5,4 @@ include:
   - ./api-server/deploy/cpu-only-autotest.compose.yml
   - ./celery-worker/deploy/cpu-only.compose.yml
   - ./celery-worker/deploy/cpu-only-autotest.compose.yml
+  - ./dev-server/deploy/cpu-only.compose.yml

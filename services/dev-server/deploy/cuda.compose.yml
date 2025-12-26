@@ -1,0 +1,14 @@
+services:
+  dev-server:
+    image: 'localhost/localhost/answers-dev-server:python-3.12-cuda12'
+
+    environment:
+      GPU_MODE: cuda12
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

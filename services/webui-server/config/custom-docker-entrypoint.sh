@@ -11,16 +11,17 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
+    # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
+    echo "Running in NFS mode. Mounting file systems..."
     # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
+    sudo /usr/bin/mount /mnt/frontend-nfs
     sudo /usr/bin/mount /app/frontend
 
-    # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
-    echo "Running in NFS mode. Mounting tmpfs on node_modules..."
     # Ensure directory exists before mounting
     mkdir -p /app/frontend/node_modules
     # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
     # Actually, simpler to just try mount.
-    sudo mount -t tmpfs tmpfs /app/frontend/node_modules
+    sudo /usr/bin/mount /app/frontend/node_modules
 fi
 
 cd /app/frontend

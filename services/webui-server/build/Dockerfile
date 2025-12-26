@@ -10,6 +10,7 @@ RUN \
     # Install Debian packages
     && apt-get install -y --no-install-recommends \
     curl \
+    gnupg \
     wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -54,18 +55,6 @@ COPY --from=frontend-dir ./src/ /app/frontend/src/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/frontend/
 
-# This is to allow the container user to mount the directory from the NFS server.
-# The user will run the following command:
-#   sudo mount /app/frontend
-RUN apt-get update \
-    && apt-get install -y sudo \
-    && echo "nfs:/frontend /app/frontend nfs defaults,noauto 0 0" >> /etc/fstab \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount -t tmpfs tmpfs /app/frontend/node_modules' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
-    && rm -rf /var/lib/apt/lists/*
-
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
@@ -86,13 +75,34 @@ ARG GROUP_ID=1000
 
 USER root
 
+# This is to allow the container user to mount the directory from the NFS server.
+# The user will run the following command:
+#   sudo mount /app/frontend
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo "nfs:/frontend /mnt/frontend-nfs nfs defaults,noauto 0 0" >> /etc/fstab \
+    && echo "/mnt/frontend-nfs /app/frontend none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo "/home/node/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/frontend-nfs' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /mnt/frontend-nfs' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend/node_modules' >> /etc/sudoers \
+    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
+    && mkdir -p /mnt/frontend-nfs \
+    && mkdir -p /home/node/node_modules-storage \
+    && chown ${USER_ID}:${GROUP_ID} /home/node/node_modules-storage \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
     ca-certificates \
-    git \
-    gnupg \
+    bind9-dnsutils \
+    iproute2 \
+    psmisc \
+    tree \
     openssh-client \
     patch \
     && apt-get clean \

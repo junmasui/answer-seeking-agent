@@ -9,6 +9,17 @@ ARG GROUP_ID=1000
 
 RUN \
     set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN \
+    set -eux ; \
     #
     # Create a custom group with GROUP_ID
     # Then create a custom user with USER_ID and GROUP_ID and home directory.
@@ -24,12 +35,7 @@ RUN \
     #
     apt-get update \
     && apt-get install -y --no-install-recommends \
-    bind9-dnsutils \
-    iproute2 \
-    psmisc \
-    tree \
     nfs-common \
-    curl \
     libgl1 \
     libgl1-mesa-dri \
     libglu1-mesa \
@@ -106,20 +112,6 @@ COPY --from=backend-dir ./libs/ /app/backend/libs/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
-# This is to allow the container user to mount the directory from the NFS server.
-# The user will run the following command:
-#   sudo mount /app/backend
-RUN apt-get update \
-    && apt-get install -y sudo \
-    && echo "nfs:/backend /app/backend nfs defaults,noauto 0 0" >> /etc/fstab \
-    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
-    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
-    && rm -rf /var/lib/apt/lists/*
-
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
@@ -144,14 +136,37 @@ ARG GROUP_ID=1000
 
 USER root
 
+# This is to allow the container user to mount the directory from the NFS server.
+# The user will run the following command:
+#   sudo mount /app/backend
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y sudo \
+    && echo "nfs:/backend /mnt/backend-nfs nfs defaults,noauto,nfsvers=4 0 0" >> /etc/fstab \
+    && echo "/mnt/backend-nfs /app/backend none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/backend-nfs' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /mnt/backend-nfs' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
+    && mkdir -p /mnt/backend-nfs \
+    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
+    bind9-dnsutils \
+    iproute2 \
+    psmisc \
+    tree \
     ca-certificates \
-    git \
-    gnupg \
     openssh-client \
     patch \
     && apt-get clean \

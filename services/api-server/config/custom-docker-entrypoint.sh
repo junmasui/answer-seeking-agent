@@ -1,21 +1,23 @@
 set -eu
 
 if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
+    # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
+    echo "Running in NFS mode. Mounting file systems..."
     # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
-    sudo /usr/bin/mount /app/backend
+    sudo /usr/bin/mount /mnt/data
+    sudo /usr/bin/mount /app
+
+    # Ensure directory exists before mounting
+    mkdir -p /app/backend/.venv
+    # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
+    # Actually, simpler to just try mount.
+    sudo /usr/bin/mount /app/backend/.venv
 fi
 
 cd /app/backend
 
-# If running with NFS, we need to mask .venv with a bind mount so it's container-local
 if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
-    echo "Running in NFS mode. Mounting internal storage on .venv..."
-    # Ensure directory exists before mounting
-    mkdir -p /app/backend/.venv
-    
-    # Bind mount the container-local storage to the NFS path
-    sudo /usr/bin/mount /app/backend/.venv
-
+    #    
     # Create the virtual environment only once.
     #
     # For the CACHEDIR.TAG specification, see https://bford.info/cachedir/
