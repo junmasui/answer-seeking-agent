@@ -4,7 +4,7 @@ services:
   minio:
     restart: unless-stopped
 
-    image: docker.io/minio/minio:RELEASE.2025-05-24T17-08-30Z-cpuv1
+    image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     profiles: [ minio, infrastructure-core, infrastructure, all ]
 
     env_file:
@@ -68,7 +68,7 @@ services:
   minio-init:
     restart: 'no'
 
-    image: docker.io/minio/minio:RELEASE.2025-05-24T17-08-30Z-cpuv1
+    image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:
@@ -95,7 +95,7 @@ services:
   minio-init-autotest:
     restart: 'no'
 
-    image: docker.io/minio/minio:RELEASE.2025-05-24T17-08-30Z-cpuv1
+    image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     profiles: [ minio, infrastructure-core, infrastructure, all, run-and-done ]
 
     environment:

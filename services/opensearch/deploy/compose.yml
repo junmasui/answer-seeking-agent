@@ -34,7 +34,7 @@ services:
     #   init-opensearch-volumes: # If an init-volumes service were added
     #     condition: service_completed_successfully
 
-    image: opensearchproject/opensearch:2.9.0
+    image: opensearchproject/opensearch:2.17.1
     hostname: opensearch
     profiles:
       - opensearch

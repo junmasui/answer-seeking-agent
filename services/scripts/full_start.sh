@@ -77,4 +77,4 @@ then
 fi
 
 
-./display_processes.sh --gpu-mode=$GPU_MODE
+./scripts/display_processes.sh --gpu-mode=$GPU_MODE

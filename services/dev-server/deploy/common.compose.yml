@@ -1,0 +1,119 @@
+services:
+  init-backend-autotest-volumes:
+    restart: 'no'
+
+    image: 'docker.io/python:3.12.8-slim-bookworm'
+    profiles: [ init-volumes, backend-autotest, all ]
+
+    # No network is needed to initialize named volumes
+    network_mode: none
+    volumes:
+      - dev-server-home:/home/python
+      - dev-server-venv:/home/python/.venv-storage
+      - dev-server-node-modules:/home/python/node_modules-storage
+
+    entrypoint: 'bash'
+    command:
+      - '-c'
+      # Beware that docker-compose also performs variable interpolation.
+      # So we need to escape the dollar sign with $$name so that bash
+      # will recieve our embedded script with $name. 
+      - |
+        set -ex ;
+
+        ls -ld /home/python/
+
+        mkdir -p /home/python/.venv-storage
+        mkdir -p /home/python/node_modules-storage
+
+        chown -R 1000:1000 /home/python
+
+        ls -ld /home/python/
+#    secrets:
+#      - answers_minio_autotest_secrets
+#      - answers_postgres_autotest_secrets
+#      - checkpoints_postgres_autotest_secrets
+#      - redis_secrets
+#      - weaviate_secrets
+
+  dev-server:
+    depends_on:
+      init-backend-autotest-volumes:
+        condition: service_completed_successfully
+
+    # Image is defined in cpu-only.compose.yml or cuda.compose.yml
+    profiles: [ backend-autotest, all ]
+    privileged: true
+
+    environment:
+      DEBUGGER_LISTEN: true
+      # Mount the NFS directory into this container
+      USE_NFS_SRC_DIR: true
+    env_file:
+      - automated-test.env
+      - opentelemetry-instrument.env
+    ports: # use if it is necessary to expose the container to the host machine
+      - '8102:8100'
+    networks:
+      - agent-poc
+
+    volumes:
+      # Mount configuration for NFS and persistence
+      - dev-server-home:/home/python
+      - dev-server-venv:/home/python/.venv-storage
+      - dev-server-node-modules:/home/python/node_modules-storage
+
+      # Mount docker socket
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount entrypoint
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      # Mount start script
+      - ../config/start_dev.sh:/start_dev.sh:ro
+#    secrets:
+#      - answers_secrets
+#      - answers_api_key_autotest_secrets
+#      - answers_jwt_autotest_secrets
+#      - answers_minio_autotest_secrets
+#      - answers_postgres_autotest_secrets
+#      - checkpoints_postgres_autotest_secrets
+#      - redis_secrets
+#      - weaviate_secrets
+
+    user: '1000:1000'
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    # Command to run the dev startup script
+    command: [ '/start_dev.sh' ]
+
+#
+# Named volumes
+#
+volumes:
+  dev-server-home:
+    driver: local
+  dev-server-venv:
+    driver: local
+  dev-server-node-modules:
+    driver: local
+
+secrets:
+  answers_secrets:
+    external: true
+  answers_api_key_autotest_secrets:
+    external: true
+  answers_jwt_autotest_secrets:
+    external: true
+  answers_minio_autotest_secrets:
+    external: true
+  answers_postgres_autotest_secrets:
+    external: true
+  checkpoints_postgres_autotest_secrets:
+    external: true
+  redis_secrets:
+    external: true
+  weaviate_secrets:
+    external: true
+
+networks:
+  agent-poc:
+    external: true
+    name: agent_agent-poc

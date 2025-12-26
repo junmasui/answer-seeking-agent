@@ -2,11 +2,11 @@ set -e  # Exit immediately on error.
 set -u  # Unbound variables are errors.
 set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
-# Set environment variables from mounted secrets files
+## # Set environment variables from mounted secrets files
 
-SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
+## SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
+## # shellcheck disable=SC2046
+## export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 # # Wait for dependency-gate to open.
 # #
@@ -28,9 +28,13 @@ else
     exit -1
 fi
 
-
 # Build all workspace members
 echo "Building all workspace members..."
+
+pwd
+ls -la
+pwd
+ls -la ..
 
 # List of workspace members from pyproject.toml
 workspace_members=(
@@ -47,6 +51,8 @@ workspace_members=(
     "libs/early_init"
     "libs/log_config_monitor"
 )
+
+ls -la
 
 failed_builds=()
 successful_builds=()

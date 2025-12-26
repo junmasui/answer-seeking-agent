@@ -1,0 +1,17 @@
+{
+    "name": "Dev Server",
+    "dockerComposeFile": [
+        "../services/dev-server/deploy/common.compose.yml",
+        "../services/dev-server/deploy/cuda.compose.yml"
+    ],
+    "service": "dev-server",
+    "workspaceFolder": "/app",
+    "shutdownAction": "none",
+    "extensions": [
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "tamasfe.even-better-toml"
+    ],
+    "remoteUser": "python"
+}

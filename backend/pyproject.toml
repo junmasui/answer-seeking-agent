@@ -58,6 +58,7 @@ addopts = [
 ]
 
 [tool.uv]
+required-environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
 # Explicit declaration that the "cpu" and "cuda12" extras are in conflict
 #
 # See: https://github.com/astral-sh/uv/blob/main/docs/reference/settings.md#conflicts--conflicts-
@@ -108,7 +109,6 @@ constraint-dependencies = [
     "numpy>=1.24.0,<2.0.0",
     "pandas>=2.0.0,<3.0.0",
 ]
-
 
 [tool.uv.workspace]
 members = [
@@ -168,5 +168,5 @@ explicit = true
 
 [[tool.uv.index]]
 name = "pytorch-cuda12"
-url = "https://download.pytorch.org/whl/cu124"
+url = "https://download.pytorch.org/whl/cu126"
 explicit = true

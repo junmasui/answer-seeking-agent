@@ -1,0 +1,79 @@
+name: seaweedfs
+
+services:
+  seaweedfs:
+    restart: unless-stopped
+    image: localhost/localhost/seaweedfs:latest
+    profiles: [ seaweedfs, infrastructure, all ]
+
+    env_file:
+      - seaweedfs.env
+    
+    # We map 8333 to host 8333 by default to avoid conflict with existing MinIO (9000).
+    # User can change this if they want to replace MinIO completely.
+    ports:
+      - '8333:8333'
+      - '9333:9333' # Master port
+      - '8888:8888' # Filer port
+    
+    networks:
+      - agent-poc
+    
+    volumes:
+      - seaweedfs-data:/data
+      - ../config/s3.json.template:/etc/seaweedfs/s3.json.template:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+    
+    secrets:
+      - minio_secrets
+      - answers_minio_secrets
+    
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # Start S3 service, Filer, and Master in one process for simplicity (single container mode)
+    # -s3: start S3 gateway
+    # -filer: start Filer
+    # -master: start Master
+    # -volume: start Volume server (implicitly started by server command usually)
+    # 'server' command starts master, volume, filer, and s3.
+    command: server -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -dir=/data -ip=seaweedfs
+    
+    mem_limit: 1g
+    memswap_limit: 2g
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8333/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  seaweedfs-init:
+    restart: 'no'
+    # Use the same SeaweedFS image as the main service
+    image: localhost/localhost/seaweedfs:latest
+    profiles: [ seaweedfs, infrastructure, all, run-and-done ]
+
+    env_file:
+      - seaweedfs.env
+    
+    networks:
+      - agent-poc
+    
+    volumes:
+      - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
+      - seaweedfs-init-signal:/init-signal
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+
+    secrets:
+      - minio_secrets
+      - answers_minio_secrets
+
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
+    # init-seaweedfs.sh will now refer to 'weed shell'
+    command: /init-seaweedfs.sh
+
+volumes:
+  seaweedfs-data:
+    driver: local
+  seaweedfs-init-signal:
+    driver: local

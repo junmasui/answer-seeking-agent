@@ -9,13 +9,24 @@ ARG GROUP_ID=1000
 
 RUN \
     set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN \
+    set -eux ; \
     #
     # Create a custom group with GROUP_ID
     # Then create a custom user with USER_ID and GROUP_ID and home directory.
     #
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
     ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
-    
+
 RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
@@ -24,24 +35,23 @@ RUN \
     #
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        bind9-dnsutils \
-        curl \
-        libgl1 \
-        libgl1-mesa-dri \
-        libglu1-mesa \
-        libglx-mesa0 \
-        libx11-6 \
-        libxext6 \
+    nfs-common \
+    libgl1 \
+    libgl1-mesa-dri \
+    libglu1-mesa \
+    libglx-mesa0 \
+    libx11-6 \
+    libxext6 \
     #
     # Install unstructured dependencies
     #
     # See: https://docs.unstructured.io/open-source/introduction/quick-start
     #
     && apt-get install -y --no-install-recommends \
-        libmagic1 \
-        libreoffice \
-        poppler-utils \
-        tesseract-ocr \
+    libmagic1 \
+    libreoffice \
+    poppler-utils \
+    tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     #
@@ -50,7 +60,7 @@ RUN \
     # See: https://github.com/Unstructured-IO/unstructured/blob/main/scripts/install-pandoc.sh
     #
     && curl -O -sS -f --proto "=https" --proto-redir "=https" -L \
-        https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
+    https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-linux-amd64.tar.gz \
     && tar xvf pandoc-3.7.0.2-linux-amd64.tar.gz \
     && cd pandoc-3.7.0.2 \
     && cp bin/pandoc /usr/local/bin/ \
@@ -69,11 +79,11 @@ RUN \
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 
-COPY --from=config-dir ./custom-docker-entrypoint.sh /
-COPY --from=config-dir ./run_api_server.sh /
+COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
+COPY --from=config-dir ./run_api_server.sh /run_api_server.sh
 
-COPY --from=celery-config-dir ./run_celery_worker.sh /
-COPY --from=celery-config-dir ./run_celery_flower.sh /
+COPY --from=celery-config-dir ./run_celery_worker.sh /run_celery_worker.sh
+COPY --from=celery-config-dir ./run_celery_flower.sh /run_celery_flower.sh
 
 COPY --from=dependency-gate-dir ./wait_for_gate.sh /
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
@@ -90,15 +100,15 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /staging
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /app/backend/
 
-COPY --from=src-dir ./pyproject.toml /app/pyproject.toml
-COPY --from=src-dir ./uv.lock /app/uv.lock
+COPY --from=backend-dir ./pyproject.toml /app/backend/pyproject.toml
+COPY --from=backend-dir ./uv.lock /app/backend/uv.lock
 
-COPY --from=src-dir ./alembic.ini /app/alembic.ini
-COPY --from=src-dir ./logging.toml /app/logging.toml
-COPY --from=src-dir ./apps/ /app/apps/
-COPY --from=src-dir ./libs/ /app/libs/
+COPY --from=backend-dir ./alembic.ini /app/backend/alembic.ini
+COPY --from=backend-dir ./logging.toml /app/backend/logging.toml
+COPY --from=backend-dir ./apps/ /app/backend/apps/
+COPY --from=backend-dir ./libs/ /app/backend/libs/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
@@ -126,16 +136,39 @@ ARG GROUP_ID=1000
 
 USER root
 
+# This is to allow the container user to mount the directory from the NFS server.
+# The user will run the following command:
+#   sudo mount /app/backend
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y sudo \
+    && echo "nfs:/backend /mnt/backend-nfs nfs defaults,noauto,nfsvers=4 0 0" >> /etc/fstab \
+    && echo "/mnt/backend-nfs /app/backend none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/backend-nfs' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /mnt/backend-nfs' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
+    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
+    && mkdir -p /mnt/backend-nfs \
+    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        git \
-        gnupg \
-        openssh-client \
-        patch \
+    bind9-dnsutils \
+    iproute2 \
+    psmisc \
+    tree \
+    ca-certificates \
+    openssh-client \
+    patch \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

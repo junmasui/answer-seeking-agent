@@ -6,6 +6,7 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 [ ! -d ./secrets ] && mkdir ./secrets
 
+HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-}"
 export HF_TOKEN="${HF_TOKEN:-$HUGGINGFACEHUB_API_TOKEN}"
 export HUGGINGFACEHUB_API_TOKEN="${HUGGINGFACEHUB_API_TOKEN:-$HF_TOKEN}"
 
@@ -209,16 +210,3 @@ VALUE_PREFIX=opensearch_admin_
 DESCR="OpenSearch's initial admin password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-#=======
-
-
-#
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "./secrets/redis.secrets.env" | xargs -n1 )
-
-RELPATH=redis/redis.conf
-envsubst < "${RELPATH}.template" > "secrets/redis.conf"
-
-

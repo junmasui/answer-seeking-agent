@@ -10,7 +10,7 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # shellcheck disable=SC2046
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
-cp "${SECRETS_MOUNT}/redis_conf" redis.conf
+sed "s/\${REDIS_DEFAULT_PASSWORD}/${REDIS_DEFAULT_PASSWORD}/g" /redis.conf.template > redis.conf
 
 cat redis.conf
 

@@ -49,10 +49,8 @@ services:
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+
+
       ##
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
@@ -92,7 +90,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.1' # 10% of available CPU resources
+          cpus: '0.5' # 50% of available CPU resources
           memory: 8G # Give enough to run Tesseract and local model
         reservations:
           devices:
@@ -128,10 +126,8 @@ services:
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
-      #
-      # The Python bytecode cache should be moved away from the bind-mount because
-      # there is no need for it shared with the host.
-      PYTHONPYCACHEPREFIX: '/home/python/.cache/pycache'
+
+
       GPU_MODE: cpu
     env_file:
       - backend.env
@@ -184,7 +180,7 @@ services:
 
   celery-exporter:
 
-    image: 'docker.io/danihodovic/celery-exporter'
+    image: 'docker.io/danihodovic/celery-exporter:0.12.2'
     profiles: [ celery, backend, all ]
 
     env_file:
