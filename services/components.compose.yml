@@ -55,3 +55,9 @@ secrets:
     file: ./secrets/answers.postgres.autotest.secrets.env
   checkpoints_postgres_autotest_secrets:
     file: ./secrets/checkpoints.postgres.autotest.secrets.env
+
+  keycloak_postgres_secrets:
+    file: ./secrets/keycloak.postgres.secrets.env
+  keycloak_admin_secrets:
+    file: ./secrets/keycloak.admin.secrets.env
+

@@ -210,3 +210,20 @@ VALUE_PREFIX=opensearch_admin_
 DESCR="OpenSearch's initial admin password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
+# Keycloak Postgres
+SECRETS_FILE=./secrets/keycloak.postgres.secrets.env
+VAR_NAME=KEYCLOAK_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=keycloak_postgres_
+DESCR="Keycloak Postgres account's password."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+# Keycloak Admin
+SECRETS_FILE=./secrets/keycloak.admin.secrets.env
+VAR_NAME=KEYCLOAK_ADMIN_PASSWORD
+VALUE_PREFIX=keycloak_admin_
+DESCR="Keycloak Admin password."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"

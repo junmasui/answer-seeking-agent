@@ -1,0 +1,59 @@
+name: keycloak
+
+services:
+    keycloak:
+        image: quay.io/keycloak/keycloak:26.0
+        profiles: [ keycloak, infrastructure, all ]
+        restart: unless-stopped
+        command: start-dev
+
+        env_file:
+            - keycloak.env
+
+        ports:
+            - "28080:8080"
+        networks:
+            - agent-poc
+        secrets:
+            - keycloak_postgres_secrets
+            - keycloak_admin_secrets
+
+        healthcheck:
+            test: [ "CMD", "/bin/bash", "/healthcheck.sh" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+        volumes:
+            - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+            - ../config/healthcheck.sh:/healthcheck.sh:ro
+
+        entrypoint: [ "/custom-docker-entrypoint.sh" ]
+
+    keycloak-init:
+        image: python:3.12-slim
+        profiles: [ keycloak, infrastructure, all, run-and-done ]
+
+        env_file:
+            - keycloak.env
+
+        working_dir: /
+        volumes:
+            - ../config/init_keycloak.sh:/init_keycloak.sh:ro
+            - ../config/init_keycloak.py:/init_keycloak.py:ro
+            - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
+        secrets:
+            - keycloak_postgres_secrets
+            - keycloak_admin_secrets
+
+        entrypoint:
+            - /bin/bash
+            - /init_keycloak.sh
+
+        networks:
+            - agent-poc
+
+networks:
+    agent-poc:
+        external: true
+        name: agent_agent-poc

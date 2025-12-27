@@ -10,11 +10,6 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # shellcheck disable=SC2046
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
-# Wait for dependency-gate to open.
-#
-
-. /wait_for_gate.sh
-
 
 # Check for necessary environment variables
 [ -z "${POSTGRES_HOST:-}" ] && echo "missing POSTGRES_HOST" && exit 1
@@ -27,6 +22,16 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 [ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
 
+if [ "${INIT_KEYCLOAK:-}" = "true" ]; then
+  [ -z "${KEYCLOAK_POSTGRES_USER_NAME:-}" ] && echo "missing KEYCLOAK_POSTGRES_USER_NAME" && exit 1
+  [ -z "${KEYCLOAK_POSTGRES_USER_PASSWORD:-}" ] && echo "missing KEYCLOAK_POSTGRES_USER_PASSWORD" && exit 1
+fi
+
+# Wait for dependency-gate to open.
+#
+
+. /wait_for_gate.sh
+
 wait_for_dependency_gate /init-signal/postgres-gate
 
 export PGPASSWORD="$POSTGRES_PASSWORD"
@@ -34,4 +39,9 @@ export PGPASSWORD="$POSTGRES_PASSWORD"
 envsubst < /init-db.sql.template > /init-db.sql
 sleep 10
 psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -f /init-db.sql
+
+if [ "${INIT_KEYCLOAK:-}" = "true" ]; then
+  envsubst < /init-keycloak-db.sql.template > /init-keycloak-db.sql
+  psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -f /init-keycloak-db.sql
+fi
 

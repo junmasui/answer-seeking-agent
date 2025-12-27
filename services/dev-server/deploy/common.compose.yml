@@ -95,24 +95,6 @@ volumes:
   dev-server-node-modules:
     driver: local
 
-secrets:
-  answers_secrets:
-    external: true
-  answers_api_key_autotest_secrets:
-    external: true
-  answers_jwt_autotest_secrets:
-    external: true
-  answers_minio_autotest_secrets:
-    external: true
-  answers_postgres_autotest_secrets:
-    external: true
-  checkpoints_postgres_autotest_secrets:
-    external: true
-  redis_secrets:
-    external: true
-  weaviate_secrets:
-    external: true
-
 networks:
   agent-poc:
     external: true
