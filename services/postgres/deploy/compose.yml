@@ -82,7 +82,6 @@ services:
             - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
             - ../config/init-db.sql.template:/init-db.sql.template:ro
             - ../config/init-postgres.sh:/init-postgres.sh:ro
-            - ../config/init-keycloak-db.sql.template:/init-keycloak-db.sql.template:ro
         secrets:
             - postgres_secrets
             - answers_postgres_secrets
@@ -93,6 +92,30 @@ services:
         # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
         # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
         command: [ /init-postgres.sh ]
+
+    postgres-keycloak-init:
+
+        image: localhost/localhost/debian-slim-util:1.0
+        #image: localhost/localhost/postgres:17.2-with-postgres
+        profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
+
+        env_file:
+            - postgres-keycloak-init.env
+        networks:
+            - agent-poc
+        volumes:
+            - postgres-init-signal-1:/init-signal
+            - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+            - ../config/init-keycloak-db.sql.template:/init-keycloak-db.sql.template:ro
+            - ../config/init-postgres-keycloak.sh:/init-postgres-keycloak.sh:ro
+        secrets:
+            - postgres_secrets
+            - keycloak_postgres_secrets
+
+        entrypoint: [ '/bin/bash' ]
+        # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
+        # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
+        command: [ /init-postgres-keycloak.sh ]
 
     postgres-init-autotest:
 

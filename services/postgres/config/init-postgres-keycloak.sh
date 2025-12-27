@@ -2,7 +2,6 @@
 
 set -e  # Exit immediately on error.
 #set -u  # Unbound variables are errors.
-## set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 # Set environment variables from mounted secrets files
 
@@ -16,13 +15,8 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 [ -z "${POSTGRES_USER:-}" ] && echo "missing POSTGRES_USER" && exit 1
 [ -z "${POSTGRES_PASSWORD:-}" ] && echo "missing POSTGRES_PASSWORD" && exit 1
 
-[ -z "${ANSWERS_POSTGRES_DATABASE:-}" ] && echo "missing ANSWERS_POSTGRES_DATABASE" && exit 1
-[ -z "${ANSWERS_POSTGRES_USER_NAME:-}" ] && echo "missing ANSWERS_POSTGRES_USER_NAME" && exit 1
-[ -z "${ANSWERS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing ANSWERS_POSTGRES_USER_PASSWORD" && exit 1
-[ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
-[ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
-
-
+[ -z "${KEYCLOAK_POSTGRES_USER_NAME:-}" ] && echo "missing KEYCLOAK_POSTGRES_USER_NAME" && exit 1
+[ -z "${KEYCLOAK_POSTGRES_USER_PASSWORD:-}" ] && echo "missing KEYCLOAK_POSTGRES_USER_PASSWORD" && exit 1
 
 # Wait for dependency-gate to open.
 #
@@ -33,9 +27,5 @@ wait_for_dependency_gate /init-signal/postgres-gate
 
 export PGPASSWORD="$POSTGRES_PASSWORD"
 
-envsubst < /init-db.sql.template > /init-db.sql
-sleep 10
-psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -f /init-db.sql
-
-
-
+envsubst < /init-keycloak-db.sql.template > /init-keycloak-db.sql
+psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -f /init-keycloak-db.sql

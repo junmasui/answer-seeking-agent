@@ -38,15 +38,7 @@
         </v-list>
       </v-menu>
     </v-app-bar>
-    <sign-in-dialog
-      v-model:active="performSignIn"
-      v-model:access-token="accessToken"
-      v-model:refresh-token="refreshToken"
-      v-model:refresh-access-after="refreshAccessAfter"
-      v-model:signed-in="signedIn"
-      @on-success="signInSucceeded"
-    >
-    </sign-in-dialog>
+
 
     <v-main>
       <v-container fluid class="pa=0 ma-0">
@@ -72,14 +64,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import { useRouter, useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
 
-import { useCurrentUserStore } from './common/CurrentUserStore.js'
-
-import SignInDialog from './common/SignInDialog.vue'
+import { authService } from './common/AuthService'
 
 const theme = useTheme()
 
@@ -87,62 +76,35 @@ const router = useRouter()
 const route = useRoute()
 
 const drawerModel = ref(false)
-const performSignIn = ref(false)
+const signedIn = ref(false)
 
-const currentUserStore = useCurrentUserStore()
-const { signedIn, accessToken, refreshToken, refreshAccessAfter } = storeToRefs(currentUserStore)
+onMounted(async () => {
+  const user = await authService.getUser()
+  signedIn.value = !!user && !user.expired
+})
 
-/**
- * Toggles the visibility of the navigation drawer.
- * Opens or closes the side navigation menu for mobile and desktop navigation.
- */
 function toggleDrawer() {
   drawerModel.value = !drawerModel.value
 }
 
-/**
- * Opens the sign-in dialog for user authentication.
- * Displays the authentication modal for users to enter their credentials.
- */
-function signIn() {
-  performSignIn.value = true
-}
-
-/**
- * Handles successful sign-in completion.
- * Called after the user successfully authenticates through the sign-in dialog.
- */
-function signInSucceeded() {
-  // If user was trying to access a protected route, redirect there
-  // Otherwise, redirect to conversational page
-
-  const returnTo = route.query.returnTo || '/conversational'
-  router.push(returnTo)
+async function signIn() {
+  await authService.signIn()
 }
 
 // Watch for route changes to handle protected routes
 watch(
   () => route.path,
-  (newPath) => {
+  async (newPath) => {
     // Redirect to sign-in if accessing admin without authentication
     if (newPath === '/admin' && !signedIn.value) {
-      router.push(`/?returnTo=${encodeURIComponent(newPath)}`)
-      performSignIn.value = true
+       // OIDC flow handles redirect, but we might want to pass state
+       await authService.signIn()
     }
   }
 )
 
-/**
- * Signs out the current user by clearing authentication data.
- * Resets the access token and signed-in status to log out the user.
- */
-function signOut() {
-  accessToken.value = ''
-  refreshToken.value = ''
-  refreshAccessAfter.value = null
-  signedIn.value = false
-  // Redirect to home page after sign-out
-  router.push('/')
+async function signOut() {
+  await authService.signOut()
 }
 
 /**

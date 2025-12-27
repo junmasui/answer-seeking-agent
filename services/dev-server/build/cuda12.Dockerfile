@@ -73,13 +73,26 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && . /etc/os-release \
+    && printf "Types: deb\nURIs: https://download.docker.com/linux/debian\nSuites: ${VERSION_CODENAME}\nComponents: stable\nSigned-By: /etc/apt/keyrings/docker.asc\n" > /etc/apt/sources.list.d/docker.sources \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # antigravity editor needs curl git and tar
 RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-    curl wget git procps tar patch  \
+    curl wget git procps tar patch \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

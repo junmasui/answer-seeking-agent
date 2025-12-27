@@ -49,7 +49,6 @@ workspace_members=(
     "apps/db_migration"
     "apps/core_app"
     "apps/core_worker"
-    "apps/sim_auth_app"
     "libs/core"
     "libs/core_db"
     "libs/core_public"

@@ -152,7 +152,11 @@ class ApplicationSettings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
+    # OIDC Configuration
+    oidc_issuer: str = Field(default='', validation_alias='OIDC_ISSUER')
+    oidc_audience: str = Field(default='', validation_alias='OIDC_AUDIENCE')
+    oidc_jwks_url: Optional[str] = Field(default=None, validation_alias='OIDC_JWKS_URL')
+
 
     disable_static_api_keys: bool = Field(default=False, validation_alias='DISABLE_APPLICATION_API_KEYS')
 
