@@ -8,6 +8,10 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 export KC_DB_PASSWORD="${KEYCLOAK_POSTGRES_USER_PASSWORD}"
 
+KEYCLOAK_DB_HOST="postgres:5432"
+KEYCLOAK_DB_NAME=keycloak
+
+
 apt update && apt install curl -y
 
 #

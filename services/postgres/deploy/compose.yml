@@ -86,7 +86,6 @@ services:
             - postgres_secrets
             - answers_postgres_secrets
             - checkpoints_postgres_secrets
-            - keycloak_postgres_secrets
 
         entrypoint: [ '/bin/bash' ]
         # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

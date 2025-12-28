@@ -57,6 +57,7 @@ RUN \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend/node_modules' >> /etc/sudoers \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
+    && echo 'python ALL=(ALL:ALL) ALL' >> /etc/sudoers \
     && mkdir -p /mnt/data \
     && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && mkdir -p /home/python/node_modules-storage && chown ${USER_ID}:${GROUP_ID} /home/python/node_modules-storage
@@ -97,6 +98,22 @@ RUN \
     curl wget git procps tar patch  \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Wrapper to fix buggy antigravity behavior adding extra colon.
+# The extra colon is in a command that is passed to the container when installing the
+# antigravity server. The logs indicate the specific command is:
+# 
+#   docker exec -u root <container-name> chown 1000:1000: /tmp/<randomized-name>.sh
+#
+RUN echo '#!/bin/bash' > /usr/local/bin/chown \
+    && echo 'args=("$@")' >> /usr/local/bin/chown \
+    && echo 'for ((i=0; i<${#args[@]}; i++)); do' >> /usr/local/bin/chown \
+    && echo '    if [ "${args[i]}" = "1000:1000:" ]; then' >> /usr/local/bin/chown \
+    && echo '        args[i]="1000:1000"' >> /usr/local/bin/chown \
+    && echo '    fi' >> /usr/local/bin/chown \
+    && echo 'done' >> /usr/local/bin/chown \
+    && echo 'exec /usr/bin/chown "${args[@]}"' >> /usr/local/bin/chown \
+    && chmod +x /usr/local/bin/chown
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}

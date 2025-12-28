@@ -1,5 +1,5 @@
 services:
-  init-backend-autotest-volumes:
+  init-dev-server-volumes:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
@@ -38,7 +38,7 @@ services:
 
   dev-server:
     depends_on:
-      init-backend-autotest-volumes:
+      init-dev-server-volumes:
         condition: service_completed_successfully
 
     # Image is defined in cpu-only.compose.yml or cuda.compose.yml
@@ -80,7 +80,6 @@ services:
 #      - redis_secrets
 #      - weaviate_secrets
 
-    user: '1000:1000'
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     # Command to run the dev startup script
     command: [ '/start_dev.sh' ]

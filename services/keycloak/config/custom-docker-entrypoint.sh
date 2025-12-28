@@ -11,8 +11,12 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 # Map generated secrets to Keycloak expected variables
+export KC_BOOTSTRAP_ADMIN_USERNAME="${KEYCLOAK_ADMIN}"
+export KC_BOOTSTRAP_ADMIN_PASSWORD="${KEYCLOAK_ADMIN_PASSWORD}"
+
 export KC_DB_PASSWORD="${KEYCLOAK_POSTGRES_USER_PASSWORD}"
-export KC_DB_USERNAME="${KEYCLOAK_POSTGRES_USER_NAME:-keycloak}"
+
+env | sort
 
 # Process with original command
 exec /opt/keycloak/bin/kc.sh "$@"
