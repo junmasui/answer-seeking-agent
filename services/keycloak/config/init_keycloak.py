@@ -212,6 +212,19 @@ def create_client_if_missing(realm_name):
             "publicClient": True,
             "redirectUris": ["http://localhost:5173/*", "http://localhost:80/*", "https://localhost:15173/*", "https://localhost:15173"],
             "webOrigins": ["+"],
+            "protocolMappers": [
+                {
+                    "name": "audience-mapper",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-audience-mapper",
+                    "consentRequired": False,
+                    "config": {
+                        "included.client.audience": client_id,
+                        "id.token.claim": "true",
+                        "access.token.claim": "true"
+                    }
+                }
+            ]
         })
     else:
         logger.info(f"Client {client_id} already exists in {realm_name}")

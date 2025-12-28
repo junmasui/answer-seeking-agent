@@ -3,7 +3,7 @@ import { UserManager, WebStorageStateStore } from 'oidc-client-ts'
 // These should be configurable via environment variables in a real app
 // For now we hardcode for the known dev setup, effectively generic standard defaults.
 const OIDC_SETTINGS = {
-    authority: 'http://localhost:28080/realms/tenant-1',
+    authority: 'http://localhost:28080/realms/tenant-a',
     client_id: 'api-client',
     redirect_uri: window.location.origin,
     post_logout_redirect_uri: window.location.origin,

@@ -3,7 +3,7 @@ services:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, dev-server ]
+    profiles: [ init-volumes, dev-server, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -42,7 +42,7 @@ services:
         condition: service_completed_successfully
 
     # Image is defined in cpu-only.compose.yml or cuda.compose.yml
-    profiles: [ dev-server ]
+    profiles: [ dev-server, all ]
     privileged: true
 
     environment:
