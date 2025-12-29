@@ -75,6 +75,11 @@ class JWKSClient:
                 # Parse keys into PyJWK objects
                 public_keys = {}
                 for key_data in jwks.get('keys', []):
+                    # Skip encryption keys, we only need signing keys
+                    if key_data.get('use') == 'enc':
+                        logger.debug(f"Skipping encryption key {key_data.get('kid')}")
+                        continue
+                        
                     try:
                         py_jwk = jwt.PyJWK(key_data)
                         public_keys[key_data['kid']] = py_jwk
@@ -110,12 +115,16 @@ async def _decode_token_data(token: str) -> Optional[User]:
         config = get_app_config()
         
         # public_key property returns the RSA public key
+        issuers = [config.oidc_issuer]
+        if config.oidc_extra_issuers:
+            issuers.extend(config.oidc_extra_issuers)
+            
         payload = jwt.decode(
             token,
             key.key,
             algorithms=['RS256'],
             audience=config.oidc_audience,
-            issuer=config.oidc_issuer
+            issuer=issuers
         )
 
         # 4. Extract user info
@@ -139,7 +148,12 @@ async def _decode_token_data(token: str) -> Optional[User]:
         return User(userid=userid, scopes=scopes)
 
     except (InvalidTokenError, PyJWTError) as e:
-        logger.debug(f"Invalid token: {e}")
+        logger.warning(f"Invalid token: {e}. Token header: {jwt.get_unverified_header(token)}")
+        try:
+             # Try to decode without verification to see what's inside for debugging
+             logger.warning(f"Failed token payload: {jwt.decode(token, options={'verify_signature': False})}")
+        except:
+             pass
         raise_credentials_error('Bearer')
     except Exception as e:
         logger.error(f"Token validation error: {e}")
