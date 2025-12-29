@@ -42,9 +42,9 @@ import os
 import uuid
 from functools import cache
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, field_validator
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -152,7 +152,19 @@ class ApplicationSettings(BaseSettings):
             TomlConfigSettingsSource(settings_cls, toml_file=toml_file_path),
         )
 
-    application_jwt_secret: JwtSecretStr = Field(default='', validation_alias='APPLICATION_JWT_SECRET')
+    # OIDC Configuration
+    oidc_issuer: str = Field(default='', validation_alias='OIDC_ISSUER')
+    oidc_audience: str = Field(default='', validation_alias='OIDC_AUDIENCE')
+    oidc_jwks_url: Optional[str] = Field(default=None, validation_alias='OIDC_JWKS_URL')
+    oidc_extra_issuers: Union[str, list[str]] = Field(default_factory=list, validation_alias='OIDC_EXTRA_ISSUERS')
+
+    @field_validator('oidc_extra_issuers', mode='before')
+    @classmethod
+    def parse_extra_issuers(cls, v):
+        if isinstance(v, str):
+            return [i.strip() for i in v.split(',') if i.strip()]
+        return v or []
+
 
     disable_static_api_keys: bool = Field(default=False, validation_alias='DISABLE_APPLICATION_API_KEYS')
 

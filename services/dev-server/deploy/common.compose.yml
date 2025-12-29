@@ -1,9 +1,9 @@
 services:
-  init-backend-autotest-volumes:
+  init-dev-server-volumes:
     restart: 'no'
 
     image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, backend-autotest, all ]
+    profiles: [ init-volumes, dev-server, all ]
 
     # No network is needed to initialize named volumes
     network_mode: none
@@ -38,11 +38,11 @@ services:
 
   dev-server:
     depends_on:
-      init-backend-autotest-volumes:
+      init-dev-server-volumes:
         condition: service_completed_successfully
 
     # Image is defined in cpu-only.compose.yml or cuda.compose.yml
-    profiles: [ backend-autotest, all ]
+    profiles: [ dev-server, all ]
     privileged: true
 
     environment:
@@ -52,10 +52,11 @@ services:
     env_file:
       - automated-test.env
       - opentelemetry-instrument.env
-    ports: # use if it is necessary to expose the container to the host machine
-      - '8102:8100'
     networks:
       - agent-poc
+
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
 
     volumes:
       # Mount configuration for NFS and persistence
@@ -79,7 +80,6 @@ services:
 #      - redis_secrets
 #      - weaviate_secrets
 
-    user: '1000:1000'
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     # Command to run the dev startup script
     command: [ '/start_dev.sh' ]
@@ -94,24 +94,6 @@ volumes:
     driver: local
   dev-server-node-modules:
     driver: local
-
-secrets:
-  answers_secrets:
-    external: true
-  answers_api_key_autotest_secrets:
-    external: true
-  answers_jwt_autotest_secrets:
-    external: true
-  answers_minio_autotest_secrets:
-    external: true
-  answers_postgres_autotest_secrets:
-    external: true
-  checkpoints_postgres_autotest_secrets:
-    external: true
-  redis_secrets:
-    external: true
-  weaviate_secrets:
-    external: true
 
 networks:
   agent-poc:

@@ -100,6 +100,7 @@ constraint-dependencies = [
     "fastapi>=0.104.0,<1.0.0",
     "pydantic>=2.5.0,<3.0.0",
     "uvicorn>=0.24.0",
+    "httpx>=0.23.0",
     
     # Database - ensure compatible SQLAlchemy ecosystem
     "sqlalchemy>=2.0.0,<3.0.0",
@@ -115,7 +116,6 @@ members = [
     "apps/db_migration",
     "apps/core_app",
     "apps/core_worker",
-    "apps/sim_auth_app",
     "libs/core",
     "libs/core_db",
     "libs/core_public",
@@ -132,7 +132,6 @@ members = [
 
 core-app = { workspace = true }
 core-worker = { workspace = true }
-sim-auth-app = { workspace = true }
 
 core = { workspace = true }
 core-db = { workspace = true }

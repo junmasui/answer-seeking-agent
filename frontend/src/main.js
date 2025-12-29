@@ -25,29 +25,45 @@ import router from './router'
 import App from './App.vue'
 
 const vuetify = createVuetify({
-  icons: {
-    iconfont: 'mdi'
-  },
-  components: {
-    ...components,
-    VDateInput,
-    VFileUpload,
-    VNumberInput,
-    VTimePicker,
-    VTreeview
-  },
-  directives,
-  theme: {
-    defaultTheme: 'dark'
-  }
+    icons: {
+        iconfont: 'mdi'
+    },
+    components: {
+        ...components,
+        VDateInput,
+        VFileUpload,
+        VNumberInput,
+        VTimePicker,
+        VTreeview
+    },
+    directives,
+    theme: {
+        defaultTheme: 'dark'
+    }
 })
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedState)
 
-createApp(App)
-  .use(router)
-  .use(pinia)
-  .use(vuetify)
-  // Mount
-  .mount('#app')
+// Auth
+import { authService } from './common/AuthService'
+
+const app = createApp(App)
+    .use(router)
+    .use(pinia)
+    .use(vuetify)
+
+
+// Check for OIDC callback
+if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+    authService.handleCallback().then(() => {
+        // Remove query params to clean URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+        app.mount('#app')
+    }).catch(err => {
+        console.error("Auth Callback Error", err)
+        app.mount('#app')
+    })
+} else {
+    app.mount('#app')
+}

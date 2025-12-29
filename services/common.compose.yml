@@ -11,6 +11,7 @@ include:
   - ./grafana/deploy/compose.yml
   - ./jaeger/deploy/compose.yml
   - ./loki/deploy/compose.yml
+  - ./keycloak/deploy/compose.yml
   - ./minio/deploy/compose.yml
   - ./opensearch/deploy/compose.yml
   - ./otel-collector/deploy/compose.yml

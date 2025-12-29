@@ -14,7 +14,7 @@ from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from ..auth import Scope
 from .api_key import get_current_user_from_api_key
 from .error import raise_credentials_error
-from .jwt import get_current_user_from_token
+from .jwt_util import get_current_user_from_token
 
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
