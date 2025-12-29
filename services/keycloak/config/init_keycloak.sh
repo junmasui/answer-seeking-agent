@@ -20,7 +20,7 @@ apt update && apt install curl -y
 echo "waiting for keycloak to be ready"
 while true
 do
-    curl -f "http://keycloak:${KC_HOSTNAME_PORT}"
+    curl -f "http://keycloak:8080"
     if [ "$?" -eq 0 ]
     then
         echo "keycloak is live"
