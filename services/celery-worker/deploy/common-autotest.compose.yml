@@ -8,6 +8,7 @@ services:
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-autotest, all ]
+    privileged: true
 
     environment:
       DEBUGGER_LISTEN: true
@@ -85,6 +86,7 @@ services:
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
     profiles: [ backend-autotest, all ]
+    privileged: true
 
     environment:
       # Only environment variables that are important to a Docker environment

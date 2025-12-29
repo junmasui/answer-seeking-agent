@@ -4,8 +4,8 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
     echo "Running in NFS mode. Mounting file systems..."
     # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
-    sudo /usr/bin/mount /mnt/data
-    sudo /usr/bin/mount /app
+    sudo /usr/bin/mount /mnt/backend-nfs
+    sudo /usr/bin/mount /app/backend
 
     # Ensure directory exists before mounting
     mkdir -p /app/backend/.venv
