@@ -210,7 +210,7 @@ def create_client_if_missing(realm_name):
             "directAccessGrantsEnabled": False,
             "serviceAccountsEnabled": False,
             "publicClient": True,
-            "redirectUris": ["http://localhost:5173/*", "http://localhost:80/*", "https://localhost:15173/*", "https://localhost:15173"],
+            "redirectUris": ["http://localhost:5173/*", "http://localhost:80/*", "https://localhost:15173/*", "https://localhost:15173", , "https://localhost:15183/*", "https://localhost:15183"],
             "webOrigins": ["+"],
             "protocolMappers": [
                 {
