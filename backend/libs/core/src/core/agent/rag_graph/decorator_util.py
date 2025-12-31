@@ -76,8 +76,41 @@ class AsyncReusableRunnable(Runnable):
         self.afunc = afunc
 
     def invoke(self, input: GraphState, config: Optional[dict] = None, **kwargs) -> dict[str, Any]:
-        """Synchronous invoke is not implemented for AsyncReusableRunnable."""
-        raise NotImplementedError('No synchronous function (func) implemented for invoke().')
+        """
+        Invoke the wrapped asynchronous function synchronously.
+
+        Args:
+            input (GraphState): Input state.
+            config (dict, optional): Optional config.
+            **kwargs: Additional arguments.
+
+        Returns:
+            dict[str, Any]: Output from the wrapped async function.
+
+        """
+        import asyncio
+        import nest_asyncio
+        import concurrent.futures
+
+        if self.afunc is None:
+            raise TypeError('No asynchronous function (afunc) provided for invoke().')
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop:
+            if loop.__class__.__module__.startswith("uvloop"):
+                # uvloop does not support nest_asyncio, so we run in a separate thread
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(asyncio.run, self.afunc(input))
+                    return future.result()
+
+            nest_asyncio.apply(loop)
+            return loop.run_until_complete(self.afunc(input))
+
+        return asyncio.run(self.afunc(input))
 
     async def ainvoke(self, input: GraphState, config: Optional[dict] = None, **kwargs) -> dict[str, Any]:
         """

@@ -5,6 +5,7 @@ from langgraph.graph import StateGraph
 from .agent_state import GraphState
 from .constants import NodeName
 from .deciders import check_for_relevant_documents, gather_relevant_documents
+from .decorator_util import arunnable
 from .nemo_guards import execute_nemo_guardrails_check
 from .node_util import no_op
 from .presidio_guard import execute_presidio_check
@@ -13,7 +14,8 @@ from .retrieval_grader import grade_document_relevancies
 logger = logging.getLogger(__name__)
 
 
-def check_retrieval_with_nemo(state: GraphState):
+@arunnable
+async def check_retrieval_with_nemo(state: GraphState):
     """
     Determines .
 
@@ -37,7 +39,7 @@ def check_retrieval_with_nemo(state: GraphState):
     for index, doc in enumerate(documents):
         docs_content = doc.page_content
 
-        result = execute_nemo_guardrails_check('content_check', [{'role': 'user', 'content': docs_content}])
+        result = await execute_nemo_guardrails_check('content_check', [{'role': 'user', 'content': docs_content}])
 
         # Some nemo responses may not include the expected keys. Handle missing
         # 'output_data' or 'triggered_input_rail' by treating them as False so
@@ -59,7 +61,8 @@ def check_retrieval_with_nemo(state: GraphState):
     return {'nemo_retrieval_check': scores}
 
 
-def check_retrieval_with_presidio(state: GraphState):
+@arunnable
+async def check_retrieval_with_presidio(state: GraphState):
     """
     Determines .
 
@@ -83,7 +86,7 @@ def check_retrieval_with_presidio(state: GraphState):
     for index, doc in enumerate(documents):
         docs_content = doc.page_content
 
-        result = execute_presidio_check(docs_content)
+        result = await execute_presidio_check(docs_content)
 
         result = [x for x in result if x.get('score', 0.0) < 0.2]
         result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]

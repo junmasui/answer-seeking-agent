@@ -9,7 +9,7 @@ from functools import cache
 
 from ..internal_models import AgentPromptName
 from .agent_state import GraphState
-from .decorator_util import runnable
+from .decorator_util import arunnable
 from .grader_util import build_grader
 from .internal_models import GradeAnswer
 from .prompt_util import get_chat_prompt
@@ -32,8 +32,8 @@ def get_response_grader():
     return response_grader
 
 
-@runnable
-def grade_response(state: GraphState):
+@arunnable
+async def grade_response(state: GraphState):
     """
     Determines whether the generation is grounded in the document and answers question.
 
@@ -51,7 +51,7 @@ def grade_response(state: GraphState):
 
     response_grader = get_response_grader()
 
-    score = response_grader.invoke(
+    score = await response_grader.ainvoke(
         input={'question': question, 'generation': generation}, config={'metadata': {'chain_name': grade_response.name}}
     )
 

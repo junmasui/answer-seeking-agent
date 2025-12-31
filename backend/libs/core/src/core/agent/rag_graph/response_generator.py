@@ -9,7 +9,7 @@ import logging
 from ...providers.chat_llm import get_chat_llm
 from ..internal_models import AgentPromptName
 from .agent_state import GraphState
-from .decorator_util import runnable
+from .decorator_util import arunnable
 from .prompt_util import get_chat_prompt
 from .response_citation_parser import ResponseCitationParser
 
@@ -40,8 +40,8 @@ def response_generator():
     return rag_chain
 
 
-@runnable
-def generate_response(state: GraphState):
+@arunnable
+async def generate_response(state: GraphState):
     """
     Generate an response using the RAG agent.
 
@@ -63,7 +63,7 @@ def generate_response(state: GraphState):
     logger.info('Response generation count %d', response_generation_count)
 
     # RAG generation
-    result = chain.invoke(
+    result = await chain.ainvoke(
         input={'documents': documents, 'chat_history': history, 'question': question},
         config={'configurable': {'documents': documents}, 'metadata': {'chain_name': generate_response.name}},
     )

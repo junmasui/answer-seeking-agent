@@ -5,7 +5,7 @@ from langgraph.graph import StateGraph
 from .agent_state import GraphState
 from .constants import NodeName
 from .deciders import check_if_safe_input
-from .decorator_util import runnable
+from .decorator_util import arunnable
 from .nemo_guards import execute_nemo_guardrails_check
 from .node_util import no_op
 from .presidio_guard import execute_presidio_check
@@ -13,8 +13,8 @@ from .presidio_guard import execute_presidio_check
 logger = logging.getLogger(__name__)
 
 
-@runnable
-def check_input_with_nemo(state: GraphState):
+@arunnable
+async def check_input_with_nemo(state: GraphState):
     """
     Determines .
 
@@ -28,7 +28,7 @@ def check_input_with_nemo(state: GraphState):
     logger.info('---CHECK INPUT WITH NEMO GUARDRAILS---')
     question = state.question
 
-    result = execute_nemo_guardrails_check('input_check', [{'role': 'user', 'content': question}])
+    result = await execute_nemo_guardrails_check('input_check', [{'role': 'user', 'content': question}])
 
     # Guard against missing keys. If 'output_data' or 'triggered_input_rail' are missing,
     # treat as if no rail was triggered (same behavior as triggered_rail == False).
@@ -44,8 +44,8 @@ def check_input_with_nemo(state: GraphState):
     return {'nemo_input_check': 100 if triggered_rail else 0}
 
 
-@runnable
-def check_input_with_presidio(state: GraphState):
+@arunnable
+async def check_input_with_presidio(state: GraphState):
     """
     Determines .
 
@@ -59,7 +59,7 @@ def check_input_with_presidio(state: GraphState):
     logger.info('---CHECK INPUT WITH PRESIDIO---')
     question = state.question
 
-    result = execute_presidio_check(question)
+    result = await execute_presidio_check(question)
 
     result = [x for x in result if x.get('score', 0.0) < 0.2]
     result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]

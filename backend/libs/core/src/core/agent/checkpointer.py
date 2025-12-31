@@ -1,8 +1,9 @@
 import logging
 from functools import cache
 
-from core_db.providers.sql_database import DataDomain, get_connection_pool
+from core_db.providers.sql_database import DataDomain, get_async_connection_pool, get_connection_pool
 from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from ..signals import start_up_handler
 
@@ -27,8 +28,8 @@ def checkpointer_startup(sender):
 
 @cache
 def get_checkpointer():
-    """Return a cached instance of the PostgresSaver checkpointer."""
-    connection_pool = get_connection_pool(DataDomain.CHECKPOINTS)
+    """Return a cached instance of the AsyncPostgresSaver checkpointer."""
+    connection_pool = get_async_connection_pool(DataDomain.CHECKPOINTS)
 
-    checkpointer = PostgresSaver(connection_pool)
+    checkpointer = AsyncPostgresSaver(connection_pool)
     return checkpointer
