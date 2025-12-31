@@ -8,18 +8,18 @@ logger = logging.getLogger(__name__)
 
 
 @start_up_handler
-def documents_startup(sender):
+async def documents_startup(sender):
     """Initialize document-related database tables and predefined data on application startup."""
     if sender.is_worker:
         return
 
     create_tables_if_not_exists()
 
-    send_db_predefined_data()
+    await send_db_predefined_data()
 
 
 @reset_data_handler
-def documents_reset(sender):
+async def documents_reset(sender):
     """
     Drop and recreate document-related database tables on reset.
 
@@ -33,4 +33,4 @@ def documents_reset(sender):
 
     create_tables_if_not_exists()
 
-    send_db_predefined_data()
+    await send_db_predefined_data()

@@ -35,7 +35,7 @@ async def lifespan(fastapi_app: FastAPI):
 
     logger.info('Application is starting up...')
     configure_sender(is_worker=False)
-    send_start_up()
+    await send_start_up()
 
     yield
 

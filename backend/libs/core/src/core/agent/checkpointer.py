@@ -1,7 +1,7 @@
 import logging
 from functools import cache
 
-from core_db.providers.sql_database import DataDomain, get_async_connection_pool, get_connection_pool
+from core_db.providers.sql_database import DataDomain, get_async_connection_pool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
@@ -11,19 +11,19 @@ logger = logging.getLogger(__name__)
 
 
 @start_up_handler
-def checkpointer_startup(sender):
+async def checkpointer_startup(sender):
     """Set up database objects for the LangGraph checkpointer on application startup."""
     if sender.is_worker:
         return
 
     logger.info('Setting up checkpointer database objects')
 
-    connection_pool = get_connection_pool(DataDomain.CHECKPOINTS)
+    connection_pool = get_async_connection_pool(DataDomain.CHECKPOINTS)
 
-    with connection_pool.connection() as conn:
-        conn.autocommit = True
-        checkpointer = PostgresSaver(conn)
-        checkpointer.setup()
+    async with connection_pool.connection() as conn:
+        await conn.set_autocommit(True)
+        checkpointer = AsyncPostgresSaver(conn)
+        await checkpointer.setup()
 
 
 @cache

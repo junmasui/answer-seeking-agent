@@ -3,7 +3,7 @@
 from functools import cache
 
 from core_public.status_models import PingResult, PingStatus
-from psycopg_pool import AsyncConnectionPool, ConnectionPool
+from psycopg_pool import AsyncConnectionPool
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
@@ -17,7 +17,6 @@ __all__ = [
     'get_connection_str',
     'get_engine',
     'get_sessionmaker',
-    'get_connection_pool',
     'get_async_connection_pool',
     'ping_sql_database',
 ]
@@ -78,22 +77,6 @@ def get_sessionmaker(db_schema: DataDomain):
 
     session = sessionmaker(bind=engine)
     return session
-
-
-@cache
-def get_connection_pool(db_schema: DataDomain):
-    """
-    Return a database connection pool.
-
-    This pool will be different from the one used by SQLAlchemy
-    """
-    connection_str = get_connection_str(db_schema)
-    connection_str = connection_str.replace('+psycopg', '')
-
-    pool = ConnectionPool(conninfo=connection_str, min_size=2, max_size=10)
-    pool.open()
-
-    return pool
 
 
 @cache

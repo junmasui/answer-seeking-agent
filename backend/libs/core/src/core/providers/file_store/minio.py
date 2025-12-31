@@ -89,7 +89,7 @@ def ping_file_store() -> PingResult:
 
 
 @start_up_handler
-def startup(_sender):
+async def startup(_sender):
     """
     Handle the startup signal for file store initialization.
 
@@ -99,7 +99,7 @@ def startup(_sender):
 
 
 @reset_data_handler
-def reset(sender):
+async def reset(sender):
     """
     Handle the reset_data signal to clear the S3 bucket if not a worker process.
 

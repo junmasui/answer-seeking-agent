@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @db_predefined_data_handler
-def register_initial_prompts(sender):
+async def register_initial_prompts(sender):
     """
     Register initial agent prompts from YAML configuration file.
 

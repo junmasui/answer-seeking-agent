@@ -114,7 +114,7 @@ def delete_vectors_by_document_id(doc_id: uuid.UUID):
 
 
 @start_up_handler
-def startup(sender):
+async def startup(sender):
     """
     Initialize the vector store database schema on application startup.
 
@@ -132,7 +132,7 @@ def startup(sender):
 
 
 @reset_data_handler
-def reset(sender):
+async def reset(sender):
     """
     Reset the vector store by dropping and recreating all tables and collections.
 
