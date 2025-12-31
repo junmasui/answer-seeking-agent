@@ -13,15 +13,15 @@ from weaviate.classes.query import Filter
 from ...lib_config import get_lib_config
 from ...providers.retriever import get_retriever
 from .agent_state import GraphState
-from .decorator_util import runnable
+from .decorator_util import arunnable
 
 logger = logging.getLogger(__name__)
 
 pp = pprint.PrettyPrinter(indent=2, width=120, underscore_numbers=True)
 
 
-@runnable
-def query_documents(state: GraphState):
+@arunnable
+async def query_documents(state: GraphState):
     """
     Retrieve documents.
 
@@ -62,7 +62,7 @@ def query_documents(state: GraphState):
     retriever = get_retriever()
 
     # Retrieval
-    documents = retriever.invoke(input=question, config={'metadata': {'chain_name': query_documents.name}}, **kwargs)
+    documents = await retriever.ainvoke(input=question, config={'metadata': {'chain_name': query_documents.name}}, **kwargs)
 
     # Remove irrelevant metadata. It's stuff that we don't need for processing
     # or evaluation.

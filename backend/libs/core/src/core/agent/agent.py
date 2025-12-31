@@ -60,7 +60,7 @@ def get_mermaid_graph():
     return mermaid_graph
 
 
-def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[uuid.UUID | str]):
+async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[uuid.UUID | str]):
     """
     Seek an answer to the user's input using the agent graph.
 
@@ -123,7 +123,7 @@ def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Option
         if callback_handlers:
             run_config['callbacks'] = callback_handlers
         print(f'GRAPH TYPE {type(graph)}')
-        for output in graph.stream(input=graph_input, config=run_config):
+        async for output in graph.astream(input=graph_input, config=run_config):
             for key, value in output.items():
                 # Node
                 logger.info("Node '%s':", key)

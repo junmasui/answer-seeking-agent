@@ -13,7 +13,7 @@ from langchain_core.output_parsers import StrOutputParser
 from ...providers.chat_llm import get_chat_llm
 from ..internal_models import AgentPromptName
 from .agent_state import GraphState
-from .decorator_util import runnable
+from .decorator_util import arunnable
 from .prompt_util import get_chat_prompt
 
 logger = logging.getLogger(__name__)
@@ -38,8 +38,8 @@ def get_question_rewriter():
     return chain
 
 
-@runnable
-def rewrite_question(state: GraphState):
+@arunnable
+async def rewrite_question(state: GraphState):
     """
     Transform the query to produce a better question.
 
@@ -57,7 +57,7 @@ def rewrite_question(state: GraphState):
     question_rewriter = get_question_rewriter()
 
     # Re-write question
-    better_question = question_rewriter.invoke(
+    better_question = await question_rewriter.ainvoke(
         input={'question': question}, config={'metadata': {'chain_name': rewrite_question.name}}
     )
 

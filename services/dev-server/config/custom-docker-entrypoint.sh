@@ -53,7 +53,14 @@ if [ -d "/app/backend" ]; then
             fi
 
             # Sync the virtual environment (persistent across restarts now)
-            uv sync --extra cpu --dev --all-packages
+            if [ "$GPU_MODE" == "cuda12" ]; then
+                uv sync  --extra cuda12 --dev --all-packages
+            elif [ "$GPU_MODE" == "cpu" ]; then
+                uv sync  --extra cpu --dev --all-packages
+            else
+                echo "Unknown GPU_MODE: $GPU_MODE"
+                exit -1
+            fi
         fi
 
         ls -la .

@@ -14,7 +14,7 @@ from .response_grader import grade_response
 logger = logging.getLogger(__name__)
 
 
-def check_output_with_nemo(state: GraphState):
+async def check_output_with_nemo(state: GraphState):
     """
     Determines .
 
@@ -30,7 +30,7 @@ def check_output_with_nemo(state: GraphState):
     generation = state.generation
 
     messages = [{'role': 'user', 'content': question}, {'role': 'assistant', 'content': generation}]
-    result = execute_nemo_guardrails_check('output_check', messages)
+    result = await execute_nemo_guardrails_check('output_check', messages)
 
     # Safely extract nested keys. If the expected structure isn't present,
     # treat it as if no rail was triggered (same behavior as triggered_rail == False).
@@ -48,7 +48,7 @@ def check_output_with_nemo(state: GraphState):
     return {'nemo_output_check': 100 if triggered_rail else 0}
 
 
-def check_output_with_presidio(state: GraphState):
+async def check_output_with_presidio(state: GraphState):
     """
     Determines .
 
@@ -62,7 +62,7 @@ def check_output_with_presidio(state: GraphState):
     logger.info('---CHECK RESPONSE WITH PRESIDIO---')
     generation = state.response
 
-    result = execute_presidio_check(generation)
+    result = await execute_presidio_check(generation)
 
     result = [x for x in result if x.get('score', 0.0) < 0.2]
     result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]

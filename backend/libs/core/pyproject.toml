@@ -28,6 +28,7 @@ dependencies = [
   "langgraph-checkpoint-postgres>=2.0.9",
   # Explicitly specifyin min-version. See https://github.com/nltk/nltk/issues/3266
   "msgpack>=1.1.1",
+  "nest_asyncio>=1.6.0",
   "nltk>=3.9.1",
   # onnx is implicit dependency of unstructured
   "onnx>=1.17.0",

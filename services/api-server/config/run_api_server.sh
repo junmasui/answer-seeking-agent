@@ -67,7 +67,7 @@ uv run --frozen --no-sync \
     opentelemetry-instrument \
       --distro custom_otel \
       --configurator custom_otel \
-    uvicorn core_app:app --host 0.0.0.0 --port 8100
+    uvicorn core_app:app --host 0.0.0.0 --port 8100 --loop asyncio
 
 
 #    opentelemetry-instrument \
