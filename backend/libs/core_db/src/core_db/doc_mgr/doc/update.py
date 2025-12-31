@@ -1,28 +1,28 @@
 import logging
 import uuid
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 
 from core_db.db_models import DbTrackedDocument
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from sqlalchemy import select
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def update_tracking_record(doc_uuid):
+@asynccontextmanager
+async def update_tracking_record(doc_uuid):
     """Updates the tracking record for the document."""
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         try:
-            with session.begin():
+            async with session.begin():
                 stmt = select(DbTrackedDocument).where(DbTrackedDocument.id == doc_uuid)
-                result = session.execute(stmt)
+                result = await session.execute(stmt)
 
                 existing_obj = result.scalar_one()
 
@@ -35,5 +35,5 @@ def update_tracking_record(doc_uuid):
             yield None
             return
 
-        with session.begin():
+        async with session.begin():
             yield existing_obj

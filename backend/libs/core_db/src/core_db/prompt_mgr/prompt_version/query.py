@@ -3,7 +3,7 @@ import uuid
 from typing import Optional
 
 from core_db.db_models import DbPromptVersion, DbPrompt
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from core_public import SortDirection
 from core_public.prompt_version import PromptStatus
 from sqlalchemy import and_, column, func, select
@@ -12,7 +12,7 @@ from sqlalchemy.orm import aliased, selectinload, subqueryload
 logger = logging.getLogger(__name__)
 
 
-def get_prompt_version(prompt_version_uuid_list: list[str | uuid.UUID]):
+async def get_prompt_version(prompt_version_uuid_list: list[str | uuid.UUID]):
     """Return tracking records when matched to specified prommpt version UUID."""
 
     def _ensure_uuid(item):
@@ -21,9 +21,9 @@ def get_prompt_version(prompt_version_uuid_list: list[str | uuid.UUID]):
 
     prompt_version_uuid_list = [_ensure_uuid(item) for item in prompt_version_uuid_list]
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         where = [DbPromptVersion.id.in_(prompt_version_uuid_list)]
 
         if len(where) > 1:
@@ -32,7 +32,7 @@ def get_prompt_version(prompt_version_uuid_list: list[str | uuid.UUID]):
             stmt = select(DbPromptVersion).where(where[0])
         else:
             stmt = select(DbPromptVersion)
-        result = session.execute(stmt)
+        result = await session.execute(stmt)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
@@ -92,7 +92,7 @@ def _build_order_by(sort_by: Optional[list] = None):
     return return_value
 
 
-def list_prompt_versions(
+async def list_prompt_versions(
     *,
     prompt_id: Optional[uuid.UUID] = None,
     status: Optional[PromptStatus] = None,
@@ -103,11 +103,11 @@ def list_prompt_versions(
     """Return prompts when matched to specified propmt UUID."""
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
     join_prompt = True
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
@@ -160,7 +160,7 @@ def list_prompt_versions(
             query = core_query.options(selectinload(DbPromptVersion.prompt))
 
 
-        result = session.execute(query)
+        result = await session.execute(query)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.

@@ -3,7 +3,7 @@ import uuid
 from typing import Optional
 
 from core_db.db_models import DbPrompt
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from core_public import OwnerType, SortDirection
 from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased
@@ -11,7 +11,7 @@ from sqlalchemy.orm import aliased
 logger = logging.getLogger(__name__)
 
 
-def get_prompt(prompt_uuid_list: list[str | uuid.UUID], owner_type: Optional[OwnerType] = None):
+async def get_prompt(prompt_uuid_list: list[str | uuid.UUID], owner_type: Optional[OwnerType] = None):
     """Return tracking records when matched to specified prommpt UUID."""
 
     def _ensure_uuid(item):
@@ -20,9 +20,9 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID], owner_type: Optional[Own
 
     prompt_uuid_list = [_ensure_uuid(item) for item in prompt_uuid_list]
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         where = [DbPrompt.id.in_(prompt_uuid_list)]
         if owner_type is not None:
             where.append(DbPrompt.owner_type == owner_type)
@@ -33,7 +33,7 @@ def get_prompt(prompt_uuid_list: list[str | uuid.UUID], owner_type: Optional[Own
             stmt = select(DbPrompt).where(where[0])
         else:
             stmt = select(DbPrompt)
-        result = session.execute(stmt)
+        result = await session.execute(stmt)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
@@ -107,7 +107,7 @@ def _build_order_by(sort_by: Optional[list] = None):
     return return_value
 
 
-def list_prompts(
+async def list_prompts(
     *,
     name: Optional[str] = None,
     owner_type: Optional[OwnerType] = None,
@@ -118,9 +118,9 @@ def list_prompts(
     """Return prompts when matched to specified propmt UUID."""
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
@@ -159,7 +159,7 @@ def list_prompts(
         else:
             query = core_query
 
-        result = session.execute(query)
+        result = await session.execute(query)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
