@@ -5,6 +5,7 @@ from functools import cache
 from core_public.status_models import PingResult, PingStatus
 from psycopg_pool import AsyncConnectionPool
 from sqlalchemy import create_engine, text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from ...db_models.doc_mgr import DbTrackedDocument
@@ -16,7 +17,9 @@ from .base import DataDomain
 __all__ = [
     'get_connection_str',
     'get_engine',
+    'get_async_engine',
     'get_sessionmaker',
+    'get_async_sessionmaker',
     'get_async_connection_pool',
     'ping_sql_database',
 ]
@@ -65,6 +68,20 @@ def get_engine(db_schema: DataDomain):
 
 
 @cache
+def get_async_engine(db_schema: DataDomain):
+    """
+    Returns a SQLAlchemy async engine for the database.
+
+    The engine is a global object created just once for a particular database server. It creates and
+    holds connections to the database server
+    """
+    connection_str = get_connection_str(db_schema)
+
+    engine = create_async_engine(connection_str)
+    return engine
+
+
+@cache
 def get_sessionmaker(db_schema: DataDomain):
     """
     Returns a SQLAlchemy sessionmaker object for the database.
@@ -76,6 +93,21 @@ def get_sessionmaker(db_schema: DataDomain):
     engine = get_engine(db_schema)
 
     session = sessionmaker(bind=engine)
+    return session
+
+
+@cache
+def get_async_sessionmaker(db_schema: DataDomain):
+    """
+    Returns a SQLAlchemy async sessionmaker object for the database.
+
+    A sessionmaker is a factory for creating new Session objects. A Session object is like a
+    connection with enhanced functionality for using the ORM paradigm (for examle, holding mappings
+    between Python objects and database rows)
+    """
+    engine = get_async_engine(db_schema)
+
+    session = async_sessionmaker(bind=engine)
     return session
 
 
