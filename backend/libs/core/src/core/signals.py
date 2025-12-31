@@ -65,8 +65,6 @@ class Sender(BaseModel):
 
     is_worker: bool = False
 
-import inspect
-
 
 @cache
 def _get_sender():

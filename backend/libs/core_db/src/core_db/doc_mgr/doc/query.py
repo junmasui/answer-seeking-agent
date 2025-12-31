@@ -2,12 +2,13 @@ import logging
 import uuid
 from typing import Optional, Sequence
 
+from core_public import DocumentStatus, SortDirection
+from sqlalchemy import and_, column, func, select
+from sqlalchemy.orm import aliased, selectinload
+
 from core_db.db_models import DbTrackedDocument
 from core_db.db_models.doc_mgr import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
-from core_public import DocumentStatus, SortDirection
-from sqlalchemy import and_, column, func, select
-from sqlalchemy.orm import aliased, subqueryload, selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -136,9 +137,9 @@ async def list_tracking_records(
                 )
             )
         else:
-                # Eager load the parent document-set records in a single 2nd query.
-                # The parent records are loaded using a WHERE IN clause using
-                # the results of the 1st query.
+            # Eager load the parent document-set records in a single 2nd query.
+            # The parent records are loaded using a WHERE IN clause using
+            # the results of the 1st query.
             query = core_query.options(selectinload(DbTrackedDocument.document_set))
 
         result = await session.execute(query)

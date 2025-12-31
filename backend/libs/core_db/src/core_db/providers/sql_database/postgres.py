@@ -22,6 +22,7 @@ __all__ = [
     'get_async_sessionmaker',
     'get_async_connection_pool',
     'ping_sql_database',
+    'ping_async_sql_database',
 ]
 
 
@@ -127,7 +128,7 @@ def get_async_connection_pool(db_schema: DataDomain):
     return pool
 
 
-def ping_sql_database(db_schema: DataDomain) -> PingResult:
+async def ping_async_sql_database(db_schema: DataDomain) -> PingResult:
     """
     Pings the specified SQL database schema to check its health and connectivity.
 
@@ -146,11 +147,11 @@ def ping_sql_database(db_schema: DataDomain) -> PingResult:
 
     """
     try:
-        engine = get_engine(db_schema)
-        with engine.connect() as connection:
+        engine = get_async_engine(db_schema)
+        async with engine.connect() as connection:
             if db_schema == DataDomain.ANSWERS:
                 # Check if the 'answers' schema exists
-                schema_check_result = connection.execute(
+                schema_check_result = await connection.execute(
                     text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'answers';")
                 )
                 if not schema_check_result.fetchone():
@@ -165,7 +166,7 @@ def ping_sql_database(db_schema: DataDomain) -> PingResult:
                 # tracked_documents table.
                 table_name = DbTrackedDocument.__tablename__
                 count_query = text(f'SELECT COUNT(*) FROM answers.{table_name}')
-                record_count_result = connection.execute(count_query)
+                record_count_result = await connection.execute(count_query)
                 record_count = record_count_result.scalar_one_or_none()
 
                 return PingResult(
@@ -175,7 +176,7 @@ def ping_sql_database(db_schema: DataDomain) -> PingResult:
                 )
             else:
                 # For other schemas, a simple SELECT 1 can be used as a basic check.
-                connection.execute(text('SELECT 1'))
+                await connection.execute(text('SELECT 1'))
         return PingResult(status=PingStatus.GOOD, message=f'Successfully connected to {db_schema.value} schema.')
     except Exception as e:
         # Log the exception for debugging purposes if a logger is available

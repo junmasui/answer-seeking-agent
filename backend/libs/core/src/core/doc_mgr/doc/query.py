@@ -11,7 +11,7 @@ from .stats import get_document_statistics
 logger = logging.getLogger(__name__)
 
 
-def list_documents(
+async def list_documents(
     *,
     doc_set_id: Optional[uuid.UUID | list[uuid.UUID]] = None,
     status: Optional[DocumentStatus | list[DocumentStatus]] = None,
@@ -52,7 +52,7 @@ def list_documents(
         A DocumentList object containing the list of documents and table statistics.
 
     """
-    existing_objs = list_tracking_records(
+    existing_objs = await list_tracking_records(
         doc_set_id=doc_set_id,
         status=status,
         file_name=file_name,
@@ -63,7 +63,7 @@ def list_documents(
         content_type=content_type,
         source_url=source_url,
     )
-    table_stats = get_document_statistics()
+    table_stats = await get_document_statistics()
 
     def _to_dict(_x: DbTrackedDocument):
         """Convert database document record to API response Document model."""

@@ -1,6 +1,7 @@
+from sqlalchemy import func, select
+
 from core_db.db_models import DbTrackedDocument
 from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
-from sqlalchemy import func, select
 
 
 async def get_tracking_stats():

@@ -1,20 +1,22 @@
 import logging
-from typing import Optional
 import uuid
 from contextlib import asynccontextmanager
+from typing import Optional
 
-from core_db.db_models import DbPromptVersion
-from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from core_public import PromptStatus
 from sqlalchemy import and_, func, select, update
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
+
+from core_db.db_models import DbPromptVersion
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def update_prompt_version_record(prompt_uuid: uuid.UUID | str, prompt_version_uuid: Optional[uuid.UUID] = None,
-                                  version: Optional[int] = None):
+async def update_prompt_version_record(
+    prompt_uuid: uuid.UUID | str, prompt_version_uuid: Optional[uuid.UUID] = None, version: Optional[int] = None
+):
     """Updates the prompt version record."""
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)

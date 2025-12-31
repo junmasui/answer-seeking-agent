@@ -13,7 +13,7 @@ async def documents_startup(sender):
     if sender.is_worker:
         return
 
-    create_tables_if_not_exists()
+    await create_tables_if_not_exists()
 
     await send_db_predefined_data()
 
@@ -29,8 +29,8 @@ async def documents_reset(sender):
     if sender.is_worker:
         return
 
-    drop_all_tables()
+    await drop_all_tables()
 
-    create_tables_if_not_exists()
+    await create_tables_if_not_exists()
 
     await send_db_predefined_data()

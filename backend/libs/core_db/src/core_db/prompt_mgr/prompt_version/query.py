@@ -2,12 +2,13 @@ import logging
 import uuid
 from typing import Optional
 
-from core_db.db_models import DbPromptVersion, DbPrompt
-from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from core_public import SortDirection
 from core_public.prompt_version import PromptStatus
 from sqlalchemy import and_, column, func, select
-from sqlalchemy.orm import aliased, selectinload, subqueryload
+from sqlalchemy.orm import aliased, selectinload
+
+from core_db.db_models import DbPrompt, DbPromptVersion
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,7 @@ async def get_prompt_version(prompt_version_uuid_list: list[str | uuid.UUID]):
 
 
 def _build_query_filter(prompt_id: uuid.UUID, status: PromptStatus):
-    """
-    Build WHERE clause conditions for filtering agent prompts.
-    """
+    """Build WHERE clause conditions for filtering agent prompts."""
     where = []
     if prompt_id is not None:
         where.append(DbPromptVersion.prompt_id == prompt_id)
@@ -158,7 +157,6 @@ async def list_prompt_versions(
             # The parent records are loaded using a WHERE IN clause using
             # the results of the 1st query.
             query = core_query.options(selectinload(DbPromptVersion.prompt))
-
 
         result = await session.execute(query)
         existing_objs = result.scalars().all()

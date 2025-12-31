@@ -7,9 +7,8 @@ from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import MetaData, text
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy.orm import sessionmaker
 
-from core_db.providers.sql_database import DataDomain, get_engine
+from core_db.providers.sql_database import DataDomain, get_async_engine
 
 from ..lib_config import get_lib_config
 from .base import DECLARED_METADATA
@@ -17,7 +16,7 @@ from .base import DECLARED_METADATA
 logger = logging.getLogger(__name__)
 
 
-def create_tables_if_not_exists():
+async def create_tables_if_not_exists():
     """
     Create database tables if they do not already exist.
 
@@ -28,9 +27,9 @@ def create_tables_if_not_exists():
     """
     logger.info('creating tables that are absent')
 
-    engine = get_engine(DataDomain.ANSWERS)
+    engine = get_async_engine(DataDomain.ANSWERS)
 
-    actual_schema_version = get_current_version(engine)
+    actual_schema_version = await get_current_version(engine)
     expected_schema_version = get_head_revision()
 
     initialize = False
@@ -42,7 +41,7 @@ def create_tables_if_not_exists():
         logger.info('Migration revisions differ')
         migrate = True
     else:
-        differences = get_schema_differences(engine)
+        differences = await get_schema_differences(engine)
 
         # Analyze the differences
         if differences:
@@ -66,24 +65,29 @@ def create_tables_if_not_exists():
                 logger.info('DB difference: %s %s %s %s', diff_op, obj_name, table_name, schema_name)
 
     if initialize:
-        _create_tables_if_new(engine)
+        await _create_tables_if_new(engine)
     if migrate:
-        _run_migrations(engine)
+        await _run_migrations(engine)
 
 
-def get_current_version(engine):
+async def get_current_version(engine):
     """Return the current Alembic version applied to the database."""
-    reflected_metadata = MetaData(schema='answers')
-    reflected_metadata.reflect(bind=engine)
+
+    def _reflect(conn):
+        reflected_metadata = MetaData(schema='answers')
+        reflected_metadata.reflect(bind=conn)
+        return reflected_metadata
+
+    async with engine.connect() as conn:
+        reflected_metadata = await conn.run_sync(_reflect)
 
     if reflected_metadata.tables is None or len(reflected_metadata.tables) == 0:
         logger.info('database is empty.')
         return None
 
-    session_maker = sessionmaker(bind=engine)
-    with session_maker() as session:
+    async with engine.connect() as session:
         try:
-            result = session.execute(
+            result = await session.execute(
                 text("""SELECT EXISTS (
                     SELECT FROM
                         information_schema.tables
@@ -114,7 +118,7 @@ def get_current_version(engine):
             # where the examples show the trace:
             #  * SELECT alembic_version.version_num FROM alembic_version
             # The lack of a WHERE clause suggests that this table has only one record.
-            result = session.execute(text('SELECT version_num FROM alembic_version'))
+            result = await session.execute(text('SELECT version_num FROM alembic_version'))
             rowcount = result.rowcount
             if rowcount == 0:
                 # No migrations if the table is empty.
@@ -139,7 +143,7 @@ def get_head_revision():
     return head_revision
 
 
-def get_schema_differences(engine):
+async def get_schema_differences(engine):
     """
     Compare the declared database schema with the actual database schema.
 
@@ -149,70 +153,79 @@ def get_schema_differences(engine):
     # Declared metadata.
     metadata = DECLARED_METADATA
 
+    def _compare(conn):
+        # Configure the migration context
+        context = MigrationContext.configure(
+            conn,
+            opts={
+                'compare_type': True,
+                # If true, server default comparison is enabled.
+                # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.compare_server_default
+                'compare_server_default': True,
+                # If True, autogenerate will scan across all schemas located by the SQLAlchemy
+                # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.include_schemas
+                'include_schemas': False,
+            },
+        )
+
+        # Compare the declared metadata with the actual database schema
+        #
+        # See https://alembic.sqlalchemy.org/en/latest/api/autogenerate.html#getting-diffs
+        differences = compare_metadata(context, metadata)
+        return differences
+
     # Connect to the database for the actual metadata.
-    connection = engine.connect()
-
-    # Configure the migration context
-    context = MigrationContext.configure(
-        connection,
-        opts={
-            'compare_type': True,
-            # If true, server default comparison is enabled.
-            # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.compare_server_default
-            'compare_server_default': True,
-            # If True, autogenerate will scan across all schemas located by the SQLAlchemy
-            # See: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure.params.include_schemas
-            'include_schemas': False,
-        },
-    )
-
-    # Compare the declared metadata with the actual database schema
-    #
-    # See https://alembic.sqlalchemy.org/en/latest/api/autogenerate.html#getting-diffs
-    differences = compare_metadata(context, metadata)
+    async with engine.connect() as conn:
+        differences = await conn.run_sync(_compare)
 
     return differences
 
 
-def _create_tables_if_new(engine):
+async def _create_tables_if_new(engine):
     """
     Create database tables for a new/empty database and initialize Alembic tracking.
 
     Only creates tables if the database is empty (no reflected tables except alembic_version). After
     creating tables, stamps the database with the current Alembic head revision.
     """
-    reflected_metadata = MetaData(schema='answers')
-    reflected_metadata.reflect(bind=engine)
 
-    reflected_tables = reflected_metadata.tables
+    def _create(conn):
+        reflected_metadata = MetaData(schema='answers')
+        reflected_metadata.reflect(bind=conn)
 
-    # Remove the alembic migration table from the reflected tables list.
-    # Although not in the declared schema, this will show up in the actual schema,
-    # and its appearance will cause the migrations to be short-circuited.
-    if reflected_tables is not None:
-        reflected_tables = [table for table in reflected_tables if table not in ['answers.alembic_version']]
+        reflected_tables = reflected_metadata.tables
 
-    if reflected_tables is not None and len(reflected_tables) > 0:
-        logger.info('database is not empty. use formal migration tools.')
-        return
+        # Remove the alembic migration table from the reflected tables list.
+        # Although not in the declared schema, this will show up in the actual schema,
+        # and its appearance will cause the migrations to be short-circuited.
+        if reflected_tables is not None:
+            reflected_tables = [table for table in reflected_tables if table not in ['answers.alembic_version']]
 
-    alembic_ini = get_lib_config().alembic_ini_path
-    alembic_cfg = Config(file_=str(alembic_ini))
+        if reflected_tables is not None and len(reflected_tables) > 0:
+            logger.info('database is not empty. use formal migration tools.')
+            return
 
-    logger.info('initializing database tables.')
+        alembic_ini = get_lib_config().alembic_ini_path
+        alembic_cfg = Config(file_=str(alembic_ini))
 
-    # Create database tables.
-    DECLARED_METADATA.create_all(engine)
+        logger.info('initializing database tables.')
 
-    # Prepare this database for future upgrades by writing the alembic metadata.
-    #
-    # See https://alembic.sqlalchemy.org/en/latest/cookbook.html#building-an-up-to-date-database-from-scratch
-    command.stamp(alembic_cfg, 'head')
+        # Create database tables.
+        DECLARED_METADATA.create_all(conn)
 
-    logger.info('initialized database tables.')
+        # Prepare this database for future upgrades by writing the alembic metadata.
+        #
+        # See https://alembic.sqlalchemy.org/en/latest/cookbook.html#building-an-up-to-date-database-from-scratch
+        alembic_cfg.attributes['connection'] = conn
+        command.stamp(alembic_cfg, 'head')
+
+        logger.info('initialized database tables.')
+
+    async with engine.begin() as conn:
+        await conn.run_sync(_create)
 
 
-def _run_migrations(engine):
+async def _run_migrations(engine):
     """
     Run Alembic database migrations to upgrade to the latest schema version.
 
@@ -222,29 +235,32 @@ def _run_migrations(engine):
     alembic_ini = get_lib_config().alembic_ini_path
     alembic_cfg = Config(file_=str(alembic_ini))
 
-    # Upgrade to latest version
-    logger.info('upgrading database.')
-    try:
-        command.upgrade(alembic_cfg, 'head')
-    except Exception as ex:
-        logger.warning('Error in migration', exc_info=ex)
-    logger.info('upgraded database.')
+    def _upgrade(conn):
+        # Upgrade to latest version
+        logger.info('upgrading database.')
+        try:
+            alembic_cfg.attributes['connection'] = conn
+            command.upgrade(alembic_cfg, 'head')
+        except Exception as ex:
+            logger.warning('Error in migration', exc_info=ex)
+        logger.info('upgraded database.')
+
+    async with engine.begin() as conn:
+        await conn.run_sync(_upgrade)
 
 
-def drop_all_tables():
+async def drop_all_tables():
     """Drops all tables for model objects defined with this module's `Base`."""
     logger.info('dropping all registered tables')
-    engine = get_engine(DataDomain.ANSWERS)
+    engine = get_async_engine(DataDomain.ANSWERS)
 
-    # Drop any custom enums types and cascade to any dependencies.
-    with engine.connect() as conn:
-        conn.execute(text('DROP TYPE IF EXISTS agentpromptstatus CASCADE'))
-        conn.commit()
+    async with engine.begin() as conn:
+        # Drop any custom enums types and cascade to any dependencies.
+        await conn.execute(text('DROP TYPE IF EXISTS agentpromptstatus CASCADE'))
 
-    DECLARED_METADATA.drop_all(engine)
+        # Drop all tables
+        await conn.run_sync(DECLARED_METADATA.drop_all)
 
-    # Drop the Alembic migration table. If this table remains, our migration detection
-    # logic will prevent the recreation of the registered tables.
-    with engine.connect() as conn:
-        conn.execute(text('DROP TABLE IF EXISTS "alembic_version" CASCADE'))
-        conn.commit()
+        # Drop the Alembic migration table. If this table remains, our migration detection
+        # logic will prevent the recreation of the registered tables.
+        await conn.execute(text('DROP TABLE IF EXISTS "alembic_version" CASCADE'))

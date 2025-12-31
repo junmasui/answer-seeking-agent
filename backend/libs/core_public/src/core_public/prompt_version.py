@@ -44,9 +44,7 @@ class PromptVersionStats(CamelModel):
     The statistics include the total count and last update time.
     """
 
-    prompt_version_count: Annotated[
-        Optional[int], Field(description='Total number of prompt versions.', default=None)
-    ]
+    prompt_version_count: Annotated[Optional[int], Field(description='Total number of prompt versions.', default=None)]
     table_updated_time: Annotated[
         Optional[datetime], Field(description='Last time the prompt version table was updated.', default=None)
     ]
@@ -65,9 +63,7 @@ class PromptVersionList(CamelModel):
     """
 
     prompt_versions: Annotated[list[PromptVersion], Field(description='List of prompt versions.')]
-    prompt_version_count: Annotated[
-        Optional[int], Field(description='Total number of prompt versions.', default=None)
-    ]
+    prompt_version_count: Annotated[Optional[int], Field(description='Total number of prompt versions.', default=None)]
     table_updated_time: Annotated[
         Optional[datetime], Field(description='Last time the prompt version table was updated.', default=None)
     ]

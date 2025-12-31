@@ -1,9 +1,10 @@
 import uuid
 
-from core_db.db_models import DbPromptVersion
-from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from core_public.prompt_version import PromptStatus
 from sqlalchemy import select
+
+from core_db.db_models import DbPromptVersion
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 
 async def add_or_update_prompt_version(

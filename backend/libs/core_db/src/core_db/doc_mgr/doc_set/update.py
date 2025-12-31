@@ -2,10 +2,11 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 
-from core_db.db_models import DbTrackedDocumentSet
-from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from sqlalchemy import select
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
+
+from core_db.db_models import DbTrackedDocumentSet
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 logger = logging.getLogger(__name__)
 

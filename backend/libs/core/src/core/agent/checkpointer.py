@@ -2,7 +2,6 @@ import logging
 from functools import cache
 
 from core_db.providers.sql_database import DataDomain, get_async_connection_pool
-from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from ..signals import start_up_handler

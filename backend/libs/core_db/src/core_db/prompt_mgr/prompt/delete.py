@@ -1,9 +1,10 @@
 import logging
 import uuid
 
+from sqlalchemy import delete
+
 from core_db.db_models import DbPrompt
 from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
-from sqlalchemy import delete
 
 logger = logging.getLogger(__name__)
 

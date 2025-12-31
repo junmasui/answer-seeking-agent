@@ -2,11 +2,12 @@ import logging
 import uuid
 from typing import Optional
 
-from core_db.db_models import DbTrackedDocumentSet
-from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 from core_public import SortDirection
 from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased
+
+from core_db.db_models import DbTrackedDocumentSet
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 logger = logging.getLogger(__name__)
 

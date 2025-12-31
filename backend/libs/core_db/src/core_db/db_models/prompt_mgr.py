@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 
-from core_public import PromptStatus, OwnerType
+from core_public import OwnerType, PromptStatus
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class DbPrompt(Base):
-    """
-    SQLAlchemy model representing an prompt in the database.
-    """
+    """SQLAlchemy model representing an prompt in the database."""
 
     __tablename__ = 'prompt'
 
@@ -39,9 +37,8 @@ class DbPrompt(Base):
         DateTime, server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
     )
     # Define the relationship to DbTrackedDocument
-    versions: Mapped[list['DbPromptVersion']] = relationship(
-        order_by='DbPromptVersion.id', back_populates='prompt'
-    )
+    versions: Mapped[list['DbPromptVersion']] = relationship(order_by='DbPromptVersion.id', back_populates='prompt')
+
 
 class DbPromptVersion(Base):
     """

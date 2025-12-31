@@ -8,7 +8,7 @@ from core_public import PromptStatus
 logger = logging.getLogger(__name__)
 
 
-def update_prompt_version(
+async def update_prompt_version(
     prompt_id: uuid.UUID,
     prompt_version_id: Optional[uuid.UUID] = None,
     version: Optional[int] = None,
@@ -19,12 +19,11 @@ def update_prompt_version(
     last_user_id: Optional[str] = None,
 ):
     """Update a prompt version."""
-
     # TODO:
     # Add new version if message is changed.
     # Update version if only status is changed
 
-    with update_prompt_version_record(prompt_uuid=prompt_id, prompt_version_uuid=prompt_version_id) as record:
+    async with update_prompt_version_record(prompt_uuid=prompt_id, prompt_version_uuid=prompt_version_id) as record:
         if status is not None:
             record.status = status
 

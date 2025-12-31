@@ -6,6 +6,6 @@ from core_db.prompt_mgr.prompt_version.delete import delete_prompt_version as db
 logger = logging.getLogger(__name__)
 
 
-def delete_prompt_version(prompt_version_id: uuid.UUID):
+async def delete_prompt_version(prompt_version_id: uuid.UUID):
     """Delete a prompt version."""
-    return db_delete_prompt_version(prompt_version_id)
+    return await db_delete_prompt_version(prompt_version_id)

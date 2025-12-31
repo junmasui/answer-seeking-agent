@@ -36,7 +36,7 @@ async def register_initial_prompts(sender):
 
         logger.info('adding predefined prompt %s', prompt_name)
 
-        add_chat_prompt(
+        await add_chat_prompt(
             prompt_name=prompt_name,
             owner_type=OwnerType.SYSTEM,
             system_message=prompt.get('system_message', ''),

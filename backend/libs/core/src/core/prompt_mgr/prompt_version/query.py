@@ -11,7 +11,7 @@ from .stats import get_prompt_version_stats
 logger = logging.getLogger(__name__)
 
 
-def list_prompt_versions(
+async def list_prompt_versions(
     *,
     prompt_id: Optional[str] = None,
     status: Optional[PromptStatus] = None,
@@ -20,11 +20,10 @@ def list_prompt_versions(
     sort_by: Optional[list] = None,
 ):
     """Return the list of prompt versions."""
-
-    existing_objs = db_list_prompt_versions(
+    existing_objs = await db_list_prompt_versions(
         prompt_id=prompt_id, status=status, start=start, length=length, sort_by=sort_by
     )
-    table_stats = get_prompt_version_stats()
+    table_stats = await get_prompt_version_stats()
 
     def _to_dict(_x: DbPromptVersion):
         """Convert database agent prompt record to API response AgentPrompt model."""

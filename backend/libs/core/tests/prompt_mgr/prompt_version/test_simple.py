@@ -56,7 +56,7 @@ async def test_find(api_server, populated_prompt_version_table, populated_prompt
     assert resp.get('promptVersionCount') == 3
 
     # Now list prompt versions
-    list_path = f'/prompt-versions/'
+    list_path = '/prompt-versions/'
     resp_type, resp = await api_server.get(path=list_path)
 
     assert resp_type == 'json'
@@ -102,10 +102,10 @@ async def test_find_by_prompt_id(api_server, populated_prompt_version_table, pop
     assert prompt_versions[0].get('promptName') == prompt_name
 
 
-
-
 @pytest.mark.asyncio
-async def test_find_prompt_versions(api_server, populated_prompt_version_table, populated_prompt_table, sql_sessionmaker):
+async def test_find_prompt_versions(
+    api_server, populated_prompt_version_table, populated_prompt_table, sql_sessionmaker
+):
     """Test listing prompt-version statistics and listing versions for a prompt."""
     # Check overall table statistics
     stats_path = '/prompt-versions/stats'
@@ -137,6 +137,7 @@ async def test_find_prompt_versions(api_server, populated_prompt_version_table, 
 
     assert prompt_versions[0].get('promptName') == prompt_name
 
+
 @pytest.mark.asyncio
 async def test_get(api_server, populated_prompt_version_table, sql_sessionmaker):
     """No single-item GET endpoint for prompt-versions; ensure fixture provides entries."""
@@ -161,11 +162,7 @@ async def test_update(api_server, populated_prompt_version_table, sql_sessionmak
         prompt_id = result[0].prompt_id
 
     path = f'/prompts/{prompt_id}/versions/{prompt_version_id}'
-    body = {
-        'version': 0,
-        'humanMessage': 'updated human message',
-        'systemMessage': 'updated system message',
-    }
+    body = {'version': 0, 'humanMessage': 'updated human message', 'systemMessage': 'updated system message'}
     resp_type, _resp = await api_server.patch(path=path, content_type='json', data=body)
 
     assert resp_type == 'json'

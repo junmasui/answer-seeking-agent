@@ -9,7 +9,7 @@ from langchain_core.prompts import (
 )
 
 from ...lib_config import get_lib_config
-from ...prompt_mgr import list_prompts, list_prompt_versions
+from ...prompt_mgr import list_prompt_versions, list_prompts
 from ..internal_models import AgentPromptName
 
 logger = logging.getLogger(__name__)

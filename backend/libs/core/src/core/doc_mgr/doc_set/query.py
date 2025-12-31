@@ -10,7 +10,7 @@ from .stats import get_document_set_statistics
 logger = logging.getLogger(__name__)
 
 
-def list_document_sets(
+async def list_document_sets(
     *,
     name: Optional[str] = None,
     is_default: Optional[bool] = None,
@@ -20,10 +20,10 @@ def list_document_sets(
     sort_by: Optional[list] = None,
 ):
     """Return the list of document sets."""
-    existing_objs = list_tracking_document_sets(
+    existing_objs = await list_tracking_document_sets(
         name=name, is_default=is_default, is_public=is_public, start=start, length=length, sort_by=sort_by
     )
-    table_stats = get_document_set_statistics()
+    table_stats = await get_document_set_statistics()
 
     def _to_dict(_x: DbTrackedDocumentSet):
         """Convert database document set record to API response DocumentSet model."""

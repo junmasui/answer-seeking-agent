@@ -1,16 +1,13 @@
 import uuid
 
+from core_public import OwnerType
+from sqlalchemy import select
+
 from core_db.db_models import DbPrompt
 from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
-from core_public import OwnerType
-from sqlalchemy import and_, select, update
 
 
-async def add_or_update_prompt(
-    name: str,
-    owner_type: OwnerType,
-    user_id: uuid.UUID,
-):
+async def add_or_update_prompt(name: str, owner_type: OwnerType, user_id: uuid.UUID):
     """Adds or updates the prompt."""
     sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
@@ -29,12 +26,7 @@ async def add_or_update_prompt(
             else:
                 prompt_uuid = uuid.uuid4()
 
-                new_obj = DbPrompt(
-                    id=prompt_uuid,
-                    name=name,
-                    owner_type=owner_type,
-                    last_user_id=user_id,
-                )
+                new_obj = DbPrompt(id=prompt_uuid, name=name, owner_type=owner_type, last_user_id=user_id)
                 session.add(new_obj)
 
     return prompt_uuid
