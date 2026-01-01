@@ -5,7 +5,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=2, width=120, compact=False, underscore_numbers=True, sort_dicts=False)
 
 
-def dump_logger_tree(logger=None, include_all=False):
+async def dump_logger_tree(logger=None, include_all=False):
     """
     Returns the logger hierarchy.
 

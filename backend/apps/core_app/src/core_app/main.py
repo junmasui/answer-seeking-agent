@@ -1,7 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
 
-
 from core.signals import configure_sender, send_start_up
 from core_telemetry_distro.verifier import verify_distro
 from fastapi import FastAPI
@@ -9,12 +8,9 @@ from log_config_monitor import get_logging_conf_monitor
 
 from .middlewares import ErrorLoggingMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
-from .routers import admin, answer, document_sets, documents, health, prompts, prompt_versions, status, tasks
+from .routers import admin, answer, document_sets, documents, health, prompt_versions, prompts, status, tasks
 
 logger = logging.getLogger(__name__)
-
-
-
 
 
 @asynccontextmanager
@@ -57,8 +53,6 @@ app.include_router(router=status.router, prefix='/status')
 app.include_router(router=prompts.router)
 app.include_router(router=prompt_versions.router)
 app.include_router(router=tasks.router, prefix='/tasks')
-
-
 
 
 @app.get('')  # Empty path handles no trailing slash without using 307 redirect.

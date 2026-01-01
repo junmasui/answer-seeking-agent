@@ -10,7 +10,7 @@ __all__ = [
     'get_async_sessionmaker',
     'get_async_connection_pool',
     'DataDomain',
-    'ping_sql_database',
+    'ping_async_sql_database',
 ]
 
 # For now, there is only one database provider
@@ -22,5 +22,5 @@ from .postgres import (
     get_connection_str,
     get_engine,
     get_sessionmaker,
-    ping_sql_database,
+    ping_async_sql_database,
 )

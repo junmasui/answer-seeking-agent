@@ -15,6 +15,7 @@ See Also:
 
 import logging
 import threading
+import asyncio
 from uuid import UUID
 
 from celery import Celery
@@ -169,7 +170,7 @@ class CeleryMonitoringThread:
                 doc_ids = kwargs.get('doc_ids')
                 if doc_ids:
                     for doc_id in doc_ids:
-                        update_document_status(doc_id, DocumentStatus.QUEUED)
+                        asyncio.run(update_document_status(doc_id, DocumentStatus.QUEUED))
 
             logger.info('Task sent: %s[%s] %s', task.name, task.uuid, task.info())
         except Exception as ex:

@@ -32,17 +32,9 @@ def start_metrics(is_main_worker: bool):
         stats = gc.get_stats()
         observations = []
         for generation, stat in enumerate(stats):
+            observations.append(Observation(stat['collected'], {'generation': str(generation), 'type': 'collected'}))
             observations.append(
-                Observation(
-                    stat['collected'],
-                    {"generation": str(generation), "type": "collected"}
-                )
-            )
-            observations.append(
-                Observation(
-                    stat['collections'],
-                    {"generation": str(generation), "type": "collections"}
-                )
+                Observation(stat['collections'], {'generation': str(generation), 'type': 'collections'})
             )
         return observations
 

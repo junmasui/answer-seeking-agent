@@ -19,4 +19,4 @@ async def handle_health_check(_current_user: Annotated[User, Depends(get_scoped_
 
     Returns the system health.
     """
-    return health_check()
+    return await health_check()

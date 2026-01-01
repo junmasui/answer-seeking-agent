@@ -7,6 +7,7 @@ from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import BaseGenerationOutputParser
 from langchain_core.outputs import ChatGeneration, Generation
 from langchain_core.runnables import RunnableConfig
+from langchain_core.runnables.config import run_in_executor
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,17 @@ class ResponseCitationParser(BaseGenerationOutputParser[dict[str, str]]):
         """
         raise NotImplementedError('This OutputParser can only be called by the `parse_with_prompt` method.')
 
+    async def ainvoke(
+        self, input: Union[str, BaseMessage], config: Optional[RunnableConfig] = None, **kwargs: Any
+    ) -> dict[str, str]:
+        """
+        Async invoke the parser on an input.
+
+        This overrides the default ainvoke to ensure that the invoke method is called,
+        which in turn ensures that the config is passed to parse_result.
+        """
+        return await run_in_executor(config, self.invoke, input, config, **kwargs)
+
     def invoke(
         self, input: Union[str, BaseMessage], config: Optional[RunnableConfig] = None, **kwargs: Any
     ) -> dict[str, str]:
@@ -82,7 +94,9 @@ class ResponseCitationParser(BaseGenerationOutputParser[dict[str, str]]):
 
     def parse_result(self, result: list[Generation], *, partial: bool = False, config: dict = None) -> dict[str, str]:
         """Parse the output of an LLM call."""
-        documents = config['configurable'].get('documents', [])
+        config = config or {}
+        configurable = config.get('configurable', {})
+        documents = configurable.get('documents', [])
         # Create a dict with keys of type str. When we parse out the document ID from
         # the LLM generation, the parsed ID will be of type str.
         documents_by_id = {str(doc.metadata['document_id']): doc for doc in documents}

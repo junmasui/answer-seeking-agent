@@ -21,7 +21,6 @@ __all__ = [
     'get_sessionmaker',
     'get_async_sessionmaker',
     'get_async_connection_pool',
-    'ping_sql_database',
     'ping_async_sql_database',
 ]
 
@@ -122,9 +121,7 @@ def get_async_connection_pool(db_schema: DataDomain):
     connection_str = get_connection_str(db_schema)
     connection_str = connection_str.replace('+psycopg', '')
 
-    pool = AsyncConnectionPool(conninfo=connection_str, min_size=2, max_size=10)
-    pool.open()
-
+    pool = AsyncConnectionPool(conninfo=connection_str, min_size=2, max_size=10, open=False)
     return pool
 
 

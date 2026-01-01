@@ -16,14 +16,14 @@ from .response_citation_parser import ResponseCitationParser
 logger = logging.getLogger(__name__)
 
 
-def response_generator():
+async def response_generator():
     """
     Create a response generation chain for RAG (Retrieval-Augmented Generation).
 
     Combines a chat prompt, language model, and answer citation parser to generate answers from
     retrieved documents with proper citation extraction.
     """
-    prompt = get_chat_prompt(prompt_name=AgentPromptName.GENERATE_ANSWER)
+    prompt = await get_chat_prompt(prompt_name=AgentPromptName.GENERATE_ANSWER)
 
     # LLM
     llm = get_chat_llm()
@@ -58,7 +58,7 @@ async def generate_response(state: GraphState):
     history = state.messages
     response_generation_count = state.response_generation_count
 
-    chain = response_generator()
+    chain = await response_generator()
 
     logger.info('Response generation count %d', response_generation_count)
 

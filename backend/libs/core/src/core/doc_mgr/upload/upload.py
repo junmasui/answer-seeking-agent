@@ -11,15 +11,16 @@ from ..doc_set.query import list_document_sets
 logger = logging.getLogger(__name__)
 
 
-def _get_doc_set(doc_set_uuid):
+async def _get_doc_set(doc_set_uuid):
     """Retrieve a document set by its UUID, or the default document set if no UUID is provided."""
+    doc_set = None
     if doc_set_uuid:
-        document_sets = get_document_sets([doc_set_uuid])
+        document_sets = await get_document_sets([doc_set_uuid])
         if len(document_sets) > 0:
             doc_set = document_sets[0]
 
     if not doc_set:
-        results = list_document_sets(is_default=True)
+        results = await list_document_sets(is_default=True)
         doc_set = results.document_sets[0]
 
     return doc_set
@@ -63,13 +64,15 @@ def _get_doc_file_path(doc_set, partial_doc_path):
     return cloud_dir / joined.name
 
 
-def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, content_type, download_time_utc, user_id):
+async def upload_document(
+    doc_set_uuid, partial_doc_path, local_file, source_url, content_type, download_time_utc, user_id
+):
     """
     Upload a complete document into our document system.
 
     This involves storing the document in our cloud file store and adding a tracking record.
     """
-    doc_set = _get_doc_set(doc_set_uuid)
+    doc_set = await _get_doc_set(doc_set_uuid)
 
     cloud_doc_path = _get_doc_file_path(doc_set, partial_doc_path)
 
@@ -84,7 +87,7 @@ def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, cont
 
     bucket = get_s3_bucket()
 
-    add_document(
+    await add_document(
         document_set_uuid=doc_set.id,
         file_dir=str(Path(partial_doc_path).parent),
         file_name=Path(partial_doc_path).name,
@@ -97,11 +100,11 @@ def upload_document(doc_set_uuid, partial_doc_path, local_file, source_url, cont
     )
 
 
-def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
+async def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
     """Upload a document chunk to cloud storage."""
     logger.info('uploading chunk filename %s index %d to cloud file store', partial_doc_path, chunk_index)
 
-    doc_set = _get_doc_set(doc_set_uuid)
+    doc_set = await _get_doc_set(doc_set_uuid)
 
     cloud_chunk_path = _get_chunk_file_path(doc_set, partial_doc_path, chunk_index)
 
@@ -116,7 +119,7 @@ def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
     return True
 
 
-def merge_chunked_document(
+async def merge_chunked_document(
     doc_set_uuid, partial_doc_path, total_chunks, source_url, content_type, download_time_utc, user_id
 ):
     """
@@ -126,7 +129,7 @@ def merge_chunked_document(
     """
     logger.info('merging file %s to cloud file store', partial_doc_path)
 
-    doc_set = _get_doc_set(doc_set_uuid)
+    doc_set = await _get_doc_set(doc_set_uuid)
 
     cloud_doc_path = _get_doc_file_path(doc_set, partial_doc_path)
 
@@ -143,7 +146,7 @@ def merge_chunked_document(
 
     bucket = get_s3_bucket()
 
-    add_document(
+    await add_document(
         document_set_uuid=doc_set.id,
         file_dir=str(Path(partial_doc_path).parent),
         file_name=Path(partial_doc_path).name,

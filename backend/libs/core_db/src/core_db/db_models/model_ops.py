@@ -85,9 +85,9 @@ async def get_current_version(engine):
         logger.info('database is empty.')
         return None
 
-    async with engine.connect() as session:
+    async with engine.connect() as conn:
         try:
-            result = await session.execute(
+            result = await conn.execute(
                 text("""SELECT EXISTS (
                     SELECT FROM
                         information_schema.tables
@@ -118,7 +118,7 @@ async def get_current_version(engine):
             # where the examples show the trace:
             #  * SELECT alembic_version.version_num FROM alembic_version
             # The lack of a WHERE clause suggests that this table has only one record.
-            result = await session.execute(text('SELECT version_num FROM alembic_version'))
+            result = await conn.execute(text('SELECT version_num FROM alembic_version'))
             rowcount = result.rowcount
             if rowcount == 0:
                 # No migrations if the table is empty.

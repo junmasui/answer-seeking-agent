@@ -4,6 +4,7 @@ import logging
 import uuid
 from functools import cache
 
+from core_db.providers.sql_database import DataDomain, get_async_engine, get_async_sessionmaker, ping_async_sql_database
 from core_public.status_models import PingResult
 from langchain_postgres import PGVector
 from sqlalchemy import MetaData, select
@@ -11,7 +12,6 @@ from sqlalchemy import MetaData, select
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
 from ..embeddings import get_embeddings
-from core_db.providers.sql_database import DataDomain, get_async_engine, get_async_sessionmaker, ping_async_sql_database
 
 #
 # See https://python.langchain.com/docs/integrations/vectorstores/pgvector/
@@ -41,6 +41,7 @@ def get_vector_store():
 
 _METADATA_CACHE = None
 
+
 async def _get_reflected_metadata():
     """
     Get reflected metadata for vector store tables from the custom schema.
@@ -65,7 +66,7 @@ async def _get_reflected_metadata():
 
     async with engine.connect() as conn:
         await conn.run_sync(_reflect)
-    
+
     _METADATA_CACHE = metadata
     return metadata
 
@@ -137,35 +138,10 @@ async def startup(sender):
 
     vector_store = get_vector_store()
 
-    # These methods might be synchronous in PGVector, but we are in an async handler.
-    # If PGVector supports async engine, it might have async setup methods or we might need to run them in a thread.
-    # Assuming standard PGVector usage with async engine might require manual setup or run_sync if methods are blocking.
-    # However, langchain_postgres PGVector usually handles this.
-    # If these methods are not async, we should wrap them or hope they don't block too much (setup is once).
-    # But wait, if connection is async engine, sync execution will fail.
-    # We should check if we can use run_sync or if PGVector handles it.
-    # For now, let's assume we need to use run_sync if they are sync methods on an async engine connection.
-    # But we don't have easy access to run_sync on the internal connection here easily without hacking.
-    # Let's try calling them directly. If they fail, we'll know.
-    # Actually, langchain_postgres PGVector methods like create_tables_if_not_exists use the connection.
-    # If connection is async engine, they might fail if they use `engine.connect()` (sync).
-    # Let's assume for now they work or we might need to fix langchain_postgres usage.
-    #
-    # UPDATE: langchain_postgres 0.0.1+ supports async.
-    # But `create_tables_if_not_exists` might be `acreate_tables_if_not_exists`?
-    # I'll assume sync methods for now as I can't verify the library version/docs.
-    # If this fails, we will see errors.
-    
-    # To be safe with async engine, we should probably use a sync engine for setup if possible,
-    # or use the async methods if they exist.
-    # Since I can't check, I'll leave them as is but be aware.
-    # Wait, if I changed get_vector_store to use async engine, and these methods use that engine...
-    # I'll try to use `run_in_executor` if I really needed to, but I can't wrap object methods easily.
-    
-    # Let's just call them.
-    vector_store.create_vector_extension()
-    vector_store.create_tables_if_not_exists()
-    vector_store.create_collection()
+    # Use async methods for setup since we are using an async engine.
+    await vector_store.acreate_vector_extension()
+    await vector_store.acreate_tables_if_not_exists()
+    await vector_store.acreate_collection()
 
 
 @reset_data_handler

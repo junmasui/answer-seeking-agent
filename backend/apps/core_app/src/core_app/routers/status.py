@@ -21,7 +21,7 @@ async def handle_status_check():
 
     Returns the application status.
     """
-    return status_check()
+    return await status_check()
 
 
 @router.get('/loggers')
@@ -55,4 +55,4 @@ async def dump_loggers(include_all: Union[bool, None] = False, worker: bool = Fa
 
         return result
 
-    return dump_logger_tree(include_all=include_all)
+    return await dump_logger_tree(include_all=include_all)

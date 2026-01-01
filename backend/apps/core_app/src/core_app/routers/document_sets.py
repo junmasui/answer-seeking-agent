@@ -34,7 +34,9 @@ async def handle_list_doc_sets(
     """Returns a list of document sets."""
     parsed_sort_by = parse_sort_by(sort_by)
 
-    return list_document_sets(name=name, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by)
+    return await list_document_sets(
+        name=name, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by
+    )
 
 
 @router.post('')  # Empty path handles no trailing slash without using 307 redirect.
@@ -46,7 +48,7 @@ async def handle_single_insert(
     """Add document set."""
     user_id = current_user.userid if current_user is not None else None
 
-    add_document_set(
+    await add_document_set(
         name=body.name,
         is_new_doc_default=body.is_new_doc_default,
         is_public_viewable=body.is_public_viewable,
@@ -59,7 +61,7 @@ async def handle_single_insert(
 @router.get('/stats', response_model=DocumentSetStats)
 async def handle_table_stats(_current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None):
     """Returns statistics about tracking table."""
-    return get_document_set_statistics()
+    return await get_document_set_statistics()
 
 
 @router.patch('/{doc_set_uuid}')
@@ -71,7 +73,7 @@ async def handle_single_update(
     """Delete the file and associated embeddings specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
 
-    update_document_set(
+    await update_document_set(
         doc_set_uuid,
         name=body.name,
         is_new_doc_default=body.is_new_doc_default,
@@ -90,6 +92,6 @@ async def handle_single_delete(
     """Delete the file and associated embeddings specified by the document UUID."""
     _user_id = _current_user.userid if _current_user is not None else None
 
-    delete_document_set(doc_set_uuid)
+    await delete_document_set(doc_set_uuid)
 
     return {}

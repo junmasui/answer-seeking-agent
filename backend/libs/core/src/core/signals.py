@@ -84,10 +84,11 @@ async def send_start_up():
     logger.info('Sending start-up signal')
 
     sender = _get_sender()
-    results = _START_UP.send(sender)
+    results = await _START_UP.send_async(sender)
 
     for _, response in results:
-        await response
+        if response:
+            pass
 
 
 async def send_db_predefined_data():
@@ -102,10 +103,11 @@ async def send_db_predefined_data():
     sender = _get_sender()
     logger.info('Sender %s', sender.is_worker)
 
-    results = _DB_READY_FOR_PREDEFINED_DATA.send(sender)
+    results = await _DB_READY_FOR_PREDEFINED_DATA.send_async(sender)
 
     for _, response in results:
-        await response
+        if response:
+            pass
 
     logger.info('Sent db-predefined-data signal')
 
@@ -115,7 +117,8 @@ async def send_reset_data():
     logger.info('Sending reset-data signal')
 
     sender = _get_sender()
-    results = _RESET_DATA.send(sender)
+    results = await _RESET_DATA.send_async(sender)
 
     for _, response in results:
-        await response
+        if response:
+            pass
