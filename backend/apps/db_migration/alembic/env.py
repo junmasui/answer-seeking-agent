@@ -112,4 +112,12 @@ async def run_migrations_online() -> None:
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    asyncio.run(run_migrations_online())
+    try:
+        loop = asyncio.get_running_loop()
+        # Event loop is already running, use nest_asyncio to allow nested loops
+        import nest_asyncio
+        nest_asyncio.apply()
+        asyncio.run(run_migrations_online())
+    except RuntimeError:
+        # No running loop, proceed normally
+        asyncio.run(run_migrations_online())

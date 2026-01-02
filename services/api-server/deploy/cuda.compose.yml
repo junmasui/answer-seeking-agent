@@ -5,8 +5,8 @@ services:
     environment:
       GPU_MODE: cuda12
 
-    devices:
-      - nvidia.com/gpu=all
+    # devices:
+    #   - nvidia.com/gpu=all
 
     deploy:
       resources:

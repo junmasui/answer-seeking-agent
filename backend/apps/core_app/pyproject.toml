@@ -24,8 +24,6 @@ dependencies = [
   "pyjwt>=2.10.1",
 ]
 
-[project.scripts]
-
 # Dependency groups following workspace DRY principles
 # Common groups are inherited from workspace-level constraints
 [dependency-groups]

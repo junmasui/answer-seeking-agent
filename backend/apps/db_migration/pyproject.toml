@@ -12,6 +12,7 @@ dependencies = [
   "alembic>=1.15.1",
   "alembic-postgresql-enum>=1.7.0",
   "alembic-utils>=0.8.6",
+  "nest_asyncio>=1.6.0",
   "sqlalchemy-utils>=0.42.0",
 ]
 
