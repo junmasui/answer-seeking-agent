@@ -20,15 +20,14 @@ from .prompt_util import get_chat_prompt
 logger = logging.getLogger(__name__)
 
 
-@cache
-def get_retrieval_grader():
+async def get_retrieval_grader():
     """
     Initializes and returns a retrieval grading chain.
 
     This function builds a grader that uses a chat prompt (GRADE_RETRIEVED_DOCUMENTS) and a Pydantic
     model (GradeDocuments) for structured output. The grader is cached to avoid reinitialization.
     """
-    prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_RETRIEVED_DOCUMENTS)
+    prompt = await get_chat_prompt(prompt_name=AgentPromptName.GRADE_RETRIEVED_DOCUMENTS)
 
     retrieval_grader = build_grader(prompt, GradeDocuments, 'retrieval_grader')
 
@@ -52,7 +51,7 @@ async def grade_document_relevancies(state: GraphState):
     question = state.question
     documents = state.documents
 
-    retrieval_grader = get_retrieval_grader()
+    retrieval_grader = await get_retrieval_grader()
 
     # Score each doc
     document_relevancy = []

@@ -165,7 +165,6 @@ class ApplicationSettings(BaseSettings):
             return [i.strip() for i in v.split(',') if i.strip()]
         return v or []
 
-
     disable_static_api_keys: bool = Field(default=False, validation_alias='DISABLE_APPLICATION_API_KEYS')
 
     static_api_key_1: Optional[str] = Field(default=None, validation_alias='APPLICATION_API_KEY_1')

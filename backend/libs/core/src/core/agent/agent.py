@@ -75,7 +75,7 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     elif isinstance(thread_id, str):
         thread_id = uuid.UUID(hex=thread_id)
 
-    result = list_document_sets(is_public=True)
+    result = await list_document_sets(is_public=True)
     doc_set_ids = [doc_set.id for doc_set in result.document_sets]
 
     graph = get_compiled_agent_graph()

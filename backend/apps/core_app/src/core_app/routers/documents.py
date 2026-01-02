@@ -98,7 +98,7 @@ async def handle_list_files(
     """
     parsed_sort_by = parse_sort_by(sort_by)
 
-    return list_documents(
+    return await list_documents(
         doc_set_id=doc_set_uuid,
         start=page * items_per_page,
         length=items_per_page,
@@ -112,7 +112,7 @@ async def handle_list_files(
 @router.get('/stats', response_model=DocumentStats)
 async def handle_table_stats(_current_user: Annotated[User, Depends(get_scoped_current_user(Scope.DOC_READ))] = None):
     """Returns statistics about tracking table."""
-    return get_document_statistics()
+    return await get_document_statistics()
 
 
 @router.post('/upload')
@@ -133,7 +133,7 @@ async def handle_upload(
     logger.debug('handling %s chunk: %d %d', file.filename, form_data.chunk_index, form_data.total_chunks)
 
     if form_data.total_chunks > 1:
-        upload_chunk(
+        await upload_chunk(
             doc_set_uuid=form_data.document_set_id,
             partial_doc_path=file.filename,
             chunk_index=form_data.chunk_index,
@@ -141,7 +141,7 @@ async def handle_upload(
         )
 
         if form_data.chunk_index == form_data.total_chunks - 1:
-            merge_chunked_document(
+            await merge_chunked_document(
                 doc_set_uuid=form_data.document_set_id,
                 partial_doc_path=file.filename,
                 total_chunks=form_data.total_chunks,
@@ -152,7 +152,7 @@ async def handle_upload(
             )
         return
 
-    upload_document(
+    await upload_document(
         doc_set_uuid=form_data.document_set_id,
         partial_doc_path=file.filename,
         local_file=file.file,
@@ -172,7 +172,7 @@ async def handle_single_update(
     """Update the file specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
 
-    update_document(doc_uuid, doc_set_uuid=body.document_set_id, last_user_id=user_id)
+    await update_document(doc_uuid, doc_set_uuid=body.document_set_id, last_user_id=user_id)
 
     return {}
 
@@ -185,7 +185,7 @@ async def handle_single_delete(
     """Delete the file and associated embeddings specified by the document UUID."""
     _user_id = current_user.userid if current_user is not None else None
 
-    delete_document(doc_uuid)
+    await delete_document(doc_uuid)
 
     return {}
 
@@ -200,7 +200,7 @@ async def handle_single_ingest(
     """Ingest the file specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
 
-    update_document_status(doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
+    await update_document_status(doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
 
     task = ingest_task.delay(doc_ids=[doc_uuid])
 
@@ -221,14 +221,14 @@ async def handle_ingest(
         doc_uuids = set(body.doc_uuids)
 
     if body.all_uploaded:
-        result = list_documents(doc_set_id=body.doc_set_uuid, status=DocumentStatus.UPLOADED)
+        result = await list_documents(doc_set_id=body.doc_set_uuid, status=DocumentStatus.UPLOADED)
         uningested_doc_ids = [doc.id for doc in result.documents]
         doc_uuids = doc_uuids.union(uningested_doc_ids)
         logger.info('queued %d items with uploaded status', len(uningested_doc_ids))
 
     task_ids = []
     for doc_uuid in doc_uuids:
-        update_document_status(doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
+        await update_document_status(doc_uuid, DocumentStatus.QUEUING, last_user_id=user_id)
 
         task = ingest_task.delay(doc_ids=[doc_uuid])
 
@@ -248,6 +248,6 @@ async def handle_delete(
     doc_uuids = body.doc_uuids if body.doc_uuids else []
 
     for doc_uuid in doc_uuids:
-        delete_document(doc_uuid)
+        await delete_document(doc_uuid)
 
     return {}

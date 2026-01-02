@@ -14,9 +14,17 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     sudo /usr/bin/mount /app/backend/.venv
 fi
 
+if [ "${USE_LOCAL_VENV_DIR:-false}" = "true" ]; then
+    # Ensure directory exists before mounting
+    #mkdir -p /app/backend/.venv
+    # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
+    # Actually, simpler to just try mount.
+    sudo /usr/bin/mount /app/backend/.venv
+fi
+
 cd /app/backend
 
-if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
+if [ "${USE_NFS_SRC_DIR:-false}" = "true" || "${USE_LOCAL_VENV_DIR:-false}" = "true" ]; then
     #    
     # Create the virtual environment only once.
     #

@@ -6,11 +6,11 @@ from core_db.prompt_mgr.prompt.query import get_prompt
 logger = logging.getLogger(__name__)
 
 
-def delete_prompt(prompt_uuid):
+async def delete_prompt(prompt_uuid):
     """Delete prompt."""
     # Retrieve prompt record.
 
-    prompt_records = get_prompt(prompt_uuid_list=[prompt_uuid])
+    prompt_records = await get_prompt(prompt_uuid_list=[prompt_uuid])
     if not prompt_records:
         return False
 
@@ -18,6 +18,6 @@ def delete_prompt(prompt_uuid):
 
     # Delete prompt record.
 
-    db_delete_prompt(prompt_record.id)
+    await db_delete_prompt(prompt_record.id)
 
     return True

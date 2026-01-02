@@ -1,22 +1,23 @@
 import uuid
 
 from core.lib_config import get_lib_config
-from core_db.db_models import DbTrackedDocumentSet
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from sqlalchemy import select
 
+from core_db.db_models import DbTrackedDocumentSet
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
-def add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID):
+
+async def add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID):
     """Adds or updates the document set."""
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
-        with session.begin():
+    async with sessionmaker() as session:
+        async with session.begin():
             stmt = select(DbTrackedDocumentSet).where(DbTrackedDocumentSet.name == name)
-            result = session.execute(stmt)
+            result = await session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
-        with session.begin():
+        async with session.begin():
             doc_root_dir = get_lib_config().doc_root_dir
             s3_rel_path = doc_root_dir + '/' + name
 

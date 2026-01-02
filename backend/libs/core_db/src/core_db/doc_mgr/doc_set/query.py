@@ -2,16 +2,17 @@ import logging
 import uuid
 from typing import Optional
 
-from core_db.db_models import DbTrackedDocumentSet
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import SortDirection
 from sqlalchemy import and_, column, func, select
 from sqlalchemy.orm import aliased
 
+from core_db.db_models import DbTrackedDocumentSet
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
+
 logger = logging.getLogger(__name__)
 
 
-def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
+async def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
     """Return tracking records when matched to specified document UUID."""
 
     def _ensure_uuid(item):
@@ -20,18 +21,18 @@ def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
 
     doc_set_uuid_list = [_ensure_uuid(item) for item in doc_set_uuid_list]
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         stmt = select(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id.in_(doc_set_uuid_list))
-        result = session.execute(stmt)
+        result = await session.execute(stmt)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
     return existing_objs
 
 
-def list_tracking_document_sets(
+async def list_tracking_document_sets(
     *,
     name: Optional[str] = None,
     is_default: Optional[bool] = None,
@@ -43,9 +44,9 @@ def list_tracking_document_sets(
     """Return tracking set when matched to specified document UUID."""
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         paginate = start is not None and length is not None
 
         # When paginating, we add a windowing function to the selected fields.
@@ -84,7 +85,7 @@ def list_tracking_document_sets(
         else:
             query = core_query
 
-        result = session.execute(query)
+        result = await session.execute(query)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.

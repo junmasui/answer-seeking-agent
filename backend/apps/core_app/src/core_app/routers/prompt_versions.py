@@ -26,6 +26,7 @@ router = APIRouter(prefix='/prompt-versions')
 
 versions_router = APIRouter(prefix='')
 
+
 @router.get('', response_model=PromptVersionList)
 @router.get('/', response_model=PromptVersionList)
 async def handle_list_prompt_versions(
@@ -45,21 +46,22 @@ async def handle_list_prompt_versions(
     """Returns a list of prompt versions."""
     parsed_sort_by = parse_sort_by(sort_by)
 
-    return list_prompt_versions(
+    return await list_prompt_versions(
         prompt_id=prompt_id, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by
     )
+
 
 @router.get('/stats', response_model=PromptVersionStats)
 async def handle_table_stats(
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_READ))] = None,
 ):
     """Returns statistics about tracking table."""
-    return get_prompt_version_stats()
+    return await get_prompt_version_stats()
 
 
 @versions_router.get('/{prompt_id}/versions', response_model=PromptVersionList)
 @versions_router.get('/{prompt_id}/versions/', response_model=PromptVersionList)
-async def handle_list_prompt_versions(
+async def handle_list_prompt_versions_for_prompt(
     prompt_id: Annotated[uuid.UUID, Path(..., discription='Prompt UUID')],
     page: Annotated[int, Query(..., description='Zero-indexed page', ge=0)] = 0,
     items_per_page: Annotated[int, Query(..., alias='itemsPerPage', description='Item count per page', ge=1)] = 10,
@@ -76,9 +78,10 @@ async def handle_list_prompt_versions(
     """Returns a list of prompt versions."""
     parsed_sort_by = parse_sort_by(sort_by)
 
-    return list_prompt_versions(
+    return await list_prompt_versions(
         prompt_id=prompt_id, start=page * items_per_page, length=items_per_page, sort_by=parsed_sort_by
     )
+
 
 @versions_router.post('/{prompt_id}/versions')
 async def handle_single_insert(
@@ -89,7 +92,7 @@ async def handle_single_insert(
     """Add prompt version."""
     user_id = current_user.userid if current_user is not None else None
 
-    add_prompt_version(
+    await add_prompt_version(
         prompt_id=prompt_id,
         status=body.status,
         include_history=body.include_history,
@@ -111,9 +114,9 @@ async def handle_single_update(
     """Update a prompt version."""
     user_id = current_user.userid if current_user is not None else None
 
-    update_prompt_version(
-        prompt_id = prompt_id,
-        prompt_version_id = prompt_version_id,
+    await update_prompt_version(
+        prompt_id=prompt_id,
+        prompt_version_id=prompt_version_id,
         status=None,
         include_history=body.include_history,
         system_message=body.system_message,
@@ -131,6 +134,6 @@ async def handle_single_delete(
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.PROMPT_WRITE))] = None,
 ):
     """Delete a prompt version."""
-    delete_prompt_version(prompt_version_id)
+    await delete_prompt_version(prompt_version_id)
 
     return {}

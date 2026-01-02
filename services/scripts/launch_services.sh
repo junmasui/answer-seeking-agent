@@ -169,3 +169,29 @@ if [ $? -ne 0 ]
 then
     exit "$?"
 fi
+
+# Dev Server
+#
+echo Launching dev-server
+docker compose --profile dev-server up -d
+if [ $? -ne 0 ]
+then
+    exit "$?"
+fi
+
+SLEEP_TIME=2
+for LOOP in $(seq 1 "$MAX_RETRIES")
+do
+    ./scripts/display_processes.sh --gpu-mode=$GPU_MODE
+    if [ $? -eq 0 ]
+    then
+        break
+    fi
+    echo Give $SLEEP_TIME seconds for dev-server
+    sleep "$SLEEP_TIME"
+    SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
+done
+if [ $? -ne 0 ]
+then
+    exit "$?"
+fi

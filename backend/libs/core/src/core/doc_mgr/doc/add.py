@@ -7,7 +7,7 @@ from core_db.doc_mgr.doc.add import add_or_update_document
 logger = logging.getLogger(__name__)
 
 
-def add_document(
+async def add_document(
     *,
     document_set_uuid,
     file_dir,
@@ -31,7 +31,7 @@ def add_document(
     # need to move the bucket to another location.
     s3_rel_path = cloud_path.relative_to(bucket_path)
 
-    return add_or_update_document(
+    return await add_or_update_document(
         document_set_uuid=document_set_uuid,
         file_dir=file_dir,
         file_name=file_name,

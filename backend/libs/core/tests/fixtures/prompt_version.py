@@ -1,4 +1,3 @@
-import inspect
 import logging
 
 import pytest
@@ -21,6 +20,7 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
     return count
 
+
 def _dump_table(auto_mapped_table, sql_sessionmaker):
     """Return table."""
     with sql_sessionmaker() as session:
@@ -29,6 +29,7 @@ def _dump_table(auto_mapped_table, sql_sessionmaker):
         result = [{k: v for k, v in row.items()} for row in rows]
 
     return result
+
 
 def _truncate_table(auto_mapped_table, sql_engine, sql_sessionmaker, force: bool = False):
     """Truncate 'prompt'."""
@@ -84,7 +85,9 @@ def empty_prompt_version_table(prompt_version_table, sql_engine, sql_sessionmake
 
 
 @pytest_asyncio.fixture(scope='function', loop_scope='function')
-async def populated_prompt_version_table(prompt_version_table, populated_prompt_table, api_server, sql_engine, sql_sessionmaker):
+async def populated_prompt_version_table(
+    prompt_version_table, populated_prompt_table, api_server, sql_engine, sql_sessionmaker
+):
     """Return the SQLAlchemy reflected table 'prompt' populated for prompt versions."""
     # Clean up table before we start: there are rare error scenarios like power outages
     # or out-of-memory errors where clean-up did not occur.
@@ -104,7 +107,7 @@ async def populated_prompt_version_table(prompt_version_table, populated_prompt_
             data = {
                 'includeHistory': index % 2 == 0,
                 'humanMessage': f'placeholder human message {index}',
-                'systemMessage': f'placeholder system message {index}'
+                'systemMessage': f'placeholder system message {index}',
             }
             await api_server.post(path=path, content_type='json', data=data)
 

@@ -3,8 +3,9 @@
 from functools import cache
 
 from core_public.status_models import PingResult, PingStatus
-from psycopg_pool import AsyncConnectionPool, ConnectionPool
+from psycopg_pool import AsyncConnectionPool
 from sqlalchemy import create_engine, text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from ...db_models.doc_mgr import DbTrackedDocument
@@ -16,10 +17,11 @@ from .base import DataDomain
 __all__ = [
     'get_connection_str',
     'get_engine',
+    'get_async_engine',
     'get_sessionmaker',
-    'get_connection_pool',
+    'get_async_sessionmaker',
     'get_async_connection_pool',
-    'ping_sql_database',
+    'ping_async_sql_database',
 ]
 
 
@@ -66,6 +68,20 @@ def get_engine(db_schema: DataDomain):
 
 
 @cache
+def get_async_engine(db_schema: DataDomain):
+    """
+    Returns a SQLAlchemy async engine for the database.
+
+    The engine is a global object created just once for a particular database server. It creates and
+    holds connections to the database server
+    """
+    connection_str = get_connection_str(db_schema)
+
+    engine = create_async_engine(connection_str)
+    return engine
+
+
+@cache
 def get_sessionmaker(db_schema: DataDomain):
     """
     Returns a SQLAlchemy sessionmaker object for the database.
@@ -81,19 +97,18 @@ def get_sessionmaker(db_schema: DataDomain):
 
 
 @cache
-def get_connection_pool(db_schema: DataDomain):
+def get_async_sessionmaker(db_schema: DataDomain):
     """
-    Return a database connection pool.
+    Returns a SQLAlchemy async sessionmaker object for the database.
 
-    This pool will be different from the one used by SQLAlchemy
+    A sessionmaker is a factory for creating new Session objects. A Session object is like a
+    connection with enhanced functionality for using the ORM paradigm (for examle, holding mappings
+    between Python objects and database rows)
     """
-    connection_str = get_connection_str(db_schema)
-    connection_str = connection_str.replace('+psycopg', '')
+    engine = get_async_engine(db_schema)
 
-    pool = ConnectionPool(conninfo=connection_str, min_size=2, max_size=10)
-    pool.open()
-
-    return pool
+    session = async_sessionmaker(bind=engine)
+    return session
 
 
 @cache
@@ -106,13 +121,11 @@ def get_async_connection_pool(db_schema: DataDomain):
     connection_str = get_connection_str(db_schema)
     connection_str = connection_str.replace('+psycopg', '')
 
-    pool = AsyncConnectionPool(conninfo=connection_str, min_size=2, max_size=10)
-    pool.open()
-
+    pool = AsyncConnectionPool(conninfo=connection_str, min_size=2, max_size=10, open=False)
     return pool
 
 
-def ping_sql_database(db_schema: DataDomain) -> PingResult:
+async def ping_async_sql_database(db_schema: DataDomain) -> PingResult:
     """
     Pings the specified SQL database schema to check its health and connectivity.
 
@@ -131,11 +144,11 @@ def ping_sql_database(db_schema: DataDomain) -> PingResult:
 
     """
     try:
-        engine = get_engine(db_schema)
-        with engine.connect() as connection:
+        engine = get_async_engine(db_schema)
+        async with engine.connect() as connection:
             if db_schema == DataDomain.ANSWERS:
                 # Check if the 'answers' schema exists
-                schema_check_result = connection.execute(
+                schema_check_result = await connection.execute(
                     text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'answers';")
                 )
                 if not schema_check_result.fetchone():
@@ -150,7 +163,7 @@ def ping_sql_database(db_schema: DataDomain) -> PingResult:
                 # tracked_documents table.
                 table_name = DbTrackedDocument.__tablename__
                 count_query = text(f'SELECT COUNT(*) FROM answers.{table_name}')
-                record_count_result = connection.execute(count_query)
+                record_count_result = await connection.execute(count_query)
                 record_count = record_count_result.scalar_one_or_none()
 
                 return PingResult(
@@ -160,7 +173,7 @@ def ping_sql_database(db_schema: DataDomain) -> PingResult:
                 )
             else:
                 # For other schemas, a simple SELECT 1 can be used as a basic check.
-                connection.execute(text('SELECT 1'))
+                await connection.execute(text('SELECT 1'))
         return PingResult(status=PingStatus.GOOD, message=f'Successfully connected to {db_schema.value} schema.')
     except Exception as e:
         # Log the exception for debugging purposes if a logger is available

@@ -20,6 +20,7 @@ def _get_table_count(auto_mapped_table, sql_sessionmaker):
 
     return count
 
+
 def _dump_table(auto_mapped_table, sql_sessionmaker):
     """Return table."""
     with sql_sessionmaker() as session:
@@ -94,9 +95,7 @@ async def populated_prompt_table(prompt_table, api_server, sql_engine, sql_sessi
     try:
         path = '/prompts/'
         for index in range(3):
-            data = {
-                'name': f'prompt {index}'
-            }
+            data = {'name': f'prompt {index}'}
             await api_server.post(path=path, content_type='json', data=data)
 
         count = _get_table_count(prompt_table, sql_sessionmaker)

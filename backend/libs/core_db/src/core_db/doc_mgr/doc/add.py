@@ -1,12 +1,13 @@
 import uuid
 
-from core_db.db_models import DbTrackedDocument
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import DocumentStatus
 from sqlalchemy import and_, select
 
+from core_db.db_models import DbTrackedDocument
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
-def add_or_update_document(
+
+async def add_or_update_document(
     *,
     document_set_uuid,
     file_dir,
@@ -28,17 +29,17 @@ def add_or_update_document(
     if not isinstance(document_set_uuid, uuid.UUID):
         raise TypeError('document_set_uuid must be a UUID object')
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
-        with session.begin():
+    async with sessionmaker() as session:
+        async with session.begin():
             stmt = select(DbTrackedDocument).where(
                 and_(DbTrackedDocument.filename == file_name, DbTrackedDocument.document_set_id == document_set_uuid)
             )
-            result = session.execute(stmt)
+            result = await session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
-        with session.begin():
+        async with session.begin():
             if existing_obj:
                 doc_uuid = existing_obj.id
 

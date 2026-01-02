@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 DOCUMENT_TABLE_NAME = 'tracked_documents'
 
+
 def _get_table_count(auto_mapped_table, sql_sessionmaker):
     """Return count of recods in 'tracked_documents'."""
     with sql_sessionmaker() as session:

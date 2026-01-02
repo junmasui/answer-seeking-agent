@@ -20,19 +20,13 @@ from .doc_set import (
     DocumentSetUpdateRequest,
 )
 from .ingest import IngestRequestBody
-from .prompt import (
-    Prompt,
-    PromptAddRequest,
-    PromptList,
-    PromptStats,
-    PromptUpdateRequest,
-)
+from .prompt import Prompt, PromptAddRequest, PromptList, PromptStats, PromptUpdateRequest
 from .prompt_version import (
     PromptStatus,
     PromptVersion,
-    PromptVersionStats,
-    PromptVersionList,
     PromptVersionAddRequest,
+    PromptVersionList,
+    PromptVersionStats,
     PromptVersionUpdateRequest,
 )
 

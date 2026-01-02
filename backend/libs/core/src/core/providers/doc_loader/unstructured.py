@@ -10,7 +10,7 @@ from ...signals import start_up_handler
 
 
 @start_up_handler
-def start(sender):
+async def start(sender):
     """
     Download required NLTK data for the unstructured document loader.
 

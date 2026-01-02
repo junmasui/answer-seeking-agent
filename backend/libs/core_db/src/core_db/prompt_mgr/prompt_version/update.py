@@ -1,36 +1,38 @@
 import logging
-from typing import Optional
 import uuid
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
+from typing import Optional
 
-from core_db.db_models import DbPromptVersion
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import PromptStatus
 from sqlalchemy import and_, func, select, update
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
+from core_db.db_models import DbPromptVersion
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
+
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def update_prompt_version_record(prompt_uuid: uuid.UUID | str, prompt_version_uuid: Optional[uuid.UUID] = None,
-                                  version: Optional[int] = None):
+@asynccontextmanager
+async def update_prompt_version_record(
+    prompt_uuid: uuid.UUID | str, prompt_version_uuid: Optional[uuid.UUID] = None, version: Optional[int] = None
+):
     """Updates the prompt version record."""
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         try:
-            with session.begin():
+            async with session.begin():
                 stmt = select(DbPromptVersion)
                 if prompt_version_uuid is not None:
                     criteria = and_(DbPromptVersion.prompt_id == prompt_uuid, DbPromptVersion.id == prompt_version_uuid)
                 if version is not None:
                     criteria = and_(DbPromptVersion.prompt_id == prompt_uuid, DbPromptVersion.version == version)
                 stmt = stmt.where(criteria)
-                result = session.execute(stmt)
+                result = await session.execute(stmt)
 
                 existing_obj = result.scalar_one()
 
@@ -41,7 +43,7 @@ def update_prompt_version_record(prompt_uuid: uuid.UUID | str, prompt_version_uu
             logger.warning('Multiple tracking doc records found for %s version %s', prompt_uuid, version, exc_info=ex)
             return
 
-        with session.begin():
+        async with session.begin():
             yield existing_obj
 
             # IMPORTANT!!

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from celery import Celery
@@ -24,7 +25,7 @@ def ingest_task(doc_ids=None):
     Processes document ingestion asynchronously, converting uploaded documents into searchable
     content in the vector store.
     """
-    return ingest_documents(doc_ids)
+    return asyncio.run(ingest_documents(doc_ids))
 
 
 @celery_app.task(name='get-logger-tree')
@@ -35,7 +36,7 @@ def get_worker_logger_tree(include_all=False):
     Returns the hierarchical structure of loggers configured in the worker, optionally including all
     loggers or just the configured ones.
     """
-    return dump_logger_tree(include_all=include_all)
+    return asyncio.run(dump_logger_tree(include_all=include_all))
 
 
 @celery_app.task(name='reset-data')
@@ -46,4 +47,4 @@ def reset_data_task():
     Handles the reset-data event by clearing temporary files and resetting worker-specific data
     structures to their initial state.
     """
-    return reset_worker_data()
+    return asyncio.run(reset_worker_data())

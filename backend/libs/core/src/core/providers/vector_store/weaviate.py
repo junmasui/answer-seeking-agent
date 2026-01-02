@@ -259,7 +259,7 @@ def ping_vector_store() -> PingResult:
 
 
 @start_up_handler
-def startup(sender):
+async def startup(sender):
     """Initialize the vector store on application startup if not a worker process."""
     if sender.is_worker:
         return
@@ -268,7 +268,7 @@ def startup(sender):
 
 
 @reset_data_handler
-def reset(sender):
+async def reset(sender):
     """Reset the Weaviate collection by deleting and recreating it if not a worker process."""
     if sender.is_worker:
         return

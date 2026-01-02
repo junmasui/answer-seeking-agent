@@ -13,12 +13,12 @@ router = APIRouter()
 
 
 @router.post('/reset-database')
-def reset_database(
+async def reset_database(
     include_workers: Annotated[bool, Query(alias='includeWorkers')] = None,
     _current_user: Annotated[User, Depends(get_scoped_current_user(Scope.ADMIN))] = None,
 ):
     """Reset database, vector store, and file store."""
-    send_reset_data()
+    await send_reset_data()
 
     if include_workers:
         _task = reset_data_task.delay()

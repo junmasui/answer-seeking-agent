@@ -17,15 +17,14 @@ from .prompt_util import get_chat_prompt
 logger = logging.getLogger(__name__)
 
 
-@cache
-def get_response_grader():
+async def get_response_grader():
     """
     Initializes and returns an answer grading chain.
 
     This function builds a grader that uses a chat prompt (GRADE_ANSWER) and a Pydantic model
     (GradeAnswer) for structured output. The grader is cached to avoid reinitialization.
     """
-    prompt = get_chat_prompt(prompt_name=AgentPromptName.GRADE_ANSWER)
+    prompt = await get_chat_prompt(prompt_name=AgentPromptName.GRADE_ANSWER)
 
     response_grader = build_grader(prompt, GradeAnswer, 'response_grader')
 
@@ -49,7 +48,7 @@ async def grade_response(state: GraphState):
     question = state.question
     generation = state.generation
 
-    response_grader = get_response_grader()
+    response_grader = await get_response_grader()
 
     score = await response_grader.ainvoke(
         input={'question': question, 'generation': generation}, config={'metadata': {'chain_name': grade_response.name}}

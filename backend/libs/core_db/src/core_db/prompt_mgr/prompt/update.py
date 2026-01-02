@@ -1,28 +1,29 @@
 import logging
 import uuid
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
+
+from sqlalchemy import select
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from core_db.db_models import DbPrompt
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
-from sqlalchemy import and_, func, select, update
-from sqlalchemy.exc import MultipleResultsFound, NoResultFound
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def update_prompt_record(prompt_uuid):
+@asynccontextmanager
+async def update_prompt_record(prompt_uuid):
     """Updates the prompt record."""
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         try:
-            with session.begin():
+            async with session.begin():
                 stmt = select(DbPrompt).where(DbPrompt.id == prompt_uuid)
-                result = session.execute(stmt)
+                result = await session.execute(stmt)
 
                 existing_obj = result.scalar_one()
 
@@ -33,5 +34,5 @@ def update_prompt_record(prompt_uuid):
             logger.warning('Multiple tracking doc records found for %s', prompt_uuid, exc_info=ex)
             return
 
-        with session.begin():
+        async with session.begin():
             yield existing_obj

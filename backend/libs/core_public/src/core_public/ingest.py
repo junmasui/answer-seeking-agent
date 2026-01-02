@@ -21,6 +21,4 @@ class IngestRequestBody(CamelModel):
         Optional[UUID | list[UUID]],
         Field(description='A document set UUID or a list of document set UUIDs to ingest.', default=None),
     ]
-    all_uploaded: Annotated[
-        Optional[bool], Field(description='A flag to ingest all uploaded documents.', default=None)
-    ]
+    all_uploaded: Annotated[Optional[bool], Field(description='A flag to ingest all uploaded documents.', default=None)]

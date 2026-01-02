@@ -23,7 +23,7 @@ def get_embeddings():
 
 
 @start_up_handler
-def start(_sender):
+async def start(_sender):
     """
     Handle the application startup signal.
 

@@ -9,18 +9,18 @@ from langchain_core.prompts import (
 )
 
 from ...lib_config import get_lib_config
-from ...prompt_mgr import list_prompts, list_prompt_versions
+from ...prompt_mgr import list_prompt_versions, list_prompts
 from ..internal_models import AgentPromptName
 
 logger = logging.getLogger(__name__)
 
 
-def get_chat_prompt(prompt_name: str):
+async def get_chat_prompt(prompt_name: str):
     """Retrieve a chat prompt from the database and return a ChatPromptTemplate."""
     if prompt_name not in AgentPromptName:
         raise TypeError(f'prompt_name must be a valid AgentPromptName, got {prompt_name}')
 
-    result = list_prompts(name=prompt_name)
+    result = await list_prompts(name=prompt_name)
     if not result.prompts:
         raise ValueError(f"Prompt '{prompt_name}' not found in database.")
 
@@ -28,7 +28,7 @@ def get_chat_prompt(prompt_name: str):
 
     prompt_id = prompt.id
 
-    result = list_prompt_versions(prompt_id=prompt_id, status=PromptStatus.ACTIVE)
+    result = await list_prompt_versions(prompt_id=prompt_id, status=PromptStatus.ACTIVE)
     if not result.prompt_versions:
         raise ValueError(f"Prompt versions '{prompt_name}' not found in database.")
 

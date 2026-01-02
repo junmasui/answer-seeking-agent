@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Generator
+from typing import AsyncGenerator
 from uuid import UUID
 
 from cloudpathlib.s3 import S3Path
@@ -23,14 +23,14 @@ logger = logging.getLogger(__name__)
 __all__ = ['ingest_documents', 'reset_worker_data']
 
 
-def _load_one_source(
+async def _load_one_source(
     source_path: Path,
     tracked_doc_id: UUID,
     tracked_doc_set_id: UUID,
     source_url: str,
     content_type: str,
     download_time_utc: datetime,
-) -> Generator[Document, None, None]:
+) -> AsyncGenerator[Document, None]:
     """
     Load and process documents from a single source file, enriching each document with metadata.
 
@@ -46,7 +46,7 @@ def _load_one_source(
         # Periodically check if the tracking record still exists. Stop ingesting
         # if it has been deleted.
         if datetime.now() > check_in_time:
-            doc_records = get_documents(doc_uuid_list=[tracked_doc_id])
+            doc_records = await get_documents(doc_uuid_list=[tracked_doc_id])
             if len(doc_records) == 0:
                 logger.warning('tracked document %s no longer exists, stopping processing', tracked_doc_id)
                 return
@@ -80,7 +80,7 @@ def _load_one_source(
         yield doc
 
 
-def _ingest_one_document(
+async def _ingest_one_document(
     detached_record: DbTrackedDocument, bucket: S3Path, vector_store: VectorStore, staging_dir: Path
 ) -> None:
     """
@@ -89,7 +89,7 @@ def _ingest_one_document(
     This function ingests a single tracked document by downloading it, processing it, and storing it
     in the vector store. It also updates the document's tracking record with the ingestion status.
     """
-    with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
+    async with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
         if updateable_record is None:
             return
 
@@ -138,7 +138,7 @@ def _ingest_one_document(
 
         document_chunks = []
         batch_size = 10
-        for doc_chunk in _load_one_source(
+        async for doc_chunk in _load_one_source(
             actual_local_path,
             tracked_doc_id=doc_id,
             tracked_doc_set_id=doc_set_id,
@@ -162,7 +162,7 @@ def _ingest_one_document(
         # remove orphans earlier in case re-processing a file resulted in identical
         # vectors to the prior processing.
 
-        with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
+        async with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
             if updateable_record is None:
                 # The tracking record should exist when operations are normal: this big function
                 # started with a verification that the tracking record existed.
@@ -194,7 +194,7 @@ def _ingest_one_document(
             logger.info('pruned %d stale vectors regarding %s', len(to_remove), rel_path)
 
     except Exception as _ex:
-        with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
+        async with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
             if updateable_record is None:
                 # The tracking record should exist when operations are normal: the same call at
                 # the beginning of this function tested for existance.
@@ -218,7 +218,7 @@ def _ingest_one_document(
                 logger.warning('could not delete staged file %s', str(local_path), exc_info=ex)
 
 
-def ingest_documents(doc_ids):
+async def ingest_documents(doc_ids):
     """
     Ingest cloud files.
 
@@ -236,17 +236,17 @@ def ingest_documents(doc_ids):
     staging_dir = config.staging_dir / 'ingest'
     staging_dir.mkdir(parents=True, exist_ok=True)
 
-    tracking_records = get_documents(doc_uuid_list=doc_ids)
+    tracking_records = await get_documents(doc_uuid_list=doc_ids)
 
     for record in tracking_records:
-        _ingest_one_document(record, bucket, vector_store, staging_dir)
+        await _ingest_one_document(record, bucket, vector_store, staging_dir)
 
     logger.info('completed ingesting')
 
     return {'status': 'completed'}
 
 
-def reset_worker_data():
+async def reset_worker_data():
     """Cleanse the staging area."""
     config = get_lib_config()
 

@@ -1,9 +1,10 @@
 import early_init  # noqa: I001, F401 ## loading this module configures environment and logging
 
 
-from sqlalchemy import engine_from_config
+import asyncio
 from sqlalchemy import pool
 from sqlalchemy import inspect
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # Autogeneration support for Postgres functions, views, etc
 
@@ -63,27 +64,60 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
+def do_run_migrations(connection):
+    if is_database_empty(connection):
+        print('Database is empty. Skipping migration generation.')
+    else:
+        context.configure(connection=connection, target_metadata=target_metadata)
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+async def run_migrations_online() -> None:
     """
     Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine and associate a connection with the context.
     """
-    engine = engine_from_config(
-        config.get_section(config.config_ini_section, {}), prefix='sqlalchemy.', poolclass=pool.NullPool
+    connectable = async_engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix='sqlalchemy.',
+        poolclass=pool.NullPool,
     )
 
-    if is_database_empty(engine):
-        print('Database is empty. Skipping migration generation.')
-    else:
-        with engine.connect() as connection:
-            context.configure(connection=connection, target_metadata=target_metadata)
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-            with context.begin_transaction():
-                context.run_migrations()
+    await connectable.dispose()
 
+
+#
+# Alembic Execution Modes:
+#
+# 1. Offline Mode (--sql):
+#    - "Generate a SQL script"
+#    - Does NOT connect to the database.
+#    - Reads the URL to determine the SQL dialect (e.g., Postgres).
+#    - Prints raw SQL commands (CREATE TABLE...) to stdout or a file.
+#    - Synchronous because it is purely CPU-bound text processing.
+#
+# 2. Online Mode (Default):
+#    - "Apply changes to the database"
+#    - Connects to the live database to inspect current state and execute SQL.
+#    - Asynchronous to align with the project's AsyncEngine architecture.
+#    - Uses `run_sync` to bridge the async connection to Alembic's internal synchronous logic.
+#
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    try:
+        loop = asyncio.get_running_loop()
+        # Event loop is already running, use nest_asyncio to allow nested loops
+        import nest_asyncio
+        nest_asyncio.apply()
+        asyncio.run(run_migrations_online())
+    except RuntimeError:
+        # No running loop, proceed normally
+        asyncio.run(run_migrations_online())

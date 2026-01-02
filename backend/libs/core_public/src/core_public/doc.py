@@ -32,9 +32,7 @@ class Document(CamelModel):
     status: Annotated[DocumentStatus, Field(description='Status.')]
     size_bytes: Annotated[int, Field(description='Raw file size in bytes.')]
     modification_time: Annotated[datetime, Field(description='Latest time when document was modified.')]
-    ingestion_time: Annotated[
-        Optional[datetime], Field(default=None, description='Time when document was ingested.')
-    ]
+    ingestion_time: Annotated[Optional[datetime], Field(default=None, description='Time when document was ingested.')]
     source_url: Annotated[Optional[str], Field(default=None, description='Source URL of this document')]
     content_type: Annotated[Optional[str], Field(default=None, description='MIME content type of this document')]
     download_time_utc: Annotated[

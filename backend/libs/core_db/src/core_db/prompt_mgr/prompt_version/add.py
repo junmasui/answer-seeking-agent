@@ -1,12 +1,13 @@
 import uuid
 
-from core_db.db_models import DbPromptVersion
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public.prompt_version import PromptStatus
 from sqlalchemy import select
 
+from core_db.db_models import DbPromptVersion
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
-def add_or_update_prompt_version(
+
+async def add_or_update_prompt_version(
     prompt_id: uuid.UUID,
     status: PromptStatus | None,
     include_history: bool | None,
@@ -18,19 +19,19 @@ def add_or_update_prompt_version(
     if status == None:
         status = PromptStatus.ACTIVE
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         # We want to know auto-increment the version number.
         # So this query will return the highest version numbered first.
-        with session.begin():
+        async with session.begin():
             stmt = (
                 select(DbPromptVersion)
                 .where(DbPromptVersion.prompt_id == prompt_id)
                 .limit(1)
                 .order_by(DbPromptVersion.version.desc())
             )
-            result = session.execute(stmt)
+            result = await session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
             # IMPORTANT!!
@@ -40,7 +41,7 @@ def add_or_update_prompt_version(
             # from interferring with the next transaction.
             version = 1 if existing_obj is None else (existing_obj.version + 1)
 
-        with session.begin():
+        async with session.begin():
             prompt_version_uuid = uuid.uuid4()
 
             new_obj = DbPromptVersion(

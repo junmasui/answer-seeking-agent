@@ -2,17 +2,18 @@ import logging
 import uuid
 from typing import Optional, Sequence
 
-from core_db.db_models import DbTrackedDocument
-from core_db.db_models.doc_mgr import DbTrackedDocumentSet
-from core_db.providers.sql_database import DataDomain, get_sessionmaker
 from core_public import DocumentStatus, SortDirection
 from sqlalchemy import and_, column, func, select
-from sqlalchemy.orm import aliased, subqueryload, selectinload
+from sqlalchemy.orm import aliased, selectinload
+
+from core_db.db_models import DbTrackedDocument
+from core_db.db_models.doc_mgr import DbTrackedDocumentSet
+from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 logger = logging.getLogger(__name__)
 
 
-def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[DbTrackedDocument]:
+async def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[DbTrackedDocument]:
     """Return tracking records when matched to specified document UUID."""
 
     def _ensure_uuid(item):
@@ -21,18 +22,18 @@ def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[DbTrackedDoc
 
     doc_uuid_list = [_ensure_uuid(item) for item in doc_uuid_list]
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         stmt = select(DbTrackedDocument).where(DbTrackedDocument.id.in_(doc_uuid_list))
-        result = session.execute(stmt)
+        result = await session.execute(stmt)
         existing_objs = result.scalars().all()
 
     # The returned objects are detached from the closed session.
     return existing_objs
 
 
-def list_tracking_records(
+async def list_tracking_records(
     *,
     doc_set_id: Optional[uuid.UUID | list[uuid.UUID]] = None,
     status: Optional[DocumentStatus | list[DocumentStatus]] = None,
@@ -75,7 +76,7 @@ def list_tracking_records(
     """
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
     # Determine if we need to explicitly join the related table for sorting inside the
     # primary SQL query. The relationship between SQLAlchemy classes is used only for
@@ -83,7 +84,7 @@ def list_tracking_records(
     # scenarios that involve WHERE and ORDER BY in the primary SQL query.
     join_document_set = _should_join_document_set(sort_by)
 
-    with sessionmaker() as session:
+    async with sessionmaker() as session:
         paginate = start is not None and length is not None
 
         core_query = select(DbTrackedDocument)
@@ -136,12 +137,12 @@ def list_tracking_records(
                 )
             )
         else:
-                # Eager load the parent document-set records in a single 2nd query.
-                # The parent records are loaded using a WHERE IN clause using
-                # the results of the 1st query.
+            # Eager load the parent document-set records in a single 2nd query.
+            # The parent records are loaded using a WHERE IN clause using
+            # the results of the 1st query.
             query = core_query.options(selectinload(DbTrackedDocument.document_set))
 
-        result = session.execute(query)
+        result = await session.execute(query)
         existing_objs = result.scalars().all()
 
     return existing_objs

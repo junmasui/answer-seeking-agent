@@ -19,7 +19,7 @@ from .prompt_util import get_chat_prompt
 logger = logging.getLogger(__name__)
 
 
-def get_question_rewriter():
+async def get_question_rewriter():
     """
     Initializes and returns a question rewriting chain.
 
@@ -29,7 +29,7 @@ def get_question_rewriter():
     # LLM
     llm = get_chat_llm()
 
-    rewrite_prompt = get_chat_prompt(prompt_name=AgentPromptName.REWRITE_QUERY)
+    rewrite_prompt = await get_chat_prompt(prompt_name=AgentPromptName.REWRITE_QUERY)
 
     chain = rewrite_prompt | llm | StrOutputParser()
 
@@ -54,7 +54,7 @@ async def rewrite_question(state: GraphState):
     question = state.question
     query_rewrite_count = state.query_rewrite_count
 
-    question_rewriter = get_question_rewriter()
+    question_rewriter = await get_question_rewriter()
 
     # Re-write question
     better_question = await question_rewriter.ainvoke(

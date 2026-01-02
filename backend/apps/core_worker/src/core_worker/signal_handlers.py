@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from celery.app.log import TaskFormatter
@@ -50,7 +51,7 @@ def handle_worker_init(**_kwargs):
 
     configure_sender(is_worker=True)
 
-    send_start_up()
+    asyncio.run(send_start_up())
 
 
 @worker_ready.connect
