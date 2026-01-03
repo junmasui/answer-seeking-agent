@@ -24,6 +24,10 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     echo "Bind mounting /mnt/data to /app..."
     sudo mount /app
 
+    # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
+    # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
+    sleep 2
+
     # Bind mount .venv from /home/python/.venv-storage
     echo "Bind mounting .venv..."
     sudo mount /app/backend/.venv

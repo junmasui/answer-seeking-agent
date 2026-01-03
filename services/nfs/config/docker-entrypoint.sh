@@ -26,5 +26,23 @@ dbus-daemon --system --fork
 echo "Starting rpcbind..."
 rpcbind
 
+echo "Starting Unison Sync (Background)..."
+# Initial sync from Staging -> Exports to ensure export is populated
+if [ -d "/staging" ]; then
+    echo "Initializing /exports from /staging..."
+    unison -batch -owner -group -numericids /staging /exports || echo "Initial sync warning"
+    
+    # Background loop
+    (
+        while true; do
+            # Sync /staging <-> /exports bi-directionally
+            unison -batch -auto -owner -group -numericids /staging /exports > /dev/null 2>&1
+            sleep 1
+        done
+    ) &
+else
+    echo "WARN: /staging directory not found. Unison sync skipped."
+fi
+
 echo "Starting ganesha.nfsd..."
 exec ganesha.nfsd "$@"

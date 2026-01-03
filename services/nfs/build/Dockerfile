@@ -4,9 +4,9 @@ FROM debian:12-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-    nfs-ganesha nfs-common nfs-ganesha-vfs \
- && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends \
+    nfs-ganesha nfs-common nfs-ganesha-vfs unison \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the configuration from the named build stage or image `config-dir`.
 # The original build uses a sibling stage/image providing the file.

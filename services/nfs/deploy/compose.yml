@@ -16,8 +16,8 @@ services:
         volumes:
             - ../config/docker-entrypoint.sh:/docker-entrypoint.sh:ro
             - ../config/ganesha.conf:/etc/ganesha/ganesha.conf:ro
-            # Bind mount the root of this repository into the export directory of the NFS server.
-            - ../../../:/exports/
+            # Bind mount the root of this repository into the staging directory for Unison sync
+            - ../../../:/staging/
 
         cap_add:
             - SYS_ADMIN
