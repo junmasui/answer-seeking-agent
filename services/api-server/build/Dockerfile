@@ -144,7 +144,12 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y sudo \
-    && echo "nfs:/backend /mnt/backend-nfs nfs defaults,noauto,nfsvers=4 0 0" >> /etc/fstab \
+    #
+    # FSAL_VFS is the only Ganesha module for exporting standard Linux filesystem.
+    # This module has a broken "Spare Read" features that failes on Docker / overlay2.
+    # The NFS client is forced into 4.1 protocol which does not support the failing READ_PLUS.
+    #
+    && echo "nfs:/backend /mnt/backend-nfs nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
     && echo "/mnt/backend-nfs /app/backend none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/backend-nfs' >> /etc/sudoers \

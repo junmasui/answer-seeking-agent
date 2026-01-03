@@ -22,6 +22,10 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
     # Actually, simpler to just try mount.
     sudo /usr/bin/mount /app/frontend/node_modules
+
+    # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
+    # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
+    sleep 2
 fi
 
 cd /app/frontend

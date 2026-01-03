@@ -109,7 +109,7 @@ services:
       ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - backend-autotest-home-1:/home/python
       ##SRC - backend-autotest-venv-1:/app/backend/.venv
       - backend-autotest-staging-1:/staging
@@ -160,7 +160,8 @@ services:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
-    profiles: [ automated-test, all ]
+    profiles: [ backend-autotest, automated-test, all ]
+    privileged: true
 
     environment:
       DEBUGGER_LISTEN: true
@@ -177,6 +178,9 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       GPU_MODE: cpu
+      ##
+      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ##
       # Mount the NFS directory into this container
       USE_NFS_SRC_DIR: true
     env_file:

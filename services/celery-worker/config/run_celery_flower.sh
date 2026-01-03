@@ -59,6 +59,7 @@ fi
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \
+   --debug-force-polling \
    --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
    --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
    -- \

@@ -22,12 +22,29 @@ source .venv/bin/activate
 
 # NOTE: Run compile_requirements.sh after changes to dependencies
 #
+SYNC_CMD="uv sync --frozen --dev --all-packages"
+EXTRA_ARGS=""
+
 if [ "$GPU_MODE" == "cuda12" ]; then
-    uv sync  --extra cuda12 --dev --all-packages
+    EXTRA_ARGS="--extra cuda12"
 elif [ "$GPU_MODE" == "cpu" ]; then
-    uv sync  --extra cpu --dev --all-packages
+    EXTRA_ARGS="--extra cpu"
 else
+    echo "Unknown GPU_MODE: $GPU_MODE"
     exit -1
+fi
+
+set +e
+# shellcheck disable=SC2086
+$SYNC_CMD $EXTRA_ARGS
+EXIT_CODE=$?
+set -e
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "Error: Failed to sync virtual environment."
+    echo "This is likely because uv.lock is not up-to-date with pyproject.toml."
+    echo "Please run 'uv lock' on your host machine to update uv.lock."
+    exit $EXIT_CODE
 fi
 
 # Run the FastAPI server.
@@ -59,6 +76,7 @@ fi
 
 uv run --frozen --no-sync \
     watchmedo auto-restart \
+        --debug-force-polling \
         --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
         --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
     -- \

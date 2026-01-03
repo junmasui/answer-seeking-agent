@@ -80,7 +80,12 @@ USER root
 #   sudo mount /app/frontend
 RUN apt-get update \
     && apt-get install -y sudo \
-    && echo "nfs:/frontend /mnt/frontend-nfs nfs defaults,noauto 0 0" >> /etc/fstab \
+    #
+    # FSAL_VFS is the only Ganesha module for exporting standard Linux filesystem.
+    # This module has a broken "Spare Read" features that failes on Docker / overlay2.
+    # The NFS client is forced into 4.1 protocol which does not support the failing READ_PLUS.
+    #
+    && echo "nfs:/frontend /mnt/frontend-nfs nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
     && echo "/mnt/frontend-nfs /app/frontend none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo "/home/node/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/frontend-nfs' >> /etc/sudoers \
