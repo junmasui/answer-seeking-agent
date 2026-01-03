@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-apt update
-apt-get install -y psmisc net-tools
-
 echo "=== NFS Ganesha Entrypoint Diagnostics ==="
 echo "Checking /exports..."
 ls -ld /exports
@@ -23,26 +20,16 @@ echo ""
 mkdir -p /var/run/dbus
 dbus-daemon --system --fork
 
-echo "Starting rpcbind..."
-rpcbind
+mkdir -p /var/log/supervisor
 
-echo "Starting Unison Sync (Background)..."
-# Initial sync from Staging -> Exports to ensure export is populated
+echo "Performing initial sync..."
+# Initial sync from Staging -> Exports to ensure export is populated before starting services
 if [ -d "/staging" ]; then
     echo "Initializing /exports from /staging..."
     unison -batch -owner -group -numericids /staging /exports || echo "Initial sync warning"
-    
-    # Background loop
-    (
-        while true; do
-            # Sync /staging <-> /exports bi-directionally
-            unison -batch -auto -owner -group -numericids /staging /exports > /dev/null 2>&1
-            sleep 1
-        done
-    ) &
 else
     echo "WARN: /staging directory not found. Unison sync skipped."
 fi
 
-echo "Starting ganesha.nfsd..."
-exec ganesha.nfsd "$@"
+echo "Starting Supervisord..."
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf

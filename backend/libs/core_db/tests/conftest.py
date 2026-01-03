@@ -1,10 +1,5 @@
+# The conftest.py file provides fixtures for an entire directory.
+# Import fixture modules so pytest will register fixtures defined in them
+# (for example: tests/fixtures/api.py defines `api_server`).
 
-import pytest
-import asyncio
-from backend.libs.core_db.tests.fixtures.db import *
 
-@pytest.fixture(scope="module")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()

@@ -16,6 +16,7 @@ services:
         volumes:
             - ../config/docker-entrypoint.sh:/docker-entrypoint.sh:ro
             - ../config/ganesha.conf:/etc/ganesha/ganesha.conf:ro
+            - ../config/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf:ro
             # Bind mount the root of this repository into the staging directory for Unison sync
             - ../../../:/staging/
 

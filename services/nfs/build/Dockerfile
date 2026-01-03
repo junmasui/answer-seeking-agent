@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    nfs-ganesha nfs-common nfs-ganesha-vfs unison \
+    nfs-ganesha nfs-common nfs-ganesha-vfs unison supervisor psmisc procps net-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the configuration from the named build stage or image `config-dir`.
