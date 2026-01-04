@@ -13,12 +13,26 @@ RUN \
     gnupg \
     wget \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/* ; \
+    #
     # Create a custom group with GROUP_ID
     # Then create a custom user with USER_ID and GROUP_ID
-    && set -eux ; \
+    #
+    set -eux ; \
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
     ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
+
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    #
+    # Locally required Debian packages
+    #
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+    nfs-common \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the build-and-run script.
 #

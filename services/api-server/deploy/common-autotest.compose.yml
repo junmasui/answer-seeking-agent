@@ -96,6 +96,7 @@ services:
       ##
       # Mount the NFS directory into this container
       USE_NFS_SRC_DIR: true
+      PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - automated-test.env
       - opentelemetry-instrument.env
@@ -154,13 +155,13 @@ services:
 
 
 
-  automated-test:
+  automated-pytest:
     depends_on:
       init-backend-autotest-volumes:
         condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
-    profiles: [ backend-autotest, automated-test, all ]
+    profiles: [ backend-autotest, automated-pytest, all ]
     privileged: true
 
     environment:
@@ -183,6 +184,7 @@ services:
       ##
       # Mount the NFS directory into this container
       USE_NFS_SRC_DIR: true
+      PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - automated-test.env
     networks:

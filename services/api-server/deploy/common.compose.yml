@@ -142,7 +142,7 @@ services:
 
 
   python-build:
-    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
     profiles: [
       python-build
     ]
@@ -159,7 +159,9 @@ services:
       ##
       GPU_MODE: cpu
       # Mount the NFS directory into this container
-      USE_NFS_SRC_DIR: never
+      USE_NFS_SRC_DIR: false
+      #
+      PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - backend.env
     networks:
@@ -170,6 +172,8 @@ services:
       - ../config/run_build_backend.sh:/run_build_backend.sh:ro
       # Mount dist directory
       - ../../dist:/dist
+      # Mount source directory
+      - ../../../backend:/app/backend
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
 

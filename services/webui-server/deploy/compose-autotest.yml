@@ -40,12 +40,15 @@ services:
 
     image: 'localhost/localhost/answers-frontend-dev:node-22-bookworm'
     profiles: [ frontend-autotest, all ]
+    privileged: true
 
     environment:
       # Only environment variables that are important to the Docker environment
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
       CHOKIDAR_USEPOLLING: 'true'
+      # Mount the NFS directory into this container
+      USE_NFS_SRC_DIR: true
     #   - NODE_ENV=production
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
     ## traffic to go thru the reserve-proxy server at 15173.

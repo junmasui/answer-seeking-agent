@@ -14,9 +14,12 @@ USER root
 # Copy node and its components from the official Node image.
 COPY --from=node-source /usr/local/bin/node /usr/local/bin/node
 COPY --from=node-source /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
-COPY --from=node-source /usr/local/bin/npm /usr/local/bin/npm
-COPY --from=node-source /usr/local/bin/npx /usr/local/bin/npx
-COPY --from=node-source /usr/local/bin/corepack /usr/local/bin/corepack
+# Copy soft links as soft links
+RUN --mount=type=bind,from=node-source,target=/context \
+    cp -a /context/usr/local/bin/nodejs /usr/local/bin/nodejs \
+    && cp -a /context/usr/local/bin/npm /usr/local/bin/npm \
+    && cp -a /context/usr/local/bin/npx /usr/local/bin/npx \
+    && cp -a /context/usr/local/bin/corepack /usr/local/bin/corepack
 
 
 #

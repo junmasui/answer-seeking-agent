@@ -20,6 +20,18 @@ DOCKER_BUILD_OPTS=
 LOG_DIR=../../../logs
 
 #
+# Build an image with Python 3.12 on Debian 12
+#
+$DOCKER build \
+  $DOCKER_BUILD_OPTS \
+  --file Dockerfile \
+  --target python3.12-cpu \
+  --tag localhost/localhost/python:3.12.10-bookworm-cpu \
+  --progress plain \
+  . 2>&1 \
+| tee $LOG_DIR/build-python-bookworm-cpu.log
+
+#
 # Build an image with CUDA12 installed on Python 3.12 on Debian 12
 #
 $DOCKER build \

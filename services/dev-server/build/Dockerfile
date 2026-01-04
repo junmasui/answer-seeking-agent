@@ -14,9 +14,12 @@ USER root
 # Copy node and its components from the official Node image.
 COPY --from=node-source /usr/local/bin/node /usr/local/bin/node
 COPY --from=node-source /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
-COPY --from=node-source /usr/local/bin/npm /usr/local/bin/npm
-COPY --from=node-source /usr/local/bin/npx /usr/local/bin/npx
-COPY --from=node-source /usr/local/bin/corepack /usr/local/bin/corepack
+# Copy soft links as soft links
+RUN --mount=type=bind,from=node-source,target=/context \
+    cp -a /context/usr/local/bin/nodejs /usr/local/bin/nodejs \
+    && cp -a /context/usr/local/bin/npm /usr/local/bin/npm \
+    && cp -a /context/usr/local/bin/npx /usr/local/bin/npx \
+    && cp -a /context/usr/local/bin/corepack /usr/local/bin/corepack
 
 
 #
@@ -57,7 +60,7 @@ RUN \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend/node_modules' >> /etc/sudoers \
     && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
-    && echo 'python ALL=(ALL:ALL) ALL' >> /etc/sudoers \
+    && echo 'python ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers \
     && mkdir -p /mnt/data \
     && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && mkdir -p /home/python/node_modules-storage && chown ${USER_ID}:${GROUP_ID} /home/python/node_modules-storage

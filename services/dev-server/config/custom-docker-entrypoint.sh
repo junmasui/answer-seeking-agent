@@ -17,12 +17,12 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     if mountpoint -q /mnt/data; then
         echo "/mnt/data is already mounted."
     else
-        sudo mount /mnt/data || echo "Failed to mount /mnt/data, proceeding anyway (might be pre-mounted)."
+        sudo /usr/bin/mount /mnt/data || echo "Failed to mount /mnt/data, proceeding anyway (might be pre-mounted)."
     fi
 
     # Bind mount /mnt/data to /app
     echo "Bind mounting /mnt/data to /app..."
-    sudo mount /app
+    sudo /usr/bin/mount /app
 
     # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
     # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
@@ -30,13 +30,13 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
 
     # Bind mount .venv from /home/python/.venv-storage
     echo "Bind mounting .venv..."
-    sudo mount /app/backend/.venv
+    sudo /usr/bin/mount /app/backend/.venv
 
     # Bind mount node_modules from /home/python/node_modules-storage
     # Note: user is python (uid 1000), but node stuff might be in frontend dir.
     # We mapped node_modules-storage to /app/frontend/node_modules in fstab/dockerfile.
     echo "Bind mounting node_modules..."
-    sudo mount /app/frontend/node_modules
+    sudo /usr/bin/mount /app/frontend/node_modules
 fi
 
 # If backend directory exists, then set up the Python environment.
