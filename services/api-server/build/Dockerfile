@@ -1,5 +1,5 @@
 #
-# STAGE: production
+# STAGE: python3.12-cpu
 #
 FROM docker.io/python:3.12.10-slim-bookworm AS python3.12-cpu
 
@@ -31,7 +31,7 @@ RUN \
     #
     pip install --no-cache-dir uv
 
-FROM python3.12-cpu AS production
+FROM python3.12-cpu AS production-base
 
 
 ARG USER_ID=1000
@@ -128,24 +128,27 @@ ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 CMD [ "/run_api_server.sh" ]
 
 #
-# STAGE: production-prebuilt
+# STAGE: production
 #
-FROM production AS production-prebuilt
+FROM production-base AS production
 
-# Switch to the custom user
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
 USER ${USER_ID}:${GROUP_ID}
 
 RUN \
     set -eux ; \
     uv venv --allow-existing \
-    && uv sync --extra cpu --dev --all-packages
+    && uv sync --extra cuda12 --dev --all-packages
 
-
+# Build start the server
+CMD ["/run_api_server.sh"]
 
 #
 # STAGE: dev
 #
-FROM production AS dev
+FROM production-base AS dev
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -196,3 +199,6 @@ RUN \
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
+
+# Build the app then start the server
+CMD ["/run_api_server.sh"]

@@ -64,7 +64,7 @@ JQ_3=$(cat << EOS
                   "agent-webui-server-autotest-1",
                   "agent-otel-collector-1",
                   "agent-otel-collector-docker-1",
-                  "agent-automated-test-1",
+                  "agent-automated-pytest-1",
                   "agent-loki-1" ]
               | index(\$name)
             ) )
@@ -95,7 +95,7 @@ JQ_2=$(cat << EOS
                     "agent-webui-server-autotest-1",
                     "agent-otel-collector-1",
                     "agent-otel-collector-docker-1",
-                    "agent-automated-test-1",
+                    "agent-automated-pytest-1",
                     "agent-nfs-1",
                     "agent-loki-1" ]
                 | index(\$name)

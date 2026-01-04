@@ -121,9 +121,9 @@ RUN \
 
 
 #
-# STAGE: production
+# STAGE: production-base
 #
-FROM python3.12-cuda12-cudnn9 AS production
+FROM python3.12-cuda12-cudnn9 AS production-base
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -212,22 +212,31 @@ RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
+ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
+
+
+#
+# STAGE: production
+#
+FROM production-base AS production
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+USER ${USER_ID}:${GROUP_ID}
+
 RUN \
     set -eux ; \
     uv venv --allow-existing \
     && uv sync --extra cuda12 --dev --all-packages
 
-
-ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
-
-# Build the app then start the Vue.js development server
+# Build start the server
 CMD ["/run_api_server.sh"]
-
 
 #
 # STAGE: dev
 #
-FROM production AS dev
+FROM production-base AS dev
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -274,3 +283,6 @@ RUN \
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
+
+# Build the app then start the server
+CMD ["/run_api_server.sh"]
