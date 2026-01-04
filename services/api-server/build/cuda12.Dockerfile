@@ -1,5 +1,9 @@
 FROM docker.io/python:3.12.10-slim-bookworm AS python3.12-cuda12-cudnn9
 
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+
 #
 # https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/base/Dockerfile
 #
@@ -14,11 +18,15 @@ RUN \
     curl \
     gnupg \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && curl -sS -f --proto "=https" --proto-redir "=https" -L \
-    https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
-    | apt-key add - \
-    && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list
+    && rm -rf /var/lib/apt/lists/* ; \
+    #
+    # Create a custom group with GROUP_ID
+    # Then create a custom user with USER_ID and GROUP_ID and home directory.
+    #
+    ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
+    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
+
+
 
 
 # For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
@@ -32,6 +40,10 @@ ENV NV_CUDA_CUDART_VERSION=12.6.77-1
 RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
+    curl -sS -f --proto "=https" --proto-redir "=https" -L \
+    https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub \
+    | apt-key add - ; \
+    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
     cuda-compat-12-6 \
@@ -100,23 +112,21 @@ RUN \
     libcudnn9-cuda-12 \
     && rm -rf /var/lib/apt/lists/*
 
+RUN \
+    set -eux ; \
+    #
+    # Install uv package manager
+    #
+    pip install --no-cache-dir uv
+
+
 #
 # STAGE: production
 #
 FROM python3.12-cuda12-cudnn9 AS production
 
-
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-
-RUN \
-    set -eux ; \
-    #
-    # Create a custom group with GROUP_ID
-    # Then create a custom user with USER_ID and GROUP_ID and home directory.
-    #
-    ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
-    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
 
 RUN \
     set -eux ; \
@@ -157,11 +167,7 @@ RUN \
     && cd pandoc-3.7.0.2 \
     && cp bin/pandoc /usr/local/bin/ \
     && cd .. \
-    && rm -rf pandoc-3.7.0* \
-    #
-    # Install uv package manager
-    #
-    && pip install --no-cache-dir uv
+    && rm -rf pandoc-3.7.0*
 
 #
 # These script live in the parent of this dockerfile's directory, so we must define

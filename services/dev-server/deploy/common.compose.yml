@@ -49,8 +49,9 @@ services:
       DEBUGGER_LISTEN: true
       # Mount the NFS directory into this container
       USE_NFS_SRC_DIR: true
+      PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
-      - automated-test.env
+      - automated-pytest.env
       - opentelemetry-instrument.env
     networks:
       - agent-poc

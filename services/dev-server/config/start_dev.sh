@@ -22,85 +22,85 @@ fi
 #
 if [ -d "/app/backend" ]; then
     cd /app/backend
-fi
 
-if [ -n "${GPU_MODE:-}" ]; then
-    if [ "$GPU_MODE" == "cuda12" ]; then
-        nvidia-smi
-    fi
-
-    # NOTE: Run compile_requirements.sh after changes to dependencies
-    #
-    if [ "$GPU_MODE" == "cuda12" ]; then
-        uv sync  --extra cuda12 --dev --all-packages
-    elif [ "$GPU_MODE" == "cpu" ]; then
-        uv sync  --extra cpu --dev --all-packages
-    else
-        exit -1
-    fi
-fi
-
-# Build all workspace members
-echo "Building all workspace members..."
-pwd
-
-# List of workspace members from pyproject.toml
-workspace_members=(
-    "apps/db_migration"
-    "apps/core_app"
-    "apps/core_worker"
-    "libs/core"
-    "libs/core_db"
-    "libs/core_public"
-    "libs/core_tasks"
-    "libs/core_telemetry_distro"
-    "libs/core_telemetry_instrumentation"
-    "libs/early_init"
-    "libs/log_config_monitor"
-)
-
-failed_builds=()
-successful_builds=()
-
-if [ -d /dist ]; then
-    BUILD_OUTDIR="--out-dir /dist"
-else
-    BUILD_OUTDIR=
-fi
-
-for member in "${workspace_members[@]}"; do
-    if [ -f "$member/pyproject.toml" ]; then
-        echo "Building $member..."
-        uv build $BUILD_OUTDIR "$member"
-        if [ $? -eq 0 ]; then
-            echo "✓ Successfully built $member"
-            successful_builds+=("$member")
-        else
-            echo "✗ Failed to build $member"
-            failed_builds+=("$member")
+    if [ -n "${GPU_MODE:-}" ]; then
+        if [ "$GPU_MODE" == "cuda12" ]; then
+            nvidia-smi
         fi
-        echo "---"
-    else
-        echo "⚠ Skipping $member (no pyproject.toml found)"
-        failed_builds+=("$member (no pyproject.toml)")
+
+        # NOTE: Run compile_requirements.sh after changes to dependencies
+        #
+        if [ "$GPU_MODE" == "cuda12" ]; then
+            uv sync  --extra cuda12 --dev --all-packages
+        elif [ "$GPU_MODE" == "cpu" ]; then
+            uv sync  --extra cpu --dev --all-packages
+        else
+            exit -1
+        fi
     fi
-done
 
-echo "Build Summary:"
-echo "=============="
-echo "Successful builds (${#successful_builds[@]}):"
-for build in "${successful_builds[@]}"; do
-    echo "  ✓ $build"
-done
+    # Build all workspace members
+    echo "Building all workspace members..."
+    pwd
 
-if [ ${#failed_builds[@]} -gt 0 ]; then
-    echo "Failed builds (${#failed_builds[@]}):"
-    for build in "${failed_builds[@]}"; do
-        echo "  ✗ $build"
+    # List of workspace members from pyproject.toml
+    workspace_members=(
+        "apps/db_migration"
+        "apps/core_app"
+        "apps/core_worker"
+        "libs/core"
+        "libs/core_db"
+        "libs/core_public"
+        "libs/core_tasks"
+        "libs/core_telemetry_distro"
+        "libs/core_telemetry_instrumentation"
+        "libs/early_init"
+        "libs/log_config_monitor"
+    )
+
+    failed_builds=()
+    successful_builds=()
+
+    if [ -d /dist ]; then
+        BUILD_OUTDIR="--out-dir /dist"
+    else
+        BUILD_OUTDIR=
+    fi
+
+    for member in "${workspace_members[@]}"; do
+        if [ -f "$member/pyproject.toml" ]; then
+            echo "Building $member..."
+            uv build $BUILD_OUTDIR "$member"
+            if [ $? -eq 0 ]; then
+                echo "✓ Successfully built $member"
+                successful_builds+=("$member")
+            else
+                echo "✗ Failed to build $member"
+                failed_builds+=("$member")
+            fi
+            echo "---"
+        else
+            echo "⚠ Skipping $member (no pyproject.toml found)"
+            failed_builds+=("$member (no pyproject.toml)")
+        fi
     done
-    exit 1
-else
-    echo "All python builds successful!"
+
+    echo "Build Summary:"
+    echo "=============="
+    echo "Successful builds (${#successful_builds[@]}):"
+    for build in "${successful_builds[@]}"; do
+        echo "  ✓ $build"
+    done
+
+    if [ ${#failed_builds[@]} -gt 0 ]; then
+        echo "Failed builds (${#failed_builds[@]}):"
+        for build in "${failed_builds[@]}"; do
+            echo "  ✗ $build"
+        done
+        exit 1
+    else
+        echo "All python builds successful!"
+    fi
 fi
 
 #
