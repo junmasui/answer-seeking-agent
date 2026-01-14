@@ -55,30 +55,30 @@ function wait_for_nslookup {
     done
 }
 
-function wait_for_minio {
-    declare MINIO_ENDPOINT_URL="${1:-}"
+function wait_for_seaweedfs {
+    declare SEAWEEDFS_ENDPOINT_URL="${1:-}"
 
-    if [ -z "${MINIO_ENDPOINT_URL:-}" ]
+    if [ -z "${SEAWEEDFS_ENDPOINT_URL:-}" ]
     then
-        echo "MINIO_ENDPOINT_URL is empty"
+        echo "SEAWEEDFS_ENDPOINT_URL is empty"
         exit 1
     fi
 
     #
-    # Wait for DNS resolution of minio
+    # Wait for DNS resolution of seaweedfs
     #
-    wait_for_nslookup minio
+    wait_for_nslookup seaweedfs
 
     #
-    # Wait for minio to be ready
+    # Wait for seaweedfs to be ready
     #
-    echo "waiting for minio to be ready"
+    echo "waiting for seaweedfs to be ready"
     while true
     do
-        curl -f "${MINIO_ENDPOINT_URL}/minio/health/live"
+        curl -f "${SEAWEEDFS_ENDPOINT_URL}/minio/health/live"
         if [ "$?" -eq 0 ]
         then
-            echo "minio is live"
+            echo "seaweedfs is live"
             break
         fi
         sleep 2

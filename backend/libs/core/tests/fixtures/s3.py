@@ -14,9 +14,9 @@ def s3_client() -> Generator[S3Client, None, None]:
     """Returns S3 client."""
     config = get_test_config()
     client = S3Client(
-        aws_access_key_id=config.minio_user_name,
-        aws_secret_access_key=config.minio_user_password,
-        endpoint_url=str(config.minio_endpoint_url),
+        aws_access_key_id=config.s3_access_key,
+        aws_secret_access_key=config.s3_secret_key,
+        endpoint_url=str(config.s3_endpoint_url),
     )
     yield client
 
@@ -25,7 +25,7 @@ def s3_client() -> Generator[S3Client, None, None]:
 def s3_bucket(s3_client) -> Generator[S3Path, None, None]:
     """Returns S3 bucket used by this application."""
     config = get_test_config()
-    bucket = S3Path(f's3://{config.minio_bucket_name}/', client=s3_client)
+    bucket = S3Path(f's3://{config.s3_bucket_name}/', client=s3_client)
 
     purge_s3_bucket(bucket, force=True)
 

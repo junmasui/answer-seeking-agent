@@ -49,7 +49,6 @@ services:
     profiles: [ backend-autotest, infrastructure, all ]
 
     env_file:
-      - dependency-gate.env
       - automated-test.env
     networks:
       - agent-poc
@@ -59,8 +58,8 @@ services:
       - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
     secrets:
-      - answers_minio_autotest_secrets
       - answers_postgres_autotest_secrets
+      - answers_seaweedfs_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
@@ -107,7 +106,7 @@ services:
     volumes:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
-      ##SRC - ../config/run_api_server.sh:/run_api_server.sh:ro
+      - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
@@ -118,7 +117,7 @@ services:
       - answers_secrets
       - answers_api_key_autotest_secrets
       - answers_jwt_autotest_secrets
-      - answers_minio_autotest_secrets
+      - answers_seaweedfs_autotest_secrets
       - answers_postgres_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
@@ -202,7 +201,7 @@ services:
       - answers_secrets
       - answers_api_key_autotest_secrets
       - answers_jwt_autotest_secrets
-      - answers_minio_autotest_secrets
+      - answers_seaweedfs_autotest_secrets
       - answers_postgres_autotest_secrets
       - celery_flower_autotest_secrets
       - checkpoints_postgres_autotest_secrets

@@ -17,6 +17,8 @@ secrets:
     file: ./secrets/postgres.secrets.env
   redis_secrets:
     file: ./secrets/redis.secrets.env
+  seaweedfs_secrets:
+    file: ./secrets/seaweedfs.secrets.env
   weaviate_secrets:
     file: ./secrets/weaviate.secrets.env
   opensearch_secrets:
@@ -42,6 +44,8 @@ secrets:
     file: ./secrets/answers.minio.secrets.env
   answers_postgres_secrets:
     file: ./secrets/answers.postgres.secrets.env
+  answers_seaweedfs_secrets:
+    file: ./secrets/answers.seaweedfs.secrets.env
   checkpoints_postgres_secrets:
     file: ./secrets/checkpoints.postgres.secrets.env
 
@@ -53,6 +57,8 @@ secrets:
     file: ./secrets/answers.minio.autotest.secrets.env
   answers_postgres_autotest_secrets:
     file: ./secrets/answers.postgres.autotest.secrets.env
+  answers_seaweedfs_autotest_secrets:
+    file: ./secrets/answers.seaweedfs.autotest.secrets.env
   checkpoints_postgres_autotest_secrets:
     file: ./secrets/checkpoints.postgres.autotest.secrets.env
 

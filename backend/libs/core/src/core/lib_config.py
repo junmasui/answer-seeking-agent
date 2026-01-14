@@ -22,7 +22,7 @@ from functools import cache
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic import AnyHttpUrl, DirectoryPath, Field, HttpUrl, NewPath, RedisDsn, StringConstraints
+from pydantic import AliasChoices, AnyHttpUrl, DirectoryPath, Field, HttpUrl, NewPath, RedisDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -110,10 +110,10 @@ class LibrarySettings(BaseSettings):
     weaviate_http_port: int = Field(default=0, validation_alias='WEAVIATE_HTTP_PORT')
     weaviate_grpc_port: int = Field(default=0, validation_alias='WEAVIATE_GRPC_PORT')
 
-    minio_endpoint_url: AnyHttpUrl = Field(default='', validation_alias='MINIO_ENDPOINT_URL')
-    minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
-    minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
-    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
+    s3_endpoint_url: AnyHttpUrl = Field(default='', validation_alias=AliasChoices('S3_ENDPOINT_URL'))
+    s3_bucket_name: MinimalStr = Field(default='', validation_alias=AliasChoices('S3_BUCKET_NAME'))
+    s3_access_key: MinimalStr = Field(default='', validation_alias=AliasChoices('S3_ACCESS_KEY'))
+    s3_secret_key: PasswordOrKeyStr = Field(default='', validation_alias=AliasChoices('S3_SECRET_KEY'))
 
     chunk_root_dir: str = Field(default='upload_chunks')
     doc_root_dir: str = Field(default='documents')

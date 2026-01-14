@@ -3,28 +3,28 @@ api:
   insecure: true
 
 entryPoints:
-  web1:
+  web:
     address: ":15170"
     http:
       redirections:
         entryPoint:
-          to: websecure1
+          to: websecure
           scheme: https
   
-  websecure1:
+  websecure:
     address: ":15173"
     http:
       tls: {}
 
-  web2:
+  web-autotest:
     address: ":15180"
     http:
       redirections:
         entryPoint:
-          to: websecure2
+          to: websecure-autotest
           scheme: https
   
-  websecure2:
+  websecure-autotest:
     address: ":15183"
     http:
       tls: {}

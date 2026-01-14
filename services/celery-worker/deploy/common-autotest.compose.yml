@@ -45,7 +45,7 @@ services:
       - answers_secrets
       - answers_api_key_autotest_secrets
       - answers_jwt_autotest_secrets
-      - answers_minio_autotest_secrets
+      - answers_seaweedfs_autotest_secrets
       - answers_postgres_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
@@ -119,7 +119,7 @@ services:
       - answers_secrets
       - answers_api_key_autotest_secrets
       - answers_jwt_autotest_secrets
-      - answers_minio_autotest_secrets
+      - answers_seaweedfs_autotest_secrets
       - answers_postgres_autotest_secrets
       - celery_flower_autotest_secrets
       - checkpoints_postgres_autotest_secrets

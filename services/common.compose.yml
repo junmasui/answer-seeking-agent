@@ -12,7 +12,7 @@ include:
   - ./jaeger/deploy/compose.yml
   - ./loki/deploy/compose.yml
   - ./keycloak/deploy/compose.yml
-  - ./minio/deploy/compose.yml
+  - ./seaweedfs/deploy/compose.yml
   - ./opensearch/deploy/compose.yml
   - ./otel-collector/deploy/compose.yml
   - ./nemo/deploy/compose.yml
@@ -21,6 +21,7 @@ include:
   - ./presidio/deploy/compose.yml
   - ./prometheus/deploy/compose.yml
   - ./redis/deploy/compose.yml
+  - ./slim-util/deploy/compose.yml
   - ./traefik/deploy/compose.yml
   - ./weaviate/deploy/compose.yml
   - ./webui-server/deploy/compose.yml

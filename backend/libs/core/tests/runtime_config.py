@@ -25,7 +25,7 @@ from functools import cache
 from pathlib import Path
 from typing import Optional
 
-from pydantic import AnyHttpUrl, Field, PostgresDsn, StringConstraints
+from pydantic import AliasChoices, AnyHttpUrl, Field, PostgresDsn, StringConstraints
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
@@ -87,10 +87,10 @@ class RuntimeSettings(BaseSettings):
 
     postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
 
-    minio_endpoint_url: AnyHttpUrl = Field(default='', validation_alias='MINIO_ENDPOINT_URL')
-    minio_bucket_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_BUCKET')
-    minio_user_name: MinimalStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_NAME')
-    minio_user_password: PasswordOrKeyStr = Field(default='', validation_alias='ANSWERS_MINIO_USER_PASSWORD')
+    s3_endpoint_url: AnyHttpUrl = Field(default='', validation_alias=AliasChoices('S3_ENDPOINT_URL'))
+    s3_bucket_name: MinimalStr = Field(default='', validation_alias=AliasChoices('S3_BUCKET_NAME'))
+    s3_access_key: MinimalStr = Field(default='', validation_alias=AliasChoices('S3_ACCESS_KEY'))
+    s3_secret_key: PasswordOrKeyStr = Field(default='', validation_alias=AliasChoices('S3_SECRET_KEY'))
 
     static_api_key_1: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_1')
     static_api_key_scope_1: Optional[str] = Field(default='', validation_alias='APPLICATION_API_KEY_SCOPE_1')
