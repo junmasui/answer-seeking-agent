@@ -32,15 +32,15 @@ async def system_health_check():
             status=PingStatus.BAD, message="PostgreSQL 'answers' schema check failed unexpectedly.", error=str(e)
         ).model_dump()
 
-    # Ping MinIO file store
+    # Ping S3 file store
     try:
         # TODO: Make ping_file_store async
         minio_status = ping_file_store()
         system_health['file_store'] = minio_status.model_dump()
     except Exception as e:
-        logger.error('Error during MinIO file store health check', exc_info=e)
+        logger.error('Error during S3 file store health check', exc_info=e)
         system_health['file_store'] = PingResult(
-            status=PingStatus.BAD, message='MinIO file store check failed unexpectedly.', error=str(e)
+            status=PingStatus.BAD, message='S3 file store check failed unexpectedly.', error=str(e)
         ).model_dump()
 
     # Ping Vector Store

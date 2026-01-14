@@ -76,7 +76,7 @@ services:
     secrets:
       - answers_secrets
       - answers_jwt_secrets
-      - answers_minio_secrets
+      - answers_seaweedfs_secrets
       - answers_postgres_secrets
       - checkpoints_postgres_secrets
       - redis_secrets
@@ -149,7 +149,7 @@ services:
     secrets:
       - answers_secrets
       - answers_jwt_secrets
-      - answers_minio_secrets
+      - answers_seaweedfs_secrets
       - answers_postgres_secrets
       - celery_flower_secrets
       - checkpoints_postgres_secrets

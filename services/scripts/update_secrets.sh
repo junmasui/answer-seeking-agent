@@ -120,26 +120,26 @@ generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESC
 
 
 
-# Minio
+# Seaweed
 
-SECRETS_FILE=./secrets/minio.secrets.env
-VAR_NAME=MINIO_ROOT_PASSWORD
-VALUE_PREFIX=minio_
-DESCR="Minio's root account's password."
-
-generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
-
-
-SECRETS_FILE=./secrets/answers.minio.secrets.env
-VAR_NAME=ANSWERS_MINIO_USER_PASSWORD
-VALUE_PREFIX=backend_minio_
-DESCR="Backend's Minio account's password."
+SECRETS_FILE=./secrets/seaweedfs.secrets.env
+VAR_NAME=SEAWEEDFS_ROOT_PASSWORD
+VALUE_PREFIX=seaweedfs_
+DESCR="seaweedfs's root account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.minio.autotest.secrets.env
-VALUE_PREFIX=backend_minio_dev_
-DESCR="Backend Test's Minio account's password."
+
+SECRETS_FILE=./secrets/answers.seaweedfs.secrets.env
+VAR_NAME=S3_SECRET_KEY
+VALUE_PREFIX=backend_seaweedfs_
+DESCR="Backend's seaweedfs account's password."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+SECRETS_FILE=./secrets/answers.seaweedfs.autotest.secrets.env
+VALUE_PREFIX=backend_seaweedfs_dev_
+DESCR="Backend Test's seaweedfs account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 

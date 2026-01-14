@@ -12,7 +12,7 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 #
 source /wait_for_gate.sh
 
-wait_for_dependency_gate /init-signal/backend-gate
+##wait_for_dependency_gate /init-signal/backend-gate
 
 if [ "$GPU_MODE" == "cuda12" ]; then
     nvidia-smi

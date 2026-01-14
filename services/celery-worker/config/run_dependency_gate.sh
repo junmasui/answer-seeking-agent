@@ -20,7 +20,7 @@ wait_for_resolv_conf
 REDIS_URL="redis://:${REDIS_DEFAULT_PASSWORD}@redis:6379/0"
 
 wait_for_redis "${REDIS_URL}"
-wait_for_minio "${MINIO_ENDPOINT_URL}"
+##wait_for_seaweedfs "${SEAWEEDFS_ENDPOINT_URL}"
 
 DATABASE_URL="postgres://${ANSWERS_POSTGRES_USER_NAME}:${ANSWERS_POSTGRES_USER_PASSWORD}@postgres:5432/${ANSWERS_POSTGRES_DATABASE}"
 

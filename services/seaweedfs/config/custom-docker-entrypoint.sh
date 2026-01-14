@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 # Set environment variables from mounted secrets files
@@ -19,12 +19,19 @@ do
     done < "$FILE"
 done
 
-# Ensure SEAWEEDFS_BUCKET is set
-# We still keep this fallback or assume users provide SEAWEEDFS_BUCKET in secrets?
-# The user said "secrets files will also have the corrected the environment variable names".
-# So we can remove the fallback logic too if we want to be strict, but keeping a check doesn't hurt.
-# However, the user specifically mentioned "no need to remap".
-# I will just remove the explicit remapping case block.
+# Ensure SEAWEEDFS environment variables are set to avoid duplicate keys in s3.json
+if [ -z "$SEAWEEDFS_ROOT_USER" ]; then
+    # Fallback to S3_ACCESS_KEY or default to 'admin'
+    export SEAWEEDFS_ROOT_USER="${S3_ACCESS_KEY:-admin}"
+fi
+if [ -z "$SEAWEEDFS_ROOT_PASSWORD" ]; then
+    # Fallback to S3_SECRET_KEY. If neither is set, let the next check fail it.
+    export SEAWEEDFS_ROOT_PASSWORD="${S3_SECRET_KEY}"
+fi
+if [ -z "$SEAWEEDFS_ROOT_PASSWORD" ]; then
+    echo "ERROR: SEAWEEDFS_ROOT_PASSWORD is not set."
+    exit 1
+fi
 
 # Generate s3.json from template
 if [ -f "/etc/seaweedfs/s3.json.template" ]; then
