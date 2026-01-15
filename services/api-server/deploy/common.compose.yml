@@ -29,7 +29,7 @@ services:
       - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-staging-1:/staging
     secrets:
       - answers_secrets

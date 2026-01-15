@@ -14,10 +14,15 @@ DEV_VOLS="/home/python /home/python/.venv-storage /home/python/node_modules-stor
 for VOL in $DEV_VOLS
 do
   if [ -d "$VOL" ]; then
-    echo "Initializing $VOL..."
-    chown -R 1000:1000 "$VOL"
-    chmod -R 755 "$VOL"
-    ls -ld "$VOL"
+    # Only initialize if it's a mount point (volume)
+    if grep -q " $VOL " /proc/self/mounts; then
+      echo "Initializing $VOL..."
+      chown -R 1000:1000 "$VOL"
+      chmod -R 755 "$VOL"
+      ls -ld "$VOL"
+    else
+      echo "$VOL is part of the image, skipping initialization."
+    fi
   fi
 done
 

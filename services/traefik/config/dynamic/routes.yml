@@ -3,14 +3,14 @@ http:
     webui-router:
       rule: "Host(`localhost`)"
       entryPoints:
-        - websecure1
+        - websecure
       service: webui-service
       tls: {}
 
     api-router:
       rule: "Host(`localhost`) && PathPrefix(`/api/`)"
       entryPoints:
-        - websecure1
+        - websecure
       service: api-service
       middlewares:
         - strip-api-prefix

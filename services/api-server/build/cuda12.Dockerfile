@@ -17,8 +17,10 @@ RUN \
     ca-certificates \
     curl \
     gnupg \
+    gosu \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* ; \
+    gosu nobody true ; \
     #
     # Create a custom group with GROUP_ID
     # Then create a custom user with USER_ID and GROUP_ID and home directory.

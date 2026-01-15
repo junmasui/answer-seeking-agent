@@ -66,8 +66,9 @@ services:
       ##SRC - frontend-autotest-home-1:/home/node
       ##SRC - frontend-autotest-node-modules-1:/app/frontend/node_modules
 
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_webui_server.sh' ]
-    user: '1000:1000'
+    user: root
 
 
 volumes:

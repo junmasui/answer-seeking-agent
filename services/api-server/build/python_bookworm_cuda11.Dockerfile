@@ -22,13 +22,15 @@ ENV NV_CUDA_CUDART_VERSION=11.8.89-1
 RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        gnupg2 \
+    ca-certificates \
+    curl \
+    gnupg2 \
+    gosu \
     && apt-get clean \
+    && gosu nobody true \
     && curl -fsSL --proto "=https" --proto-redir "=https" \
-        https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/3bf863cc.pub \
-        | apt-key add - \
+    https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/3bf863cc.pub \
+    | apt-key add - \
     && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64 /" > /etc/apt/sources.list.d/cuda.list \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -37,8 +39,8 @@ RUN \
     #
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        cuda-compat-11-8 \
-        cuda-cudart-11-8=${NV_CUDA_CUDART_VERSION} \
+    cuda-compat-11-8 \
+    cuda-cudart-11-8=${NV_CUDA_CUDART_VERSION} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     # Required for nvidia-docker v1
@@ -115,22 +117,22 @@ RUN apt-get update \
     # Install the CUDA libraries installed in the runtime NVIDIA image.
     #
     && apt-get install -y --no-install-recommends \
-        cuda-libraries-11-8=${NV_CUDA_LIB_VERSION} \
-        cuda-nvtx-11-8=${NV_NVTX_VERSION} \
-        libcublas-11-8=${NV_LIBCUBLAS_VERSION} \
-        libcusparse-11-8=${NV_LIBCUSPARSE_VERSION} \
-        libnpp-11-8=${NV_LIBNPP_VERSION} \
+    cuda-libraries-11-8=${NV_CUDA_LIB_VERSION} \
+    cuda-nvtx-11-8=${NV_NVTX_VERSION} \
+    libcublas-11-8=${NV_LIBCUBLAS_VERSION} \
+    libcusparse-11-8=${NV_LIBCUSPARSE_VERSION} \
+    libnpp-11-8=${NV_LIBNPP_VERSION} \
     #
     # Install the CUDNN libraries installed in the runtime NVIDIA image.
     #
     # See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/cudnn/Dockerfile
     #
-        libcudnn8=${NV_CUDNN_VERSION} \
-   && apt-get clean \
-   && apt-mark hold \
-        libcublas-11-8 \
-        libcudnn8 \
-   && rm -rf /var/lib/apt/lists/*
+    libcudnn8=${NV_CUDNN_VERSION} \
+    && apt-get clean \
+    && apt-mark hold \
+    libcublas-11-8 \
+    libcudnn8 \
+    && rm -rf /var/lib/apt/lists/*
 #        libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
 #   && apt-mark hold libcublas-11-8 libnccl2 \
 #

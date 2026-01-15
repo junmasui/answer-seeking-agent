@@ -51,7 +51,7 @@ services:
       - redis_secrets
       - weaviate_secrets
 
-    user: '1000:1000'
+    user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
@@ -126,7 +126,7 @@ services:
       - redis_secrets
       - weaviate_secrets
 
-    user: '1000:1000'
+    user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
