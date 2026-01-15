@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 #
 # Build a small Debian image with some utilities installed.
@@ -14,10 +16,15 @@ set -eu
 DOCKER="docker buildx"
 #DOCKER_BUILD_OPTS="--no-cache"
 DOCKER_BUILD_OPTS=
+LOG_DIR=../../../logs
+
+mkdir -p $LOG_DIR
 
 $DOCKER build \
   --file Dockerfile \
   $DOCKER_BUILD_OPTS \
   --build-context parent-dir=.. \
   --tag localhost/localhost/debian-slim-util:1.0 \
-  . 2>&1
+  --progress plain \
+  . 2>&1 \
+| tee $LOG_DIR/build-slim-util.log

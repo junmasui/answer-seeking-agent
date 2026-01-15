@@ -1,44 +1,5 @@
 services:
-  init-celery-volumes:
-    restart: 'no'
-
-    image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, celery, backend, all ]
-
-    # No network is needed to initialize named volumes
-    network_mode: none
-    volumes:
-      - backend-home-2:/home/python/home-2
-      - backend-venv-2:/home/python/venv-2
-      - backend-staging-2:/home/python/staging-2
-      - backend-home-3:/home/python/home-3
-      - backend-venv-3:/home/python/venv-3
-
-    entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |
-        set -ex ;
-
-        ls -ld /home/python/
-
-        for VOL in \
-          'home-2' 'venv-2' 'staging-2' \
-          'home-3' 'venv-3'
-        do
-          touch /home/python/$$VOL/.initialized
-          chown -R 1000:1000 /home/python/$$VOL
-          chmod -R 755 /home/python/$$VOL
-          ls -ld /home/python/$$VOL
-        done
-
   celery-worker:
-    depends_on:
-      init-celery-volumes:
-        condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
     profiles: [  celery, backend, all ]
@@ -82,10 +43,10 @@ services:
       - redis_secrets
       - weaviate_secrets
 
-    user: '1000:1000'
+    user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: [ '/run_celery_worker.sh' ]
     deploy:
       resources:
@@ -99,13 +60,14 @@ services:
               capabilities: [gpu]
 
     healthcheck:
-      # When this service start for the first time, there is multiple minutes while the
-      # python environment is sync'ed to the requirements file then when the celery worker
-      # is starting up. A health-check based on API pinging will fail during the sync and the
-      # start up.
+      # When this service starts for the first time, it may take several minutes to sync
+      # the python environment and start the service. A healthcheck based on
+      # pinging would fail during this period.
       #
-      # For now, we just check if python3 can run. Later, we will  try to come up  
-      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      # For now, we verify that python3 is executable.
+      # Note: If switching to a network-based check, use http://127.0.0.1 to avoid
+      # IPv6 resolution issues with 'localhost'.
+      ## test: ['CMD', 'curl', '-f', 'http://127.0.0.1']
       test: ['CMD', 'python3', '--version']
       interval: 30s
       timeout: 15s
@@ -114,9 +76,6 @@ services:
 
           
   celery-flower:
-    depends_on:
-      init-celery-volumes:
-        condition: service_completed_successfully
 
     image: 'localhost/localhost/answers-backend:python-3.12-cpu'
     profiles: [ celery, backend, all ]
@@ -156,20 +115,21 @@ services:
       - redis_secrets
       - weaviate_secrets
 
-    user: '1000:1000'
+    user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: [ '/run_celery_flower.sh' ]
 
     healthcheck:
-      # When this service start for the first time, there is multiple minutes while the
-      # python environment is sync'ed to the requirements file then when the celery flower node
-      # is starting up. A health-check based on API pinging will fail during the sync and the
-      # start up.
+      # When this service starts for the first time, it may take several minutes to sync
+      # the python environment and start the service. A healthcheck based on
+      # pinging would fail during this period.
       #
-      # For now, we just check if python3 can run. Later, we will  try to come up  
-      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      # For now, we verify that python3 is executable.
+      # Note: If switching to a network-based check, use http://127.0.0.1 to avoid
+      # IPv6 resolution issues with 'localhost'.
+      ## test: ['CMD', 'curl', '-f', 'http://127.0.0.1']
       test: ['CMD', 'python3', '--version']
       interval: 30s
       timeout: 15s
@@ -212,11 +172,14 @@ services:
       # library's urllib.request module. This script will attempt to connect to
       # the /health endpoint on port 9808 and exit with a status code
       # indicating success (0) or failure (1).
+      #
+      # Use the IPv4 loopback address. When 'localhost' is used, urllib will try to use
+      # the IPv6 ::1 address where there is no listening port.
       test: [
         'CMD',
         'python3',
         '-c',
-        "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://localhost:9808/health').getcode() == 200 else sys.exit(1)"
+        "import urllib.request, sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:9808/health').getcode() == 200 else sys.exit(1)"
       ]
       interval: 30s
       timeout: 15s

@@ -1,73 +1,5 @@
 services:
-  init-backend-volumes:
-    restart: 'no'
-
-    image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, api-server, backend, all ]
-
-    # No network is needed to initialize named volumes
-    network_mode: none
-    volumes:
-      - backend-home-1:/home/python/home-1
-      - backend-venv-1:/home/python/venv-1
-      - backend-staging-1:/home/python/staging-1
-
-    entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |
-        set -ex ;
-
-        ls -ld /home/python/
-
-        for VOL in \
-          'home-1' 'venv-1' 'staging-1'
-        do
-          touch /home/python/$$VOL/.initialized
-          chown -R 1000:1000 /home/python/$$VOL
-          chmod -R 755 /home/python/$$VOL
-          ls -ld /home/python/$$VOL
-        done
-
-  backend-dependency-gate:
-    restart: 'no'
-
-    image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ backend,  api-server, infrastructure, all ]
-
-    env_file:
-      - backend.env
-    networks:
-      - agent-poc
-    volumes:
-      - backend-init-signal-1:/init-signal
-      - ../config/run_dependency_gate.sh:/run_dependency_gate.sh:ro
-      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
-    secrets:
-      - answers_postgres_secrets
-      - answers_seaweedfs_secrets
-      - checkpoints_postgres_secrets
-      - redis_secrets
-      - weaviate_secrets
-
-    mem_limit: 128m
-    memswap_limit: 128m
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
-    entrypoint: 'bash'
-    command: [ /run_dependency_gate.sh ]
-
-
-
   api-server:
-    depends_on:
-      init-backend-volumes:
-        condition: service_completed_successfully
-
     image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
     profiles: [  api-server, backend, all ]
 
@@ -97,7 +29,7 @@ services:
       - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - backend-staging-1:/staging
     secrets:
       - answers_secrets
@@ -109,10 +41,10 @@ services:
       - redis_secrets
       - weaviate_secrets
 
-    user: '1000:1000'
+    user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: [ '/run_api_server.sh' ]
     deploy:
       resources:
@@ -126,13 +58,14 @@ services:
               capabilities: [gpu]
 
     healthcheck:
-      # When this service start for the first time, there is multiple minutes while the
-      # python environment is sync'ed to the requirements file then when the FastAPI server
-      # is starting up. A health-check based on API pinging will fail during the sync and the
-      # start up.
+      # When this service starts for the first time, it may take several minutes to sync
+      # the python environment and start the FastAPI server. A healthcheck based on
+      # API pinging would fail during this period.
       #
-      # For now, we just check if python3 can run. Later, we will  try to come up  
-      ## test: ['CMD', 'curl', '-f', 'http://localhost']
+      # For now, we verify that python3 is executable.
+      # Note: If switching to an API-based check, use http://127.0.0.1 to avoid
+      # IPv6 resolution issues with 'localhost'.
+      ## test: ['CMD', 'curl', '-f', 'http://127.0.0.1']
       test: ['CMD', 'python3', '--version']
       interval: 30s
       timeout: 15s
@@ -175,11 +108,12 @@ services:
       - ../../../backend:/app/backend
       ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
+      - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
 
-    user: '1000:1000'
+    user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
     # See: https://docs.docker.com/reference/compose-file/services/#entrypoint
-    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    entrypoint: [ '/custom-docker-entrypoint.sh' ]
     command: [ '/run_build_backend.sh' ]
 
 

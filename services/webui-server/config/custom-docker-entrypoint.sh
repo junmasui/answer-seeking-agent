@@ -4,31 +4,46 @@ set -e  # Exit immediately on error.
 set -u  # Unbound variables are errors.
 set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
-# Set environment variables from mounted secrets files
-
-SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
-
+# NFS mounting logic (if requested)
 if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
-    # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
     echo "Running in NFS mode. Mounting file systems..."
-    # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
-    sudo /usr/bin/mount /mnt/frontend-nfs
-    sudo /usr/bin/mount /app/frontend
+    mount /mnt/frontend-nfs || echo "Warning: Failed to mount /mnt/frontend-nfs"
+    mount /app/frontend || echo "Warning: Failed to mount /app/frontend"
 
     # Ensure directory exists before mounting
     mkdir -p /app/frontend/node_modules
-    # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
-    # Actually, simpler to just try mount.
-    sudo /usr/bin/mount /app/frontend/node_modules
+    mount /app/frontend/node_modules || echo "Warning: Failed to mount /app/frontend/node_modules"
 
-    # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
-    # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
+    # Wait for the NFS server/sync loop
     sleep 2
 fi
 
-cd /app/frontend
+# Volume initialization logic (must run as root)
+echo "Initializing frontend volumes..."
 
+# Identify potential volume mount points in the frontend container
+FRONTEND_VOLS="/app/frontend/node_modules"
 
-exec "$@"
+for VOL in $FRONTEND_VOLS
+do
+  if [ -d "$VOL" ]; then
+    # Only initialize if it's a mount point (volume)
+    if grep -q " $VOL " /proc/self/mounts; then
+      if [ ! -f "$VOL/.initialized" ]; then
+        echo "Initializing $VOL..."
+        touch "$VOL/.initialized"
+        chown -R 1000:1000 "$VOL"
+        chmod -R 755 "$VOL"
+        ls -ld "$VOL"
+      else
+        echo "$VOL is already initialized."
+      fi
+    else
+      echo "$VOL is part of the image, skipping initialization."
+    fi
+  fi
+done
+
+# Transition to the non-privileged entrypoint
+echo "Dropping privileges to node (UID 1000)..."
+exec gosu 1000:1000 /custom-docker-entrypoint-nonpriv.sh "$@"

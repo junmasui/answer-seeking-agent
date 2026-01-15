@@ -1,41 +1,9 @@
 name: redis
 
 services:
-    init-redis-volumes:
-        restart: 'no'
-
-        image: 'docker.io/debian:bookworm-slim'
-        profiles: [ init-volumes, redis, infrastructure-core, infrastructure, all ]
-
-        # No network is needed to initialize named volumes
-        network_mode: none
-        volumes:
-            - redis-data-1:/data-1
-
-        entrypoint: 'bash'
-        command:
-            - '-c'
-            # Beware that docker-compose also performs variable interpolation.
-            # So we need to escape the dollar sign with $$name so that bash
-            # will recieve our embedded script with $name. 
-            - |
-              set -ex ;
-
-              for VOL in 'data-1'
-              do
-                touch /$$VOL/.initialized
-                chown -R 999:999 /$$VOL
-                chmod -R 777 /$$VOL
-                ls -ld /$$VOL
-              done
-
     redis:
         restart: unless-stopped
-        depends_on:
-            init-redis-volumes:
-                condition: service_completed_successfully
-
-        image: redis:7.4.1-bookworm
+        image: localhost/localhost/redis:7.4.1-custom
         profiles: [ redis, infrastructure-core, infrastructure, all ]
 
         ports:
@@ -44,12 +12,11 @@ services:
             - agent-poc
         volumes:
             - redis-data-1:/data
-            - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
             - ../config/redis.conf.template:/redis.conf.template:ro
         secrets:
             - redis_secrets
 
-        user: "redis:redis"
+        user: root
         entrypoint: [ '/custom-docker-entrypoint.sh' ]
         # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
         # See: https://docs.docker.com/reference/compose-file/services/#entrypoint

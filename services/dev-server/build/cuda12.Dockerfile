@@ -26,9 +26,12 @@ RUN --mount=type=bind,from=node-source,target=/context \
 # Copy scripts
 #
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
+COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
-    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh
+    && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -42,21 +45,11 @@ RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
-    && apt-get install -y sudo \
     && echo "nfs:/exports /mnt/data nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
     && echo "/mnt/data /app none defaults,bind,noauto 0 0" >> /etc/fstab \
     # Bind mount .venv and node_modules from user home to /app subdirectories
     && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo "/home/python/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
-    # Sudoers configuration for mounting
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/data' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /mnt/data' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend/node_modules' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
     && mkdir -p /mnt/data \
     && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && mkdir -p /home/python/node_modules-storage && chown ${USER_ID}:${GROUP_ID} /home/python/node_modules-storage

@@ -40,7 +40,9 @@ services:
         memswap_limit: 4g
 
         healthcheck:
-            test: [ "CMD", "curl", "-f", "http://localhost:9005/" ]
+            # Use the IPv4 loopback address. When 'localhost' is used, curl will try to use
+            # the IPv6 ::1 address where there is no listening port.
+            test: [ "CMD", "curl", "-f", "http://127.0.0.1:9005/" ]
             interval: 10s
             timeout: 5s
             retries: 5
