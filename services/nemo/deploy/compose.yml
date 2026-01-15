@@ -1,40 +1,37 @@
 name: nemo
 
 services:
-  nemo-guardrails:
-    restart: unless-stopped
+    nemo-guardrails:
+        restart: unless-stopped
 
-    image: localhost/localhost/nemo-guardrails:latest
-    profiles: [
-      nemo,
-      backend,
-      all
-    ]
+        image: localhost/localhost/nemo-guardrails:latest
+        profiles: [ nemo, backend, all ]
 
-    env_file:
-      - nemo.env
-      - opentelemetry-instrument.env
-    ports:
-      - '27500:8000'
-    networks:
-      - agent-poc
-    volumes:
-      - ../../dist:/dist:ro
-      ##SRC - ../config/config:/config:ro
-      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      ##SRC - ../config/docker/pyproject.toml:/app/pyproject.toml
-      ##SRC - ../config/docker/uv.lock:/app/uv.lock:ro
-    secrets:
-      - answers_secrets
+        env_file:
+            - nemo.env
+            - opentelemetry-instrument.env
+        ports:
+            - '27500:8000'
+        networks:
+            - agent-poc
+        volumes:
+            - ../../dist:/dist:ro
+            ##SRC - ../config/config:/config:ro
+            ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+            ##SRC - ../config/docker/pyproject.toml:/app/pyproject.toml
+            ##SRC - ../config/docker/uv.lock:/app/uv.lock:ro
+        secrets:
+            - answers_secrets
 
+        entrypoint: [ '/custom-docker-entrypoint.sh' ]
+        # The option --config=/config is required for multi-config support.
+        command: [ "server", "--config=/config" ]
 
-    entrypoint: [ '/custom-docker-entrypoint.sh' ]
-    # The option --config=/config is required for multi-config support.
-    command: ["server", "--config=/config"]
-
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/']
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+        healthcheck:
+            # Use the IPv4 loopback address. When 'localhost' is used, curl will try to use
+            # the IPv6 ::1 address where there is no listening port.
+            test: [ 'CMD', 'curl', '-f', 'http://127.0.0.1:8000/' ]
+            interval: 30s
+            timeout: 5s
+            retries: 5
+            start_period: 5s

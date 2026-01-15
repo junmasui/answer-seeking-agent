@@ -1,103 +1,53 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
 
-#
-# This entrypoint script is responsible for setting up the environment
-# for the dev-server container.
-#
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
-echo "Starting dev-server entrypoint..."
+echo "Initializing dev-server volumes..."
 
-#
-# Mount the NFS directory if requested
-#
+# Identify potential volume mount points
+# The backend and frontend setup will happen in the non-priv script,
+# but we need to ensure the shared volumes are owned by the python user.
+DEV_VOLS="/home/python /home/python/.venv-storage /home/python/node_modules-storage"
+
+for VOL in $DEV_VOLS
+do
+  if [ -d "$VOL" ]; then
+    echo "Initializing $VOL..."
+    chown -R 1000:1000 "$VOL"
+    chmod -R 755 "$VOL"
+    ls -ld "$VOL"
+  fi
+done
+
+# NFS mounting logic (if requested)
 if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     echo "Mounting NFS directory..."
-    # Attempt to mount /mnt/data
     if mountpoint -q /mnt/data; then
         echo "/mnt/data is already mounted."
     else
-        sudo /usr/bin/mount /mnt/data || echo "Failed to mount /mnt/data, proceeding anyway (might be pre-mounted)."
+        mount /mnt/data || echo "Failed to mount /mnt/data"
     fi
 
     # Bind mount /mnt/data to /app
     echo "Bind mounting /mnt/data to /app..."
-    sudo /usr/bin/mount /app
+    mount /app || echo "Failed to mount /app"
 
-    # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
-    # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
+    # Wait for the NFS server/sync loop
     sleep 2
 
     # Bind mount .venv from /home/python/.venv-storage
     echo "Bind mounting .venv..."
-    sudo /usr/bin/mount /app/backend/.venv
+    mkdir -p /app/backend/.venv
+    mount /app/backend/.venv || echo "Failed to mount /app/backend/.venv"
 
-    # Bind mount node_modules from /home/python/node_modules-storage
-    # Note: user is python (uid 1000), but node stuff might be in frontend dir.
-    # We mapped node_modules-storage to /app/frontend/node_modules in fstab/dockerfile.
+    # Bind mount node_modules
     echo "Bind mounting node_modules..."
-    sudo /usr/bin/mount /app/frontend/node_modules
+    mkdir -p /app/frontend/node_modules
+    mount /app/frontend/node_modules || echo "Failed to mount /app/frontend/node_modules"
 fi
 
-# If backend directory exists, then set up the Python environment.
-if [ -d "/app/backend" ]; then
-    (
-        cd /app/backend
-
-        if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
-            #    
-            # Create the virtual environment only once.
-            #
-            # For the CACHEDIR.TAG specification, see https://bford.info/cachedir/
-            # For uv's explanation, see: https://github.com/astral-sh/uv/issues/1648
-            if [ ! -f ".venv/CACHEDIR.TAG" ] \
-                || ! ( grep -q "Signature: 8a477f597d28d172789f06886806bc55" ".venv/CACHEDIR.TAG" )
-            then
-                uv venv --allow-existing
-            fi
-
-            # Sync the virtual environment (persistent across restarts now)
-            if [ "$GPU_MODE" == "cuda12" ]; then
-                uv sync  --extra cuda12 --dev --all-packages
-            elif [ "$GPU_MODE" == "cpu" ]; then
-                uv sync  --extra cpu --dev --all-packages
-            else
-                echo "Unknown GPU_MODE: $GPU_MODE"
-                exit -1
-            fi
-        fi
-
-        ls -la .
-
-        if [ -f .venv/bin/activate ]; then
-            # We source it here to verify it works, but sourcing in a subshell won't affect parent.
-            # So we actually need to replicate the sourcing logic in the parent OR accept that 
-            # the parent environment won't have the venv activated by default unless we do it again.
-            # However, since the user asked if we should return to original directory, the implication 
-            # is they MIGHT want to run commands elsewhere.
-            # But normally we want 'exec "$@"' to run with the venv activated.
-            true
-        else
-            echo "Warning: .venv/bin/activate not found."
-        fi
-    )
-    
-    # Re-activate in parent if available, but keep directory as original (likely /app)
-    if [ -f "/app/backend/.venv/bin/activate" ]; then
-        source /app/backend/.venv/bin/activate
-    fi
-else
-    echo "Directory /app/backend not found. Skipping backend setup."
-fi
-
-# If frontend directory exists, then set up the ViteJS environment.
-if [ -d "/app/frontend" ]; then
-    (
-        cd /app/frontend
-        echo npm install
-    )
-else
-    echo "Directory /app/frontend not found. Skipping frontend setup."
-fi
-
-exec "$@"
+# Transition to the non-privileged entrypoint
+echo "Dropping privileges to python (UID 1000)..."
+exec gosu 1000:1000 /custom-docker-entrypoint-nonpriv.sh "$@"

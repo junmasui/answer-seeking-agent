@@ -12,8 +12,10 @@ RUN \
     curl \
     gnupg \
     wget \
+    gosu \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* ; \
+    gosu nobody true ; \
     #
     # Create a custom group with GROUP_ID
     # Then create a custom user with USER_ID and GROUP_ID
@@ -42,18 +44,19 @@ RUN \
 # Copy in Dockerfile has a slightly different syntax. When copying a file to
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
-COPY --from=config-dir ./custom-docker-entrypoint.sh /
-COPY --from=config-dir ./run_webui_server.sh /
+COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
+COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
+COPY --from=config-dir ./run_webui_server.sh /run_webui_server.sh
 
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 
 
 
-## RUN chmod a+x /custom-docker-entrypoint.sh \
-##     && chmod a+x /run_webui_server.sh \
-##     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
-##     && chown ${USER_ID}:${GROUP_ID} /run_webui_server.sh
-RUN chmod a+x /run_webui_server.sh \
+RUN chmod a+x /custom-docker-entrypoint.sh \
+    && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
+    && chmod a+x /run_webui_server.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_webui_server.sh
 
 # Set the working directory inside the container
@@ -93,7 +96,6 @@ USER root
 # The user will run the following command:
 #   sudo mount /app/frontend
 RUN apt-get update \
-    && apt-get install -y sudo \
     #
     # FSAL_VFS is the only Ganesha module for exporting standard Linux filesystem.
     # This module has a broken "Spare Read" features that failes on Docker / overlay2.
@@ -102,12 +104,6 @@ RUN apt-get update \
     && echo "nfs:/frontend /mnt/frontend-nfs nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
     && echo "/mnt/frontend-nfs /app/frontend none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo "/home/node/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/frontend-nfs' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /mnt/frontend-nfs' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/mount /app/frontend/node_modules' >> /etc/sudoers \
-    && echo 'node ALL=(ALL) NOPASSWD: /usr/bin/umount /app/frontend/node_modules' >> /etc/sudoers \
     && mkdir -p /mnt/frontend-nfs \
     && mkdir -p /home/node/node_modules-storage \
     && chown ${USER_ID}:${GROUP_ID} /home/node/node_modules-storage \

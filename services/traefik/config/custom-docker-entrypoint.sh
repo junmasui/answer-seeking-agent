@@ -1,16 +1,27 @@
 #!/usr/bin/env sh
 
-## set -e  # Exit immediately on error.
-set -u  # Unbound variables are errors.
-## set -o pipefail  # Use right-most non-zero exit code from a pipe.
+set -e  # Exit immediately on error.
 
-# Let’s Encrypt has rate limits, so always persist the acme.json file to avoid repeated requests.
-touch /acme/acme.json
-chmod 600 /acme/acme.json
+# Volume initialization logic (must run as root)
+echo "Initializing volumes..."
+for VOL in /acme
+do
+  if [ -d "$VOL" ]; then
+    if [ ! -f "$VOL/.initialized" ]; then
+      echo "Initializing $VOL..."
+      touch "$VOL/.initialized"
+      touch "$VOL/acme.json"
+      chown -R 1000:1000 "$VOL"
+      chmod -R 600 "$VOL"
+      ls -ld "$VOL"
+    else
+      echo "$VOL is already initialized."
+    fi
+  else
+    echo "Warning: Volume directory $VOL not found."
+  fi
+done
 
-echo exec /entrypoint.sh "$@"
-
-# Process with original entrypoint, which can be discovered
-# from the host command-line with:
-#   docker inspect traefik:v3.4 | jq '.[0].Config.Entrypoint'
-exec /entrypoint.sh "$@"
+# Transition to the non-privileged entrypoint
+echo "Dropping privileges to 1000:1000..."
+exec gosu 1000:1000 /custom-docker-entrypoint-nonpriv.sh "$@"

@@ -1,16 +1,28 @@
 #!/usr/bin/env bash
 
-set -e
-set -u
-set -o pipefail
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
-# Set environment variables from mounted secrets files
+# Volume initialization logic (must run as root)
+echo "Initializing volumes..."
+for VOL in /usr/share/opensearch/data
+do
+  if [ -d "$VOL" ]; then
+    if [ ! -f "$VOL/.initialized" ]; then
+      echo "Initializing $VOL..."
+      touch "$VOL/.initialized"
+      chown -R 1000:1000 "$VOL"
+      chmod -R 777 "$VOL"
+      ls -ld "$VOL"
+    else
+      echo "$VOL is already initialized."
+    fi
+  else
+    echo "Warning: Volume directory $VOL not found."
+  fi
+done
 
-SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
-
-# Process with original entrypoint, which can be discovered
-# from the host command-line with:
-#   docker inspect opensearchproject/opensearch:2.9.0 | jq '.[0].Config.Entrypoint'
-exec ./opensearch-docker-entrypoint.sh "$@"
+# Transition to the non-privileged entrypoint
+echo "Dropping privileges to 1000:1000..."
+exec gosu 1000:1000 /custom-docker-entrypoint-nonpriv.sh "$@"

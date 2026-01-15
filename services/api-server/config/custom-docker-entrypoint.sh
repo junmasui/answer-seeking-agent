@@ -1,77 +1,46 @@
-set -eu
+#!/usr/bin/env bash
 
+set -e  # Exit immediately on error.
+set -u  # Unbound variables are errors.
+set -o pipefail  # Use right-most non-zero exit code from a pipe.
+
+# Volume initialization logic (must run as root)
+echo "Initializing backend volumes..."
+
+# NFS mounting logic (if requested)
 if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
-    # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
     echo "Running in NFS mode. Mounting file systems..."
-    # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
-    sudo /usr/bin/mount /mnt/backend-nfs
-    sudo /usr/bin/mount /app/backend
+    # These mounts require root privileges
+    mount /mnt/backend-nfs || echo "Warning: Failed to mount /mnt/backend-nfs"
+    mount /app/backend || echo "Warning: Failed to mount /app/backend"
 
-    # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
-    # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
+    # Wait for the NFS server/sync loop
     sleep 2
 
-    # Ensure directory exists before mounting
     mkdir -p /app/backend/.venv
-    # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
-    # Actually, simpler to just try mount.
-    sudo /usr/bin/mount /app/backend/.venv
+    mount /app/backend/.venv || echo "Warning: Failed to mount /app/backend/.venv"
 fi
 
-if [ "${USE_LOCAL_VENV_DIR:-false}" = "true" ]; then
-    # Ensure directory exists before mounting
-    #mkdir -p /app/backend/.venv
-    # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
-    # Actually, simpler to just try mount.
-    sudo /usr/bin/mount /app/backend/.venv
-fi
+# Identify potential volume mount points in the backend containers
+# API Server volumes
+API_VOLS="/app/backend/.venv /staging"
 
-cd /app/backend
-
-if [ "${USE_NFS_SRC_DIR:-false}" = "true" ] || [ "${USE_LOCAL_VENV_DIR:-false}" = "true" ]; then
-    #    
-    # Create the virtual environment only once.
-    #
-    # For the CACHEDIR.TAG specification, see https://bford.info/cachedir/
-    # For uv's explanation, see: https://github.com/astral-sh/uv/issues/1648
-    if [ ! -f ".venv/CACHEDIR.TAG" ] \
-        || ! ( grep -q "Signature: 8a477f597d28d172789f06886806bc55" ".venv/CACHEDIR.TAG" )
-    then
-        uv venv --allow-existing
-    fi
-
-    # Sync the virtual environment (persistent across restarts now)
-    # Use --frozen to prevent writing to the lockfile (which might be read-only or owned by another user)
-    SYNC_CMD="uv sync --frozen --dev --all-packages"
-
-    SYNC_CMD="uv sync --frozen --dev --all-packages"
-    EXTRA_ARGS=""
-
-    if [ "$GPU_MODE" == "cuda12" ]; then
-        EXTRA_ARGS="--extra cuda12"
-    elif [ "$GPU_MODE" == "cpu" ]; then
-        EXTRA_ARGS="--extra cpu"
+for VOL in $API_VOLS
+do
+  if [ -d "$VOL" ]; then
+    if [ ! -f "$VOL/.initialized" ]; then
+      echo "Initializing $VOL..."
+      touch "$VOL/.initialized"
+      chown -R 1000:1000 "$VOL"
+      chmod -R 755 "$VOL"
+      ls -ld "$VOL"
     else
-        echo "Unknown GPU_MODE: $GPU_MODE"
-        exit -1
+      echo "$VOL is already initialized."
     fi
+  fi
+done
 
-    set +e
-    # shellcheck disable=SC2086
-    $SYNC_CMD $EXTRA_ARGS
-    EXIT_CODE=$?
-    set -e
 
-    if [ $EXIT_CODE -ne 0 ]; then
-        echo "Error: Failed to sync virtual environment."
-        echo "This is likely because uv.lock is not up-to-date with pyproject.toml."
-        echo "Please run 'uv lock' on your host machine to update uv.lock."
-        exit $EXIT_CODE
-    fi
-fi
-
-ls -la .
-
-source .venv/bin/activate
-
-exec "$@"
+# Transition to the non-privileged entrypoint
+echo "Dropping privileges to python (UID 1000)..."
+exec gosu 1000:1000 /custom-docker-entrypoint-nonpriv.sh "$@"

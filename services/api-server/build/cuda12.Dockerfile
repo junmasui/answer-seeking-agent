@@ -177,8 +177,9 @@ RUN \
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
 
-COPY --from=config-dir ./custom-docker-entrypoint.sh /
-COPY --from=config-dir ./run_api_server.sh /
+COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
+COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
+COPY --from=config-dir ./run_api_server.sh /run_api_server.sh
 COPY --from=celery-config-dir ./run_celery_worker.sh /
 COPY --from=celery-config-dir ./run_celery_flower.sh /
 
@@ -186,10 +187,12 @@ COPY --from=dependency-gate-dir ./wait_for_gate.sh /
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
+    && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
     && chmod a+x /run_celery_worker.sh \
     && chmod a+x /run_celery_flower.sh \
     && chmod a+x /run_api_server.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_worker.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_flower.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_api_server.sh \
@@ -247,7 +250,6 @@ USER root
 # The user will run the following command:
 #   sudo mount /app/backend
 RUN apt-get update \
-    && apt-get install -y sudo \
     && mkdir -p /mnt/backend-nfs \
     #
     # FSAL_VFS is the only Ganesha module for exporting standard Linux filesystem.
@@ -257,12 +259,6 @@ RUN apt-get update \
     && echo "nfs:/backend /mnt/backend-nfs nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
     && echo "/mnt/backend-nfs /app/backend none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /mnt/backend-nfs' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /mnt/backend-nfs' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/mount /app/backend/.venv' >> /etc/sudoers \
-    && echo 'python ALL=(ALL) NOPASSWD: /usr/bin/umount /app/backend/.venv' >> /etc/sudoers \
     && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && rm -rf /var/lib/apt/lists/*
 

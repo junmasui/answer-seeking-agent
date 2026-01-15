@@ -1,49 +1,9 @@
 services:
-  init-dev-server-volumes:
-    restart: 'no'
-
-    image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, dev-server, all ]
-
-    # No network is needed to initialize named volumes
-    network_mode: none
-    volumes:
-      - dev-server-home:/home/python
-      - dev-server-venv:/home/python/.venv-storage
-      - dev-server-node-modules:/home/python/node_modules-storage
-
-    entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |
-        set -ex ;
-
-        ls -ld /home/python/
-
-        mkdir -p /home/python/.venv-storage
-        mkdir -p /home/python/node_modules-storage
-
-        chown -R 1000:1000 /home/python
-
-        ls -ld /home/python/
-#    secrets:
-#      - answers_minio_autotest_secrets
-#      - answers_postgres_autotest_secrets
-#      - checkpoints_postgres_autotest_secrets
-#      - redis_secrets
-#      - weaviate_secrets
-
   dev-server:
-    depends_on:
-      init-dev-server-volumes:
-        condition: service_completed_successfully
-
     # Image is defined in cpu-only.compose.yml or cuda.compose.yml
     profiles: [ dev-server, all ]
     privileged: true
+    user: root
 
     environment:
       DEBUGGER_LISTEN: true

@@ -5,7 +5,7 @@ set -u  # Unbound variables are errors.
 set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 # Build container images.
-for SUBDIR in slim-util api-server webui-server dev-server seaweedfs
+for SUBDIR in slim-util seaweedfs redis opensearch traefik weaviate nfs api-server
 do
     ( cd "$SUBDIR"/build ; ./build_images.sh )
 done
@@ -21,7 +21,7 @@ then
 fi
 
 # Build container images.
-for SUBDIR in nemo
+for SUBDIR in nemo webui-server dev-server
 do
     ( cd "$SUBDIR"/build ; ./build_images.sh )
 done

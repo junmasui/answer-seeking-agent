@@ -1,73 +1,75 @@
 services:
-  # OpenTelemetry Collector - Central telemetry collection and processing
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.142.0
-    profiles: [infrastructure, telemetry, all]
+    # OpenTelemetry Collector - Central telemetry collection and processing
+    otel-collector:
+        image: otel/opentelemetry-collector-contrib:0.142.0
+        profiles: [ infrastructure, telemetry, all ]
 
-    ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
-      - "8889:8889"   # Prometheus metrics exporter
-      - "8888:8888"   # Collector's own metrics
-      - "9411:9411"   # Zipkin receiver
-      - "13133:13133" # Health check endpoint
-      - "1777:1777"   # pprof endpoint
-      - "55679:55679" # zpages endpoint
-    networks:
-      - agent-poc
-    volumes:
-      - ../config/otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
-      ## - /mnt/bindfs/docker-containers-bindfs:/var/lib/docker/containers:ro
-      ## - /var/run/docker.sock:/var/run/docker.sock:ro
+        ports:
+            - "4317:4317" # OTLP gRPC receiver
+            - "4318:4318" # OTLP HTTP receiver
+            - "8889:8889" # Prometheus metrics exporter
+            - "8888:8888" # Collector's own metrics
+            - "9411:9411" # Zipkin receiver
+            - "13133:13133" # Health check endpoint
+            - "1777:1777" # pprof endpoint
+            - "55679:55679" # zpages endpoint
+        networks:
+            - agent-poc
+        volumes:
+            - ../config/otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
+            ## - /mnt/bindfs/docker-containers-bindfs:/var/lib/docker/containers:ro
+            ## - /var/run/docker.sock:/var/run/docker.sock:ro
 
-    environment:
-      OTEL_ENVIRONMENT: development
-      POD_NAME: otel-collector
-    command: ["--config=/etc/otelcol-contrib/otel-collector-config.yaml"]
+        environment:
+            OTEL_ENVIRONMENT: development
+            POD_NAME: otel-collector
+        command: [ "--config=/etc/otelcol-contrib/otel-collector-config.yaml" ]
+        # NOTE:
+        # The official contrib image is based on the "scratch" image. It copies only the
+        # otel-collector; it does not copy wget or curl into this image. Hence a healthcheck
+        # cannot be defined yet.
+        #
+        # healthcheck:
+        #   # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use
+        #   # the IPv6 ::1 address where there is no listening port.
+        #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:13133/"]
+        #   interval: 30s
+        #   timeout: 5s
+        #   retries: 3
+        #   start_period: 10s
 
-    # NOTE:
-    # The official contrib image is based on the "scratch" image. It copies only the
-    # otel-collector; it does not copy wget or curl into this image. Hence a healthcheck
-    # cannot be defined yet.
-    #
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:13133/"]
-    #   interval: 30s
-    #   timeout: 5s
-    #   retries: 3
-    #   start_period: 10s
 
+        # OpenTelemetry Collector - Central telemetry collection and processing
+    otel-collector-docker:
+        image: otel/opentelemetry-collector-contrib:0.142.0
+        profiles: [ infrastructure, telemetry, all ]
 
-  # OpenTelemetry Collector - Central telemetry collection and processing
-  otel-collector-docker:
-    image: otel/opentelemetry-collector-contrib:0.142.0
-    profiles: [infrastructure, telemetry, all]
+        # ports:
+        #   - "8888:8888"   # Collector's own metrics
+        #   - "9411:9411"   # Zipkin receiver
+        #   - "13133:13133" # Health check endpoint
+        networks:
+            - agent-poc
+        volumes:
+            - ../config/otel-collector-docker-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
+            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
 
-    # ports:
-    #   - "8888:8888"   # Collector's own metrics
-    #   - "9411:9411"   # Zipkin receiver
-    #   - "13133:13133" # Health check endpoint
-    networks:
-      - agent-poc
-    volumes:
-      - ../config/otel-collector-docker-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-    environment:
-      OTEL_ENVIRONMENT: development
-      POD_NAME: otel-collector-docker
-    user: "0"
-    command: ["--config=/etc/otelcol-contrib/otel-collector-config.yaml"]
-
-    # NOTE:
-    # The official contrib image is based on the "scratch" image. It copies only the
-    # otel-collector; it does not copy wget or curl into this image. Hence a healthcheck
-    # cannot be defined yet.
-    #
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:13133/"]
-    #   interval: 30s
-    #   timeout: 5s
-    #   retries: 3
-    #   start_period: 10s
+        environment:
+            OTEL_ENVIRONMENT: development
+            POD_NAME: otel-collector-docker
+        user: "0"
+        command: [ "--config=/etc/otelcol-contrib/otel-collector-config.yaml" ]
+        # NOTE:
+        # The official contrib image is based on the "scratch" image. It copies only the
+        # otel-collector; it does not copy wget or curl into this image. Hence a healthcheck
+        # cannot be defined yet.
+        #
+        # healthcheck:
+        #   # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use
+        #   # the IPv6 ::1 address where there is no listening port.
+        #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:13133/"]
+        #   interval: 30s
+        #   timeout: 5s
+        #   retries: 3
+        #   start_period: 10s
