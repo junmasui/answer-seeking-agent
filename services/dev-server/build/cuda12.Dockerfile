@@ -27,9 +27,12 @@ RUN --mount=type=bind,from=node-source,target=/context \
 #
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
+COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
+COPY --from=config-dir ./dev_mount_helper.sh /usr/local/bin/dev_mount_helper.sh
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
+    && chmod a+x /usr/local/bin/dev_mount_helper.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh
 
@@ -88,9 +91,10 @@ RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-    curl wget git procps tar patch \
+    curl wget git procps tar patch fuse3 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.79/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
 
 
 # Wrapper to fix buggy antigravity behavior adding extra colon.

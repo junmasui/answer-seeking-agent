@@ -15,7 +15,7 @@ services:
         healthcheck:
             # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use
             # the IPv6 ::1 address where there is no listening port.
-            test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3100/" ]
+            test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3100/ready" ]
             interval: 10s
             timeout: 5s
             retries: 5

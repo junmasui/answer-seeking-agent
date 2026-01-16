@@ -15,6 +15,8 @@ services:
         environment:
             - S3_ENDPOINT_URL=http://seaweedfs:9000
             - SYNC_BUCKET=codebase
+            - SEAWEEDFS_FILER=seaweedfs:9002
+            - WEED_MOUNT_EXTRA_ARGS=
 
         networks:
             - agent-poc
@@ -23,10 +25,19 @@ services:
             - codebase_seaweedfs_secrets
 
         volumes:
-            - ../config/sync.sh:/sync.sh:ro
+            - ../config/supervisord.conf:/etc/supervisord.conf:ro
+            - ../config/run_sync.sh:/run_sync.sh:ro
             # Source directory (Host) bind-mounted to /staging
             - ../../../:/staging
             # We don't need to expose the fuse mount back to the host, 
             # but we assume this service syncs TO the S3 bucket which other services mount.
 
-        command: [ "/sync.sh" ]
+        healthcheck:
+            # We use mountpoint to verify the FUSE mount is active.
+            # weed mount does not expose a default HTTP port for curl checks
+            # unless -debug is enabled.
+            test: [ "CMD", "mountpoint", "-q", "/mnt/fuse" ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 30s

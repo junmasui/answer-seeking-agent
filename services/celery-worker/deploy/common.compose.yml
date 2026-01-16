@@ -167,6 +167,8 @@ services:
         limits:
           cpus: '0.1' # 10% of available CPU resources
 
+    restart: unless-stopped
+
     healthcheck:
       # The danihodovic/celery-exporter image is based on python:3.13-slim-bookworm,
       # which does not have curl or wget installed.

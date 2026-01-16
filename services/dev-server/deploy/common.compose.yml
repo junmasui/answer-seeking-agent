@@ -12,13 +12,13 @@ services:
       PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - automated-pytest.env
+      - opentelemetry-instrument.env
     cap_add:
       - SYS_ADMIN
     devices:
       - /dev/fuse
     security_opt:
       - apparmor:unconfined
-      - opentelemetry-instrument.env
     networks:
       - agent-poc
 

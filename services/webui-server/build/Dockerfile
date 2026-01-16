@@ -105,7 +105,7 @@ RUN apt-get update \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     # Install weed CLI
-    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
+    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.79/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
 
 RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
