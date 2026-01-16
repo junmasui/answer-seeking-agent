@@ -21,9 +21,16 @@ services:
       ##
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
-      # Mount the NFS directory into this container
-      USE_NFS_SRC_DIR: true
+      ##
+      # Mount the FUSE directory into this container
+      USE_FUSE_SRC_DIR: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
     env_file:
       - automated-test.env
       - opentelemetry-instrument.env
@@ -50,6 +57,7 @@ services:
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -97,9 +105,15 @@ services:
 
 
       GPU_MODE: cpu
-      # Mount the NFS directory into this container
-      USE_NFS_SRC_DIR: true
+      # Mount the FUSE directory into this container
+      USE_FUSE_SRC_DIR: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
     env_file:
       - backend.env
     ports: # use if it is necessary to expose the container to the host machine
@@ -125,6 +139,7 @@ services:
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

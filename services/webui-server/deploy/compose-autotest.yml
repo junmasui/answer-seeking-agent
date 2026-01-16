@@ -47,8 +47,16 @@ services:
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
       CHOKIDAR_USEPOLLING: 'true'
-      # Mount the NFS directory into this container
-      USE_NFS_SRC_DIR: true
+      # Mount the FUSE directory into this container
+      USE_FUSE_SRC_DIR: true
+      # Codebase bucket credentials
+      CODEBASE_ACCESS_KEY:
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
     #   - NODE_ENV=production
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
     ## traffic to go thru the reserve-proxy server at 15173.
@@ -65,6 +73,9 @@ services:
       # Mounting a local area to use container-installed dependencies
       ##SRC - frontend-autotest-home-1:/home/node
       ##SRC - frontend-autotest-node-modules-1:/app/frontend/node_modules
+
+    secrets:
+      - codebase_seaweedfs_secrets
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_webui_server.sh' ]

@@ -62,6 +62,9 @@ secrets:
   checkpoints_postgres_autotest_secrets:
     file: ./secrets/checkpoints.postgres.autotest.secrets.env
 
+  codebase_seaweedfs_secrets:
+    file: ./secrets/codebase.seaweedfs.secrets.env
+
   keycloak_postgres_secrets:
     file: ./secrets/keycloak.postgres.secrets.env
   keycloak_admin_secrets:

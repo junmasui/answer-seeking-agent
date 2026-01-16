@@ -144,6 +144,14 @@ DESCR="Backend Test's seaweedfs account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
+SECRETS_FILE=./secrets/codebase.seaweedfs.secrets.env
+VAR_NAME=CODEBASE_SECRET_KEY
+VALUE_PREFIX=codebase_seaweedfs_
+DESCR="Codebase bucket's secret key."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-32-safe" "$VALUE_PREFIX" "$DESCR"
+
+
 # Postgres
 
 

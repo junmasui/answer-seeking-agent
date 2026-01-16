@@ -1,0 +1,32 @@
+services:
+    file-sync:
+        restart: unless-stopped
+        image: localhost/localhost/file-sync:latest
+        profiles: [ file-sync, infrastructure, all ]
+
+        # key for FUSE
+        cap_add:
+            - SYS_ADMIN
+        devices:
+            - /dev/fuse
+        security_opt:
+            - apparmor:unconfined
+
+        environment:
+            - S3_ENDPOINT_URL=http://seaweedfs:9000
+            - SYNC_BUCKET=codebase
+
+        networks:
+            - agent-poc
+        secrets:
+            - answers_seaweedfs_secrets
+            - codebase_seaweedfs_secrets
+
+        volumes:
+            - ../config/sync.sh:/sync.sh:ro
+            # Source directory (Host) bind-mounted to /staging
+            - ../../../:/staging
+            # We don't need to expose the fuse mount back to the host, 
+            # but we assume this service syncs TO the S3 bucket which other services mount.
+
+        command: [ "/sync.sh" ]

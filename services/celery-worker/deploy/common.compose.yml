@@ -42,6 +42,7 @@ services:
       - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -114,6 +115,7 @@ services:
       - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

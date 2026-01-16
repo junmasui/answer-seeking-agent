@@ -92,8 +92,32 @@ services:
         # init-seaweedfs.sh will now refer to 'weed shell'
         command: /init-seaweedfs.sh
 
+    # This service is responsible for initializing the 'codebase' bucket and user
+    seaweedfs-init-codebase:
+        image: localhost/localhost/init-seaweedfs:latest
+        profiles: [ infrastructure, all ]
+        networks:
+            - agent-poc
+        volumes:
+            - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
+        secrets:
+            - answers_seaweedfs_secrets
+        environment:
+            # We reuse the same secrets file but we expect CODEBASE_ACCESS_KEY/SECRET_KEY to be present or defaulted in the script if not
+            - SEAWEEDFS_FILER=seaweedfs:9002
+            - SEAWEEDFS_MASTER=seaweedfs:9005
+            - S3_BUCKET_NAME=codebase
+            # Use indirection
+            - S3_ACCESS_KEY_VAR=CODEBASE_ACCESS_KEY
+            - S3_SECRET_KEY_VAR=CODEBASE_SECRET_KEY
+        entrypoint: [ "/init-seaweedfs.sh" ]
+        depends_on:
+            seaweedfs:
+                condition: service_started
+
 volumes:
     seaweedfs-data:
+
         driver: local
     seaweedfs-init-signal:
         driver: local
