@@ -42,6 +42,7 @@ services:
       - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -114,6 +115,7 @@ services:
       - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -164,6 +166,8 @@ services:
       resources:
         limits:
           cpus: '0.1' # 10% of available CPU resources
+
+    restart: unless-stopped
 
     healthcheck:
       # The danihodovic/celery-exporter image is based on python:3.13-slim-bookworm,

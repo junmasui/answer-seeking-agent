@@ -17,6 +17,16 @@ done
 
 #
 #
+# Support indirect variable references (e.g. use CODEBASE_SECRET_KEY as S3_SECRET_KEY)
+if [ -n "${S3_ACCESS_KEY_VAR:-}" ]; then
+  eval "val=\${$S3_ACCESS_KEY_VAR}"
+  if [ -n "$val" ]; then S3_ACCESS_KEY="$val"; fi
+fi
+if [ -n "${S3_SECRET_KEY_VAR:-}" ]; then
+  eval "val=\${$S3_SECRET_KEY_VAR}"
+  if [ -n "$val" ]; then S3_SECRET_KEY="$val"; fi
+fi
+
 # Ensure SEAWEEDFS environment variables are set to avoid duplicate keys in s3.json
 if [ -z "$SEAWEEDFS_ROOT_USER" ]; then
     # Fallback to S3_ACCESS_KEY or default to 'admin'
@@ -51,7 +61,6 @@ if [ "$SEAWEEDFS_ROOT_USER" = "$S3_ACCESS_KEY" ]; then
     echo "WARNING: Root user and App user have same name '$SEAWEEDFS_ROOT_USER'. Appending '-app' to app user."
     export S3_ACCESS_KEY="${S3_ACCESS_KEY}-app"
 fi
-
 
 
 echo "Detailed setup done."

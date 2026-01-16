@@ -13,6 +13,7 @@ RUN \
     gnupg \
     wget \
     gosu \
+    supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* ; \
     gosu nobody true ; \
@@ -47,6 +48,8 @@ RUN \
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 COPY --from=config-dir ./run_webui_server.sh /run_webui_server.sh
+COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
+COPY --from=config-dir ./webui_mount_helper.sh /usr/local/bin/webui_mount_helper.sh
 
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 
@@ -55,6 +58,7 @@ COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
     && chmod a+x /run_webui_server.sh \
+    && chmod a+x /usr/local/bin/webui_mount_helper.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_webui_server.sh
@@ -92,22 +96,16 @@ ARG GROUP_ID=1000
 
 USER root
 
-# This is to allow the container user to mount the directory from the NFS server.
-# The user will run the following command:
-#   sudo mount /app/frontend
+# This is to allow the container user to mount the directory using FUSE.
+# The user will run the 'weed mount' command.
 RUN apt-get update \
-    #
-    # FSAL_VFS is the only Ganesha module for exporting standard Linux filesystem.
-    # This module has a broken "Spare Read" features that failes on Docker / overlay2.
-    # The NFS client is forced into 4.1 protocol which does not support the failing READ_PLUS.
-    #
-    && echo "nfs:/frontend /mnt/frontend-nfs nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
-    && echo "/mnt/frontend-nfs /app/frontend none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && echo "/home/node/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && mkdir -p /mnt/frontend-nfs \
-    && mkdir -p /home/node/node_modules-storage \
-    && chown ${USER_ID}:${GROUP_ID} /home/node/node_modules-storage \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends \
+    fuse3 \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    # Install weed CLI
+    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.79/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
 
 RUN \
     export DEBIAN_FRONTEND=noninteractive ; \

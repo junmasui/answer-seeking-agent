@@ -110,7 +110,8 @@ jq --compact-output "$JQ_2" <<< "$PROCESSES"
 echo "Examine suspicious or failed processes"
 
 SUSPICIOUS=$( ( jq --compact-output "$JQ_2" <<< "$PROCESSES" ) | wc -l )
-if [ "$SUSPICIOUS" -ne 0 ]
+FAILED=$( ( jq --compact-output "$JQ_4" <<< "$PROCESSES" ) | wc -l )
+if [ "$SUSPICIOUS" -ne 0 ] || [ "$FAILED" -ne 0 ]
 then
   exit 1 # Generic Error 
 else

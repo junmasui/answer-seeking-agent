@@ -1,22 +1,15 @@
+#!/bin/bash
 set -eu
 
-if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
-    # If running with NFS, we need to mask node_modules with a tmpfs so it's container-local
-    echo "Running in NFS mode. Mounting file systems..."
-    # The command must exactly match what is permitted in the /etc/sudoers file to avoid execution denial.
-    sudo /usr/bin/mount /mnt/backend-nfs
-    sudo /usr/bin/mount /app/backend
+# NOTE: This script is overridden by /celery-docker-entrypoint.sh when built into the image for production/FUSE use.
+# This file is kept if needed for local non-FUSE dev where it might be mounted, 
+# although the compose file now points to the baked-in one in the image.
 
-    # Wait two seconds for the NFS server to start. This delay accounts for the periodic Unison
-    # sync loop (Host -> /staging -> /exports) required to decouple the NFS export from the bind-mount.
-    sleep 2
+# If you are seeing this running, it means you are likely mounting this script over the image's one
+# or running in a context where the image hasn't been updated.
 
-    # Ensure directory exists before mounting
-    mkdir -p /app/backend/.venv
-    # Check if already mounted (to avoid double mounting if container restarts but didn't fully die?) 
-    # Actually, simpler to just try mount.
-    sudo /usr/bin/mount /app/backend/.venv
-fi
+# Reuse standard logic or legacy logic here if needed.
+# For now, just a placeholder or fallback.
 
 cd /app/backend
 
@@ -31,12 +24,12 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     then
         uv venv --allow-existing
     fi
-
-    # Sync the virtual environment (persistent across restarts now)
+    
+    SYNC_CMD="uv sync --frozen --dev --all-packages"
     if [ "$GPU_MODE" == "cuda12" ]; then
-        uv sync  --extra cuda12 --dev --all-packages
+        $SYNC_CMD --extra cuda12
     elif [ "$GPU_MODE" == "cpu" ]; then
-        uv sync  --extra cpu --dev --all-packages
+        $SYNC_CMD --extra cpu
     else
         echo "Unknown GPU_MODE: $GPU_MODE"
         exit -1
@@ -44,5 +37,4 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
 fi
 
 source .venv/bin/activate
-
 exec "$@"

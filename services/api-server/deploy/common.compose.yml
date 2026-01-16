@@ -90,12 +90,20 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       GPU_MODE: cpu
-      # Mount the NFS directory into this container
-      USE_NFS_SRC_DIR: false
+      # Mount the FUSE directory into this container
+      USE_FUSE_SRC_DIR: false
       #
       PYTHONPYCACHEPREFIX: /home/python/.pycache
+      # Codebase bucket credentials
+      CODEBASE_ACCESS_KEY:
     env_file:
       - backend.env
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
     networks:
       agent-poc: {}
     volumes:

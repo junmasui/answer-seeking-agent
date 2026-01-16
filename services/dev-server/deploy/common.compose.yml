@@ -7,12 +7,18 @@ services:
 
     environment:
       DEBUGGER_LISTEN: true
-      # Mount the NFS directory into this container
-      USE_NFS_SRC_DIR: true
+      # Mount the FUSE directory into this container
+      USE_FUSE_SRC_DIR: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - automated-pytest.env
       - opentelemetry-instrument.env
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
     networks:
       - agent-poc
 
@@ -31,15 +37,16 @@ services:
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount start script
       - ../config/start_dev.sh:/start_dev.sh:ro
-#    secrets:
-#      - answers_secrets
-#      - answers_api_key_autotest_secrets
-#      - answers_jwt_autotest_secrets
-#      - answers_minio_autotest_secrets
-#      - answers_postgres_autotest_secrets
-#      - checkpoints_postgres_autotest_secrets
-#      - redis_secrets
-#      - weaviate_secrets
+    secrets:
+      - answers_secrets
+      - answers_api_key_autotest_secrets
+      - answers_jwt_autotest_secrets
+      - answers_minio_autotest_secrets
+      - answers_postgres_autotest_secrets
+      - checkpoints_postgres_autotest_secrets
+      - redis_secrets
+      - weaviate_secrets
+      - codebase_seaweedfs_secrets
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     # Command to run the dev startup script
