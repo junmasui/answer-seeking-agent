@@ -15,7 +15,8 @@ services:
                 #   - '5173:5173'
         networks:
             - agent-poc
-        volumes: []
+        volumes:
+            - ../config/run_webui_server.sh:/run_webui_server.sh:ro
             # Mount the project directory to /app in the container
             ##SRC - ../../../frontend/app:/app:ro
             ## - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh

@@ -30,7 +30,9 @@ services:
     #   - '5173:5173'
     networks:
       - agent-poc
-    volumes: []
+    volumes:
+      - ../config/run_webui_server.sh:/run_webui_server.sh:ro
+      - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
       ##SRC - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount important script into the container when we are

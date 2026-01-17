@@ -16,9 +16,7 @@ import * as directives from 'vuetify/directives'
 // Labs components require a manual import and installation of the component.
 import { VDateInput } from 'vuetify/labs/VDateInput'
 import { VFileUpload } from 'vuetify/labs/VFileUpload'
-import { VNumberInput } from 'vuetify/labs/VNumberInput'
-import { VTimePicker } from 'vuetify/labs/VTimePicker'
-import { VTreeview } from 'vuetify/labs/VTreeview'
+
 
 // Components
 import router from './router'
@@ -32,9 +30,6 @@ const vuetify = createVuetify({
         ...components,
         VDateInput,
         VFileUpload,
-        VNumberInput,
-        VTimePicker,
-        VTreeview
     },
     directives,
     theme: {
@@ -56,10 +51,15 @@ const app = createApp(App)
 
 // Check for OIDC callback
 if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
-    authService.handleCallback().then(() => {
+    authService.handleCallback().then((user) => {
         // Remove query params to clean URL
         window.history.replaceState({}, document.title, window.location.pathname)
         app.mount('#app')
+
+        // Redirect to original path if present in state
+        if (user && user.state && user.state.returnPath) {
+            router.push(user.state.returnPath)
+        }
     }).catch(err => {
         console.error("Auth Callback Error", err)
         app.mount('#app')

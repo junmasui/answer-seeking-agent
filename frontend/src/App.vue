@@ -53,11 +53,11 @@
           <v-list-item title="About" to="/about"></v-list-item>
         -->
         <v-list-item title="Status" to="/status"></v-list-item>
-        <v-list-item title="Document Manager" to="/doc-mgr"></v-list-item>
-        <v-list-item title="Prompt Manager" to="/prompt-mgr"></v-list-item>
-        <v-list-item title="Conversational" to="/conversational"></v-list-item>
-        <v-list-item title="Administrator" to="/admin"></v-list-item>
-        <v-list-item title="Diagram" to="/diagram"></v-list-item>
+        <v-list-item title="Document Manager" to="/doc-mgr" v-if="signedIn"></v-list-item>
+        <v-list-item title="Prompt Manager" to="/prompt-mgr" v-if="signedIn"></v-list-item>
+        <v-list-item title="Conversational" to="/conversational" v-if="signedIn"></v-list-item>
+        <v-list-item title="Administrator" to="/admin" v-if="signedIn"></v-list-item>
+        <v-list-item title="Diagram" to="/diagram" v-if="signedIn"></v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-app>
@@ -92,16 +92,7 @@ async function signIn() {
 }
 
 // Watch for route changes to handle protected routes
-watch(
-  () => route.path,
-  async (newPath) => {
-    // Redirect to sign-in if accessing admin without authentication
-    if (newPath === '/admin' && !signedIn.value) {
-       // OIDC flow handles redirect, but we might want to pass state
-       await authService.signIn()
-    }
-  }
-)
+// Watcher removed as auth is now handled by router guards
 
 async function signOut() {
   await authService.signOut()

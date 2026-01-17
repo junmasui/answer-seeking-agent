@@ -38,8 +38,10 @@ class AuthService {
         return this.userManager.getUser()
     }
 
-    async signIn() {
-        return this.userManager.signinRedirect()
+    async signIn(returnPath) {
+        return this.userManager.signinRedirect({
+            state: { returnPath }
+        })
     }
 
     async signOut() {
