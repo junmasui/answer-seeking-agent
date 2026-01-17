@@ -18,7 +18,7 @@ if [ -d "/app/backend" ]; then
     (
         cd /app/backend
 
-        if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
+        if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
             #    
             # Create the virtual environment only once.
             #

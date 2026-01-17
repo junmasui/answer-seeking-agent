@@ -40,6 +40,7 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
     
     # Ensure mount point exists
     mkdir -p /app/backend
+    chown 1000:1000 /app/backend
     
     # Run supervisor
     # We rely on /etc/supervisord.conf
@@ -50,7 +51,7 @@ else
     
     # Identify potential volume mount points in the backend containers
     # API Server volumes
-    API_VOLS="/app/backend/.venv /staging"
+    API_VOLS="/staging"
     
     for VOL in $API_VOLS
     do

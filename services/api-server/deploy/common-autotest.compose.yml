@@ -1,47 +1,4 @@
 services:
-  init-backend-autotest-volumes:
-    restart: 'no'
-
-    image: 'docker.io/python:3.12.8-slim-bookworm'
-    profiles: [ init-volumes, backend-autotest, all ]
-
-    # No network is needed to initialize named volumes
-    network_mode: none
-    volumes:
-      - backend-autotest-home-1:/home/python/test-home-1
-      - backend-autotest-venv-1:/home/python/test-venv-1
-      - backend-autotest-staging-1:/home/python/test-staging-1
-      - backend-autotest-home-2:/home/python/test-home-2
-      - backend-autotest-venv-2:/home/python/test-venv-2
-      - backend-autotest-staging-2:/home/python/test-staging-2
-      - backend-autotest-home-3:/home/python/test-home-3
-      - backend-autotest-venv-3:/home/python/test-venv-3
-      - backend-autotest-home-4:/home/python/test-home-4
-      - backend-autotest-venv-4:/home/python/test-venv-4
-
-    entrypoint: 'bash'
-    command:
-      - '-c'
-      # Beware that docker-compose also performs variable interpolation.
-      # So we need to escape the dollar sign with $$name so that bash
-      # will recieve our embedded script with $name. 
-      - |
-        set -ex ;
-
-        ls -ld /home/python/
-
-        for VOL in \
-          'test-home-1' 'test-venv-1' 'test-staging-1' \
-          'test-home-2' 'test-venv-2' 'test-staging-2' \
-          'test-venv-3' 'test-home-3' \
-          'test-venv-4' 'test-home-4'
-        do
-          touch /home/python/$$VOL/.initialized
-          chown -R 1000:1000 /home/python/$$VOL
-          chmod -R 755 /home/python/$$VOL
-          ls -ld /home/python/$$VOL
-        done
-
   backend-autotest-dependency-gate:
     restart: 'no'
 
@@ -73,10 +30,6 @@ services:
 
 
   api-server-autotest:
-    depends_on:
-      init-backend-autotest-volumes:
-        condition: service_completed_successfully
-
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-autotest, all ]
     privileged: true
@@ -116,7 +69,9 @@ services:
       - ../config/run_api_server.sh:/run_api_server.sh:ro
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/supervisord.conf:/etc/supervisord.conf:ro
+      - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
       ##SRC - backend-autotest-home-1:/home/python
       ##SRC - backend-autotest-venv-1:/app/backend/.venv
       - backend-autotest-staging-1:/staging
@@ -163,10 +118,6 @@ services:
 
 
   automated-pytest:
-    depends_on:
-      init-backend-autotest-volumes:
-        condition: service_completed_successfully
-
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
     profiles: [ backend-autotest, automated-pytest, all ]
     privileged: true
@@ -209,7 +160,9 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_automated_test.sh:/run_automated_test.sh:ro
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/supervisord.conf:/etc/supervisord.conf:ro
+      - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
       ##SRC - backend-autotest-home-4:/home/python
       ##SRC - backend-autotest-venv-4:/app/backend/.venv
     secrets:
@@ -259,3 +212,8 @@ volumes:
     driver: local
   backend-autotest-venv-4:
     driver: local
+
+networks:
+  agent-poc:
+    name: agent_agent-poc
+    external: true

@@ -12,15 +12,28 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 
 # Install dependencies
-# Use npm ci to ensure we strictly follow package-lock.json and do not attempt to write to it.
-# This prevents permission errors if package-lock.json is read-only or owned by another user.
+# Determine install command based on whether node_modules is a mount point
+# npm ci tries to remove the node_modules directory which fails on mount points.
+NPM_CMD="npm ci"
+if grep -q " /app/frontend/node_modules " /proc/mounts; then
+    echo "node_modules is a bind mount. Using npm install."
+    NPM_CMD="npm install"
+fi
+
 set +e
-npm ci
+$NPM_CMD
 EXIT_CODE=$?
 set -e
 
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "Error: npm ci failed."
+    echo "Error: $NPM_CMD failed. Attempting to recover by cleaning cache..."
+    npm cache clean --force
+    $NPM_CMD
+    EXIT_CODE=$?
+fi
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "Error: npm ci failed again after cache clean."
     echo "This is likely because package-lock.json is not up-to-date with package.json."
     echo "Please run 'npm install' on your host machine to update package-lock.json."
     exit $EXIT_CODE

@@ -5,7 +5,21 @@ set -eu
 
 cd /app/backend
 
-if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
+if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+
+    # Wait for mount
+    attempt=0
+    while ! mountpoint -q /app/backend; do
+        sleep 1
+        attempt=$((attempt+1))
+        if [ $attempt -ge 30 ]; then
+            echo "Error: Mount failed to appear after 30 seconds."
+            exit 1
+        fi
+    done
+
+    echo "Mount active."
+
     #    
     # Create the virtual environment only once.
     #
@@ -21,7 +35,6 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
     # Use --frozen to prevent writing to the lockfile (which might be read-only or owned by another user)
     SYNC_CMD="uv sync --frozen --dev --all-packages"
 
-    SYNC_CMD="uv sync --frozen --dev --all-packages"
     EXTRA_ARGS=""
 
     if [ "$GPU_MODE" == "cuda12" ]; then
@@ -46,8 +59,6 @@ if [ "${USE_NFS_SRC_DIR:-false}" = "true" ]; then
         exit $EXIT_CODE
     fi
 fi
-
-ls -la .
 
 source .venv/bin/activate
 

@@ -2,10 +2,6 @@ services:
 
 
   celery-worker-autotest:
-    depends_on:
-      init-backend-autotest-volumes:
-        condition: service_completed_successfully
-
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-autotest, all ]
     privileged: true
@@ -45,6 +41,9 @@ services:
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/celery-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/celery-supervisord.conf:/etc/supervisord.conf:ro
+      - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
       ##SRC - backend-autotest-home-2:/home/python
       ##SRC - backend-autotest-venv-2:/app/.venv
       - backend-autotest-staging-2:/staging
@@ -89,10 +88,6 @@ services:
       start_period: 5s
 
   celery-flower-autotest:
-    depends_on:
-      init-backend-autotest-volumes:
-        condition: service_completed_successfully
-
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
     profiles: [ backend-autotest, all ]
     privileged: true
@@ -128,6 +123,9 @@ services:
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/celery-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../config/celery-flower-supervisord.conf:/etc/supervisord.conf:ro
+      - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
       ##SRC - backend-autotest-home-3:/home/python
       ##SRC - backend-autotest-venv-3:/app/.venv
     secrets:
@@ -161,3 +159,8 @@ services:
       timeout: 15s
       retries: 5
       start_period: 5s
+
+networks:
+  agent-poc:
+    name: agent_agent-poc
+    external: true

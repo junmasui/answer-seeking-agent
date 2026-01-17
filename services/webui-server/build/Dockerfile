@@ -1,5 +1,5 @@
 # Use an official Node.js image as the base image
-FROM docker.io/node:22-bookworm-slim AS production
+FROM docker.io/node:22-bookworm-slim AS production-base
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -23,19 +23,7 @@ RUN \
     #
     set -eux ; \
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} node ; \
-    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node ;
-
-RUN \
-    set -eux ; \
-    export DEBIAN_FRONTEND=noninteractive ; \
-    #
-    # Locally required Debian packages
-    #
-    apt-get update \
-    && apt-get install -y --no-install-recommends \
-    nfs-common \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} node
 
 # Copy the build-and-run script.
 #
@@ -76,20 +64,32 @@ COPY --from=frontend-dir ./src/ /app/frontend/src/
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/frontend/
 
-# Switch to the custom user
-USER ${USER_ID}:${GROUP_ID}
-
-RUN \
-    set -eux ; \
-    npm install --ignore-scripts
-
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the Vue.js development server
 CMD ["run_webui_server.sh"]
 
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}
 
-FROM production AS dev
+FROM production-base AS production
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}
+
+
+RUN \
+    set -eux ; \
+    npm install --ignore-scripts
+
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}
+
+
+FROM production-base AS dev
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -120,6 +120,12 @@ RUN \
     patch \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+
+ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
+
+# Build the app then start the Vue.js development server
+CMD ["run_webui_server.sh"]
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}

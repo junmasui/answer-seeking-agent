@@ -21,27 +21,6 @@ else
     # Identify potential volume mount points in the frontend container
     FRONTEND_VOLS="/app/frontend/node_modules"
     
-    for VOL in $FRONTEND_VOLS
-    do
-      if [ -d "$VOL" ]; then
-        # Only initialize if it's a mount point (volume)
-        if grep -q " $VOL " /proc/self/mounts; then
-          if [ ! -f "$VOL/.initialized" ]; then
-            echo "Initializing $VOL..."
-            touch "$VOL/.initialized"
-            chown -R 1000:1000 "$VOL"
-            chmod -R 755 "$VOL"
-            ls -ld "$VOL"
-          else
-            echo "$VOL is already initialized."
-          fi
-        else
-          # echo "$VOL is part of the image, skipping initialization."
-          :
-        fi
-      fi
-    done
-    
     # Transition to the non-privileged entrypoint
     echo "Dropping privileges to node (UID 1000)..."
     exec gosu 1000:1000 /custom-docker-entrypoint-nonpriv.sh "$@"
