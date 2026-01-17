@@ -133,9 +133,5 @@ services:
 volumes:
   backend-init-signal-1:
     driver: local
-  backend-home-1:
-    driver: local
-  backend-venv-1:
-    driver: local
   backend-staging-1:
     driver: local

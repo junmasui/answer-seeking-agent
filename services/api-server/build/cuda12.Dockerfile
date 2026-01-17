@@ -140,7 +140,6 @@ RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
     curl \
-    nfs-common \
     libgl1 \
     libgl1-mesa-dri \
     libglu1-mesa \
@@ -257,21 +256,11 @@ ARG GROUP_ID=1000
 
 USER root
 
-# This is to allow the container user to mount the directory from the NFS server.
-# The user will run the following command:
-#   sudo mount /app/backend
 RUN apt-get update \
-    && mkdir -p /mnt/backend-nfs \
-    #
-    # FSAL_VFS is the only Ganesha module for exporting standard Linux filesystem.
-    # This module has a broken "Spare Read" features that failes on Docker / overlay2.
-    # The NFS client is forced into 4.1 protocol which does not support the failing READ_PLUS.
-    #
-    && echo "nfs:/backend /mnt/backend-nfs nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
-    && echo "/mnt/backend-nfs /app/backend none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
     && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    # Install weed CLI
+    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
 
 RUN \
     set -eux ; \

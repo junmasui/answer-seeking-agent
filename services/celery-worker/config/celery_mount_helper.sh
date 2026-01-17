@@ -22,11 +22,7 @@ echo "$ECHO_PREFIX Mount active."
 # Or fall back to /home/python/.venv-storage checks if needed (but celery compose maps volumes differently?)
 # The previous script checked /app/.venv
 
-if [ -d "/app/.venv" ] && ! mountpoint -q /app/backend/.venv; then
-    echo "$ECHO_PREFIX Overlaying .venv from /app/.venv..."
-    mkdir -p /app/backend/.venv
-    mount --bind /app/.venv /app/backend/.venv || echo "$ECHO_PREFIX Warning: Failed to mount .venv"
-elif [ -d "/home/python/.venv-storage" ] && ! mountpoint -q /app/backend/.venv; then
+if [ -d "/home/python/.venv-storage" ] && ! mountpoint -q /app/backend/.venv; then
     echo "$ECHO_PREFIX Overlaying .venv from /home/python/.venv-storage..."
     mkdir -p /app/backend/.venv
     mount --bind /home/python/.venv-storage /app/backend/.venv || echo "$ECHO_PREFIX Warning: Failed to mount .venv"
