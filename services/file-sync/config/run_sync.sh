@@ -25,7 +25,7 @@ echo "Mount active."
 # We want to mirror the source (bind mount) to the fuse mount (S3).
 echo "Starting initial Unison sync..."
 unison "$SOURCE_DIR" "$MOUNT_DIR" \
-    -auto -batch -repeat 1 \
+    -auto -batch -terse -repeat 1 \
     -ignore "Name .venv" \
     -ignore "Name node_modules" \
     -ignore "Name __pycache__" \
@@ -34,7 +34,7 @@ unison "$SOURCE_DIR" "$MOUNT_DIR" \
 # Watch mode (Continuous Sync)
 echo "Starting continuous sync..."
 unison "$SOURCE_DIR" "$MOUNT_DIR" \
-    -auto -batch -repeat watch \
+    -auto -batch -terse -repeat watch \
     -ignore "Name .venv" \
     -ignore "Name node_modules" \
     -ignore "Name __pycache__" \

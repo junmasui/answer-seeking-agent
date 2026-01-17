@@ -34,7 +34,7 @@ services:
         # -master: start Master
         # -volume: start Volume server (implicitly started by server command usually)
         # 'server' command starts master, volume, filer, and s3.
-        command: server -master.port=9005 -s3 -s3.port=9000 -filer.port=9002 -dir=/data -ip.bind=0.0.0.0 -s3.config=/etc/seaweedfs/s3.json
+        command: server -master.port=9005 -s3 -s3.port=9000 -filer.port=9002 -dir=/data -ip.bind=0.0.0.0 -ip=seaweedfs -volume.port=8080 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=1024 -volume.max=100
 
         mem_limit: 2g
         memswap_limit: 4g
