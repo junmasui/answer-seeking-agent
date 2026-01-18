@@ -256,11 +256,16 @@ ARG GROUP_ID=1000
 
 USER root
 
-RUN apt-get update \
-    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
+RUN \
+    set -eux ; \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+    fuse3 \
     && rm -rf /var/lib/apt/lists/* \
     # Install weed CLI
-    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
+    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed \
+    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage
 
 RUN \
     set -eux ; \

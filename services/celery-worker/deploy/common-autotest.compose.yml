@@ -44,9 +44,6 @@ services:
       - ../config/celery-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../config/celery-supervisord.conf:/etc/supervisord.conf:ro
       - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
-      ##SRC - backend-autotest-home-2:/home/python
-      ##SRC - backend-autotest-venv-2:/app/.venv
-      - backend-autotest-staging-2:/staging
     secrets:
       - answers_secrets
       - answers_api_key_autotest_secrets
@@ -126,8 +123,6 @@ services:
       - ../config/celery-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../config/celery-flower-supervisord.conf:/etc/supervisord.conf:ro
       - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
-      ##SRC - backend-autotest-home-3:/home/python
-      ##SRC - backend-autotest-venv-3:/app/.venv
     secrets:
       - answers_secrets
       - answers_api_key_autotest_secrets

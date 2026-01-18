@@ -26,17 +26,14 @@ services:
       test: ["CMD-SHELL", "exit 0"]
 
     volumes:
-      # Mount configuration for NFS and persistence
-      - dev-server-home:/home/python
-      - dev-server-venv:/home/python/.venv-storage
-      - dev-server-node-modules:/home/python/node_modules-storage
-
       # Mount docker socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount entrypoint
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount start script
       - ../config/start_dev.sh:/start_dev.sh:ro
+      # Mount supervisord config
+      - ../config/supervisord.conf:/etc/supervisord.conf:ro
     secrets:
       - answers_secrets
       - answers_api_key_autotest_secrets
@@ -51,17 +48,6 @@ services:
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     # Command to run the dev startup script
     command: [ '/start_dev.sh' ]
-
-#
-# Named volumes
-#
-volumes:
-  dev-server-home:
-    driver: local
-  dev-server-venv:
-    driver: local
-  dev-server-node-modules:
-    driver: local
 
 networks:
   agent-poc:

@@ -30,7 +30,6 @@ services:
       - backend-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - backend-staging-1:/staging
     secrets:
       - answers_secrets
       - answers_api_key_secrets
@@ -132,6 +131,4 @@ services:
 #
 volumes:
   backend-init-signal-1:
-    driver: local
-  backend-staging-1:
     driver: local
