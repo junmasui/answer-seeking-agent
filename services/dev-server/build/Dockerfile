@@ -51,12 +51,9 @@ RUN \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
-    && echo "nfs:/exports /mnt/data nfs defaults,noauto,noac,nfsvers=4.1 0 0" >> /etc/fstab \
-    && echo "/mnt/data /app none defaults,bind,noauto 0 0" >> /etc/fstab \
     # Bind mount .venv and node_modules from user home to /app subdirectories
     && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
     && echo "/home/python/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && mkdir -p /mnt/data \
     && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
     && mkdir -p /home/python/node_modules-storage && chown ${USER_ID}:${GROUP_ID} /home/python/node_modules-storage
 

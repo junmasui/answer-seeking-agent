@@ -46,10 +46,3 @@ services:
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_webui_server.sh' ]
     user: root
-
-
-volumes:
-  frontend-autotest-home-1:
-    driver: local
-  frontend-autotest-init-signal-1:
-    driver: local

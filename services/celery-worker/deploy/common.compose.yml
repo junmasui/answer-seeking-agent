@@ -31,9 +31,6 @@ services:
       - backend-init-signal-1:/init-signal
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
-      ##SRC - backend-home-2:/home/python
-      ##SRC - backend-venv-2:/app/.venv
-      - backend-staging-2:/staging
     secrets:
       - answers_secrets
       - answers_jwt_secrets
@@ -104,8 +101,6 @@ services:
       - backend-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      ##SRC - backend-home-3:/home/python
-      ##SRC - backend-venv-3:/app/.venv
     secrets:
       - answers_secrets
       - answers_jwt_secrets
@@ -197,16 +192,4 @@ services:
 #
 volumes:
   backend-init-signal-1:
-    driver: local
-  backend-home-2:
-    driver: local
-  backend-venv-2:
-    driver: local
-  backend-prometheus-2:
-    driver: local
-  backend-staging-2:
-    driver: local
-  backend-home-3:
-    driver: local
-  backend-venv-3:
     driver: local

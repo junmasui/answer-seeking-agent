@@ -19,6 +19,37 @@ if [ -d "/app/backend" ]; then
         cd /app/backend
 
         if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+
+            echo "Waiting for mount at /app..."
+
+            # Wait for mount
+            attempt=0
+            while ! mountpoint -q /app; do
+                sleep 1
+                attempt=$((attempt+1))
+                if [ $attempt -ge 30 ]; then
+                    echo "Error: Mount failed to appear after 30 seconds."
+                    exit 1
+                fi
+            done
+
+            echo "Mount active."
+
+            echo "Waiting for mount at /app/backend/.venv..."
+
+            # Wait for mount
+            attempt=0
+            while ! mountpoint -q /app/backend/.venv; do
+                sleep 1
+                attempt=$((attempt+1))
+                if [ $attempt -ge 30 ]; then
+                    echo "Error: Mount failed to appear after 30 seconds."
+                    exit 1
+                fi
+            done
+
+            echo "Mount active."
+
             #    
             # Create the virtual environment only once.
             #
@@ -67,6 +98,38 @@ fi
 # If frontend directory exists, then set up the ViteJS environment.
 if [ -d "/app/frontend" ]; then
     (
+
+        echo "Waiting for mount at /app..."
+
+        # Wait for mount
+        attempt=0
+        while ! mountpoint -q /app; do
+            sleep 1
+            attempt=$((attempt+1))
+            if [ $attempt -ge 30 ]; then
+                echo "Error: Mount failed to appear after 30 seconds."
+                exit 1
+            fi
+        done
+
+        echo "Mount active."
+
+        echo "Waiting for mount at /app/frontend/node_modules..."
+
+        # Wait for mount
+        attempt=0
+        while ! mountpoint -q /app/frontend/node_modules; do
+            sleep 1
+            attempt=$((attempt+1))
+            if [ $attempt -ge 30 ]; then
+                echo "Error: Mount failed to appear after 30 seconds."
+                exit 1
+            fi
+        done
+
+        echo "Mount active."
+
+
         cd /app/frontend
         echo npm install
     )
