@@ -39,7 +39,6 @@ async def add_or_update_document(
             result = await session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
-        async with session.begin():
             if existing_obj:
                 doc_uuid = existing_obj.id
 

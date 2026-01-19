@@ -41,7 +41,6 @@ async def add_or_update_prompt_version(
             # from interferring with the next transaction.
             version = 1 if existing_obj is None else (existing_obj.version + 1)
 
-        async with session.begin():
             prompt_version_uuid = uuid.uuid4()
 
             new_obj = DbPromptVersion(
