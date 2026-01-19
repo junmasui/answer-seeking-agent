@@ -44,6 +44,8 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
     
     # Run supervisor
     # We rely on /etc/supervisord.conf
+    # Pass the command arguments to supervisor via environment variable
+    export APP_COMMAND="$*"
     exec /usr/bin/supervisord -c /etc/supervisord.conf
 else
     # Legacy/Standard flow (NFS or copy)
