@@ -107,7 +107,11 @@ async function copyDiagram() {
 
   fetchError.value = ''
 
-  if (typeof navigator === 'undefined' || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+  if (
+    typeof navigator === 'undefined' ||
+    !navigator.clipboard ||
+    typeof navigator.clipboard.writeText !== 'function'
+  ) {
     fetchError.value = 'Clipboard access is not available in this browser.'
     return
   }
@@ -130,7 +134,12 @@ function saveDiagram() {
   fetchError.value = ''
 
   try {
-    if (typeof document === 'undefined' || !document.body || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+    if (
+      typeof document === 'undefined' ||
+      !document.body ||
+      typeof URL === 'undefined' ||
+      typeof URL.createObjectURL !== 'function'
+    ) {
       fetchError.value = 'Saving files is not supported in this environment.'
       return
     }

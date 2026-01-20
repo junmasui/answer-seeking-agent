@@ -92,10 +92,8 @@ COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.s
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 COPY --from=config-dir ./run_api_server.sh /run_api_server.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
-COPY --from=celery-config-dir ./celery-supervisord.conf /etc/celery-supervisord.conf
+
 COPY --from=config-dir ./mount_helper.sh /usr/local/bin/mount_helper.sh
-COPY --from=celery-config-dir ./celery_mount_helper.sh /usr/local/bin/celery_mount_helper.sh
-COPY --from=celery-config-dir ./celery-docker-entrypoint.sh /celery-docker-entrypoint.sh
 
 COPY --from=celery-config-dir ./run_celery_worker.sh /run_celery_worker.sh
 COPY --from=celery-config-dir ./run_celery_flower.sh /run_celery_flower.sh
@@ -109,9 +107,6 @@ RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /run_celery_flower.sh \
     && chmod a+x /run_api_server.sh \
     && chmod a+x /usr/local/bin/mount_helper.sh \
-    && chmod a+x /usr/local/bin/celery_mount_helper.sh \
-    && chmod a+x /usr/local/bin/celery_mount_helper.sh \
-    && chmod a+x /celery-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh \
     && chown ${USER_ID}:${GROUP_ID} /run_celery_worker.sh \
@@ -178,12 +173,11 @@ RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
     fuse3 \
-    curl \
-    ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     # Install weed CLI
-    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed \
-    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage
+    && ( curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed )
+
+RUN mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage
 
 RUN \
     set -eux ; \

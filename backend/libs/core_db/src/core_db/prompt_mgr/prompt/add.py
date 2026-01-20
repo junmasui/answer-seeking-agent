@@ -17,7 +17,6 @@ async def add_or_update_prompt(name: str, owner_type: OwnerType, user_id: uuid.U
             result = await session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
-        async with session.begin():
             if existing_obj:
                 prompt_uuid = existing_obj.id
                 existing_obj.name = name

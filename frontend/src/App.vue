@@ -39,7 +39,6 @@
       </v-menu>
     </v-app-bar>
 
-
     <v-main>
       <v-container fluid class="pa=0 ma-0">
         <router-view />
@@ -53,11 +52,11 @@
           <v-list-item title="About" to="/about"></v-list-item>
         -->
         <v-list-item title="Status" to="/status"></v-list-item>
-        <v-list-item title="Document Manager" to="/doc-mgr" v-if="signedIn"></v-list-item>
-        <v-list-item title="Prompt Manager" to="/prompt-mgr" v-if="signedIn"></v-list-item>
-        <v-list-item title="Conversational" to="/conversational" v-if="signedIn"></v-list-item>
-        <v-list-item title="Administrator" to="/admin" v-if="signedIn"></v-list-item>
-        <v-list-item title="Diagram" to="/diagram" v-if="signedIn"></v-list-item>
+        <v-list-item v-if="signedIn" title="Document Manager" to="/doc-mgr"></v-list-item>
+        <v-list-item v-if="signedIn" title="Prompt Manager" to="/prompt-mgr"></v-list-item>
+        <v-list-item v-if="signedIn" title="Conversational" to="/conversational"></v-list-item>
+        <v-list-item v-if="signedIn" title="Administrator" to="/admin"></v-list-item>
+        <v-list-item v-if="signedIn" title="Diagram" to="/diagram"></v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-app>

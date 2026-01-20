@@ -20,10 +20,10 @@
     <template #more-action-icons="{ item, index }">
       <v-icon class="me-2" size="small" @click="openEditDialog(item, index)">mdi-pencil</v-icon>
     </template>
-    <template #more-selected-items-buttons="{ selectedItemCount }">
+    <template #more-selected-items-buttons>
       <v-btn class="ma-2" size="large" @click="addDocSet">Add New</v-btn>
     </template>
-    <template #more-action-dialogs="{ selectedItemCount }">
+    <template #more-action-dialogs>
       <edit-doc-set-dialog
         v-model:active="activeEditDocSet"
         v-model="targetDocSet"
@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, toRaw } from 'vue'
+import { ref, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import CommonDataTable from '../common/CommonDataTable.vue'
@@ -179,7 +179,7 @@ const activeEditDocSet = ref(false)
  * @param {Object} item - The document set item to be edited
  * @param {number} index - The index of the item in the table
  */
-function openEditDialog(item, _index) {
+function openEditDialog(item) {
   activeEditDocSet.value = true
   targetDocSet.value = Object.assign({}, item)
 }
@@ -321,21 +321,6 @@ async function deleteMultipleDocumentSets(docSets) {
 //
 // Polling for server table updates.
 //
-
-let intervalId = null
-
-onMounted(async () => {
-  shouldRefresh.value = true
-
-  intervalId = setInterval(async () => {
-    await loadTableStats()
-  }, 30000)
-})
-
-onBeforeUnmount(() => {
-  clearInterval(intervalId)
-  intervalId = null
-})
 
 /**
  * Loads table statistics from the server to check for document set updates.

@@ -43,8 +43,16 @@ import EditPromptDialog from './EditPromptDialog.vue'
 
 const promptStore = usePromptStore()
 
-const { page, itemsPerPage, totalItems, items, selectedItems, nameFilter, statusFilter, ownerTypeFilter } =
-  storeToRefs(promptStore)
+const {
+  page,
+  itemsPerPage,
+  totalItems,
+  items,
+  selectedItems,
+  nameFilter,
+  statusFilter,
+  ownerTypeFilter
+} = storeToRefs(promptStore)
 
 const shouldRefresh = ref(false)
 

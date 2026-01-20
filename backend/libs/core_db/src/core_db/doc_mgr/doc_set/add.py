@@ -17,7 +17,6 @@ async def add_or_update_document_set(name: str, is_new_doc_default: bool, is_pub
             result = await session.execute(stmt)
             existing_obj = result.scalar_one_or_none()
 
-        async with session.begin():
             doc_root_dir = get_lib_config().doc_root_dir
             s3_rel_path = doc_root_dir + '/' + name
 

@@ -41,8 +41,9 @@ services:
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ../config/celery-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ../config/celery-supervisord.conf:/etc/supervisord.conf:ro
+      - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro
+      ##SRC - ../../api-server/config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
       - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
     secrets:
       - answers_secrets
@@ -108,7 +109,6 @@ services:
       - apparmor:unconfined
     env_file:
       - automated-test.env
-      - backend.env
     ports: # use if it is necessary to expose the container to the host machine
       - '25557:5555'
     networks:
@@ -120,8 +120,9 @@ services:
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ../config/celery-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ../config/celery-flower-supervisord.conf:/etc/supervisord.conf:ro
+      - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro
+      ##SRC - ../../api-server/config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
       - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
     secrets:
       - answers_secrets

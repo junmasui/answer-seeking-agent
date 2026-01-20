@@ -149,6 +149,7 @@ services:
       - apparmor:unconfined
     env_file:
       - automated-test.env
+      - opentelemetry-instrument.env
     networks:
       - agent-poc
     volumes:
@@ -171,6 +172,7 @@ services:
       - celery_flower_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
+      - weaviate_secrets
       - codebase_seaweedfs_secrets
 
     user: root
