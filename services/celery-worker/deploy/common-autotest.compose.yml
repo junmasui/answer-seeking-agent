@@ -43,7 +43,7 @@ services:
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro
-      - ../../api-server/config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
+      ##SRC - ../../api-server/config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
       - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
     secrets:
       - answers_secrets
@@ -109,7 +109,6 @@ services:
       - apparmor:unconfined
     env_file:
       - automated-test.env
-      - backend.env
     ports: # use if it is necessary to expose the container to the host machine
       - '25557:5555'
     networks:
@@ -123,7 +122,7 @@ services:
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro
-      - ../../api-server/config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
+      ##SRC - ../../api-server/config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
       - ../../api-server/config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
     secrets:
       - answers_secrets
