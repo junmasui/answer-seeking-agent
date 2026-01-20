@@ -3,7 +3,12 @@
     <v-card>
       <v-card-title class="text-h5"> Edit Prompt </v-card-title>
       <v-card-text>
-        <v-text-field v-model="modelValue.name" label="Name" variant="outlined" disabled></v-text-field>
+        <v-text-field
+          v-model="modelValue.name"
+          label="Name"
+          variant="outlined"
+          disabled
+        ></v-text-field>
         <v-select
           v-model="modelValue.status"
           :items="statusOptions"
