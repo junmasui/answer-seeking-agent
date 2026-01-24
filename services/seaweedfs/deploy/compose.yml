@@ -12,9 +12,9 @@ services:
         # We map 8333 to host 8333 by default to avoid conflict with existing MinIO (9000).
         # User can change this if they want to replace MinIO completely.
         ports:
-            - '9000:9000'
-            - '9005:9005' # Master port
-            - '9002:9002' # Filer port
+            - '29000:9000'
+            - '29005:9005' # Master port
+            - '29002:9002' # Filer port
 
         networks:
             - agent-poc

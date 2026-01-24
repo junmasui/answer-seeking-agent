@@ -4,10 +4,10 @@ services:
         profiles: [ traefik, infrastructure, all ]
 
         ports:
-            - '15170:15170'
-            - '15173:15173'
-            - '15180:15180'
-            - '15183:15183'
+            - '25170:25170'
+            - '25173:25173'
+            - '25180:25180'
+            - '25183:25183'
         networks:
             - agent-poc
         volumes:

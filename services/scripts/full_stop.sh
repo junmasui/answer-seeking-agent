@@ -30,7 +30,7 @@ else
     exit 1
 fi
 
-docker compose --profile=all down
+docker compose --profile=all down --remove-orphans
 
 EXIT_CODE="$?"
 if [ "$EXIT_CODE" != 0 ]

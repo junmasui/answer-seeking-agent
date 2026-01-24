@@ -18,8 +18,6 @@ services:
     env_file:
       - backend.env
       - opentelemetry-instrument.env
-    ports: # use if it is necessary to expose the container to the host machine
-      - '28989:8989'
     networks:
       - agent-poc
     volumes:
