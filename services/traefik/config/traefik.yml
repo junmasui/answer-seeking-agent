@@ -4,7 +4,7 @@ api:
 
 entryPoints:
   web:
-    address: ":15170"
+    address: ":25170"
     http:
       redirections:
         entryPoint:
@@ -12,12 +12,12 @@ entryPoints:
           scheme: https
   
   websecure:
-    address: ":15173"
+    address: ":25173"
     http:
       tls: {}
 
   web-autotest:
-    address: ":15180"
+    address: ":25180"
     http:
       redirections:
         entryPoint:
@@ -25,7 +25,7 @@ entryPoints:
           scheme: https
   
   websecure-autotest:
-    address: ":15183"
+    address: ":25183"
     http:
       tls: {}
 

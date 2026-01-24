@@ -193,41 +193,52 @@ def create_realm_if_missing(keycloak_admin, realm_name):
         logger.info(f"Realm {realm_name} already exists.")
 
 def create_client_if_missing(realm_name):
-    """Create the api-client for OIDC authentication."""
+    """Create or update the api-client for OIDC authentication."""
     # Create a fresh connection object for the realm operations
     kc_realm = get_realm_client(KEYCLOAK_URL, realm_name)
     
     clients = kc_realm.get_clients()
-    existing_clients = [c['clientId'] for c in clients]
-    
     client_id = "api-client"
-    if client_id not in existing_clients:
-        logger.info(f"Creating client {client_id} in {realm_name}")
-        kc_realm.create_client(payload={
-            "clientId": client_id,
-            "enabled": True,
-            "standardFlowEnabled": True,
-            "directAccessGrantsEnabled": False,
-            "serviceAccountsEnabled": False,
-            "publicClient": True,
-            "redirectUris": ["http://localhost:5173/*", "http://localhost:80/*", "https://localhost:15173/*", "https://localhost:15173", "https://localhost:15183/*", "https://localhost:15183"],
-            "webOrigins": ["+"],
-            "protocolMappers": [
-                {
-                    "name": "audience-mapper",
-                    "protocol": "openid-connect",
-                    "protocolMapper": "oidc-audience-mapper",
-                    "consentRequired": False,
-                    "config": {
-                        "included.client.audience": client_id,
-                        "id.token.claim": "true",
-                        "access.token.claim": "true"
-                    }
+    client_uuid = next((c['id'] for c in clients if c.get('clientId') == client_id), None)
+    
+    client_payload = {
+        "clientId": client_id,
+        "enabled": True,
+        "standardFlowEnabled": True,
+        "directAccessGrantsEnabled": False,
+        "serviceAccountsEnabled": False,
+        "publicClient": True,
+        "redirectUris": [
+            "http://localhost:5173/*", 
+            "http://localhost:80/*", 
+            "https://localhost:25173/*", 
+            "https://localhost:25173", 
+            "https://localhost:25183/*", 
+            "https://localhost:25183"
+        ],
+        "webOrigins": ["+"],
+        "protocolMappers": [
+            {
+                "name": "audience-mapper",
+                "protocol": "openid-connect",
+                "protocolMapper": "oidc-audience-mapper",
+                "consentRequired": False,
+                "config": {
+                    "included.client.audience": client_id,
+                    "id.token.claim": "true",
+                    "access.token.claim": "true"
                 }
-            ]
-        })
+            }
+        ]
+    }
+
+    if not client_uuid:
+        logger.info(f"Creating client {client_id} in {realm_name}")
+        kc_realm.create_client(payload=client_payload)
     else:
-        logger.info(f"Client {client_id} already exists in {realm_name}")
+        logger.info(f"Client {client_id} already exists in {realm_name}. Updating configuration...")
+        # Note: update_client takes the UUID as the first argument, not the client_id string
+        kc_realm.update_client(client_id=client_uuid, payload=client_payload)
 
 def create_roles(realm_name, roles):
     """Create roles in the realm."""

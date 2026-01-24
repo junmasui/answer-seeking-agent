@@ -59,8 +59,6 @@ services:
     env_file:
       - automated-test.env
       - opentelemetry-instrument.env
-    ports: # use if it is necessary to expose the container to the host machine
-      - '8102:8100'
     networks:
       - agent-poc
     volumes:
