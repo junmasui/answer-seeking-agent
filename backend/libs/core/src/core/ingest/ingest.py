@@ -9,6 +9,8 @@ from core_db.db_models import DbTrackedDocument
 from core_db.doc_mgr.doc.query import get_documents
 from core_db.doc_mgr.doc_set.query import get_document_sets
 from core_db.doc_mgr.doc.update import update_tracking_record
+from core_db.doc_mgr.doc_chunk.query import list_document_chunk_vector_ids
+from core_db.doc_mgr.doc_chunk.update import replace_document_chunks
 from core_public import DocumentOcrStrategy, DocumentStatus
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
@@ -98,6 +100,7 @@ async def _ingest_one_document(
         updateable_record.status = DocumentStatus.INGESTING
 
     actual_local_path = None
+    local_path = None
     try:
         # We staging the file locally. There are a few good reasons for doing so:
         # 1. We time-separate the file downloads from file processing. If any bad network
@@ -145,6 +148,7 @@ async def _ingest_one_document(
         # will represent a partially processed file while the file is
         # being processed.
         new_vector_ids = []
+        chunk_data = []
 
         document_chunks = []
         batch_size = 10
@@ -161,11 +165,27 @@ async def _ingest_one_document(
             if len(document_chunks) >= batch_size:
                 ids = vector_store.add_documents(documents=document_chunks)
                 new_vector_ids.extend(ids)
+                for doc_chunk, vector_id in zip(document_chunks, ids, strict=False):
+                    page_number = doc_chunk.metadata.get('page_number')
+                    if page_number is not None:
+                        try:
+                            page_number = int(page_number)
+                        except (TypeError, ValueError):
+                            page_number = None
+                    chunk_data.append((vector_id, page_number))
                 document_chunks = []
 
         if len(document_chunks) > 0:
             ids = vector_store.add_documents(documents=document_chunks)
             new_vector_ids.extend(ids)
+            for doc_chunk, vector_id in zip(document_chunks, ids, strict=False):
+                page_number = doc_chunk.metadata.get('page_number')
+                if page_number is not None:
+                    try:
+                        page_number = int(page_number)
+                    except (TypeError, ValueError):
+                        page_number = None
+                chunk_data.append((vector_id, page_number))
             document_chunks = []
 
         # Update the tracking store.
@@ -173,24 +193,22 @@ async def _ingest_one_document(
         # remove orphans earlier in case re-processing a file resulted in identical
         # vectors to the prior processing.
 
+        prior_vector_ids = await list_document_chunk_vector_ids(detached_record.id)
+
         async with update_tracking_record(doc_uuid=detached_record.id) as updateable_record:
             if updateable_record is None:
                 # The tracking record should exist when operations are normal: this big function
                 # started with a verification that the tracking record existed.
                 logger.warning('tracking record %s was deleted elsewhere', detached_record.id)
 
-                delete_vectors_by_document_id(detached_record.id)
+                await delete_vectors_by_document_id(detached_record.id)
 
                 return
 
             updateable_record.status = DocumentStatus.INGESTED
             updateable_record.ingested_time = func.current_timestamp()
 
-            if updateable_record.vector_ids is None:
-                updateable_record.vector_ids = []
-            prior_vector_ids = list(updateable_record.vector_ids)
-
-            updateable_record.vector_ids.extend(new_vector_ids)
+            await replace_document_chunks(detached_record.id, chunk_data)
 
         logger.info('stored %d vectors regarding %s', len(new_vector_ids), rel_path)
 
@@ -211,7 +229,7 @@ async def _ingest_one_document(
                 # the beginning of this function tested for existance.
                 logger.warning('tracking record %s was deleted elsewhere', detached_record.id)
 
-                delete_vectors_by_document_id(detached_record.id)
+                await delete_vectors_by_document_id(detached_record.id)
 
                 return
 

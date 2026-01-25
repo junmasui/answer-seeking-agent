@@ -1,13 +1,15 @@
 """This provides the vector store used by this application."""
 
 import logging
-import uuid
 from functools import cache
 
-from core_db.providers.sql_database import DataDomain, get_async_engine, get_async_sessionmaker, ping_async_sql_database
+import uuid
+
+from core_db.doc_mgr.doc_chunk.query import list_document_chunk_vector_ids
+from core_db.providers.sql_database import DataDomain, get_async_engine, ping_async_sql_database
 from core_public.status_models import PingResult
 from langchain_postgres import PGVector
-from sqlalchemy import MetaData, select
+from sqlalchemy import MetaData
 
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
@@ -90,24 +92,10 @@ async def find_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Find vector embedding UUIDs associated with a specific document ID.
 
-    Returns a list of vector embedding UUID strings that belong to the specified parent document by
-    querying the custom metadata field 'parent_document_id'.
+    Returns a list of vector embedding UUID strings that belong to the specified tracked document by
+    querying the tracked document chunks table.
     """
-    embedding_table = await _get_reflected_embedding_table()
-
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
-
-    async with sessionmaker() as session:
-        # Build a select statement filtering on cmetadata ->> 'parent_document_id'
-        stmt = select(embedding_table.c.uuid).where(
-            embedding_table.c.cmetadata.op('->>')('parent_document_id') == str(doc_id)
-        )
-
-        # Execute the query
-        result = await session.execute(stmt)
-
-        # `fetchall` must be called inside the session context.
-        return [str(row[0]) for row in result.fetchall()]
+    return await list_document_chunk_vector_ids(doc_id)
 
 
 async def delete_vectors_by_document_id(doc_id: uuid.UUID):
