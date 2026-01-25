@@ -61,7 +61,7 @@ def _count_files_in_tree(dir_name: str) -> int:
     return file_count
 
 
-def ping_file_store() -> PingResult:
+async def ping_file_store() -> PingResult:
     """
     Pings the S3 file store to check its availability and permissions.
 

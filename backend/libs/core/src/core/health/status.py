@@ -5,7 +5,7 @@ import torch
 logger = logging.getLogger(__name__)
 
 
-def status_check():
+async def status_check():
     """Checks for CUDA availability and returns this server's status."""
     status = {'status': 'not good'}
     try:

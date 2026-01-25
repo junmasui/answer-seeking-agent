@@ -11,6 +11,17 @@
       <v-btn class="ma-2" size="large" @click="onCheckStatus">Refresh</v-btn>
     </v-col>
   </v-container>
+  <v-container>
+    <v-col cols="auto">
+      <v-card :color="healthColor" variant="elevated" class="mx-auto pa-2 ma-2">
+        <div>Status: {{ systemHealth }}</div>
+      </v-card>
+    </v-col>
+
+    <v-col cols="auto">
+      <v-btn class="ma-2" size="large" @click="onCheckHealth" :disabled="healthLoading">{{ healthButtenText }}</v-btn>
+    </v-col>
+  </v-container>
 </template>
 
 <script setup>
@@ -25,7 +36,11 @@ const currentUserStore = useCurrentUserStore()
 
 const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const systemStatus = ref('unknown')
+const systemHealth = ref('unknown')
 const statusColor = ref('primary')
+const healthColor = ref('primary')
+const healthButtenText = ref('Fetch')
+const healthLoading = ref(false)
 
 /**
  * Handles the manual status check button click.
@@ -38,6 +53,24 @@ async function onCheckStatus() {
 
 onMounted(async () => {
   await checkStatus()
+})
+
+/**
+ * Handles the manual health check button click.
+ * Resets the health to unknown and triggers a fresh status check from the server.
+ */
+async function onCheckHealth() {
+  healthLoading.value = true
+  try {
+    systemHealth.value = 'unknown'
+    await checkHealth()
+  } finally {
+    healthLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  // await chechHealth()
 })
 
 /**
@@ -75,6 +108,44 @@ async function checkStatus() {
     logger.apiError('Status check failed', error)
   }
 }
+
+/**
+ * Performs a health check by calling the server status endpoint.
+ * Updates the system status display and handles offline scenarios with proper error logging.
+ */
+async function checkHealth() {
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
+    }
+
+    const response = await fetch('/api/health', {
+      method: 'GET',
+      headers
+    })
+
+    if (!response.ok) {
+      systemHealth.value = 'offline'
+      throw new Error('Health check failed')
+    }
+
+    const data = await response.json()
+    logger.apiSuccess('Health check completed', { status: data.status })
+
+    if (data.status) {
+      systemHealth.value = data.status
+    }
+    healthButtenText.value = 'Refresh'
+  } catch (error) {
+    logger.apiError('Health check failed', error)
+  }
+}
+
 </script>
 
 <style>

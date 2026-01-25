@@ -44,7 +44,7 @@ async function resetConfirmed() {
       headers.Authorization = auth
     }
 
-    const response = await fetch('/api/admin/resetDatabase', {
+    const response = await fetch('/api/admin/reset-database', {
       method: 'POST',
       headers
     })
