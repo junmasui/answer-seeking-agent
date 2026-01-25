@@ -4,8 +4,6 @@ import uuid
 
 from core_public import DocumentStatus
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Uuid
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
 
@@ -80,9 +78,6 @@ class DbTrackedDocument(Base):
     ocr_strategy: Mapped[str] = mapped_column(String(32), nullable=False, server_default='use_document_set')
 
     s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=False)
-    # https://docs.sqlalchemy.org/en/20/orm/extensions/mutable.html
-    # and https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#sqlalchemy.dialects.postgresql.ARRAY
-    vector_ids: Mapped[list[str]] = mapped_column(MutableList.as_mutable(ARRAY(String)), nullable=True)
     ingested_time: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
     # Used to track the last user who acted on this document.
@@ -103,3 +98,43 @@ class DbTrackedDocument(Base):
 
     # Define the relationship to TrackedDocumentSet
     document_set: Mapped['DbTrackedDocumentSet'] = relationship(back_populates='documents')
+
+    # Define the relationship to tracked document chunks
+    chunks: Mapped[list['DbTrackedDocumentChunk']] = relationship(
+        order_by='DbTrackedDocumentChunk.id', back_populates='tracked_document', cascade='all, delete-orphan'
+    )
+
+
+class DbTrackedDocumentChunk(Base):
+    """
+    SQLAlchemy model representing a tracked document chunk in the database.
+
+    Stores vector store IDs for chunks along with optional page number metadata.
+    """
+
+    __tablename__ = 'tracked_document_chunks'
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    tracked_document_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey(f'{DbTrackedDocument.__tablename__}.id', ondelete='CASCADE')
+    )
+    vector_id: Mapped[str] = mapped_column(String(200), nullable=False)
+    page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Used to track the last user who acted on this document.
+    last_user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=True)
+
+    # 1. `server_default` means that the value is set inside the "CREATE TABLE" statement
+    #    by defining a default value that calls the current_timestamp function.
+    # 2. `onupdate` means that the value is set within the "UPDATE" statement.
+    #
+    # See https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_default
+    # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.onupdate
+    # and https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.Column.params.server_onupdate.
+    #
+    create_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=current_timestamp())
+    update_time: Mapped[datetime.datetime] = mapped_column(
+        DateTime, server_default=current_timestamp(), onupdate=current_timestamp(), nullable=True
+    )
+
+    tracked_document: Mapped['DbTrackedDocument'] = relationship(back_populates='chunks')

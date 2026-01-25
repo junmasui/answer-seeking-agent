@@ -21,7 +21,7 @@ async def delete_document(document_id):
 
     # Delete vectors from vector store.
 
-    delete_vectors_by_document_id(tracking_record.id)
+    await delete_vectors_by_document_id(tracking_record.id)
 
     logger.info('deleted vectors: %s (%s)', tracking_record.id, tracking_record.source_url)
 

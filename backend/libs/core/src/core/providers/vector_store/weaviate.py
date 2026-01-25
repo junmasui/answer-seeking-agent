@@ -9,7 +9,7 @@ from langchain_weaviate import WeaviateVectorStore
 from weaviate import connect_to_local
 from weaviate.classes.config import Configure, DataType, Property, Tokenization, VectorDistances, VectorFilterStrategy
 from weaviate.classes.init import AdditionalConfig, Auth, Timeout
-from weaviate.classes.query import Filter
+from core_db.doc_mgr.doc_chunk.query import list_document_chunk_vector_ids
 
 from ...lib_config import get_lib_config
 from ...signals import reset_data_handler, start_up_handler
@@ -177,41 +177,24 @@ def get_vector_store():
     return vector_store
 
 
-def find_vectors_by_document_id(doc_id: uuid.UUID):
+async def find_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Find vector embedding UUIDs associated with a specific document ID.
 
-    Returns a list of vector embedding UUID strings that belong to the specified parent document by
-    querying the custom metadata field 'parent_document_id'.
+    Returns a list of vector embedding UUID strings that belong to the specified tracked document by
+    querying the tracked document chunks table.
     """
-    collection = _get_collection()
-
-    ids = []
-    batch_size = 50
-    offset = 0
-    while True:
-        query_response = collection.query.fetch_objects(
-            filters=Filter.by_property('document_id').equal(str(doc_id)), limit=batch_size, offset=offset
-        )
-
-        if len(query_response.objects) == 0:
-            break
-
-        batch_ids = [obj.uuid for obj in query_response.objects]
-        ids.extend(batch_ids)
-        offset = offset + batch_size
-
-    return ids
+    return await list_document_chunk_vector_ids(doc_id)
 
 
-def delete_vectors_by_document_id(doc_id: uuid.UUID):
+async def delete_vectors_by_document_id(doc_id: uuid.UUID):
     """
     Delete all vector embeddings associated with a specific document ID.
 
     Finds and removes all vector embeddings that belong to the specified parent document from the
     vector store by first querying for their IDs.
     """
-    vector_ids = find_vectors_by_document_id(doc_id)
+    vector_ids = await find_vectors_by_document_id(doc_id)
 
     vector_store = get_vector_store()
 
