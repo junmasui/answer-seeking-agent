@@ -53,6 +53,7 @@ import { useDocumentSetStore } from './DocSetStore'
 import AddDocSetDialog from './AddDocSetDialog.vue'
 import EditDocSetDialog from './EditDocSetDialog.vue'
 import logger from '../common/Logger.js'
+import { ocrStrategyLabels } from './OcrStrategyOptions.js'
 
 const documentSetStore = useDocumentSetStore()
 
@@ -69,6 +70,7 @@ const headers = ref([
   },
   { title: 'Is Public', value: 'isPublicViewable', sortable: true },
   { title: 'Is Default', value: 'isNewDocDefault', sortable: true },
+  { title: 'OCR Strategy', value: 'ocrStrategyLabel', sortable: false },
   {
     title: 'Last Modified Date',
     value: 'modificationTime',
@@ -106,7 +108,8 @@ function addDocSet() {
   newDocSet.value = {
     name: '',
     isPublicViewable: true,
-    isNewDocDefault: false
+    isNewDocDefault: false,
+    ocrStrategy: 'hi_res'
   }
 }
 
@@ -138,7 +141,8 @@ async function addDocumentSet() {
     const body = {
       name: newDocSet.value.name,
       isNewDocDefault: newDocSet.value.isNewDocDefault,
-      isPublicViewable: newDocSet.value.isPublicViewable
+      isPublicViewable: newDocSet.value.isPublicViewable,
+      ocrStrategy: newDocSet.value.ocrStrategy
     }
 
     const response = await fetch('/api/document-sets/', {
@@ -214,7 +218,8 @@ async function editDocumentSet(edittedDocSet) {
     const body = {
       name: edittedDocSet.name,
       isNewDocDefault: edittedDocSet.isNewDocDefault,
-      isPublicViewable: edittedDocSet.isPublicViewable
+      isPublicViewable: edittedDocSet.isPublicViewable,
+      ocrStrategy: edittedDocSet.ocrStrategy
     }
 
     const response = await fetch(`/api/document-sets/${doc_set_uuid}`, {
@@ -416,7 +421,13 @@ async function loadItems() {
 
   return {
     totalItems: data.documentSetCount,
-    items: data.documentSets.map((item) => toRaw(item)),
+    items: data.documentSets.map((item) => {
+      const rawItem = toRaw(item)
+      return {
+        ...rawItem,
+        ocrStrategyLabel: ocrStrategyLabels[rawItem.ocrStrategy] || rawItem.ocrStrategy
+      }
+    }),
     tableUpdatedTime: data.tableUpdatedTime
   }
 }

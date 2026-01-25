@@ -109,14 +109,10 @@ async def reset(sender):
         return
 
     bucket = get_s3_bucket()
-    for dirpath, dirnames, filenames in bucket.walk(top_down=False):
-        for subdirname in dirnames:
-            subdirpath = dirpath / subdirname
-            subdirpath.rmdir()
-        if len(dirnames) > 0:
-            logger.debug('cleared %d subdirs from %s', len(dirnames), str(dirpath))
-        for filename in filenames:
-            filepath = dirpath / filename
-            filepath.unlink()
-        if len(filenames) > 0:
-            logger.debug('cleared %d files from %s', len(filenames), str(dirpath))
+    for item in bucket.iterdir():
+        if item.is_dir():
+            item.rmtree()
+            logger.debug('cleared subdir %s', str(item))
+        elif item.is_file():
+            item.unlink()
+            logger.debug('cleared file %s', str(item))

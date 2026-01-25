@@ -25,19 +25,18 @@ async def update_doc_set_record(doc_set_uuid):
     sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
     async with sessionmaker() as session:
-        try:
-            async with session.begin():
+        async with session.begin():
+            try:
                 stmt = select(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id == doc_set_uuid)
                 result = await session.execute(stmt)
 
                 existing_obj = result.scalar_one()
 
-        except NoResultFound as ex:
-            logger.warning('No tracking doc record found for %s', doc_set_uuid, exc_info=ex)
-            return
-        except MultipleResultsFound as ex:
-            logger.warning('Multiple tracking doc records found for %s', doc_set_uuid, exc_info=ex)
-            return
+            except NoResultFound as ex:
+                logger.warning('No tracking doc record found for %s', doc_set_uuid, exc_info=ex)
+                return
+            except MultipleResultsFound as ex:
+                logger.warning('Multiple tracking doc records found for %s', doc_set_uuid, exc_info=ex)
+                return
 
-        async with session.begin():
             yield existing_obj

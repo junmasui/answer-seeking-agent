@@ -7,8 +7,9 @@ from uuid import UUID
 from cloudpathlib.s3 import S3Path
 from core_db.db_models import DbTrackedDocument
 from core_db.doc_mgr.doc.query import get_documents
+from core_db.doc_mgr.doc_set.query import get_document_sets
 from core_db.doc_mgr.doc.update import update_tracking_record
-from core_public import DocumentStatus
+from core_public import DocumentOcrStrategy, DocumentStatus
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from sqlalchemy import func
@@ -30,6 +31,7 @@ async def _load_one_source(
     source_url: str,
     content_type: str,
     download_time_utc: datetime,
+    ocr_strategy: str,
 ) -> AsyncGenerator[Document, None]:
     """
     Load and process documents from a single source file, enriching each document with metadata.
@@ -37,7 +39,7 @@ async def _load_one_source(
     Uses the appropriate document loader for the file type and yields individual document chunks
     with enhanced metadata including document set ID, source URL, content type, and download time.
     """
-    loader = get_doc_loader(file_path=source_path, strategy='fast')
+    loader = get_doc_loader(file_path=source_path, strategy=ocr_strategy)
 
     check_in_interval = 10
     check_in_time = datetime.now() + timedelta(seconds=check_in_interval)
@@ -130,6 +132,14 @@ async def _ingest_one_document(
         # the document-set ID.
         doc_set_id = detached_record.document_set_id
 
+        ocr_strategy_value = detached_record.ocr_strategy or DocumentOcrStrategy.USE_DOCUMENT_SET.value
+        if ocr_strategy_value == DocumentOcrStrategy.USE_DOCUMENT_SET.value:
+            document_sets = await get_document_sets([doc_set_id])
+            if document_sets:
+                ocr_strategy_value = document_sets[0].ocr_strategy
+            else:
+                ocr_strategy_value = DocumentOcrStrategy.HI_RES.value
+
         # Process the file.
         # Update the vector store in increments. The vector store
         # will represent a partially processed file while the file is
@@ -145,6 +155,7 @@ async def _ingest_one_document(
             source_url=source_url,
             content_type=content_type,
             download_time_utc=download_time_utc,
+            ocr_strategy=ocr_strategy_value,
         ):
             document_chunks.append(doc_chunk)
             if len(document_chunks) >= batch_size:

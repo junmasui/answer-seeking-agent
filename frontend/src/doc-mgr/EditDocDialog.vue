@@ -3,7 +3,26 @@
     <v-card>
       <v-card-title class="text-h5"> Edit Document </v-card-title>
       <v-card-text>
-        <v-text-field clearable label="For Demo Purposes" variant="outlined"></v-text-field>
+        <v-text-field
+          v-model="modelValue.name"
+          label="File Name"
+          variant="outlined"
+          readonly
+        ></v-text-field>
+        <v-text-field
+          v-model="modelValue.documentSetName"
+          label="Document Set"
+          variant="outlined"
+          readonly
+        ></v-text-field>
+        <v-select
+          v-model="modelValue.ocrStrategy"
+          :items="ocrStrategyOptions"
+          item-title="title"
+          item-value="value"
+          label="OCR Strategy"
+          variant="outlined"
+        ></v-select>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -16,6 +35,8 @@
 </template>
 
 <script setup>
+import { ocrStrategyOptions } from './OcrStrategyOptions.js'
+
 const active = defineModel('active', {
   type: Boolean,
   default: false
@@ -23,8 +44,15 @@ const active = defineModel('active', {
 
 const modelValue = defineModel({
   type: Object,
+  default: () => {
+    return {
+      name: '',
+      documentSetName: '',
+      ocrStrategy: 'use_document_set'
+    }
+  },
   validator: (value) => {
-    const requiredKeys = ['key1', 'key2']
+    const requiredKeys = ['name', 'documentSetName', 'ocrStrategy']
     return requiredKeys.every((key) => key in value)
   }
 })

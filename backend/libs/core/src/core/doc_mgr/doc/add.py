@@ -18,6 +18,7 @@ async def add_document(
     cloud_path,
     bucket_path,
     user_id,
+    ocr_strategy='use_document_set',
 ):
     """Adds or updates the tracking record for the document."""
     if not isinstance(document_set_uuid, uuid.UUID):
@@ -42,4 +43,5 @@ async def add_document(
         size_bytes=size_bytes,
         file_modification_time=file_modification_time,
         s3_rel_path=s3_rel_path,
+        ocr_strategy=ocr_strategy,
     )

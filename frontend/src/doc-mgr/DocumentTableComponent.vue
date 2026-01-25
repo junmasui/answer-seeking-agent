@@ -59,6 +59,7 @@
       </confirmation-dialog>
       <edit-doc-dialog
         v-model:active="activeConfirmEdit"
+        v-model="targetItem"
         @canceled="closeEditDialog"
         @confirmed="applyEditDoc"
       >
@@ -76,13 +77,7 @@ import { useDocumentStore } from './DocStore'
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import logger from '../common/Logger.js'
 import EditDocDialog from './EditDocDialog.vue'
-
-const props = defineProps({
-  documentSet: {
-    type: Object,
-    default: null
-  }
-})
+import { ocrStrategyLabels } from './OcrStrategyOptions.js'
 
 const documentStore = useDocumentStore()
 
@@ -131,6 +126,7 @@ const headers = ref([
     filterable: true,
     filterModel: contentTypeFilter
   },
+  { title: 'OCR Strategy', value: 'ocrStrategyLabel', width: '120px', sortable: false },
   { title: 'Status', value: 'status', width: '50px', sortable: true },
   {
     title: 'Ingestion Date',
@@ -279,7 +275,7 @@ async function closeEditDialog() {
  * Calls the editDocument function and closes the dialog.
  */
 async function applyEditDoc() {
-  await props.editDocument(targetItem.value)
+  await editDocument(targetItem.value)
 
   await closeEditDialog()
 }
@@ -354,9 +350,37 @@ async function closeIngestAllUploaded() {
  * Placeholder function for editing a document.
  * @param {string} _doc_uuid - The unique identifier of the document to edit (unused in placeholder implementation)
  */
-async function editDocument(_doc_uuid) {
-  // Simulate the delay from a real call to the API Server.
-  await new Promise((resolve) => setTimeout(resolve, 100))
+async function editDocument(doc) {
+  const doc_uuid = doc.id
+  try {
+    const headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+    const auth = await getAuthorization()
+    if (auth) {
+      headers.Authorization = auth
+    }
+
+    const body = {
+      ocrStrategy: doc.ocrStrategy
+    }
+
+    const response = await fetch(`/api/documents/${doc_uuid}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(body, null, 2)
+    })
+
+    if (!response.ok) {
+      throw new Error('Edit failed')
+    }
+
+    await response.json()
+    logger.apiSuccess('Document edited', { docId: doc_uuid })
+  } catch (error) {
+    logger.apiError('Document edit failed', error, { docId: doc_uuid })
+  }
 }
 
 /**
@@ -607,7 +631,13 @@ async function loadItems() {
 
   return {
     totalItems: data.documentCount,
-    items: data.documents.map((item) => toRaw(item)),
+    items: data.documents.map((item) => {
+      const rawItem = toRaw(item)
+      return {
+        ...rawItem,
+        ocrStrategyLabel: ocrStrategyLabels[rawItem.ocrStrategy] || rawItem.ocrStrategy
+      }
+    }),
     tableUpdatedTime: data.tableUpdatedTime
   }
 }

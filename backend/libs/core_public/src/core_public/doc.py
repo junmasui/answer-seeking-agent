@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import Field
 
 from .base import CamelModel
+from .ocr import DocumentOcrStrategy
 
 #
 # Domain Models
@@ -40,6 +41,10 @@ class Document(CamelModel):
     ]
     document_set_id: Annotated[Optional[UUID], Field(description='Document set UUID.')]
     document_set_name: Annotated[Optional[str], Field(description='Document set name.')]
+    ocr_strategy: Annotated[
+        DocumentOcrStrategy,
+        Field(description='OCR strategy for this document or use_document_set for inherited settings.'),
+    ]
 
 
 class DocumentStats(CamelModel):
@@ -72,7 +77,11 @@ class DocumentList(CamelModel):
 class DocumentUpdateRequest(CamelModel):
     """Represents a request to update a document."""
 
-    document_set_id: Annotated[Optional[UUID], Field(description='Document set UUID.')]
+    document_set_id: Annotated[Optional[UUID], Field(description='Document set UUID.', default=None)]
+    ocr_strategy: Annotated[
+        Optional[DocumentOcrStrategy],
+        Field(description='OCR strategy override for this document.', default=None),
+    ]
 
 
 class BulkDeleteRequestBody(CamelModel):
@@ -94,3 +103,7 @@ class DocumentUploadFormData(CamelModel):
     source_url: Annotated[str, Field(description='The source URL of the document.')]
     content_type: Annotated[str, Field(description='The MIME content type of the document.')]
     download_time_utc_str: Annotated[str, Field(description='The download time of the document in UTC format.')]
+    ocr_strategy: Annotated[
+        DocumentOcrStrategy,
+        Field(description='OCR strategy for this document.', default=DocumentOcrStrategy.USE_DOCUMENT_SET),
+    ]

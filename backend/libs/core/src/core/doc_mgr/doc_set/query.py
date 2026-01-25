@@ -33,6 +33,7 @@ async def list_document_sets(
             status=DocumentSetStatus.ACTIVE,  # TODO - Replace hardcode with database column
             is_new_doc_default=_x.is_new_doc_default,
             is_public_viewable=_x.is_public_viewable,
+            ocr_strategy=_x.ocr_strategy,
         )
 
     doc_set_list = [_to_dict(x) for x in existing_objs]

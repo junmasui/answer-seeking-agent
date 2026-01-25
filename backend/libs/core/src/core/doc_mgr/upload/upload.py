@@ -65,7 +65,14 @@ def _get_doc_file_path(doc_set, partial_doc_path):
 
 
 async def upload_document(
-    doc_set_uuid, partial_doc_path, local_file, source_url, content_type, download_time_utc, user_id
+    doc_set_uuid,
+    partial_doc_path,
+    local_file,
+    source_url,
+    content_type,
+    download_time_utc,
+    user_id,
+    ocr_strategy='use_document_set',
 ):
     """
     Upload a complete document into our document system.
@@ -97,6 +104,7 @@ async def upload_document(
         content_type=content_type,
         download_time_utc=download_time_utc,
         user_id=user_id,
+        ocr_strategy=ocr_strategy,
     )
 
 
@@ -120,7 +128,14 @@ async def upload_chunk(doc_set_uuid, partial_doc_path, chunk_index, local_file):
 
 
 async def merge_chunked_document(
-    doc_set_uuid, partial_doc_path, total_chunks, source_url, content_type, download_time_utc, user_id
+    doc_set_uuid,
+    partial_doc_path,
+    total_chunks,
+    source_url,
+    content_type,
+    download_time_utc,
+    user_id,
+    ocr_strategy='use_document_set',
 ):
     """
     Merge then upload a chunked document into our document system.
@@ -156,6 +171,7 @@ async def merge_chunked_document(
         content_type=content_type,
         download_time_utc=download_time_utc,
         user_id=user_id,
+        ocr_strategy=ocr_strategy,
     )
 
 

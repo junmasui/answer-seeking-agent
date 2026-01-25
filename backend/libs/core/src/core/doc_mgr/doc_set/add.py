@@ -6,7 +6,13 @@ from core_db.doc_mgr.doc_set.add import add_or_update_document_set
 logger = logging.getLogger(__name__)
 
 
-async def add_document_set(name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID):
+async def add_document_set(
+    name: str,
+    is_new_doc_default: bool,
+    is_public_viewable: bool,
+    user_id: uuid.UUID,
+    ocr_strategy: str = 'hi_res',
+):
     """
     Add a new document set with the specified configuration.
 
@@ -14,5 +20,9 @@ async def add_document_set(name: str, is_new_doc_default: bool, is_public_viewab
     visibility, and user ownership information.
     """
     return await add_or_update_document_set(
-        name=name, is_new_doc_default=is_new_doc_default, is_public_viewable=is_public_viewable, user_id=user_id
+        name=name,
+        is_new_doc_default=is_new_doc_default,
+        is_public_viewable=is_public_viewable,
+        user_id=user_id,
+        ocr_strategy=ocr_strategy,
     )

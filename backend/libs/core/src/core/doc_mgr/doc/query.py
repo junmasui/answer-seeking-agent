@@ -85,6 +85,7 @@ async def list_documents(
             else _x.download_time_utc,
             document_set_id=_x.document_set.id,
             document_set_name=_x.document_set.name,
+            ocr_strategy=_x.ocr_strategy,
         )
 
     file_list = [_to_dict(x) for x in existing_objs]

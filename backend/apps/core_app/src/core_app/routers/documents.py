@@ -15,6 +15,7 @@ from core import (
 )
 from core_public import (
     BulkDeleteRequestBody,
+    DocumentOcrStrategy,
     DocumentList,
     DocumentStats,
     DocumentStatus,
@@ -41,6 +42,9 @@ async def get_upload_form_data(
     source_url: Annotated[str, Form(alias='sourceUrl')],
     content_type: Annotated[str, Form(alias='contentType')],
     download_time_utc_str: Annotated[str, Form(alias='downloadTimeUtc')],
+    ocr_strategy: Annotated[
+        DocumentOcrStrategy, Form(alias='ocrStrategy')
+    ] = DocumentOcrStrategy.USE_DOCUMENT_SET,
 ) -> DocumentUploadFormData:
     """Parse and validate document upload form data into a Pydantic model."""
     return DocumentUploadFormData(
@@ -50,6 +54,7 @@ async def get_upload_form_data(
         source_url=source_url,
         content_type=content_type,
         download_time_utc_str=download_time_utc_str,
+        ocr_strategy=ocr_strategy,
     )
 
 
@@ -145,11 +150,12 @@ async def handle_upload(
                 doc_set_uuid=form_data.document_set_id,
                 partial_doc_path=file.filename,
                 total_chunks=form_data.total_chunks,
-                source_url=form_data.source_url,
-                content_type=form_data.content_type,
-                download_time_utc=download_time_utc,
-                user_id=user_id,
-            )
+            source_url=form_data.source_url,
+            content_type=form_data.content_type,
+            download_time_utc=download_time_utc,
+            user_id=user_id,
+            ocr_strategy=form_data.ocr_strategy,
+        )
         return
 
     await upload_document(
@@ -160,6 +166,7 @@ async def handle_upload(
         content_type=form_data.content_type,
         download_time_utc=download_time_utc,
         user_id=user_id,
+        ocr_strategy=form_data.ocr_strategy,
     )
 
 
@@ -172,7 +179,12 @@ async def handle_single_update(
     """Update the file specified by the document UUID."""
     user_id = current_user.userid if current_user is not None else None
 
-    await update_document(doc_uuid, doc_set_uuid=body.document_set_id, last_user_id=user_id)
+    await update_document(
+        doc_uuid,
+        doc_set_uuid=body.document_set_id,
+        ocr_strategy=body.ocr_strategy,
+        last_user_id=user_id,
+    )
 
     return {}
 
