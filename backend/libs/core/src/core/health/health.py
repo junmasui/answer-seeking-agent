@@ -35,8 +35,8 @@ async def system_health_check():
     # Ping S3 file store
     try:
         # TODO: Make ping_file_store async
-        minio_status = ping_file_store()
-        system_health['file_store'] = minio_status.model_dump()
+        file_store_status = await ping_file_store()
+        system_health['file_store'] = file_store_status.model_dump()
     except Exception as e:
         logger.error('Error during S3 file store health check', exc_info=e)
         system_health['file_store'] = PingResult(

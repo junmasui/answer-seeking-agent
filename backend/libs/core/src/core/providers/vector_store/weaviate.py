@@ -219,7 +219,7 @@ def delete_vectors_by_document_id(doc_id: uuid.UUID):
         vector_store.delete(ids=vector_ids)
 
 
-def ping_vector_store() -> PingResult:
+async def ping_vector_store() -> PingResult:
     """
     Pings the Weaviate vector store to check its health and connectivity.
 
