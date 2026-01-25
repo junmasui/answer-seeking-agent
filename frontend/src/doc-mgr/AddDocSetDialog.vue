@@ -9,6 +9,14 @@
           label="Name"
           variant="outlined"
         ></v-text-field>
+        <v-select
+          v-model="modelValue.ocrStrategy"
+          :items="ocrStrategyOptionsForDocSet"
+          item-title="title"
+          item-value="value"
+          label="OCR Strategy"
+          variant="outlined"
+        ></v-select>
         <v-checkbox v-model="modelValue.isPublicViewable" label="Is Public"></v-checkbox>
         <v-checkbox v-model="modelValue.isNewDocDefault" label="Is Default"></v-checkbox>
       </v-card-text>
@@ -23,6 +31,8 @@
 </template>
 
 <script setup>
+import { ocrStrategyOptionsForDocSet } from './OcrStrategyOptions.js'
+
 const active = defineModel('active', {
   type: Boolean,
   default: false
@@ -34,11 +44,12 @@ const modelValue = defineModel({
     return {
       name: '',
       isPublicViewable: true,
-      isNewDocDefault: false
+      isNewDocDefault: false,
+      ocrStrategy: 'hi_res'
     }
   },
   validator: (value) => {
-    const requiredKeys = ['name', 'isPublicViewable', 'isNewDocDefault']
+    const requiredKeys = ['name', 'isPublicViewable', 'isNewDocDefault', 'ocrStrategy']
     return requiredKeys.every((key) => key in value)
   }
 })

@@ -7,7 +7,13 @@ from core_db.db_models import DbTrackedDocumentSet
 from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 
-async def add_or_update_document_set(name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID):
+async def add_or_update_document_set(
+    name: str,
+    is_new_doc_default: bool,
+    is_public_viewable: bool,
+    user_id: uuid.UUID,
+    ocr_strategy: str = 'hi_res',
+):
     """Adds or updates the document set."""
     sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
@@ -27,6 +33,7 @@ async def add_or_update_document_set(name: str, is_new_doc_default: bool, is_pub
                 existing_obj.is_new_doc_default = is_new_doc_default
                 existing_obj.is_public_viewable = is_public_viewable
                 existing_obj.last_user_id = user_id
+                existing_obj.ocr_strategy = ocr_strategy
             else:
                 doc_set_uuid = uuid.uuid4()
 
@@ -36,6 +43,7 @@ async def add_or_update_document_set(name: str, is_new_doc_default: bool, is_pub
                     s3_rel_path=s3_rel_path,
                     is_new_doc_default=is_new_doc_default,
                     is_public_viewable=is_public_viewable,
+                    ocr_strategy=ocr_strategy,
                     last_user_id=user_id,
                 )
                 session.add(new_obj)

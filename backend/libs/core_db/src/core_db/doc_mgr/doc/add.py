@@ -19,6 +19,7 @@ async def add_or_update_document(
     size_bytes,
     file_modification_time,
     s3_rel_path,
+    ocr_strategy='use_document_set',
 ):
     """
     Add or update a document tracking record in the database.
@@ -50,6 +51,7 @@ async def add_or_update_document(
                 existing_obj.download_time_utc = download_time_utc
                 existing_obj.s3_rel_path = str(s3_rel_path)
                 existing_obj.last_user_id = user_id
+                existing_obj.ocr_strategy = ocr_strategy
             else:
                 doc_uuid = uuid.uuid4()
 
@@ -65,6 +67,7 @@ async def add_or_update_document(
                     content_type=content_type,
                     download_time_utc=download_time_utc,
                     s3_rel_path=str(s3_rel_path),
+                    ocr_strategy=ocr_strategy,
                     last_user_id=user_id,
                 )
                 session.add(new_obj)

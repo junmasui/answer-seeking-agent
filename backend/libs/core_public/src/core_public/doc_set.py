@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import Field
 
 from .base import CamelModel
+from .ocr import OcrStrategy
 
 #
 # Domain Models
@@ -34,6 +35,7 @@ class DocumentSet(CamelModel):
     status: Annotated[DocumentSetStatus, Field(description='Status.')]
     is_new_doc_default: Annotated[bool, Field(description='True if default document set for new documents')]
     is_public_viewable: Annotated[bool, Field(description='True if documents are publicly visible')]
+    ocr_strategy: Annotated[OcrStrategy, Field(description='OCR strategy for documents in this set.')]
 
 
 class DocumentSetStats(CamelModel):
@@ -79,6 +81,10 @@ class DocumentSetAddRequest(CamelModel):
     name: Annotated[str, Field(description='Name of document set.')]
     is_new_doc_default: Annotated[bool, Field(description='True if default document set for new documents')]
     is_public_viewable: Annotated[bool, Field(description='True if documents are publicly visible')]
+    ocr_strategy: Annotated[
+        OcrStrategy,
+        Field(description='OCR strategy for documents in this set.', default=OcrStrategy.HI_RES),
+    ]
 
 
 class DocumentSetUpdateRequest(CamelModel):
@@ -90,4 +96,8 @@ class DocumentSetUpdateRequest(CamelModel):
     ]
     is_public_viewable: Annotated[
         Optional[bool], Field(description='True if documents are publicly visible', default=None)
+    ]
+    ocr_strategy: Annotated[
+        Optional[OcrStrategy],
+        Field(description='OCR strategy for documents in this set.', default=None),
     ]

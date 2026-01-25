@@ -8,7 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 async def update_document_set(
-    doc_set_uuid, name=None, is_new_doc_default=None, is_public_viewable=None, last_user_id=None
+    doc_set_uuid,
+    name=None,
+    is_new_doc_default=None,
+    is_public_viewable=None,
+    ocr_strategy=None,
+    last_user_id=None,
 ):
     """
     Update specific fields of a document set record.
@@ -29,6 +34,9 @@ async def update_document_set(
 
         if is_public_viewable is not None:
             record.is_public_viewable = is_public_viewable
+
+        if ocr_strategy is not None:
+            record.ocr_strategy = ocr_strategy
 
         if last_user_id:
             record.last_user_id = last_user_id

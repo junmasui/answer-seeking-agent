@@ -24,8 +24,8 @@ async def update_prompt_version_record(
     sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
 
     async with sessionmaker() as session:
-        try:
-            async with session.begin():
+        async with session.begin():
+            try:
                 stmt = select(DbPromptVersion)
                 if prompt_version_uuid is not None:
                     criteria = and_(DbPromptVersion.prompt_id == prompt_uuid, DbPromptVersion.id == prompt_version_uuid)
@@ -36,14 +36,13 @@ async def update_prompt_version_record(
 
                 existing_obj = result.scalar_one()
 
-        except NoResultFound as ex:
-            logger.warning('No tracking doc record found for %s version %s', prompt_uuid, version, exc_info=ex)
-            return
-        except MultipleResultsFound as ex:
-            logger.warning('Multiple tracking doc records found for %s version %s', prompt_uuid, version, exc_info=ex)
-            return
+            except NoResultFound as ex:
+                logger.warning('No tracking doc record found for %s version %s', prompt_uuid, version, exc_info=ex)
+                return
+            except MultipleResultsFound as ex:
+                logger.warning('Multiple tracking doc records found for %s version %s', prompt_uuid, version, exc_info=ex)
+                return
 
-        async with session.begin():
             yield existing_obj
 
             # IMPORTANT!!
@@ -55,18 +54,16 @@ async def update_prompt_version_record(
             status = existing_obj.status
             version = existing_obj.version
 
-        # Count versions. The count will be the number of records with this prompt's name.
-        with session.begin():
+            # Count versions. The count will be the number of records with this prompt's name.
             stmt = select(func.count()).select_from(DbPromptVersion).where(DbPromptVersion.prompt_id == prompt_id)
-            result = session.execute(stmt)
+            result = await session.execute(stmt)
             version_count = result.scalar()
 
-        # Only one version can be active
-        if status == PromptStatus.ACTIVE and version_count > 1:
-            with session.begin():
+            # Only one version can be active
+            if status == PromptStatus.ACTIVE and version_count > 1:
                 stmt = (
                     update(DbPromptVersion)
                     .where(and_(DbPromptVersion.prompt_id == prompt_id, DbPromptVersion.version != version))
                     .value(status=PromptStatus.INACTIVE)
                 )
-                result = session.execute(stmt)
+                await session.execute(stmt)

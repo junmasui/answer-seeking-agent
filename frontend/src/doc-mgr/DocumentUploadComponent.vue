@@ -13,6 +13,15 @@
       item-id="id"
       return-object
     ></v-autocomplete>
+    <v-select
+      v-model="selectedOcrStrategy"
+      class="ma-2"
+      variant="outlined"
+      label="OCR Strategy"
+      :items="ocrStrategyOptions"
+      item-title="title"
+      item-value="value"
+    ></v-select>
 
     <v-container>
       <v-row class="flex-nowrap" no-gutters>
@@ -45,12 +54,14 @@ import { storeToRefs } from 'pinia'
 import { useUploadStore } from './UploadStore'
 import logger from '../common/Logger.js'
 import { getAuthorization } from '../common/AuthUtils.js'
+import { ocrStrategyOptions } from './OcrStrategyOptions.js'
 
 const updateStore = useUploadStore()
 
 const { fileList, selectedDocSet } = storeToRefs(updateStore)
 
 const downloading = ref(false)
+const selectedOcrStrategy = ref('use_document_set')
 
 const disableUpload = computed(() => {
   // The upload button is enabled only when all these conditions are met:
@@ -99,6 +110,7 @@ async function onUpload() {
           formData.append('chunkIndex', chunkIndex)
           formData.append('totalChunks', totalChunks)
           formData.append('documentSetId', selectedDocSet.value.id)
+          formData.append('ocrStrategy', selectedOcrStrategy.value)
 
           const headers = {
             Accept: 'application/json'

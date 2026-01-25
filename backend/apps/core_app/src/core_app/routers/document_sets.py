@@ -52,6 +52,7 @@ async def handle_single_insert(
         name=body.name,
         is_new_doc_default=body.is_new_doc_default,
         is_public_viewable=body.is_public_viewable,
+        ocr_strategy=body.ocr_strategy,
         user_id=user_id,
     )
 
@@ -78,6 +79,7 @@ async def handle_single_update(
         name=body.name,
         is_new_doc_default=body.is_new_doc_default,
         is_public_viewable=body.is_public_viewable,
+        ocr_strategy=body.ocr_strategy,
         last_user_id=user_id,
     )
 

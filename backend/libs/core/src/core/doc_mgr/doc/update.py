@@ -16,7 +16,7 @@ async def update_document_status(doc_uuid, status, last_user_id=None):
             record.last_user_id = last_user_id
 
 
-async def update_document(doc_uuid, doc_set_uuid=None, last_user_id=None):
+async def update_document(doc_uuid, doc_set_uuid=None, ocr_strategy=None, last_user_id=None):
     """Updates status field with option to update."""
     async with update_tracking_record(doc_uuid=doc_uuid) as record:
         if record is None:
@@ -24,6 +24,9 @@ async def update_document(doc_uuid, doc_set_uuid=None, last_user_id=None):
 
         if doc_set_uuid is not None:
             record.document_set_id = doc_set_uuid
+
+        if ocr_strategy is not None:
+            record.ocr_strategy = ocr_strategy
 
         if last_user_id:
             record.last_user_id = last_user_id

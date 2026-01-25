@@ -29,6 +29,7 @@ class DbTrackedDocumentSet(Base):
 
     is_new_doc_default: Mapped[bool] = mapped_column(Boolean, nullable=False)
     is_public_viewable: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    ocr_strategy: Mapped[str] = mapped_column(String(32), nullable=False, server_default='hi_res')
 
     s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=True)
 
@@ -75,6 +76,8 @@ class DbTrackedDocument(Base):
     source_url: Mapped[str] = mapped_column(String(800), nullable=False)
     content_type: Mapped[str] = mapped_column(String(800), nullable=False)
     download_time_utc: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
+
+    ocr_strategy: Mapped[str] = mapped_column(String(32), nullable=False, server_default='use_document_set')
 
     s3_rel_path: Mapped[str] = mapped_column(String(800), nullable=False)
     # https://docs.sqlalchemy.org/en/20/orm/extensions/mutable.html
