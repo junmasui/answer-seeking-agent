@@ -14,6 +14,9 @@ export default defineConfig({
             'webui-server-autotest'
         ],
     },
+    test: {
+        environment: 'jsdom',
+    },
     plugins: [
         vue({
             template: {

@@ -42,7 +42,7 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
         fi
     done
 
-    echo "Mount active."
+    echo "Mount node_modules active."
 fi
 
 # Transition to the non-privileged entrypoint

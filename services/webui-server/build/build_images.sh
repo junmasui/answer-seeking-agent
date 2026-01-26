@@ -46,3 +46,15 @@ $DOCKER build \
   --progress plain \
   . 2>&1 \
 | tee $LOG_DIR/build-frontend-dev.log
+
+$DOCKER build \
+  $DOCKER_BUILD_OPTS \
+  --file Dockerfile \
+  --build-context config-dir=../config/ \
+  --build-context dependency-gate-dir=../../dependency-gate \
+  --build-context frontend-dir=../../../frontend/ \
+  --target test-xvfb \
+  --tag localhost/localhost/answers-frontend-test-xvfb:node-22-bookworm \
+  --progress plain \
+  . 2>&1 \
+| tee $LOG_DIR/build-frontend-test-xvfb.log

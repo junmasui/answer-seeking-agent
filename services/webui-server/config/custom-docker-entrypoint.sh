@@ -12,6 +12,7 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
     mkdir -p /app/frontend
     
     export APP_COMMAND="$*"
+    export APP_AUTORESTART="${APP_AUTORESTART:-true}"
     exec /usr/bin/supervisord -c /etc/supervisord.conf
 else
     # Standard Mode

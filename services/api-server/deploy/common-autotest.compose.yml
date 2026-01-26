@@ -137,8 +137,9 @@ services:
       ##
       ##
       # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: true
+      USE_FUSE_SRC_DIR: 'true'
       PYTHONPYCACHEPREFIX: /home/python/.pycache
+      APP_AUTORESTART: 'false'
     cap_add:
       - SYS_ADMIN
     devices:
@@ -156,9 +157,11 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_automated_test.sh:/run_automated_test.sh:ro
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
+      - ../config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      - ../config/supervisord.conf:/etc/supervisord.conf:ro
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
+      - ../config/supervisord.conf:/etc/supervisord.conf:ro
+      - ../config/stop_supervisor.sh:/stop_supervisor.sh:ro
       ##SRC - backend-autotest-home-4:/home/python
       ##SRC - backend-autotest-venv-4:/app/backend/.venv
     secrets:
