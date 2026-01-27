@@ -100,8 +100,6 @@ class LibrarySettings(BaseSettings):
 
     vector_store_type: str = Field(default='weaviate', validation_alias='VECTOR_STORE_TYPE')
 
-    enable_langfuse_tracing: bool = Field(default=True, validation_alias='ENABLE_LANGFUSE_TRACKING')
-
     chat_llm_type: LowerCaseStr = Field(default='', validation_alias='CHAT_LLM_TYPE')
     llm_has_structured_output: bool = Field(default=False, validation_alias='LLM_HAS_STRUCTURED_OUTPUT')
 

@@ -84,17 +84,6 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     # Initialize telemetry callback handlers
     callback_handlers = []
 
-    # # Langfuse handler (legacy, will be deprecated)
-    # if config.enable_langfuse_tracing:
-    #     callback_kwargs = {'session_id': thread_id.hex, 'sample_rate': 1.0}
-    #     if user_id is not None:
-    #         callback_kwargs['user_id'] = (
-    #             user_id.hex if isinstance(user_id, uuid.UUID) else user_id
-    #         )
-    #     # Currently commented out for migration
-    #     # langfuse_handler = CallbackHandler(**callback_kwargs)
-    #     # callback_handlers.append(langfuse_handler)
-    #
     # # OpenTelemetry/OpenLLMetry handler (new implementation)
     # from core_telemetry import get_callback_handler
     #
