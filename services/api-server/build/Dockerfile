@@ -94,6 +94,7 @@ COPY --from=config-dir ./run_api_server.sh /run_api_server.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
 
 COPY --from=config-dir ./mount_helper.sh /usr/local/bin/mount_helper.sh
+COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 
 COPY --from=celery-config-dir ./run_celery_worker.sh /run_celery_worker.sh
 COPY --from=celery-config-dir ./run_celery_flower.sh /run_celery_flower.sh

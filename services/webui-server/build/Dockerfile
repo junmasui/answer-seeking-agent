@@ -38,6 +38,7 @@ COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entr
 COPY --from=config-dir ./run_webui_server.sh /run_webui_server.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
 COPY --from=config-dir ./webui_mount_helper.sh /usr/local/bin/webui_mount_helper.sh
+COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 
 COPY --from=dependency-gate-dir ./wait_for_resource.sh /
 
@@ -72,6 +73,11 @@ CMD ["run_webui_server.sh"]
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
+#================
+#
+# production
+#
+
 FROM production-base AS production
 
 ARG USER_ID=1000
@@ -88,6 +94,10 @@ RUN \
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}
 
+#================
+#
+# dev
+#
 
 FROM production-base AS dev
 
@@ -126,6 +136,89 @@ ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
 # Build the app then start the Vue.js development server
 CMD ["run_webui_server.sh"]
+
+# Switch to the custom user
+USER ${USER_ID}:${GROUP_ID}
+
+#================
+#
+# test / playwright
+#
+
+FROM production-base AS test-xvfb
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+USER root
+
+# This is to allow the container user to mount the directory using FUSE.
+# The user will run the 'weed mount' command.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    fuse3 \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    # Install weed CLI
+    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.79/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
+
+RUN \
+    export DEBIAN_FRONTEND=noninteractive ; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    bind9-dnsutils \
+    iproute2 \
+    psmisc \
+    tree \
+    openssh-client \
+    patch \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install system dependencies and browsers
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    xauth \
+    xvfb \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    chromium \
+    firefox-esr \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=config-dir ./run_automated_tests.sh /run_automated_tests.sh
+COPY --from=config-dir ./webui_mount_helper.sh /usr/local/bin/webui_mount_helper.sh
+
+COPY --from=dependency-gate-dir ./wait_for_resource.sh /
+
+
+
+RUN chmod a+x /custom-docker-entrypoint.sh \
+    && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
+    && chmod a+x /run_automated_tests.sh \
+    && chmod a+x /usr/local/bin/webui_mount_helper.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
+    && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh \
+    && chown ${USER_ID}:${GROUP_ID} /run_automated_tests.sh
+
+
+ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
+
+# Build the app then start the Vue.js development server
+CMD ["run_automated_tests.sh"]
 
 # Switch to the custom user
 USER ${USER_ID}:${GROUP_ID}

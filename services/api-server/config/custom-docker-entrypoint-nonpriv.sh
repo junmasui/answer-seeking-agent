@@ -7,8 +7,8 @@ cd /app/backend
 
 if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
 
-    echo "Waiting for mount at /app/backend..."
-
+    echo "USE_FUSE_SRC_DIR is set to true. Waiting for mount at /app/backend..."
+    
     # Wait for mount
     attempt=0
     while ! mountpoint -q /app/backend; do
@@ -22,32 +22,28 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
 
     echo "Mount active."
 
-    echo "Waiting for mount at /app/backend/.venv..."
-
     # Wait for mount
     attempt=0
     while ! mountpoint -q /app/backend/.venv; do
         sleep 1
         attempt=$((attempt+1))
         if [ $attempt -ge 30 ]; then
-            echo "Error: Mount failed to appear after 30 seconds."
+            echo "Error: .venv mount failed to appear after 30 seconds."
             exit 1
         fi
     done
+fi
 
-    echo "Mount active."
+# Change directory. If we are mount file-systems, then this operation must
+# wait until after the mounts are ready.
+#
+cd /app/backend
 
 
-    #    
-    # Create the virtual environment only once.
-    #
-    # For the CACHEDIR.TAG specification, see https://bford.info/cachedir/
-    # For uv's explanation, see: https://github.com/astral-sh/uv/issues/1648
-    if [ ! -f ".venv/CACHEDIR.TAG" ] \
-        || ! ( grep -q "Signature: 8a477f597d28d172789f06886806bc55" ".venv/CACHEDIR.TAG" )
-    then
-        uv venv --allow-existing
-    fi
+if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+
+    # Create or ensure the virtual environment exists.
+    uv venv --allow-existing
 
     # Sync the virtual environment (persistent across restarts now)
     # Use --frozen to prevent writing to the lockfile (which might be read-only or owned by another user)
@@ -77,6 +73,19 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
         exit $EXIT_CODE
     fi
 fi
+
+# Wait for valid virtual environment
+attempt=0
+while [ ! -f ".venv/bin/activate" ]; do
+    echo "Waiting for .venv/bin/activate..."
+    sleep 1
+    attempt=$((attempt+1))
+    if [ $attempt -ge 10 ]; then
+         echo "Error: .venv/bin/activate not found after 10 seconds."
+         ls -la .venv || true
+         exit 1
+    fi
+done
 
 source .venv/bin/activate
 

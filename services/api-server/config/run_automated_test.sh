@@ -77,17 +77,14 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=20.0
 fi
 
-df -h
-ls ./libs
-cat ./libs/core_db/tests/conftest.py
+#   -- \
+#   watchmedo auto-restart \
+#   --debug-force-polling \
+#   --no-restart-on-command-exit \
+#   --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
+#   --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
 
 uv run --frozen --no-sync \
-   -- \
-   watchmedo auto-restart \
-   --debug-force-polling \
-   --no-restart-on-command-exit \
-   --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
-   --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
    -- \
    pytest -v -v --capture=tee-sys apps libs
 

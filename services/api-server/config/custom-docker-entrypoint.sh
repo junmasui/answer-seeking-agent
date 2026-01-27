@@ -46,6 +46,7 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
     # We rely on /etc/supervisord.conf
     # Pass the command arguments to supervisor via environment variable
     export APP_COMMAND="$*"
+    export APP_AUTORESTART="${APP_AUTORESTART:-true}"
     exec /usr/bin/supervisord -c /etc/supervisord.conf
 else
     # Legacy/Standard flow (NFS or copy)

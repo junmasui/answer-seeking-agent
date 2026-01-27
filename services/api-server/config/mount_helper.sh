@@ -34,6 +34,7 @@ if [ -d "/home/python/.venv-storage" ]; then
      # Check if already mounted (in case of restart)
      if ! mountpoint -q /app/backend/.venv; then
         mount --bind /home/python/.venv-storage /app/backend/.venv || echo "$ECHO_PREFIX Warning: Failed to mount .venv"
+        echo "$ECHO_PREFIX .venv mounted."
      else
         echo "$ECHO_PREFIX .venv already mounted."
      fi
