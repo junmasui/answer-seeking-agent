@@ -29,8 +29,6 @@ dependencies = [
   "msgpack>=1.1.1",
   "nest_asyncio>=1.6.0",
   "nltk>=3.9.1",
-  # onnx is implicit dependency of unstructured
-  "onnx>=1.17.0",
   # layoutparser has incorrect versions in its metadata
   "pdfplumber>=0.11.5",
   "psycopg[binary,pool]>=3.2.4",
