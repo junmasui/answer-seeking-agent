@@ -4,4 +4,20 @@ build_images.sh
 Dockerfile
 *.Dockerfile
 
+logs
 *.log
+
+
+.git
+
+**/__pycache__/
+**/*.egg-info/
+**/*.pyc
+**/*.pyo
+**/.pytest_cache/
+**/.ruff_cache/
+**/.venv/
+
+backend/**/dist/
+
+**/node_modules/

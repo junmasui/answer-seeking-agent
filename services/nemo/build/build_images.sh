@@ -17,14 +17,44 @@ DOCKER="docker buildx"
 #DOCKER_BUILD_OPTS="--no-cache"
 DOCKER_BUILD_OPTS=
 LOG_DIR=../../../logs
+CACHE_DIR=../../../.buildkit-cache
 
 mkdir -p $LOG_DIR
+
+#
+# Setup optimized BuildKit builder with GC
+#
+BUILDER_NAME="answers-optimized-builder"
+if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
+    echo "Creating optimized builder: $BUILDER_NAME"
+    docker buildx create --name "$BUILDER_NAME" \
+        --driver docker-container \
+        --driver-opt default-load=true \
+        --buildkitd-flags '--oci-worker-gc=true --oci-worker-gc-keepstorage=50000000000' \
+        --bootstrap
+fi
+
+# Use the optimized builder
+docker buildx use "$BUILDER_NAME"
+
+# Create cache directory if it doesn't exist
+mkdir -p "$CACHE_DIR"
+
+# Cache configuration for all builds
+CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=max"
 
 $DOCKER build \
   --file Dockerfile \
   ${DOCKER_BUILD_OPTS} \
+  $CACHE_OPTS \
   --build-context config-dir=../config \
   --tag localhost/localhost/nemo-guardrails:latest \
   --progress plain \
   . 2>&1 \
 | tee $LOG_DIR/build-nemo.log
+
+#
+# Clean up old cache (keep last 50GB)
+#
+echo "Pruning old build cache..."
+docker buildx prune --builder "$BUILDER_NAME" --keep-storage 50GB --force
