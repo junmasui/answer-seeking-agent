@@ -15,3 +15,16 @@ dependencies = [
     "opentelemetry-instrumentation-transformers>=0.45.4",
     "opentelemetry-sdk>=1.36.0",
 ]
+
+[tool.uv]
+constraint-dependencies = [
+    # Fix CVE-2025-68664 https://nvd.nist.gov/vuln/detail/CVE-2025-68664
+    "langchain-core>=1.0.8",
+    # Fix CVE-2026-21441: https://nvd.nist.gov/vuln/detail/CVE-2026-21441
+    # Fix CVE-2025-66418 https://nvd.nist.gov/vuln/detail/CVE-2025-66418
+    "urllib3>=2.6.3",
+    # Fix https://nvd.nist.gov/vuln/detail/CVE-2026-0994
+    "protobuf>=6.33.5",
+    # Fix CVE-2025-62727 https://nvd.nist.gov/vuln/detail/CVE-2025-62727
+    "starlette>=0.49.1",
+]
