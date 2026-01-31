@@ -45,9 +45,11 @@ if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
     echo "Mount node_modules active."
 fi
 
-# Transition to the non-privileged entrypoint
-
+# Change directory. If we are mount file-systems, then this operation must
+# wait until after the mounts are ready.
+#
 cd /app/frontend
 
+# Transition to the non-privileged entrypoint
 
 exec "$@"
