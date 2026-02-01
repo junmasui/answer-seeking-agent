@@ -3,35 +3,50 @@ set -eu
 
 # Note: NFS and venv mounts are now handled by the root entrypoint
 
+mkdir -p /app/backend
 cd /app/backend
 
-if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
 
-    echo "USE_FUSE_SRC_DIR is set to true. Waiting for mount at /app/backend..."
+    echo "Waiting for synced backend source at /app/backend/pyproject.toml..."
     
-    # Wait for mount
+    # Wait for key files to exist
     attempt=0
-    while ! mountpoint -q /app/backend; do
+    while [ ! -f /app/backend/pyproject.toml ] || [ ! -f /app/backend/uv.lock ]; do
         sleep 1
         attempt=$((attempt+1))
-        if [ $attempt -ge 30 ]; then
-            echo "Error: Mount failed to appear after 30 seconds."
+        if [ $attempt -ge 60 ]; then
+            echo "Error: Backend source did not appear after 60 seconds."
             exit 1
         fi
     done
 
-    echo "Mount active."
-
-    # Wait for mount
-    attempt=0
-    while ! mountpoint -q /app/backend/.venv; do
+    echo "Backend source detected, verifying sync is complete..."
+    
+    # Wait for files to stabilize (no changes for 2 seconds)
+    # This ensures we're not mid-sync
+    STABLE_COUNT=0
+    LAST_MTIME=$(stat -c %Y /app/backend/pyproject.toml 2>/dev/null || echo 0)
+    
+    while [ $STABLE_COUNT -lt 2 ]; do
         sleep 1
+        CURRENT_MTIME=$(stat -c %Y /app/backend/pyproject.toml 2>/dev/null || echo 0)
+        
+        if [ "$CURRENT_MTIME" = "$LAST_MTIME" ]; then
+            STABLE_COUNT=$((STABLE_COUNT + 1))
+        else
+            STABLE_COUNT=0
+            LAST_MTIME=$CURRENT_MTIME
+        fi
+        
         attempt=$((attempt+1))
-        if [ $attempt -ge 30 ]; then
-            echo "Error: .venv mount failed to appear after 30 seconds."
-            exit 1
+        if [ $attempt -ge 90 ]; then
+            echo "Warning: Files still changing after 90 seconds, proceeding anyway"
+            break
         fi
     done
+
+    echo "Backend source synchronized and stable."
 fi
 
 # Change directory. If we are mount file-systems, then this operation must
@@ -40,7 +55,7 @@ fi
 cd /app/backend
 
 
-if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
 
     # Create or ensure the virtual environment exists.
     uv venv --allow-existing

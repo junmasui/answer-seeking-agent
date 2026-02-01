@@ -8,7 +8,6 @@ include:
   - ./celery-worker/deploy/common.compose.yml
   - ./celery-worker/deploy/common-autotest.compose.yml
   - ./dev-server/deploy/common.compose.yml
-  - ./file-sync/deploy/compose.yml
   - ./grafana/deploy/compose.yml
   - ./jaeger/deploy/compose.yml
   - ./loki/deploy/compose.yml

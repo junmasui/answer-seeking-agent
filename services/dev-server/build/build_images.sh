@@ -45,6 +45,29 @@ mkdir -p "$CACHE_DIR"
 # Cache configuration for all builds
 CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=max"
 
+required_images=(
+  "localhost/localhost/answers-frontend:node-22-bookworm"
+  "localhost/localhost/answers-backend:python-3.12-cpu"
+)
+
+missing_images=()
+for image in "${required_images[@]}"; do
+  if ! docker image inspect "$image" >/dev/null 2>&1; then
+    missing_images+=("$image")
+  fi
+done
+
+if [ ${#missing_images[@]} -gt 0 ]; then
+  echo "Missing required base images:" >&2
+  for image in "${missing_images[@]}"; do
+    echo "  - $image" >&2
+  done
+  echo "Build them first with:" >&2
+  echo "  /home/jun/research/answer-seeking-agent/services/webui-server/build/build_images.sh" >&2
+  echo "  /home/jun/research/answer-seeking-agent/services/api-server/build/build_images.sh" >&2
+  exit 1
+fi
+
 #
 # Build a dev-server image with Python 3.12 on Debian 12 (CPU only)
 #

@@ -12,7 +12,7 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 #
 source /wait_for_gate.sh
 
-wait_for_dependency_gate /init-signal/backend-autotest-gate
+## wait_for_dependency_gate /init-signal/backend-autotest-gate
 
 if [ "$GPU_MODE" == "cuda12" ]; then
     nvidia-smi
@@ -83,6 +83,9 @@ fi
 #   --no-restart-on-command-exit \
 #   --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
 #   --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
+
+# Set PYTHONPATH so pytest can resolve absolute imports like "from libs.core.tests..."
+export PYTHONPATH=/app/backend:${PYTHONPATH:-}
 
 uv run --frozen --no-sync \
    -- \

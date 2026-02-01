@@ -7,31 +7,48 @@ services:
 
     environment:
       DEBUGGER_LISTEN: true
-      # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: true
+      USE_CODEBASE_SYNC: true
+      USE_BOOTSTRAP_INSTALL: true
+      ENABLE_SSHD: true
+      ENABLE_MUTAGEN_SYNC: true
+      MUTAGEN_SOURCE_ROOT: /app
+      MUTAGEN_SSH_USER: root
+      MUTAGEN_SSH_PORT: 22
+      MUTAGEN_SSH_KEY_PATH: /run/secrets/mutagen_ssh_private_key
+      RUN_AS_UID: ${DEV_UID:-1000}
+      RUN_AS_GID: ${DEV_GID:-1000}
       PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - automated-pytest.env
       - opentelemetry-instrument.env
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor:unconfined
     networks:
       - agent-poc
 
     healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
+      test: ["CMD-SHELL", "bash /healthcheck.sh"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
 
     volumes:
       # Mount docker socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount host codebase
+      - ../../../:/app
+      # Mask .venv and node_modules
+      - dev-server-venv:/app/backend/.venv
+      - dev-server-node-modules:/app/frontend/node_modules
       # Mount entrypoint
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      # Mount non-privileged entrypoint
+      - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
+      # Mount healthcheck script
+      - ../config/healthcheck.sh:/healthcheck.sh:ro
       # Mount start script
       - ../config/start_dev.sh:/start_dev.sh:ro
+      # Mount mutagen sync script
+      - ../config/start_mutagen_sync.sh:/start_mutagen_sync.sh:ro
       # Mount supervisord config
       - ../config/supervisord.conf:/etc/supervisord.conf:ro
     secrets:
@@ -43,7 +60,8 @@ services:
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
-      - codebase_seaweedfs_secrets
+      - mutagen_ssh_private_key
+      - mutagen_sshd_authorized_keys
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     # Command to run the dev startup script
@@ -53,3 +71,9 @@ networks:
   agent-poc:
     external: true
     name: agent_agent-poc
+
+volumes:
+  dev-server-venv:
+    driver: local
+  dev-server-node-modules:
+    driver: local

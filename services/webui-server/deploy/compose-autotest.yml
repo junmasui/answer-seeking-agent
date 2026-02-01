@@ -10,19 +10,9 @@ services:
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
       CHOKIDAR_USEPOLLING: 'true'
-      # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: true
-      # Codebase bucket credentials
-      CODEBASE_ACCESS_KEY:
-      SEAWEEDFS_FILER: 'seaweedfs:9002'
-      S3_ENDPOINT_URL: 'http://seaweedfs:9000'
-      WEED_MOUNT_EXTRA_ARGS: ''
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor:unconfined
+      USE_CODEBASE_SYNC: true
+      USE_BOOTSTRAP_INSTALL: true
+      ENABLE_SSHD: true
     #   - NODE_ENV=production
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
     ## traffic to go thru the reserve-proxy server at 15173.
@@ -41,7 +31,7 @@ services:
       
 
     secrets:
-      - codebase_seaweedfs_secrets
+      - mutagen_sshd_authorized_keys
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_webui_server.sh' ]
@@ -57,20 +47,10 @@ services:
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
       CHOKIDAR_USEPOLLING: 'true'
-      # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: true
-      # Codebase bucket credentials
-      CODEBASE_ACCESS_KEY:
-      SEAWEEDFS_FILER: 'seaweedfs:9002'
-      S3_ENDPOINT_URL: 'http://seaweedfs:9000'
-      WEED_MOUNT_EXTRA_ARGS: ''
+      USE_CODEBASE_SYNC: true
+      USE_BOOTSTRAP_INSTALL: true
+      ENABLE_SSHD: true
       APP_AUTORESTART: 'false'
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor:unconfined
     #   - NODE_ENV=production
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
     ## traffic to go thru the reserve-proxy server at 15173.
@@ -91,7 +71,7 @@ services:
       
 
     secrets:
-      - codebase_seaweedfs_secrets
+      - mutagen_sshd_authorized_keys
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_automated_tests.sh' ]

@@ -32,6 +32,9 @@ fi
 # Build all workspace members
 echo "Building all workspace members..."
 
+# Clean up stale egg-info folders that may be root-owned from earlier runs.
+rm -rf apps/db_migration/migrations.egg-info
+
 pwd
 ls -la
 pwd

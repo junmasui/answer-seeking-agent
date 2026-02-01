@@ -235,3 +235,21 @@ VALUE_PREFIX=keycloak_admin_
 DESCR="Keycloak Admin password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
+# Mutagen SSH keys (dev-server -> autotest services)
+MUTAGEN_PRIVATE_KEY=./secrets/mutagen.private_key
+MUTAGEN_AUTHORIZED_KEYS=./secrets/mutagen.authorized_keys
+MUTAGEN_KEYPAIR_BASE=./secrets/mutagen_ed25519
+
+if [ ! -f "$MUTAGEN_PRIVATE_KEY" ] || [ ! -f "$MUTAGEN_AUTHORIZED_KEYS" ]; then
+    if command -v ssh-keygen >/dev/null 2>&1; then
+        ssh-keygen -t ed25519 -N "" -f "$MUTAGEN_KEYPAIR_BASE" >/dev/null 2>&1
+        cp "$MUTAGEN_KEYPAIR_BASE" "$MUTAGEN_PRIVATE_KEY"
+        cp "${MUTAGEN_KEYPAIR_BASE}.pub" "$MUTAGEN_AUTHORIZED_KEYS"
+        chmod 600 "$MUTAGEN_PRIVATE_KEY"
+        chmod 644 "$MUTAGEN_AUTHORIZED_KEYS"
+    else
+        echo "ssh-keygen not found. Skipping Mutagen SSH key generation."
+    fi
+fi

@@ -118,6 +118,17 @@ sudo systemctl restart docker
 
 ### Software: Nvidia Container Toolkit
 
+## CODEBASE SYNC (MUTAGEN HUB)
+
+This environment uses `dev-server` as the Mutagen hub. The host bind-mounts the codebase into `dev-server`, and `dev-server` runs the Mutagen client to push one-way updates into other services over SSH. The host does not run Mutagen.
+
+To enable this flow, provide SSH keys for Mutagen:
+
+- Authorized keys for target containers: [services/secrets/mutagen.authorized_keys](services/secrets/mutagen.authorized_keys)
+- Private key for the `dev-server` Mutagen client: [services/secrets/mutagen.private_key](services/secrets/mutagen.private_key)
+
+These files are mounted as secrets by Docker Compose. Replace the placeholder contents with your keys.
+
 This is optional but highly recommended on systems with newer Nvidia GPU's.
 
 ### Software: Visual Studo Code

@@ -28,11 +28,13 @@ RUN --mount=type=bind,from=node-source,target=/context \
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
-COPY --from=config-dir ./dev_mount_helper.sh /usr/local/bin/dev_mount_helper.sh
+COPY --from=config-dir ./monitor_mutagen_sync.sh /monitor_mutagen_sync.sh
+COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
-    && chmod a+x /usr/local/bin/dev_mount_helper.sh \
+    && chmod a+x /monitor_mutagen_sync.sh \
+    && chmod a+x /stop_supervisor.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh
 
@@ -41,21 +43,7 @@ WORKDIR /app
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
-#
-# Configure NFS and Bind Mounts
-#
-# /mnt/data will be the NFS mount point for the full codebase.
-# /app will be the bind mount target for /mnt/data.
-#
-RUN \
-    set -eux ; \
-    export DEBIAN_FRONTEND=noninteractive ; \
-    apt-get update \
-    # Bind mount .venv and node_modules from user home to /app subdirectories
-    && echo "/home/python/.venv-storage /app/backend/.venv none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && echo "/home/python/node_modules-storage /app/frontend/node_modules none defaults,bind,noauto 0 0" >> /etc/fstab \
-    && mkdir -p /home/python/.venv-storage && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
-    && mkdir -p /home/python/node_modules-storage && chown ${USER_ID}:${GROUP_ID} /home/python/node_modules-storage
+
 
 RUN \
     set -eux ; \

@@ -18,39 +18,25 @@ if [ -d "/app/backend" ]; then
     (
         cd /app/backend
 
-        if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+        if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
 
-            echo "Waiting for mount at /app..."
+            echo "Waiting for synced backend source at /app/backend/pyproject.toml..."
 
-            # Wait for mount
             attempt=0
-            while ! mountpoint -q /app; do
+            while [ ! -f /app/backend/pyproject.toml ]; do
                 sleep 1
                 attempt=$((attempt+1))
                 if [ $attempt -ge 30 ]; then
-                    echo "Error: Mount failed to appear after 30 seconds."
+                    echo "Error: Backend source did not appear after 30 seconds."
                     exit 1
                 fi
             done
 
-            echo "Mount active."
+            echo "Backend source detected."
+        fi
 
-            echo "Waiting for mount at /app/backend/.venv..."
+        if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
 
-            # Wait for mount
-            attempt=0
-            while ! mountpoint -q /app/backend/.venv; do
-                sleep 1
-                attempt=$((attempt+1))
-                if [ $attempt -ge 30 ]; then
-                    echo "Error: Mount failed to appear after 30 seconds."
-                    exit 1
-                fi
-            done
-
-            echo "Mount active."
-
-            #    
             # Create the virtual environment only once.
             #
             # For the CACHEDIR.TAG specification, see https://bford.info/cachedir/
@@ -99,35 +85,22 @@ fi
 if [ -d "/app/frontend" ]; then
     (
 
-        echo "Waiting for mount at /app..."
+        if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
 
-        # Wait for mount
-        attempt=0
-        while ! mountpoint -q /app; do
-            sleep 1
-            attempt=$((attempt+1))
-            if [ $attempt -ge 30 ]; then
-                echo "Error: Mount failed to appear after 30 seconds."
-                exit 1
-            fi
-        done
+            echo "Waiting for synced frontend source at /app/frontend/package.json..."
 
-        echo "Mount active."
+            attempt=0
+            while [ ! -f /app/frontend/package.json ]; do
+                sleep 1
+                attempt=$((attempt+1))
+                if [ $attempt -ge 30 ]; then
+                    echo "Error: Frontend source did not appear after 30 seconds."
+                    exit 1
+                fi
+            done
 
-        echo "Waiting for mount at /app/frontend/node_modules..."
-
-        # Wait for mount
-        attempt=0
-        while ! mountpoint -q /app/frontend/node_modules; do
-            sleep 1
-            attempt=$((attempt+1))
-            if [ $attempt -ge 30 ]; then
-                echo "Error: Mount failed to appear after 30 seconds."
-                exit 1
-            fi
-        done
-
-        echo "Mount active."
+            echo "Frontend source detected."
+        fi
 
 
         cd /app/frontend

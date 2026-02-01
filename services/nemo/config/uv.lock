@@ -1093,6 +1093,7 @@ dependencies = [
     { name = "nemoguardrails" },
     { name = "opentelemetry-distro" },
     { name = "opentelemetry-exporter-otlp" },
+    { name = "opentelemetry-exporter-zipkin-json" },
     { name = "opentelemetry-instrumentation" },
     { name = "opentelemetry-instrumentation-fastapi" },
     { name = "opentelemetry-instrumentation-flask" },
@@ -1108,6 +1109,7 @@ requires-dist = [
     { name = "nemoguardrails", specifier = ">=0.15.0" },
     { name = "opentelemetry-distro", specifier = ">=0.57b0" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.36.0" },
+    { name = "opentelemetry-exporter-zipkin-json", specifier = ">=1.27.0" },
     { name = "opentelemetry-instrumentation", specifier = ">=0.57b0" },
     { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.57b0" },
     { name = "opentelemetry-instrumentation-flask", specifier = ">=0.57b0" },
@@ -1295,6 +1297,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/25/85/6632e7e5700ba1ce5b8a065315f92c1e6d787ccc4fb2bdab15139eaefc82/opentelemetry_exporter_otlp_proto_http-1.36.0.tar.gz", hash = "sha256:dd3637f72f774b9fc9608ab1ac479f8b44d09b6fb5b2f3df68a24ad1da7d356e", size = 16213, upload-time = "2025-07-29T15:12:08.932Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7f/41/a680d38b34f8f5ddbd78ed9f0042e1cc712d58ec7531924d71cb1e6c629d/opentelemetry_exporter_otlp_proto_http-1.36.0-py3-none-any.whl", hash = "sha256:3d769f68e2267e7abe4527f70deb6f598f40be3ea34c6adc35789bea94a32902", size = 18752, upload-time = "2025-07-29T15:11:53.164Z" },
+]
+
+[[package]]
+name = "opentelemetry-exporter-zipkin-json"
+version = "1.39.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-sdk" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c7/31/95c1b93db1f29089d67d921afb4fdd88495e93c71e85766e1fd2d886f38d/opentelemetry_exporter_zipkin_json-1.39.1.tar.gz", hash = "sha256:26429783aed37b332b1289694ce2f4ba70fae6bba5a8f77b509a6743bf8a05c6", size = 16555, upload-time = "2025-12-11T13:32:44.436Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/8d/a2e65c773b898d9143b101b2e5302b03fb6a572b8c6679d656ad3f96718b/opentelemetry_exporter_zipkin_json-1.39.1-py3-none-any.whl", hash = "sha256:f90812c92c9c37edce0fcbb4303ebf587c171a1effc05508f50641831a9e44cd", size = 16333, upload-time = "2025-12-11T13:32:26.478Z" },
 ]
 
 [[package]]
