@@ -11,7 +11,7 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 
-if [ "${USE_FUSE_SRC_DIR:-false}" = "true" ]; then
+if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
     # Install dependencies
     # Determine install command based on whether node_modules is a mount point
     # npm ci tries to remove the node_modules directory which fails on mount points.

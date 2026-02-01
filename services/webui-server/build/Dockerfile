@@ -59,7 +59,7 @@ COPY --from=frontend-dir ./index.html /app/frontend/index.html
 COPY --from=frontend-dir ./jsconfig.json /app/frontend/jsconfig.json
 COPY --from=frontend-dir ./package-lock.json /app/frontend/package-lock.json
 COPY --from=frontend-dir ./package.json /app/frontend/package.json
-COPY --from=frontend-dir ./vite.config.js /app/frontend/vite.config.js
+COPY --from=frontend-dir ./eslint.config.cjs /app/frontend/eslint.config.cjs
 
 COPY --from=frontend-dir ./src/ /app/frontend/src/
 
@@ -106,17 +106,6 @@ ARG GROUP_ID=1000
 
 USER root
 
-# This is to allow the container user to mount the directory using FUSE.
-# The user will run the 'weed mount' command.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    fuse3 \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    # Install weed CLI
-    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.79/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
-
 RUN \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
@@ -131,6 +120,8 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=frontend-dir ./vite.config.js /app/frontend/vite.config.js
+COPY --from=frontend-dir ./tests/ /app/frontend/tests/
 
 ENTRYPOINT [ "bash", "/custom-docker-entrypoint.sh" ]
 
@@ -151,17 +142,6 @@ ARG USER_ID=1000
 ARG GROUP_ID=1000
 
 USER root
-
-# This is to allow the container user to mount the directory using FUSE.
-# The user will run the 'weed mount' command.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    fuse3 \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    # Install weed CLI
-    && curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.79/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
 
 RUN \
     export DEBIAN_FRONTEND=noninteractive ; \

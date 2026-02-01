@@ -18,15 +18,10 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       ##
-      # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: true
+      USE_CODEBASE_SYNC: true
+      USE_BOOTSTRAP_INSTALL: true
+      ENABLE_SSHD: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor:unconfined
     env_file:
       - automated-test.env
       - opentelemetry-instrument.env
@@ -54,7 +49,7 @@ services:
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
-      - codebase_seaweedfs_secrets
+      - mutagen_sshd_authorized_keys
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.
@@ -98,15 +93,10 @@ services:
 
 
       GPU_MODE: cpu
-      # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: true
+      USE_CODEBASE_SYNC: true
+      USE_BOOTSTRAP_INSTALL: true
+      ENABLE_SSHD: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor:unconfined
     env_file:
       - automated-test.env
     ports: # use if it is necessary to expose the container to the host machine
@@ -134,7 +124,7 @@ services:
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
-      - codebase_seaweedfs_secrets
+      - mutagen_sshd_authorized_keys
 
     user: root
     # Beware: when entrypoint is used in the compose file, the CMD in the Dockerfile is ignored.

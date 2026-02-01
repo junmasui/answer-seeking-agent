@@ -87,8 +87,8 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       GPU_MODE: cpu
-      # Mount the FUSE directory into this container
-      USE_FUSE_SRC_DIR: false
+      USE_CODEBASE_SYNC: false
+      USE_BOOTSTRAP_INSTALL: false
       #
       PYTHONPYCACHEPREFIX: /home/python/.pycache
       # Codebase bucket credentials

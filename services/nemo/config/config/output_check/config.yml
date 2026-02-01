@@ -15,9 +15,3 @@ tracing:
   adapters:
     - name: OpenTelemetry
       service_name: "nemo_guardrails"
-      exporter: "zipkin"
-      # Point to OTel Collector's Zipkin receiver endpoint
-      endpoint: "http://otel-collector:9411/api/v2/spans"
-      resource_attributes:
-        env: "production"
-        service.version: "1.0"

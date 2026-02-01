@@ -65,6 +65,11 @@ secrets:
   codebase_seaweedfs_secrets:
     file: ./secrets/codebase.seaweedfs.secrets.env
 
+  mutagen_sshd_authorized_keys:
+    file: ./secrets/mutagen.authorized_keys
+  mutagen_ssh_private_key:
+    file: ./secrets/mutagen.private_key
+
   keycloak_postgres_secrets:
     file: ./secrets/keycloak.postgres.secrets.env
   keycloak_admin_secrets:

@@ -23,7 +23,7 @@ fi
 if [ -d "/app/backend" ]; then
     cd /app/backend
 
-    if [ -n "${GPU_MODE:-}" ]; then
+    if [ -n "${GPU_MODE:-}" ] && [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
         if [ "$GPU_MODE" == "cuda12" ]; then
             nvidia-smi
         fi
@@ -110,14 +110,16 @@ echo "Installing/Building ViteJS project..."
 if [ -d "/app/frontend" ]; then
     cd /app/frontend
     
-    # We assume 'npm install' might handle builds or we run a build script if needed.
-    # Checks if node_modules exists, if not install.
-    if [ ! -d "node_modules" ]; then
-         echo "Installing npm dependencies in ../frontend..."
-         echo npm install
-    else
-         echo "node_modules exists in ../frontend. Running npm install to ensure sync..."
-         echo npm install
+    if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
+       # We assume 'npm install' might handle builds or we run a build script if needed.
+       # Checks if node_modules exists, if not install.
+       if [ ! -d "node_modules" ]; then
+           echo "Installing npm dependencies in ../frontend..."
+           echo npm install
+       else
+           echo "node_modules exists in ../frontend. Running npm install to ensure sync..."
+           echo npm install
+       fi
     fi
 
     # Optional: Run build if there is a build script
