@@ -16,5 +16,5 @@ defineProps({
   }
 })
 
-const modelValue = defineModel()
+const modelValue = defineModel({ type: String })
 </script>

@@ -19,22 +19,18 @@
     </v-col>
 
     <v-col cols="auto">
-      <v-btn class="ma-2" size="large" @click="onCheckHealth" :disabled="healthLoading">{{ healthButtenText }}</v-btn>
+      <v-btn class="ma-2" size="large" :disabled="healthLoading" @click="onCheckHealth">{{
+        healthButtenText
+      }}</v-btn>
     </v-col>
   </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
 import logger from '../common/Logger.js'
 import { getAuthorization } from '../common/AuthUtils.js'
 
-import { useCurrentUserStore } from '../common/CurrentUserStore'
-
-const currentUserStore = useCurrentUserStore()
-
-const { signedIn, accessToken } = storeToRefs(currentUserStore)
 const systemStatus = ref('unknown')
 const systemHealth = ref('unknown')
 const statusColor = ref('primary')
@@ -145,7 +141,6 @@ async function checkHealth() {
     logger.apiError('Health check failed', error)
   }
 }
-
 </script>
 
 <style>

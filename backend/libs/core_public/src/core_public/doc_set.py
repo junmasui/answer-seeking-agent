@@ -82,8 +82,7 @@ class DocumentSetAddRequest(CamelModel):
     is_new_doc_default: Annotated[bool, Field(description='True if default document set for new documents')]
     is_public_viewable: Annotated[bool, Field(description='True if documents are publicly visible')]
     ocr_strategy: Annotated[
-        OcrStrategy,
-        Field(description='OCR strategy for documents in this set.', default=OcrStrategy.HI_RES),
+        OcrStrategy, Field(description='OCR strategy for documents in this set.', default=OcrStrategy.HI_RES)
     ]
 
 
@@ -98,6 +97,5 @@ class DocumentSetUpdateRequest(CamelModel):
         Optional[bool], Field(description='True if documents are publicly visible', default=None)
     ]
     ocr_strategy: Annotated[
-        Optional[OcrStrategy],
-        Field(description='OCR strategy for documents in this set.', default=None),
+        Optional[OcrStrategy], Field(description='OCR strategy for documents in this set.', default=None)
     ]

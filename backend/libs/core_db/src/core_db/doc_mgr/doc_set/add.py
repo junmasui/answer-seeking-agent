@@ -8,11 +8,7 @@ from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 
 async def add_or_update_document_set(
-    name: str,
-    is_new_doc_default: bool,
-    is_public_viewable: bool,
-    user_id: uuid.UUID,
-    ocr_strategy: str = 'hi_res',
+    name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID, ocr_strategy: str = 'hi_res'
 ):
     """Adds or updates the document set."""
     sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)

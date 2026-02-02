@@ -176,6 +176,7 @@ async function deleteMultiplePrompts(promptVersions) {
       headers.Authorization = auth
     }
 
+    const promptUuids = promptVersions.map((pv) => pv.prompt_version_uuid)
     const body = {
       promptUuids
     }

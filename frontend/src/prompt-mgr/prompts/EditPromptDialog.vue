@@ -27,8 +27,6 @@
 </template>
 
 <script setup>
-import MultiLineTextEdit from '../../common/MultiLineTextEdit.vue'
-
 const active = defineModel('active', {
   type: Boolean,
   default: false
@@ -47,7 +45,6 @@ const modelValue = defineModel({
 })
 
 const statusOptions = ['active', 'deactivated']
-const ownerTypeOptions = ['system', 'user']
 
 const emit = defineEmits(['canceled', 'confirmed', 'done'])
 

@@ -34,7 +34,7 @@ const selectedItem = defineModel('selectedItem', {
   default: null
 })
 
-const props = defineProps({
+defineProps({
   items: {
     type: Array,
     required: true

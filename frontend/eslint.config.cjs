@@ -7,12 +7,22 @@ const eslintConfigPrettier = require('eslint-config-prettier/flat');
 const prettierPlugin = require('eslint-plugin-prettier');
 
 module.exports = [
-  // Global ignore patterns
+  // Global ignore patterns (migrated from .eslintignore)
   {
     ignores: [
       'node_modules/**',
       'dist/**',
-      '**/*.config.js'
+      'dist-ssr/**',
+      'coverage/**',
+      '**/*.config.js',
+      'logs/**',
+      '*.log',
+      '.vscode/**',
+      '.idea/**',
+      'cypress/**',
+      '.nyc_output/**',
+      '.cache/**',
+      'build/**'
     ]
   },
 
@@ -44,6 +54,9 @@ module.exports = [
         }
       ],
       
+      // Allow unused vars prefixed with underscore
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+
       // Vue-specific rules
       'vue/multi-word-component-names': 'warn',
       'vue/component-api-style': ['error', ['script-setup']],
@@ -68,6 +81,30 @@ module.exports = [
       globals: {
         ...globals.node
       }
+    }
+  },
+
+  // Configuration for Node.js scripts
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
+
+  // Configuration for test files
+  {
+    files: ['tests/**/*.js', '**/*.test.js', '**/*.spec.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        global: 'readonly'
+      }
+    },
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
     }
   }
 ];
