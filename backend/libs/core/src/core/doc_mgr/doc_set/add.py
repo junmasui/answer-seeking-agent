@@ -7,11 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 async def add_document_set(
-    name: str,
-    is_new_doc_default: bool,
-    is_public_viewable: bool,
-    user_id: uuid.UUID,
-    ocr_strategy: str = 'hi_res',
+    name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID, ocr_strategy: str = 'hi_res'
 ):
     """
     Add a new document set with the specified configuration.

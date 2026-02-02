@@ -11,7 +11,7 @@
         "lint:fix": "eslint \"**/*.{vue,js,jsx,cjs,mjs}\" --fix",
         "lint:verbose": "eslint \"**/*.{vue,js,jsx,cjs,mjs}\" --format json -o eslint-report.json || true",
         "lint:ci": "eslint \"**/*.{vue,js,jsx,cjs,mjs}\" --max-warnings=0",
-        "lint:pretty": "sh -c 'npm run lint:fix -- \"$@\" && npm run lint:verbose && node scripts/format-eslint-json.js eslint-report.json' --",
+        "lint:pretty": "sh -c 'npm run lint:fix -- \"$@\" && npm run lint:verbose && node scripts/format-eslint-json.cjs eslint-report.json' --",
         "test:unit": "vitest run"
     },
     "dependencies": {

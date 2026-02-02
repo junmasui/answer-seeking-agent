@@ -237,7 +237,7 @@ const props = defineProps({
  * Defines the events emitted by the component.
  * @emits confirmDelete - When the user confirms a delete action.
  */
-const emit = defineEmits(['confirmDelete'])
+defineEmits(['confirmDelete'])
 
 const targetItem = ref({})
 

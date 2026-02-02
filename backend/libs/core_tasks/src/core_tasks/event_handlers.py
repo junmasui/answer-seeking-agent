@@ -13,9 +13,9 @@ See Also:
 
 """
 
+import asyncio
 import logging
 import threading
-import asyncio
 from uuid import UUID
 
 from celery import Celery

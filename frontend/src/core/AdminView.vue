@@ -15,7 +15,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
 
 import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 import { getAuthorization } from '../common/AuthUtils.js'

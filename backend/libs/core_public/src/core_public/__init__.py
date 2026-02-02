@@ -19,8 +19,8 @@ from .doc_set import (
     DocumentSetStatus,
     DocumentSetUpdateRequest,
 )
-from .ocr import DocumentOcrStrategy, OcrStrategy
 from .ingest import IngestRequestBody
+from .ocr import DocumentOcrStrategy, OcrStrategy
 from .prompt import Prompt, PromptAddRequest, PromptList, PromptStats, PromptUpdateRequest
 from .prompt_version import (
     PromptStatus,

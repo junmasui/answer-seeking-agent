@@ -1,9 +1,8 @@
 """This provides the vector store used by this application."""
 
 import logging
-from functools import cache
-
 import uuid
+from functools import cache
 
 from core_db.doc_mgr.doc_chunk.query import list_document_chunk_vector_ids
 from core_db.providers.sql_database import DataDomain, get_async_engine, ping_async_sql_database

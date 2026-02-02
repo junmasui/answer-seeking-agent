@@ -79,8 +79,7 @@ class DocumentUpdateRequest(CamelModel):
 
     document_set_id: Annotated[Optional[UUID], Field(description='Document set UUID.', default=None)]
     ocr_strategy: Annotated[
-        Optional[DocumentOcrStrategy],
-        Field(description='OCR strategy override for this document.', default=None),
+        Optional[DocumentOcrStrategy], Field(description='OCR strategy override for this document.', default=None)
     ]
 
 

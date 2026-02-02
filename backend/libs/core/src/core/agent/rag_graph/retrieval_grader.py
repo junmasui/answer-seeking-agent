@@ -8,7 +8,6 @@ See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/
 """
 
 import logging
-from functools import cache
 
 from ..internal_models import AgentPromptName
 from .agent_state import GraphState

@@ -23,13 +23,11 @@ Usage:
 import os
 from functools import cache
 from pathlib import Path
-from typing import Optional
 
-from pydantic import AnyHttpUrl, Field, PostgresDsn, StringConstraints
+from pydantic import Field, PostgresDsn
 
 # See https://docs.pydantic.dev/latest/api/types/#pydantic.types.StringConstraints
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
-from typing_extensions import Annotated
 
 
 class RuntimeSettings(BaseSettings):

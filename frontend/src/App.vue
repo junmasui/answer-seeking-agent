@@ -63,16 +63,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
-import { useRouter, useRoute } from 'vue-router'
 
 import { authService } from './common/AuthService'
 
 const theme = useTheme()
-
-const router = useRouter()
-const route = useRoute()
 
 const drawerModel = ref(false)
 const signedIn = ref(false)

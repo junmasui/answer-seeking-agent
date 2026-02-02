@@ -1,9 +1,10 @@
-
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
 from ..runtime_config import get_test_config
 
 __all__ = ['get_connection_str', 'async_engine', 'async_session']
+
 
 def get_connection_str():
     """Return the connection string for the PostgreSQL database from the global configuration."""
@@ -18,14 +19,16 @@ def get_connection_str():
     # Convert away from PyDantic's custom type and to Python string.
     return str(connection_url)
 
-@pytest_asyncio.fixture(scope="module", loop_scope="module")
+
+@pytest_asyncio.fixture(scope='module', loop_scope='module')
 async def async_engine():
     connection_url = get_connection_str()
     engine = create_async_engine(connection_url)
     yield engine
     await engine.dispose()
 
-@pytest_asyncio.fixture(scope="function")
+
+@pytest_asyncio.fixture(scope='function')
 async def async_session(async_engine):
     # expire_on_commit=False is important for async
     session_maker = async_sessionmaker(async_engine, expire_on_commit=False)

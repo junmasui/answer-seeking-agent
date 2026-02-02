@@ -7,8 +7,6 @@
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-
 import logger from '../common/Logger.js'
 import { getAuthorization } from '../common/AuthUtils.js'
 

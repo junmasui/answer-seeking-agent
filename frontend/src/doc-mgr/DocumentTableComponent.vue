@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, toRaw } from 'vue'
+import { ref, nextTick, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 import CommonDataTable from '../common/CommonDataTable.vue'
 import { getAuthorization } from '../common/AuthUtils.js'

@@ -7,10 +7,10 @@ from uuid import UUID
 from cloudpathlib.s3 import S3Path
 from core_db.db_models import DbTrackedDocument
 from core_db.doc_mgr.doc.query import get_documents
-from core_db.doc_mgr.doc_set.query import get_document_sets
 from core_db.doc_mgr.doc.update import update_tracking_record
 from core_db.doc_mgr.doc_chunk.query import list_document_chunk_vector_ids
 from core_db.doc_mgr.doc_chunk.update import replace_document_chunks
+from core_db.doc_mgr.doc_set.query import get_document_sets
 from core_public import DocumentOcrStrategy, DocumentStatus
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore

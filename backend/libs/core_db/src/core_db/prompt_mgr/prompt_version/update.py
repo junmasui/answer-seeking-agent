@@ -40,7 +40,9 @@ async def update_prompt_version_record(
                 logger.warning('No tracking doc record found for %s version %s', prompt_uuid, version, exc_info=ex)
                 return
             except MultipleResultsFound as ex:
-                logger.warning('Multiple tracking doc records found for %s version %s', prompt_uuid, version, exc_info=ex)
+                logger.warning(
+                    'Multiple tracking doc records found for %s version %s', prompt_uuid, version, exc_info=ex
+                )
                 return
 
             yield existing_obj

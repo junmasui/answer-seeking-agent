@@ -129,7 +129,7 @@ async function onUpload() {
             throw new Error('File upload failed')
           }
 
-          const data = await response.json()
+          await response.json()
           logger.uploadProgress(file.name, `chunk ${chunkIndex + 1}/${totalChunks}`)
         }
       } catch (error) {
