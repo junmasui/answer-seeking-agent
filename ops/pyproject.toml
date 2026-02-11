@@ -1,0 +1,26 @@
+[project]
+name = "dagster-ops"
+version = "0.1.0"
+description = "Dagster orchestration for answer-seeking-agent"
+requires-python = ">=3.12"
+dependencies = [
+    "dagster>=1.9.0",
+    "dagster-webserver>=1.9.0",
+    "dagster-docker>=0.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "ruff>=0.9.2",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]

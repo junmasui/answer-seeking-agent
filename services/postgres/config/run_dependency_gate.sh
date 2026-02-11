@@ -25,3 +25,6 @@ wait_for_postgres "$DATABASE_URL"
 
 
 open_dependency_gate /init-signal/postgres-gate
+
+echo "exiting"
+exit 0
