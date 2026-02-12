@@ -84,10 +84,12 @@ echo "Bucket '${BUCKET_NAME}' created or already exists."
 
 # Configure IAM user and permissions
 echo "Configuring IAM user '${S3_ACCESS_KEY}'..."
-weed shell -master="${MASTER_URL}" <<EOF
+weed shell -master="${MASTER_URL}" <<WEED_EOF
 s3.configure -apply -user "${S3_ACCESS_KEY}" -access_key "${S3_ACCESS_KEY}" -secret_key "${S3_SECRET_KEY}" -actions "Read,Write,List" -buckets "${BUCKET_NAME}"
 s3.configure
 s3.bucket.list
-EOF
+WEED_EOF
 
 echo "Initialization complete."
+
+exit 0
