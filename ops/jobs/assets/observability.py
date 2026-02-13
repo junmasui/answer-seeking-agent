@@ -5,7 +5,10 @@ from typing import Dict
 from dagster import RetryPolicy, asset
 
 from ..helpers import _start_service
+from .databases import postgres_mlflow_init_service
 from .images import ALL_IMAGE_ASSETS
+from .infrastructure import seaweedfs_init_mlflow_service
+from .scripts import update_secrets_asset
 
 
 @asset(
@@ -35,7 +38,7 @@ def loki_service(context) -> Dict[str, str]:
 @asset(
     name="grafana",
     required_resource_keys={"compose_env", "process_checker"},
-    deps=[prometheus_service, loki_service],
+    deps=[prometheus_service, loki_service, update_secrets_asset],
     retry_policy=RetryPolicy(max_retries=15),
 )
 def grafana_service(context) -> Dict[str, str]:
@@ -77,4 +80,16 @@ def otel_collector_service(context) -> Dict[str, str]:
 def otel_collector_docker_service(context) -> Dict[str, str]:
     """Start OpenTelemetry collector for Docker metrics."""
     _start_service(context, "otel-collector-docker")
+    return {"status": "ready"}
+
+
+@asset(
+    name="mlflow",
+    required_resource_keys={"compose_env", "process_checker"},
+    deps=[postgres_mlflow_init_service, seaweedfs_init_mlflow_service],
+    retry_policy=RetryPolicy(max_retries=15),
+)
+def mlflow_service(context) -> Dict[str, str]:
+    """Start MLflow tracking server."""
+    _start_service(context, "mlflow")
     return {"status": "ready"}

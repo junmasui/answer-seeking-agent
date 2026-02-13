@@ -26,10 +26,13 @@ def _make_image_build_asset(directory: str, deps: List[AssetsDefinition] = None)
             raise Failure(f"missing build script: {script_path}")
             
         result = _run_subprocess(["bash", "build_images.sh"], env, cwd=str(build_dir))
+        if result.stdout:
+            context.log.info("stdout:\n%s", result.stdout.strip())
+        if result.stderr:
+            context.log.info("stderr:\n%s", result.stderr.strip())
         context.log.info("built %s exit=%s", directory, result.returncode)
-        
+
         if result.returncode != 0:
-            context.log.error("image build failed: %s", result.stderr.strip())
             raise Failure(f"image build failed for {directory} (code={result.returncode})")
             
         return {"status": "built"}

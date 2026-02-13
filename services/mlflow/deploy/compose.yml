@@ -1,0 +1,36 @@
+services:
+    mlflow:
+        image: ghcr.io/mlflow/mlflow:v2.21.3
+        profiles: [ mlflow, telemetry, all ]
+        restart: unless-stopped
+
+        env_file:
+            - mlflow.env
+
+        ports:
+            - "25005:5000"
+        networks:
+            - agent-poc
+        secrets:
+            - mlflow_postgres_secrets
+            - mlflow_seaweedfs_secrets
+
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://127.0.0.1:5000/health" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+
+        volumes:
+            - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+
+        entrypoint: [ "/custom-docker-entrypoint.sh" ]
+
+        mem_limit: 512m
+        memswap_limit: 1g
+
+networks:
+    agent-poc:
+        external: true
+        name: agent_agent-poc

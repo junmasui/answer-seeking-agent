@@ -24,20 +24,9 @@ CACHE_DIR=../../../.buildkit-cache
 mkdir -p $LOG_DIR
 
 #
-# Setup optimized BuildKit builder with GC
+# Setup optimized BuildKit builder with GC and health check
 #
-BUILDER_NAME="answers-optimized-builder"
-if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
-    echo "Creating optimized builder: $BUILDER_NAME"
-    docker buildx create --name "$BUILDER_NAME" \
-        --driver docker-container \
-        --driver-opt default-load=true \
-        --buildkitd-flags '--oci-worker-gc=true --oci-worker-gc-keepstorage=50000000000' \
-        --bootstrap
-fi
-
-# Use the optimized builder
-docker buildx use "$BUILDER_NAME"
+. "$(dirname "$0")/../../scripts/ensure_buildx_builder.sh"
 
 # Create cache directory if it doesn't exist
 mkdir -p "$CACHE_DIR"

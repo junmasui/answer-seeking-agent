@@ -220,6 +220,23 @@ DESCR="OpenSearch's initial admin password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
+# MLflow Postgres
+SECRETS_FILE=./secrets/mlflow.postgres.secrets.env
+VAR_NAME=MLFLOW_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=mlflow_postgres_
+DESCR="MLflow Postgres account's password."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+# MLflow SeaweedFS
+SECRETS_FILE=./secrets/mlflow.seaweedfs.secrets.env
+VAR_NAME=S3_SECRET_KEY
+VALUE_PREFIX=mlflow_seaweedfs_
+DESCR="MLflow's seaweedfs account's password."
+
+generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
+
+
 # Keycloak Postgres
 SECRETS_FILE=./secrets/keycloak.postgres.secrets.env
 VAR_NAME=KEYCLOAK_POSTGRES_USER_PASSWORD

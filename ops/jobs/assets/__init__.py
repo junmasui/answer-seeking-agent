@@ -12,6 +12,7 @@ from .databases import (
     postgres_init_dependency_gate_service,
     postgres_init_service,
     postgres_keycloak_init_service,
+    postgres_mlflow_init_service,
     postgres_service,
 )
 from .images import (
@@ -31,6 +32,7 @@ from .infrastructure import (
     opensearch_service,
     redis_service,
     seaweedfs_init_autotest_service,
+    seaweedfs_init_mlflow_service,
     seaweedfs_init_service,
     seaweedfs_service,
     weaviate_service,
@@ -39,11 +41,12 @@ from .observability import (
     grafana_service,
     jaeger_service,
     loki_service,
+    mlflow_service,
     otel_collector_docker_service,
     otel_collector_service,
     prometheus_service,
 )
-from .scripts import initialize_environment_asset
+from .scripts import initialize_environment_asset, update_secrets_asset
 from .services import (
     api_server_service,
     celery_worker_service,
@@ -73,6 +76,7 @@ __all__ = [
     "postgres_init_dependency_gate_service",
     "postgres_init_service",
     "postgres_keycloak_init_service",
+    "postgres_mlflow_init_service",
     "postgres_init_autotest_service",
     # Infrastructure
     "redis_service",
@@ -81,6 +85,7 @@ __all__ = [
     "seaweedfs_service",
     "seaweedfs_init_service",
     "seaweedfs_init_autotest_service",
+    "seaweedfs_init_mlflow_service",
     # Auth
     "keycloak_service",
     "keycloak_init_service",
@@ -91,6 +96,7 @@ __all__ = [
     "loki_service",
     "otel_collector_service",
     "otel_collector_docker_service",
+    "mlflow_service",
     # Services
     "traefik_service",
     "slim_util_service",
@@ -107,5 +113,6 @@ __all__ = [
     "webui_server_autotest_service",
     # Scripts
     "initialize_environment_asset",
+    "update_secrets_asset",
     "build_python_packages_asset",
 ]

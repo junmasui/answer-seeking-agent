@@ -20,6 +20,11 @@ LOG_DIR=../../../logs
 
 mkdir -p $LOG_DIR
 
+#
+# Setup optimized BuildKit builder with GC and health check
+#
+. "$(dirname "$0")/../../scripts/ensure_buildx_builder.sh"
+
 $DOCKER build \
   --file Dockerfile \
   $DOCKER_BUILD_OPTS \

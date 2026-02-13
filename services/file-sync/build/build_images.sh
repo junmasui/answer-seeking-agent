@@ -10,6 +10,11 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 DOCKER="docker buildx"
 LOG_DIR=../../../logs
 
+#
+# Setup optimized BuildKit builder with GC and health check
+#
+. "$(dirname "$0")/../../scripts/ensure_buildx_builder.sh"
+
 $DOCKER build \
   --file Dockerfile \
   --build-context config-dir=../config \
