@@ -6,6 +6,7 @@ from dagster import RetryPolicy, asset
 
 from ..helpers import _start_service
 from .auth import keycloak_init_service
+from .scripts import update_secrets_asset
 from .databases import postgres_init_service
 from .images import (
     ALL_IMAGE_ASSETS,
@@ -51,7 +52,7 @@ def slim_util_service(context) -> Dict[str, str]:
 @asset(
     name="nemo-guardrails",
     required_resource_keys={"compose_env", "process_checker"},
-    deps=[nemo_image],
+    deps=[nemo_image, update_secrets_asset],
     retry_policy=RetryPolicy(max_retries=15),
 )
 def nemo_guardrails_service(context) -> Dict[str, str]:

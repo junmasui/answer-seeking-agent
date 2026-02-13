@@ -75,3 +75,8 @@ secrets:
   keycloak_admin_secrets:
     file: ./secrets/keycloak.admin.secrets.env
 
+  mlflow_postgres_secrets:
+    file: ./secrets/mlflow.postgres.secrets.env
+  mlflow_seaweedfs_secrets:
+    file: ./secrets/mlflow.seaweedfs.secrets.env
+

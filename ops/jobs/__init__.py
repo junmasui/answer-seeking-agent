@@ -10,10 +10,12 @@ from .resources import compose_env_resource, process_checker_resource
 ALL_ASSETS = [
     # Service assets
     *assets.ALL_IMAGE_ASSETS,
+    assets.update_secrets_asset,
     assets.postgres_service,
     assets.postgres_init_dependency_gate_service,
     assets.postgres_init_service,
     assets.postgres_keycloak_init_service,
+    assets.postgres_mlflow_init_service,
     assets.postgres_init_autotest_service,
     assets.redis_service,
     assets.opensearch_service,
@@ -21,6 +23,7 @@ ALL_ASSETS = [
     assets.seaweedfs_service,
     assets.seaweedfs_init_service,
     assets.seaweedfs_init_autotest_service,
+    assets.seaweedfs_init_mlflow_service,
     assets.keycloak_service,
     assets.keycloak_init_service,
     assets.prometheus_service,
@@ -29,6 +32,7 @@ ALL_ASSETS = [
     assets.loki_service,
     assets.otel_collector_service,
     assets.otel_collector_docker_service,
+    assets.mlflow_service,
     assets.traefik_service,
     assets.slim_util_service,
     assets.api_server_service,

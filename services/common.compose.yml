@@ -11,6 +11,7 @@ include:
   - ./grafana/deploy/compose.yml
   - ./jaeger/deploy/compose.yml
   - ./loki/deploy/compose.yml
+  - ./mlflow/deploy/compose.yml
   - ./keycloak/deploy/compose.yml
   - ./seaweedfs/deploy/compose.yml
   - ./opensearch/deploy/compose.yml

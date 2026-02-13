@@ -115,6 +115,25 @@ services:
             seaweedfs:
                 condition: service_started
 
+    seaweedfs-init-mlflow:
+        image: localhost/localhost/init-seaweedfs:latest
+        profiles: [ infrastructure, all ]
+        networks:
+            - agent-poc
+        env_file:
+            - seaweedfs.env
+            - seaweedfs.init.mlflow.env
+        volumes:
+            - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
+        secrets:
+            - seaweedfs_secrets
+            - mlflow_seaweedfs_secrets
+
+        command: /init-seaweedfs.sh
+        depends_on:
+            seaweedfs:
+                condition: service_started
+
 volumes:
     seaweedfs-data:
 

@@ -1,36 +1,6 @@
 # Antigravity Rules
 
-## Output & Formatting
--   **Markdown**: Always use GitHub-flavored Markdown.
--   **Paths**: Always use absolute paths for file operations.
--   **Conciseness**: Be concise in explanations unless asked for detail.
+- Check for the presence of [AGENTS.md](AGENTS.md) files in the project workspace
 
-## Workspace Overview
--   **Frontend**: `/app/frontend` (Vue 3, Vite)
--   **Backend**: `/app/backend` (Python FastAPI, uv)
--   **Services**: `/app/services` (Docker Compose microservices)
-
-## Backend Development (Python)
--   **Package Manager**: **MUST** use `uv` for all python operations.
-    -   Add dependencies: `uv add <pkg>`
-    -   Run scripts: `uv run <script>`
-    -   Run tests: `uv run pytest`
-    -   Lint/Format: `uv run ruff check` / `uv run ruff format`
--   **Structure**: Follow the `apps/` (executables) vs `libs/` (shared) pattern.
--   **Formatting**: Strictly rely on `ruff`. Do not mention `black` or `isort`.
-
-## Frontend Development (Vue)
--   **Framework**: Vue 3 with Vite.
--   **Linting**: Use `npm run lint:fix` to ensure code style.
-
-## Orchestration (Docker)
--   **Profiles**: Use profiles for partial startups:
-    -   `infrastructure`: Databases/Storage (Postgres, MinIO, Redis)
-    -   `backend`: API Server, Worker
-    -   `frontend`: Web UI
--   **Volumes**: Run `docker compose --profile init-volumes up -d` if volumes need setup.
--   **Secrets**: Check `secrets/` folders for `.env` files. Never shadow standard secrets with hardcoded values.
-
-## MCP Recommendations
--   **PostgreSQL**: For inspecting `pgvector` database.
--   **Docker**: For managing the microservices fleet.
+- There may be additional `AGENTS.md` in sub-folders with additional
+  specific instructions that are related to only that part of the codebase.

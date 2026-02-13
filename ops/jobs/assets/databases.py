@@ -6,12 +6,13 @@ from dagster import RetryPolicy, asset
 
 from ..helpers import _run_init_container, _start_service
 from .images import ALL_IMAGE_ASSETS
+from .scripts import update_secrets_asset
 
 
 @asset(
     name="postgres",
     required_resource_keys={"compose_env", "process_checker"},
-    deps=ALL_IMAGE_ASSETS,
+    deps=[*ALL_IMAGE_ASSETS, update_secrets_asset],
     retry_policy=RetryPolicy(max_retries=15),
 )
 def postgres_service(context) -> Dict[str, str]:
@@ -53,6 +54,18 @@ def postgres_init_service(context) -> Dict[str, str]:
 def postgres_keycloak_init_service(context) -> Dict[str, str]:
     """Initialize Keycloak PostgreSQL database."""
     _run_init_container(context, "postgres-keycloak-init")
+    return {"status": "completed"}
+
+
+@asset(
+    name="postgres-mlflow-init",
+    required_resource_keys={"compose_env"},
+    deps=[postgres_init_dependency_gate_service],
+    retry_policy=RetryPolicy(max_retries=15),
+)
+def postgres_mlflow_init_service(context) -> Dict[str, str]:
+    """Initialize MLflow PostgreSQL database."""
+    _run_init_container(context, "postgres-mlflow-init")
     return {"status": "completed"}
 
 

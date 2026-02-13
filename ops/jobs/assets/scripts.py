@@ -13,3 +13,10 @@ def initialize_environment_asset(context) -> Dict[str, str]:
     """Initialize environment by running certificate generation."""
     _run_script_job(context, "initialize_environment", "scripts/make_certs.sh")
     return {"status": "completed"}
+
+
+@asset(required_resource_keys={"compose_env"})
+def update_secrets_asset(context) -> Dict[str, str]:
+    """Generate auto-managed secrets files."""
+    _run_script_job(context, "update_secrets", "scripts/update_secrets.sh")
+    return {"status": "completed"}
