@@ -133,13 +133,3 @@ def webui_server_service(context) -> Dict[str, str]:
     return {"status": "ready"}
 
 
-@asset(
-    name="dev-server",
-    required_resource_keys={"compose_env", "process_checker"},
-    deps=[webui_server_service],
-    retry_policy=RetryPolicy(max_retries=15),
-)
-def dev_server_service(context) -> Dict[str, str]:
-    """Start development server service."""
-    _start_service(context, "dev-server")
-    return {"status": "ready"}

@@ -170,10 +170,10 @@ then
     exit "$?"
 fi
 
-# Dev Server
+# Dev Tools
 #
-echo Launching dev-server
-docker compose --profile dev-server up -d
+echo Launching dev-tools
+docker compose --profile dev-tools up -d
 if [ $? -ne 0 ]
 then
     exit "$?"
@@ -187,7 +187,7 @@ do
     then
         break
     fi
-    echo Give $SLEEP_TIME seconds for dev-server
+    echo Give $SLEEP_TIME seconds for dev-tools
     sleep "$SLEEP_TIME"
     SLEEP_TIME=$( echo "$BACKOFF * $SLEEP_TIME" | bc )
 done

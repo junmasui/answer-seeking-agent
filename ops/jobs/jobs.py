@@ -41,7 +41,6 @@ SERVICE_ASSETS = [
     assets.api_server_autotest_service,
     assets.celery_worker_autotest_service,
     assets.webui_server_autotest_service,
-    assets.dev_server_service,
 ]
 
 launch_services_job = define_asset_job(

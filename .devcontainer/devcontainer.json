@@ -1,14 +1,14 @@
 {
-    "name": "Dev Server",
+    "name": "Dev Tools",
     "dockerComposeFile": [
-        "../services/dev-server/deploy/common.compose.yml",
-        "../services/dev-server/deploy/cuda.compose.yml"
+        "../dev-tools/deploy/common.compose.yml",
+        "../dev-tools/deploy/cuda.compose.yml"
     ],
     // Adds *default* settings.json values into a container/machine specific settings file.
     "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"
     },
-    "service": "dev-server",
+    "service": "dev-tools",
     "workspaceFolder": "/app",
     "shutdownAction": "none",
     "extensions": [

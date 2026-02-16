@@ -1,24 +1,40 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
-echo "Initializing file-sync service..."
+echo "Starting file-sync service..."
 
-# Load secrets (Common logic)
-SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
-for FILE in "${SECRETS_MOUNT}"/*_secrets
-do
-    [ -f "$FILE" ] || continue
-    while IFS='=' read -r KEY VALUE || [ -n "$KEY" ]; do
-      case "$KEY" in
-        \#* | '') continue ;;
-        *) export "$KEY=$VALUE" ;;
-      esac
-    done < "$FILE"
-done
+# Setup SSH configuration for mutagen
+setup_ssh_config() {
+    echo "Setting up SSH configuration..."
 
-# Ensure mount point exists
-mkdir -p /mnt/fuse
+    mkdir -p ~/.ssh
+    chmod 700 ~/.ssh
 
-# Run supervisor
-echo "Starting Supervisord..."
-exec /usr/bin/supervisord -c /etc/supervisord.conf
+    # Copy SSH private key if provided
+    if [ -f /run/secrets/mutagen_ssh_private_key ]; then
+        cp /run/secrets/mutagen_ssh_private_key ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "SSH private key configured"
+    fi
+
+    # Setup SSH config to disable strict host key checking for Docker containers
+    cat > ~/.ssh/config <<EOF
+Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+EOF
+    chmod 600 ~/.ssh/config
+
+    echo "SSH configuration complete"
+}
+
+# Main entrypoint logic
+main() {
+    setup_ssh_config
+
+    echo "Starting supervisord..."
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+}
+
+main "$@"

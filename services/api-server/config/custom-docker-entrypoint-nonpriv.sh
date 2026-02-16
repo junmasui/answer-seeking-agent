@@ -60,9 +60,9 @@ if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
     # Create or ensure the virtual environment exists.
     uv venv --allow-existing
 
-    # Sync the virtual environment (persistent across restarts now)
-    # Use --frozen to prevent writing to the lockfile (which might be read-only or owned by another user)
-    SYNC_CMD="uv sync --frozen --dev --all-packages"
+    # PHASE 1: Sync all packages as non-editable (production-like)
+    # This ensures all packages including telemetry are properly installed with entrypoints
+    SYNC_CMD="uv sync --frozen --dev --all-packages --no-editable"
 
     EXTRA_ARGS=""
 
@@ -86,6 +86,19 @@ if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
         echo "This is likely because uv.lock is not up-to-date with pyproject.toml."
         echo "Please run 'uv lock' on your host machine to update uv.lock."
         exit $EXIT_CODE
+    fi
+
+    # PHASE 2: Reinstall telemetry packages as editable for development
+    # This allows live code changes without rebuilding images
+    if [ "${TELEMETRY_EDITABLE_INSTALL:-true}" = "true" ]; then
+        echo "Installing telemetry packages in editable mode..."
+
+        source .venv/bin/activate
+
+        uv pip install -e ./libs/core_telemetry_distro
+        uv pip install -e ./libs/core_telemetry_instrumentation
+
+        echo "Telemetry packages installed in editable mode."
     fi
 fi
 

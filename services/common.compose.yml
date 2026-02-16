@@ -5,9 +5,10 @@ services: {}
 include:
   - ./api-server/deploy/common.compose.yml
   - ./api-server/deploy/common-autotest.compose.yml
+  - ./file-sync/deploy/compose.yml
   - ./celery-worker/deploy/common.compose.yml
   - ./celery-worker/deploy/common-autotest.compose.yml
-  - ./dev-server/deploy/common.compose.yml
+  - ../dev-tools/deploy/common.compose.yml
   - ./grafana/deploy/compose.yml
   - ./jaeger/deploy/compose.yml
   - ./loki/deploy/compose.yml

@@ -29,6 +29,7 @@ from .images import (
     webui_server_image,
 )
 from .infrastructure import (
+    file_sync_service,
     opensearch_service,
     redis_service,
     seaweedfs_init_autotest_service,
@@ -50,7 +51,6 @@ from .scripts import initialize_environment_asset, update_secrets_asset
 from .services import (
     api_server_service,
     celery_worker_service,
-    dev_server_service,
     nemo_guardrails_service,
     presidio_analyzer_service,
     slim_util_service,
@@ -79,6 +79,7 @@ __all__ = [
     "postgres_mlflow_init_service",
     "postgres_init_autotest_service",
     # Infrastructure
+    "file_sync_service",
     "redis_service",
     "opensearch_service",
     "weaviate_service",
@@ -105,7 +106,6 @@ __all__ = [
     "nemo_guardrails_service",
     "presidio_analyzer_service",
     "webui_server_service",
-    "dev_server_service",
     # Autotest
     "backend_autotest_dependency_gate_service",
     "api_server_autotest_service",

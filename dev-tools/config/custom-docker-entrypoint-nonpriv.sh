@@ -3,10 +3,10 @@ set -e
 
 #
 # This entrypoint script is responsible for setting up the environment
-# for the dev-server container.
+# for the dev-tools container.
 #
 
-echo "Starting dev-server entrypoint..."
+echo "Starting dev-tools entrypoint..."
 
 #
 # Mount the NFS directory if requested

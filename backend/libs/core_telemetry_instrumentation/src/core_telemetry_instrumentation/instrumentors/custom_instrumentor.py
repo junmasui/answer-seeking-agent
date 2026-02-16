@@ -16,8 +16,9 @@ from timeit import default_timer
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.trace import SpanKind, Tracer, get_tracer
 from wrapt import wrap_function_wrapper
+import mlflow
 
-from .langchain_handler import OpenTelemetryCallbackHandler, get_callback_handler
+from ..tracing.custom_tracer import CustomMlflowLangchainTracer
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,7 @@ async def _handle_async_request_wrapper(
     return response
 
 
+
 def _handle_lang_graph_wrapper(
     wrapped: typing.Callable[..., typing.Any],
     instance: typing.Any,
@@ -102,10 +104,9 @@ def _handle_lang_graph_wrapper(
     span_name: str,
 ):
     span_attributes = {}
-    metric_attributes = {}
 
     # When Pregel.stream is called, its `config` argument will be positional with
-    # index 2 or key-word. The `config` arugment will have type RunnableConfig
+    # index 2 or key-word.
     if len(args) > 2:
         config = args[2]
     else:
@@ -121,39 +122,115 @@ def _handle_lang_graph_wrapper(
             config['callbacks'] = []
             callbacks = config.get('callbacks')
 
-        has_telemetry = any(isinstance(handler, OpenTelemetryCallbackHandler) for handler in callbacks)
+        # Check if our custom tracer is present
+        has_custom_tracer = any(isinstance(handler, CustomMlflowLangchainTracer) for handler in callbacks)
 
-        if not has_telemetry:
-            callback = get_callback_handler(session_id=session_id, user_id=user_id)
-            callbacks.append(callback)
+        if not has_custom_tracer:
+            # We need to configure the tracer. 
+            # MLFlow tracer usually doesn't need args, but we might want to pass session_id if needed separately?
+            # Creating a fresh instance.
+            tracer_instance = CustomMlflowLangchainTracer()
+            callbacks.append(tracer_instance)
             config['callbacks'] = callbacks
 
-    with tracer.start_as_current_span(span_name, kind=SpanKind.INTERNAL, attributes=span_attributes) as span:
-        exception = None
+    # We NO LONGER wrap the execution in a manual span here manually if MLFlow handles it?
+    # Actually, `_handle_lang_graph_wrapper` was originally WRAPPING the `stream` call with a span.
+    # MLFlow autolog (even with log_traces=False) might NOT wrap `stream` automatically if we disabled it?
+    # Wait, `log_traces=False` disables the *injection* of the tracer. It doesn't disable the patching of methods?
+    # Actually, MLFlow's `safe_patch` is what does the wrapping.
+    # If we use `autolog(log_traces=False)`, the patches are applied, but the callback manager logic depends on `log_traces`?
+    # Looking at `autolog.py`:
+    # `if not AutoLoggingConfig.init(FLAVOR_NAME).log_traces: return` inside `_patched_callback_manager_init`.
+    # So if `log_traces=False`, MLFlow will NOT inject its tracer.
+    # But we are manually injecting OUR tracer.
+    # So we don't need to manually start a span here anymore?
+    # The original wrapper started a "langgraph.stream" span.
+    # Our Custom Tracer will rely on LangChain callbacks to create spans *inside* the execution.
+    # But does LangGraph emit a start event that creates a root span *around* the stream?
+    # LangGraph usually does.
+    
+    # Let's keep the manual span wrapper for now to ensure we have a "parent" span if LangGraph doesn't create one immediately?
+    # Or cleaner: Just return wrapped(*args, **kwargs) without extra span, relying on `CustomMlflowLangchainTracer`?
+    # Use standard OTel context propagation.
+    
+    return wrapped(*args, **kwargs)
 
-        logger.info('WRAPPING LANG GRAPH %s', wrapped.__name__)
-        print('WRAPPING LANG GRAPH %s' % wrapped.__name__)
 
-        start_time = default_timer()
+async def _handle_async_lang_graph_wrapper(
+    wrapped: typing.Callable[..., typing.Awaitable[typing.Any]],
+    instance: typing.Any,
+    args: tuple[typing.Any, ...],
+    kwargs: dict[str, typing.Any],
+    tracer: Tracer,
+    span_name: str,
+):
+    """Wrapper for async methods that return a coroutine (ainvoke, abatch)."""
+    # When Pregel.stream is called, its `config` argument will be positional with
+    # index 2 or key-word.
+    if len(args) > 2:
+        config = args[2]
+    else:
+        config = kwargs.get('config', None)
 
-        try:
-            response = wrapped(*args, **kwargs)
-        except Exception as exc:
-            exception = exc
-            response = getattr(exc, 'response', None)
-        finally:
-            elapsed_time = max(default_timer() - start_time, 0)
+    if config:
+        extra_data = config.get('configurable', None)
+        # session_id = extra_data.get('thread_id', None)
+        # user_id = extra_data.get('user_id', None)
 
-        if exception:
-            if span.is_recording():
-                span.set_attribute(ERROR_TYPE, type(exception).__qualname__)
-                metric_attributes[ERROR_TYPE] = type(exception).__qualname__
-            raise exception.with_traceback(exception.__traceback__)
+        callbacks = config.get('callbacks', None)
+        if callbacks is None:
+            config['callbacks'] = []
+            callbacks = config.get('callbacks')
 
-        logger.info('WRAPPED LANG GRAPH %s', wrapped.__name__)
-        print('WRAPPED LANG GRAPH %s' % wrapped.__name__)
+        # Check if our custom tracer is present
+        has_custom_tracer = any(isinstance(handler, CustomMlflowLangchainTracer) for handler in callbacks)
 
-    return response
+        if not has_custom_tracer:
+            # We need to configure the tracer.
+             tracer_instance = CustomMlflowLangchainTracer()
+             callbacks.append(tracer_instance)
+             config['callbacks'] = callbacks
+
+    return await wrapped(*args, **kwargs)
+
+
+async def _handle_async_lang_graph_gen_wrapper(
+    wrapped: typing.Callable[..., typing.AsyncIterator[typing.Any]],
+    instance: typing.Any,
+    args: tuple[typing.Any, ...],
+    kwargs: dict[str, typing.Any],
+    tracer: Tracer,
+    span_name: str,
+):
+    """Wrapper for async methods that return an async generator (astream)."""
+    # When Pregel.stream is called, its `config` argument will be positional with
+    # index 2 or key-word.
+    if len(args) > 2:
+        config = args[2]
+    else:
+        config = kwargs.get('config', None)
+
+    if config:
+        extra_data = config.get('configurable', None)
+        callbacks = config.get('callbacks', None)
+        if callbacks is None:
+            config['callbacks'] = []
+            callbacks = config.get('callbacks')
+
+        # Check if our custom tracer is present
+        has_custom_tracer = any(isinstance(handler, CustomMlflowLangchainTracer) for handler in callbacks)
+
+        if not has_custom_tracer:
+             tracer_instance = CustomMlflowLangchainTracer()
+             callbacks.append(tracer_instance)
+             config['callbacks'] = callbacks
+
+    async for item in wrapped(*args, **kwargs):
+        yield item
+
+
+
+
 
 
 WRAPPED_METHODS = [
@@ -425,9 +502,16 @@ WRAPPED_METHODS = [
     {
         'module': 'langgraph.pregel',
         'object': 'Pregel',
-        'method': 'stream',
-        'span_name': 'graph.stream',
+        'method': 'invoke',
+        'span_name': 'graph.invoke',
         'wrapper': _handle_lang_graph_wrapper,
+    },
+    {
+        'module': 'langgraph.pregel',
+        'object': 'Pregel',
+        'method': 'ainvoke',
+        'span_name': 'graph.ainvoke',
+        'wrapper': _handle_async_lang_graph_wrapper,
     },
     {
         'module': 'langgraph.pregel',
@@ -436,6 +520,28 @@ WRAPPED_METHODS = [
         'span_name': 'graph.stream',
         'wrapper': _handle_lang_graph_wrapper,
     },
+    {
+        'module': 'langgraph.pregel',
+        'object': 'Pregel',
+        'method': 'astream',
+        'span_name': 'graph.astream',
+        'wrapper': _handle_async_lang_graph_gen_wrapper, 
+    },
+    {
+        'module': 'langgraph.pregel',
+        'object': 'Pregel',
+        'method': 'batch',
+        'span_name': 'graph.batch',
+        'wrapper': _handle_lang_graph_wrapper,
+    },
+    {
+        'module': 'langgraph.pregel',
+        'object': 'Pregel',
+        'method': 'abatch',
+        'span_name': 'graph.abatch',
+        'wrapper': _handle_async_lang_graph_wrapper,
+    },
+
     {
         'module': 'presidio_analyzer.nlp_engine.spacy_nlp_engine',
         'object': 'SpacyNlpEngine',
@@ -472,6 +578,82 @@ class CustomInstrumentor(BaseInstrumentor):
     def _instrument(self, **kwargs):
         logger.info('CUSTOM INSTRUMENTING')
         print('CUSTOM INSTRUMENTING')
+        print('MONKEY PATCH: Starting...', flush=True)
+
+        # Monkey patch opentelemetry.sdk.trace.Span.set_attribute to debug span_type=None
+        try:
+            import traceback
+            from opentelemetry.sdk.trace import Span as SdkSpan
+            from opentelemetry.trace import Tracer as ApiTracer
+            
+            original_init = SdkSpan.__init__
+            original_set_attribute = SdkSpan.set_attribute
+            original_set_attributes = SdkSpan.set_attributes
+            original_start_span = ApiTracer.start_span
+
+            def log_none_attribute(key, value):
+                if value is None:
+                    stack = "".join(traceback.format_stack()[:-1])
+                    msg = f"MONKEY PATCH: Attribute '{key}' set to None. Traceback:\n{stack}"
+                    logger.warning(msg)
+                    print(msg, flush=True)
+
+            def version_wrapper(name):
+                try:
+                    return original_version(name)
+                except Exception as e:
+                    stack = "".join(traceback.format_stack()[:-1])
+                    msg = f"MONKEY PATCH: CRASH in importlib.metadata.version('{name}'): {e}\nTraceback:\n{stack}"
+                    print(msg, flush=True)
+                    raise e
+
+            from importlib import metadata as py_metadata
+            original_version = py_metadata.version
+            py_metadata.version = version_wrapper
+
+            def init_wrapper(self, *args, **kwargs):
+                attributes = kwargs.get("attributes")
+                if attributes:
+                    for k, v in attributes.items():
+                        log_none_attribute(k, v)
+                return original_init(self, *args, **kwargs)
+
+            def set_attribute_wrapper(self, key, value):
+                log_none_attribute(key, value)
+                return original_set_attribute(self, key, value)
+
+            def set_attributes_wrapper(self, attributes):
+                if attributes:
+                    for k, v in attributes.items():
+                        log_none_attribute(k, v)
+                return original_set_attributes(self, attributes)
+
+            def start_span_wrapper(self, name, *args, **kwargs):
+                # Check for None in attributes passed to start_span
+                attributes = kwargs.get("attributes")
+                if attributes:
+                    for k, v in attributes.items():
+                        log_none_attribute(k, v)
+                return original_start_span(self, name, *args, **kwargs)
+
+            SdkSpan.__init__ = init_wrapper
+            SdkSpan.set_attribute = set_attribute_wrapper
+            SdkSpan.set_attributes = set_attributes_wrapper
+            ApiTracer.start_span = start_span_wrapper
+            
+            msg = "MONKEY PATCH: Applied to Span.__init__, set_attribute, set_attributes, Tracer.start_span"
+            logger.info(msg)
+            print(msg, flush=True)
+        except Exception as e:
+            logger.error(f"Failed to monkey patch: {e}")
+
+        # Enable MLFlow Autologging but DISABLE default tracer injection
+        # This allows us to inject our CustomMlflowLangchainTracer manually
+        try:
+             mlflow.langchain.autolog(log_traces=False, silent=False)
+             logger.info('Enabled mlflow.langchain.autolog(log_traces=False)')
+        except Exception as e:
+             logger.error(f'Failed to enable mlflow autolog: {e}')
 
         tracer_provider = kwargs.get('tracer_provider')
         tracer = get_tracer(__name__, __version__, tracer_provider)

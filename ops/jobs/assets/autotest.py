@@ -8,6 +8,7 @@ from ..helpers import _run_init_container, _start_service
 from .auth import keycloak_init_service
 from .databases import postgres_init_autotest_service
 from .infrastructure import (
+    file_sync_service,
     redis_service,
     seaweedfs_init_autotest_service,
     weaviate_service,
@@ -47,6 +48,7 @@ def backend_autotest_dependency_gate_service(context) -> Dict[str, str]:
         traefik_service,
         presidio_analyzer_service,
         nemo_guardrails_service,
+        file_sync_service,
     ],
     retry_policy=RetryPolicy(max_retries=15),
 )
@@ -66,6 +68,7 @@ def api_server_autotest_service(context) -> Dict[str, str]:
         traefik_service,
         presidio_analyzer_service,
         nemo_guardrails_service,
+        file_sync_service,
     ],
     retry_policy=RetryPolicy(max_retries=15),
 )
@@ -78,7 +81,7 @@ def celery_worker_autotest_service(context) -> Dict[str, str]:
 @asset(
     name="webui-server-autotest",
     required_resource_keys={"compose_env", "process_checker"},
-    deps=[api_server_autotest_service, traefik_service],
+    deps=[api_server_autotest_service, traefik_service, file_sync_service],
     retry_policy=RetryPolicy(max_retries=15),
 )
 def webui_server_autotest_service(context) -> Dict[str, str]:

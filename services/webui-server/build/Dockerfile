@@ -60,6 +60,7 @@ COPY --from=frontend-dir ./jsconfig.json /app/frontend/jsconfig.json
 COPY --from=frontend-dir ./package-lock.json /app/frontend/package-lock.json
 COPY --from=frontend-dir ./package.json /app/frontend/package.json
 COPY --from=frontend-dir ./eslint.config.cjs /app/frontend/eslint.config.cjs
+COPY --from=frontend-dir ./vite.config.js /app/frontend/vite.config.js
 
 COPY --from=frontend-dir ./src/ /app/frontend/src/
 

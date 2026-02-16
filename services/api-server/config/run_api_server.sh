@@ -35,17 +35,21 @@ else
     exit -1
 fi
 
-set +e
-# shellcheck disable=SC2086
-$SYNC_CMD $EXTRA_ARGS
-EXIT_CODE=$?
-set -e
+if [ "${USE_UV_SYNC:-true}" = "true" ]; then
+    set +e
+    # shellcheck disable=SC2086
+    $SYNC_CMD $EXTRA_ARGS
+    EXIT_CODE=$?
+    set -e
 
-if [ $EXIT_CODE -ne 0 ]; then
-    echo "Error: Failed to sync virtual environment."
-    echo "This is likely because uv.lock is not up-to-date with pyproject.toml."
-    echo "Please run 'uv lock' on your host machine to update uv.lock."
-    exit $EXIT_CODE
+    if [ $EXIT_CODE -ne 0 ]; then
+        echo "Error: Failed to sync virtual environment."
+        echo "This is likely because uv.lock is not up-to-date with pyproject.toml."
+        echo "Please run 'uv lock' on your host machine to update uv.lock."
+        exit $EXIT_CODE
+    fi
+else
+    echo "Skipping uv sync (USE_UV_SYNC is set to false)"
 fi
 
 # Run the FastAPI server.

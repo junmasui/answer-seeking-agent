@@ -1,10 +1,15 @@
 # Start with the Node.js image to copy artifacts from
-FROM localhost/localhost/answers-frontend:node-22-bookworm AS node-source
+# NOTE: This is overridden by --build-context node-source=docker-image://...
+FROM node-source AS node-source
+
+# Alias the backend base image
+# NOTE: This is overridden by --build-context backend-source=docker-image://...
+FROM backend-source AS backend-source
 
 #
 # STAGE: dev
 #
-FROM localhost/localhost/answers-backend:python-3.12-cuda12 AS dev
+FROM backend-source AS dev
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000

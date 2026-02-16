@@ -44,7 +44,6 @@ ALL_ASSETS = [
     assets.api_server_autotest_service,
     assets.celery_worker_autotest_service,
     assets.webui_server_autotest_service,
-    assets.dev_server_service,
     # Script-based assets
     assets.initialize_environment_asset,
 ]

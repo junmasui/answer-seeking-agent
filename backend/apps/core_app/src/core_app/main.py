@@ -1,4 +1,13 @@
 import logging
+# Standard Library
+# ...
+import os
+
+# Configure MLFlow to use the global OTel TracerProvider (from our Distro)
+os.environ['MLFLOW_USE_DEFAULT_TRACER_PROVIDER'] = 'false'
+# Enable Exemplars in OTel Metrics for trace correlation
+os.environ['OTEL_METRICS_EXEMPLAR_FILTER'] = 'trace_based'
+
 from contextlib import asynccontextmanager
 
 from core.signals import configure_sender, send_start_up

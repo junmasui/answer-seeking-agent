@@ -1,6 +1,0 @@
-services:
-  dev-server:
-    image: 'localhost/localhost/answers-dev-server:python-3.12-cpu'
-
-    environment:
-      GPU_MODE: cpu
