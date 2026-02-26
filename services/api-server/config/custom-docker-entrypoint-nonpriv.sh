@@ -8,6 +8,22 @@ cd /app/backend
 
 if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
 
+    MUTAGEN_SYNC_FILE="/app/backend/.mutagen-sync-id"
+
+    echo "Waiting for codebase sync... (looking for $MUTAGEN_SYNC_FILE)"
+
+    # Block until the sentinel file appears.
+    #
+    # This mechanism relies on the fact that .mutagen-sync-id is NOT copied into
+    # the Docker image during build (it is excluded via .dockerignore or simply not COPY'd).
+    # Therefore, its presence in the container confirms that Mutagen has successfully
+    # synced the source directory from the host.
+    while [ ! -f "$MUTAGEN_SYNC_FILE" ]; do
+        sleep 1
+    done
+    # For the static marker approach, we just verify the file exists and has content
+    echo "Codebase sync verified: found $MUTAGEN_SYNC_FILE"
+
     echo "Waiting for synced backend source at /app/backend/pyproject.toml..."
     
     # Wait for key files to exist
@@ -57,12 +73,17 @@ cd /app/backend
 
 if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
 
+    echo "Creating virtual environment exists."
+
+    ls -al .
+    ls -al .venv || true
+
     # Create or ensure the virtual environment exists.
     uv venv --allow-existing
 
     # PHASE 1: Sync all packages as non-editable (production-like)
     # This ensures all packages including telemetry are properly installed with entrypoints
-    SYNC_CMD="uv sync --frozen --dev --all-packages --no-editable"
+    SYNC_CMD="uv sync --frozen --dev --all-packages"
 
     EXTRA_ARGS=""
 
@@ -76,10 +97,10 @@ if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
     fi
 
     set +e
+
     # shellcheck disable=SC2086
     $SYNC_CMD $EXTRA_ARGS
     EXIT_CODE=$?
-    set -e
 
     if [ $EXIT_CODE -ne 0 ]; then
         echo "Error: Failed to sync virtual environment."
@@ -88,18 +109,7 @@ if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
         exit $EXIT_CODE
     fi
 
-    # PHASE 2: Reinstall telemetry packages as editable for development
-    # This allows live code changes without rebuilding images
-    if [ "${TELEMETRY_EDITABLE_INSTALL:-true}" = "true" ]; then
-        echo "Installing telemetry packages in editable mode..."
-
-        source .venv/bin/activate
-
-        uv pip install -e ./libs/core_telemetry_distro
-        uv pip install -e ./libs/core_telemetry_instrumentation
-
-        echo "Telemetry packages installed in editable mode."
-    fi
+    set -e
 fi
 
 # Wait for valid virtual environment

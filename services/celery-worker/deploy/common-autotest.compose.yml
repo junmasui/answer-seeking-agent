@@ -20,7 +20,6 @@ services:
       ##
       USE_CODEBASE_SYNC: true
       USE_BOOTSTRAP_INSTALL: true
-      TELEMETRY_EDITABLE_INSTALL: true
       ENABLE_SSHD: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
@@ -96,7 +95,6 @@ services:
       GPU_MODE: cpu
       USE_CODEBASE_SYNC: true
       USE_BOOTSTRAP_INSTALL: true
-      TELEMETRY_EDITABLE_INSTALL: true
       ENABLE_SSHD: true
       PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:

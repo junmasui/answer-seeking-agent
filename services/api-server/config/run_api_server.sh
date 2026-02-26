@@ -75,17 +75,20 @@ export POSTGRES_CHECKPOINTS_CONNECTION_URL="postgresql+psycopg://${CHECKPOINTS_P
 #     AutoRestartTrick (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/tricks/__init__.py#L147)
 #     arriving at PatternMatchingEventHandler (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/events.py#L292)
 #     then arriving at _match_path (https://github.com/gorakhargosh/watchdog/blob/561aa0425c44b9d4376163f2b909bf1b655cf71a/src/watchdog/utils/patterns.py#L24)
+
 if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
+# uv run --frozen --no-sync \
+#     watchmedo auto-restart \
+#         --debug-force-polling \
+#         --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
+#         --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
+#     -- \
+
+
 uv run --frozen --no-sync \
-    watchmedo auto-restart \
-        --debug-force-polling \
-        --debounce-interval="${WATCH_DEBOUNCE_SECS}" \
-        --directory=./apps --directory=./libs  --recursive --pattern='*.py' \
-    -- \
-    uv run --frozen --no-sync \
     -- \
     opentelemetry-instrument \
       --distro custom_otel \

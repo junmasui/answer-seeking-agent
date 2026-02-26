@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict, List, Optional
 
 from dagster import AssetsDefinition, Failure, RetryPolicy, asset
@@ -60,7 +59,6 @@ group_1_assets = [
     redis_image,
     opensearch_image,
     traefik_image,
-    weaviate_image,
     api_server_image,
     mlflow_image,
     file_sync_image,
@@ -94,7 +92,7 @@ def build_python_packages_asset(context) -> Dict[str, str]:
 # Group 2: Depend on Python packages
 # "nemo", "webui-server"
 nemo_image = _make_image_build_asset("nemo", deps=[build_python_packages_asset])
-webui_server_image = _make_image_build_asset("webui-server", deps=[build_python_packages_asset])
+webui_server_image = _make_image_build_asset("webui-server")
 
 
 group_2_assets = [
@@ -103,4 +101,4 @@ group_2_assets = [
 ]
 
 # Collection of all image assets for external dependencies
-ALL_IMAGE_ASSETS = group_1_assets + [build_python_packages_asset] + group_2_assets
+ALL_IMAGE_ASSETS = group_1_assets + group_2_assets

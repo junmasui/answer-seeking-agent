@@ -14,7 +14,3 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-def init_telemetry():
-    """Initialize telemetry."""
-    from .lib_config import get_lib_config

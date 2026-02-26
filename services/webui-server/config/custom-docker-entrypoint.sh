@@ -17,12 +17,25 @@ start_sshd() {
         rm -rf /var/lib/apt/lists/*
     fi
 
-    mkdir -p /var/run/sshd /root/.ssh
-    chmod 700 /root/.ssh
+    # Configure SSH for node user (UID 1000) if it exists
+    if id -u node >/dev/null 2>&1; then
+        SSH_USER_HOME="/home/node"
+        SSH_USER="node"
+        SSH_GROUP="node"
+    else
+        # Fallback to root if node user doesn't exist
+        SSH_USER_HOME="/root"
+        SSH_USER="root"
+        SSH_GROUP="root"
+    fi
+
+    mkdir -p /var/run/sshd "${SSH_USER_HOME}/.ssh"
+    chmod 700 "${SSH_USER_HOME}/.ssh"
 
     if [ -f "/run/secrets/mutagen_sshd_authorized_keys" ]; then
-        cp /run/secrets/mutagen_sshd_authorized_keys /root/.ssh/authorized_keys
-        chmod 600 /root/.ssh/authorized_keys
+        cp /run/secrets/mutagen_sshd_authorized_keys "${SSH_USER_HOME}/.ssh/authorized_keys"
+        chmod 600 "${SSH_USER_HOME}/.ssh/authorized_keys"
+        chown -R "${SSH_USER}:${SSH_GROUP}" "${SSH_USER_HOME}/.ssh"
     fi
 
     if [ ! -f /etc/ssh/sshd_config ]; then

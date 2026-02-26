@@ -10,6 +10,7 @@ from .resources import compose_env_resource, process_checker_resource
 ALL_ASSETS = [
     # Service assets
     *assets.ALL_IMAGE_ASSETS,
+    assets.build_python_packages_asset,
     assets.update_secrets_asset,
     assets.postgres_service,
     assets.postgres_init_dependency_gate_service,

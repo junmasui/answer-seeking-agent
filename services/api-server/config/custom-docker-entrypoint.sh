@@ -30,12 +30,25 @@ start_sshd() {
     rm -rf /var/lib/apt/lists/*
   fi
 
-  mkdir -p /var/run/sshd /root/.ssh
-  chmod 700 /root/.ssh
+  # Configure SSH for python user (UID 1000) if it exists
+  if id -u python >/dev/null 2>&1; then
+      SSH_USER_HOME="/home/python"
+      SSH_USER="python"
+      SSH_GROUP="python"
+  else
+      # Fallback to root if python user doesn't exist (unexpected in this container)
+      SSH_USER_HOME="/root"
+      SSH_USER="root"
+      SSH_GROUP="root"
+  fi
+
+  mkdir -p /var/run/sshd "${SSH_USER_HOME}/.ssh"
+  chmod 700 "${SSH_USER_HOME}/.ssh"
 
   if [ -f "/run/secrets/mutagen_sshd_authorized_keys" ]; then
-    cp /run/secrets/mutagen_sshd_authorized_keys /root/.ssh/authorized_keys
-    chmod 600 /root/.ssh/authorized_keys
+    cp /run/secrets/mutagen_sshd_authorized_keys "${SSH_USER_HOME}/.ssh/authorized_keys"
+    chmod 600 "${SSH_USER_HOME}/.ssh/authorized_keys"
+    chown -R "${SSH_USER}:${SSH_GROUP}" "${SSH_USER_HOME}/.ssh"
   fi
 
   if [ ! -f /etc/ssh/sshd_config ]; then

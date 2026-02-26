@@ -85,6 +85,9 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         # Use SpanTracker for span management
         self.span_tracker: SpanTracker = get_span_tracker()
 
+
+        print(f'SPAN TRACKER {type(self.span_tracker)}')
+
         logger.debug(f'OpenTelemetryCallbackHandler initialized with session_id={self.session_id}')
 
     def _init_metrics(self):

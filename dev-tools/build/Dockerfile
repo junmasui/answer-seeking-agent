@@ -33,12 +33,10 @@ RUN --mount=type=bind,from=node-source,target=/context \
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
-COPY --from=config-dir ./monitor_mutagen_sync.sh /monitor_mutagen_sync.sh
 COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
-    && chmod a+x /monitor_mutagen_sync.sh \
     && chmod a+x /stop_supervisor.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh
@@ -61,6 +59,7 @@ RUN \
     tree \
     ca-certificates \
     openssh-client \
+    sudo \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

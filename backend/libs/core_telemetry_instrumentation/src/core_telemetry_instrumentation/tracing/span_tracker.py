@@ -12,8 +12,8 @@ import time
 from functools import cache
 from typing import Any, Dict, Optional
 
-from opentelemetry import context as context_api
 from opentelemetry import trace
+from opentelemetry.context import Context
 from opentelemetry.trace import Status, get_tracer, set_span_in_context
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,9 @@ class SpanTracker:
 
     This class encapsulates logic for creating, retrieving, and ending spans,
     including context propagation, status, and error handling. It maintains
-    internal mappings for active spans, their start times, and context tokens.
+    internal mappings for active spans, their start times, and explicit Context
+    objects. Context is passed explicitly (not via attach/detach) to ensure
+    async safety across concurrent tasks.
     """
 
     def __init__(self, tracer: trace.Tracer):
@@ -52,7 +54,7 @@ class SpanTracker:
         self.tracer = tracer
         self._spans: Dict[str, trace.Span] = {}
         self._run_start_times: Dict[str, float] = {}
-        self._tokens: Dict[str, trace.Span] = {}
+        self._contexts: Dict[str, Context] = {}
 
     def start_span(
         self, name: str, attributes: Dict[str, Any], run_id: str, parent_run_id: Optional[str] = None
@@ -60,9 +62,9 @@ class SpanTracker:
         """
         Create and store a new span for the given run_id.
 
-        Starts a new OpenTelemetry span, optionally as a child of a parent span, and attaches it
-        to the current context for propagation. Stores the span and its start time for later
-        reference.
+        Starts a new OpenTelemetry span, optionally as a child of a parent span, and stores
+        an explicit Context for child span propagation. Does not attach to the global context,
+        making it safe for concurrent async usage.
 
         Args:
             name (str): The name of the span.
@@ -74,20 +76,17 @@ class SpanTracker:
             trace.Span: The created OpenTelemetry span object.
 
         """
-        # Retrieve parent span if available, to maintain trace hierarchy
-        parent_span = self._spans.get(parent_run_id) if parent_run_id else None
-        # Set parent context for child span propagation
-        parent_context = trace.set_span_in_context(parent_span) if parent_span else None
-        # Start a new span using the tracer, with optional parent context and custom attributes
+        # Look up the stored parent context (if any) to maintain trace hierarchy
+        parent_context = self._contexts.get(parent_run_id) if parent_run_id else None
 
+        # Start a new span using the tracer, with optional parent context and custom attributes
         span = self.tracer.start_span(name=name, attributes=attributes, context=parent_context)
         self._spans[run_id] = span
         self._run_start_times[run_id] = time.time()
 
-        # Attach the span to the OpenTelemetry context, so it becomes the current active span
-        # This is necessary for context propagation across async boundaries and threads
-        token = context_api.attach(set_span_in_context(span))
-        self._tokens[run_id] = token
+        # Store an explicit Context carrying this span so child spans can reference it.
+        # This avoids attach/detach which is unsafe across async boundaries.
+        self._contexts[run_id] = set_span_in_context(span, parent_context)
 
         return span
 
@@ -129,7 +128,7 @@ class SpanTracker:
         End the span for the given run_id, set status and error attributes, and remove tracking.
 
         Sets additional attributes, status, and error information on the span before ending it.
-        Detaches the span from the context to clean up propagation state.
+        Removes the span and its stored context from internal tracking.
 
         Args:
             run_id (str): Unique identifier for the span/run.
@@ -163,10 +162,8 @@ class SpanTracker:
                 span.set_attribute('duration_seconds', duration)
             # End the span to signal completion to OpenTelemetry
             span.end()
-            span = self._spans.pop(run_id, None)
-            self._run_start_times.pop(run_id, None)
 
-            # Detach the span from the OpenTelemetry context to clean up context propagation
-            token = self._tokens.pop(run_id, None)
-            context_api.detach(token)
+            self._spans.pop(run_id, None)
+            self._run_start_times.pop(run_id, None)
+            self._contexts.pop(run_id, None)
         return duration

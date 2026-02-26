@@ -21,7 +21,7 @@ def verify_distro():
 
     tracer_provider = get_tracer_provider()
     tree = print_object_tree(tracer_provider)
-    ##TODO logger.info('tracer_provider\n%s', tree.getvalue())
+    logger.info('tracer_provider\n%s', tree.getvalue())
 
     event_logger_provider = get_event_logger_provider()
 

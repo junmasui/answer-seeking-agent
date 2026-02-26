@@ -43,12 +43,13 @@ if [ -f "$MUTAGEN_SSH_KEY_PATH" ]; then
     chmod 700 /root/.ssh
     cp "$MUTAGEN_SSH_KEY_PATH" /root/.ssh/mutagen_id
     chmod 600 /root/.ssh/mutagen_id
-    cat <<'EOF' > /root/.ssh/config
+    cat <<EOF > /root/.ssh/config
 Host *
     StrictHostKeyChecking no
     UserKnownHostsFile /dev/null
     LogLevel ERROR
     IdentityFile /root/.ssh/mutagen_id
+    Port ${MUTAGEN_SSH_PORT}
 EOF
 fi
 
@@ -72,21 +73,24 @@ create_session() {
         --name "${name}" \
         --mode "${MUTAGEN_SYNC_MODE}" \
         --no-ignore-vcs \
-        --ignore "backend/.venv" \
-        --ignore "frontend/node_modules" \
+        --ignore ".venv" \
+        --ignore "node_modules" \
         --ignore ".git" \
         "${source}" \
         "${dest}"
 }
 
+MUTAGEN_BACKEND_USER="${MUTAGEN_BACKEND_USER:-python}"
+MUTAGEN_FRONTEND_USER="${MUTAGEN_FRONTEND_USER:-node}"
+
 for target in ${BACKEND_TARGETS}; do
     create_session "backend-${target}" \
         "${MUTAGEN_SOURCE_ROOT}/backend" \
-        "ssh://${MUTAGEN_SSH_USER}@${target}:${MUTAGEN_SSH_PORT}//app/backend"
+        "${MUTAGEN_BACKEND_USER}@${target}:/app/backend"
  done
 
 for target in ${FRONTEND_TARGETS}; do
     create_session "frontend-${target}" \
         "${MUTAGEN_SOURCE_ROOT}/frontend" \
-        "ssh://${MUTAGEN_SSH_USER}@${target}:${MUTAGEN_SSH_PORT}//app/frontend"
+        "${MUTAGEN_FRONTEND_USER}@${target}:/app/frontend"
  done

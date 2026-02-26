@@ -1,23 +1,22 @@
 services:
-  file-sync:
-    image: localhost/localhost/file-sync:latest
-    container_name: file-sync
-    profiles:
-      - file-sync
-      - infrastructure
-      - all
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Container discovery
-      - ../../../:/app                                  # Host codebase
-    secrets:
-      - mutagen_ssh_private_key
-      - mutagen_sshd_authorized_keys
-    networks:
-      - agent-poc
-    healthcheck:
-      test: ["CMD-SHELL", "bash /healthcheck.sh"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
-    restart: unless-stopped
+    file-sync:
+        image: localhost/localhost/file-sync:latest
+        profiles:
+            - file-sync
+            - infrastructure
+            - all
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro # Container discovery
+            - ../../../:/app # Host codebase
+        secrets:
+            - mutagen_ssh_private_key
+            - mutagen_sshd_authorized_keys
+        networks:
+            - agent-poc
+        healthcheck:
+            test: [ "CMD-SHELL", "bash /healthcheck.sh" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 60s
+        restart: unless-stopped

@@ -27,7 +27,6 @@ class CustomDistro(OpenTelemetryDistro):
         """Configure the distro with custom settings."""
         logger.info('CONFIGURING DISTRO %s\n%s', type(self), kwargs)
         print('CONFIGURING DISTRO %s\n%s' % (type(self), kwargs))
-        print(f'CALL STACK\n{"".join(traceback.format_stack())}')
 
         # Add "transformers" to the disabled list to prevent it from overriding the service name.
         disabled_instrumentations = os.environ.get('OTEL_PYTHON_DISABLED_INSTRUMENTATIONS', '').split(',')

@@ -9,8 +9,8 @@ from .auth import keycloak_init_service
 from .scripts import update_secrets_asset
 from .databases import postgres_init_service
 from .images import (
-    ALL_IMAGE_ASSETS,
     api_server_image,
+    build_python_packages_asset,
     nemo_image,
     slim_util_image,
     traefik_image,
@@ -64,7 +64,7 @@ def nemo_guardrails_service(context) -> Dict[str, str]:
 @asset(
     name="presidio-analyzer",
     required_resource_keys={"compose_env", "process_checker"},
-    deps=ALL_IMAGE_ASSETS,
+    deps=[build_python_packages_asset],
     retry_policy=RetryPolicy(max_retries=15),
 )
 def presidio_analyzer_service(context) -> Dict[str, str]:
@@ -131,5 +131,3 @@ def webui_server_service(context) -> Dict[str, str]:
     """Start Web UI server service."""
     _start_service(context, "webui-server")
     return {"status": "ready"}
-
-

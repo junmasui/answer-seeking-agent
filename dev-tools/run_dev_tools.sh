@@ -91,6 +91,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DOCKER_ARGS=(
     "run"
     "--name" "$CONTAINER_NAME"
+    "--user" "root"
     "--privileged"
     "--network" "agent_agent-poc"
     "-e" "GPU_MODE=$GPU_MODE"

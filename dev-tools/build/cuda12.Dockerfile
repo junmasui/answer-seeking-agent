@@ -74,6 +74,7 @@ RUN \
     ca-certificates \
     openssh-client \
     patch \
+    sudo \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
