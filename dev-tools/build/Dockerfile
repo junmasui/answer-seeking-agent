@@ -1,10 +1,15 @@
 # Start with the Node.js image to copy artifacts from
-FROM localhost/localhost/answers-frontend:node-22-bookworm AS node-source
+# NOTE: This is overridden by --build-context node-source=docker-image://...
+FROM node-source AS node-source
+
+# Alias the backend base image
+# NOTE: This is overridden by --build-context backend-source=docker-image://...
+FROM backend-source AS backend-source
 
 #
 # STAGE: production
 #
-FROM localhost/localhost/answers-backend:python-3.12-cpu AS dev
+FROM backend-source AS dev
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -28,12 +33,10 @@ RUN --mount=type=bind,from=node-source,target=/context \
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
-COPY --from=config-dir ./monitor_mutagen_sync.sh /monitor_mutagen_sync.sh
 COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
-    && chmod a+x /monitor_mutagen_sync.sh \
     && chmod a+x /stop_supervisor.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh
@@ -56,6 +59,7 @@ RUN \
     tree \
     ca-certificates \
     openssh-client \
+    sudo \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

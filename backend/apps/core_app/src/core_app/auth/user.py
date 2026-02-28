@@ -82,13 +82,24 @@ def get_scoped_current_user(scope: str | list[str], missing_ok: bool = False):
         # get_current_user handles trying bearer_token, then x_api_key.
         # It returns a user object if successful, None if no auth was provided,
         # or raises HTTPException if auth was provided but was invalid.
+        logger.info('get_scoped_current_user: retrieving user (missing_ok=%s)', missing_ok)
         user = await _get_current_user(bearer_token=bearer_token, x_api_key=x_api_key, missing_ok=missing_ok)
+        logger.info('get_scoped_current_user: retrieved user: %s', user)
 
-        # Check for the required scope.
-        if not user or not user.scopes or (scope not in user.scopes and Scope.ADMIN not in user.scopes):
-            # User is authenticated, but not authorized for this specific scope.
+        if user is not None:
+            # Check for the required scope.
+            if not user.scopes or (scope not in user.scopes and Scope.ADMIN not in user.scopes):
+                # User is authenticated, but not authorized for this specific scope.
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN, detail=f"Not enough permissions. Requires scope: '{scope}'."
+                )
+        elif missing_ok:
+            return None
+        else:
+            # Should be unreachable if _get_current_user works as expected (raises 401 when missing_ok=False),
+            # but serves as a failsafe.
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail=f"Not enough permissions. Requires scope: '{scope}'."
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
             )
         return user
 

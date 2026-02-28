@@ -41,7 +41,6 @@ SERVICE_ASSETS = [
     assets.api_server_autotest_service,
     assets.celery_worker_autotest_service,
     assets.webui_server_autotest_service,
-    assets.dev_server_service,
 ]
 
 launch_services_job = define_asset_job(
@@ -57,4 +56,23 @@ initialize_environment_job = define_asset_job(
 build_python_packages_job = define_asset_job(
     "build_python_packages",
     selection=AssetSelection.assets(*assets.ALL_IMAGE_ASSETS, assets.build_python_packages_asset),
+)
+
+# ---------------------------------------------------------------------------
+# Teardown jobs
+# ---------------------------------------------------------------------------
+
+stop_all_services_job = define_asset_job(
+    "teardown_all_services",
+    selection=AssetSelection.assets(assets.stop_all_services_asset),
+)
+
+stop_app_services_job = define_asset_job(
+    "teardown_app_services",
+    selection=AssetSelection.assets(assets.stop_app_services_asset),
+)
+
+stop_autotest_services_job = define_asset_job(
+    "teardown_autotest_services",
+    selection=AssetSelection.assets(assets.stop_autotest_services_asset),
 )

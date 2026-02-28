@@ -81,21 +81,6 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     graph = get_compiled_agent_graph()
     logger.info('streaming_mode: %s', graph.stream_mode)
 
-    # Initialize telemetry callback handlers
-    callback_handlers = []
-
-    # # OpenTelemetry/OpenLLMetry handler (new implementation)
-    # from core_telemetry import get_callback_handler
-    #
-    # # Get callback handler
-    # otel_handler = get_callback_handler(
-    #      session_id=thread_id.hex,
-    #      user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
-    # )
-    #
-    # if otel_handler:
-    #     callback_handlers.append(otel_handler)
-
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
     logger.info('\n=============================\n=\n=\n=\n=')
@@ -105,13 +90,28 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     # And because we are not static, we avoid TypedDict and its subclasses (ex: GraphState).
     latest_value = {}
     try:
-        extra_data = {'thread_id': thread_id.hex}
-        if user_id:
-            extra_data['user_id'] = user_id.hex
-        run_config = {'recursion_limit': 30, 'configurable': extra_data}
-        if callback_handlers:
-            run_config['callbacks'] = callback_handlers
-        print(f'GRAPH TYPE {type(graph)}')
+        user_id_str = user_id.hex if isinstance(user_id, uuid.UUID) else str(user_id) if user_id else None
+
+        # configurable.thread_id is required by the LangGraph checkpointer for
+        # conversation-state persistence — it is NOT a tracing concern.
+        # All tracing / observability context lives in metadata and is
+        # picked up automatically by the CustomInstrumentor monkey-patch on
+        # Pregel.astream (which injects the OpenTelemetryCallbackHandler and
+        # sets agent.* span attributes from metadata).
+        run_config = {
+            'recursion_limit': 30,
+            'configurable': {
+                'thread_id': thread_id.hex,
+            },
+            'metadata': {
+                'thread_id': thread_id.hex,
+                'user_id': user_id_str or '',
+                'session_id': thread_id.hex,
+                'question_preview': user_input[:500],
+                'document_set_count': len(doc_set_ids),
+            },
+        }
+
         async for output in graph.astream(input=graph_input, config=run_config):
             for key, value in output.items():
                 # Node

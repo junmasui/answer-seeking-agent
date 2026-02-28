@@ -254,7 +254,7 @@ DESCR="Keycloak Admin password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-# Mutagen SSH keys (dev-server -> autotest services)
+# Mutagen SSH keys (file-sync -> autotest services)
 MUTAGEN_PRIVATE_KEY=./secrets/mutagen.private_key
 MUTAGEN_AUTHORIZED_KEYS=./secrets/mutagen.authorized_keys
 MUTAGEN_KEYPAIR_BASE=./secrets/mutagen_ed25519

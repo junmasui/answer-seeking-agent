@@ -5,7 +5,7 @@ set -u  # Unbound variables are errors.
 set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 #
-# Build file-sync image with mutagen
+# Build MLFlow image with Postgres and S3 support
 #
 
 # DOCKER=podman
@@ -28,14 +28,13 @@ mkdir -p "$LOG_DIR"
 CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=max"
 
 #
-# Build file-sync image
+# Build MLFlow image
 #
 $DOCKER build \
   $DOCKER_BUILD_OPTS \
   $CACHE_OPTS \
-  --build-context config-dir=../config \
   --file Dockerfile \
-  --tag localhost/localhost/file-sync:latest \
+  --tag localhost/localhost/mlflow:latest \
   --progress plain \
   . 2>&1 \
-| tee $LOG_DIR/build-file-sync.log
+| tee $LOG_DIR/build-mlflow.log

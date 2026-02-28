@@ -85,6 +85,9 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         # Use SpanTracker for span management
         self.span_tracker: SpanTracker = get_span_tracker()
 
+
+        print(f'SPAN TRACKER {type(self.span_tracker)}')
+
         logger.debug(f'OpenTelemetryCallbackHandler initialized with session_id={self.session_id}')
 
     def _init_metrics(self):
@@ -254,13 +257,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         span = self.span_tracker.get_span(run_id_str)
 
         if span:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.set_attribute('error.type', type(error).__name__)
-            span.set_attribute('error.message', str(error))
-            span.end()
-
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str, status=Status(StatusCode.ERROR, str(error)), error=error)
 
     def on_retriever_start(
         self,

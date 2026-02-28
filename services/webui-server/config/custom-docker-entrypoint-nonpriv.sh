@@ -7,12 +7,35 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # Set environment variables from mounted secrets files
 
 SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
-# shellcheck disable=SC2046
-export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
+for FILE in "${SECRETS_MOUNT}"/*_secrets
+do
+    [ -f "$FILE" ] || continue
+    while IFS='=' read -r KEY VALUE || [ -n "$KEY" ]; do
+      case "$KEY" in
+        \#* | '') continue ;;
+        *) export "$KEY=$VALUE" ;;
+      esac
+    done < "$FILE"
+done
 
 
 # Only run if codebase sync is enabled
 if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
+
+    MUTAGEN_SYNC_FILE="/app/frontend/.mutagen-sync-id"
+    echo "Waiting for codebase sync... (looking for $MUTAGEN_SYNC_FILE)"
+
+    # Block until the sentinel file appears.
+    #
+    # This mechanism relies on the fact that .mutagen-sync-id is NOT copied into
+    # the Docker image during build (it is excluded via .dockerignore or simply not COPY'd).
+    # Therefore, its presence in the container confirms that Mutagen has successfully
+    # synced the source directory from the host.
+    while [ ! -f "$MUTAGEN_SYNC_FILE" ]; do
+        sleep 1
+    done
+    # For the static marker approach, we just verify the file exists and has content
+    echo "Codebase sync verified: found $MUTAGEN_SYNC_FILE"
 
     echo "Waiting for synced frontend source at /app/frontend/package.json..."
 

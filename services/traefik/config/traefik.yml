@@ -42,3 +42,9 @@ providers:
 
 log:
   level: DEBUG
+
+serversTransport:
+  forwardingTimeouts:
+    dialTimeout: "120s"
+    responseHeaderTimeout: "300s"
+    idleConnTimeout: "300s"

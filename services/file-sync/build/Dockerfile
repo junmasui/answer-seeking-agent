@@ -1,29 +1,52 @@
+# syntax=docker/dockerfile:1
+
 FROM debian:bookworm-slim
 
-# Install Unison, FUSE, and utilities
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    unison \
-    fuse3 \
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    bash \
     curl \
-    procps \
+    openssh-client \
     supervisor \
     ca-certificates \
+    gnupg \
+    lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
-# Install SeaweedFS CLI (weed)
-# Using a fixed version or latest. Here fetching latest release binary.
-# Note: In production, pinning version is better.
-RUN curl -L https://github.com/seaweedfs/seaweedfs/releases/download/3.64/linux_amd64.tar.gz | tar xz -C /usr/local/bin weed
+# Install Docker CE CLI
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli && \
+    rm -rf /var/lib/apt/lists/*
 
-# Create mount point
-RUN mkdir -p /mnt/fuse
+# Install mutagen v0.18.1
+ARG MUTAGEN_VERSION=0.18.1
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then MUTAGEN_ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then MUTAGEN_ARCH="arm64"; \
+    else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
+    curl -fsSL "https://github.com/mutagen-io/mutagen/releases/download/v${MUTAGEN_VERSION}/mutagen_linux_${MUTAGEN_ARCH}_v${MUTAGEN_VERSION}.tar.gz" -o /tmp/mutagen.tar.gz && \
+    tar -xzf /tmp/mutagen.tar.gz -C /usr/local/bin && \
+    rm /tmp/mutagen.tar.gz && \
+    chmod +x /usr/local/bin/mutagen
 
-# Copy scripts
-COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
-COPY --from=config-dir ./run_sync.sh /run_sync.sh
-COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
+# Create working directory
+WORKDIR /app
 
-RUN chmod +x /custom-docker-entrypoint.sh \
-    && chmod +x /run_sync.sh
+# Copy configuration files
+COPY --from=config-dir start_mutagen_sync.sh /start_mutagen_sync.sh
+COPY --from=config-dir monitor_mutagen_sync.sh /monitor_mutagen_sync.sh
+COPY --from=config-dir healthcheck.sh /healthcheck.sh
+COPY --from=config-dir custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
+COPY --from=config-dir supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD ["/custom-docker-entrypoint.sh"]
+# Make scripts executable
+RUN chmod +x /start_mutagen_sync.sh /monitor_mutagen_sync.sh /healthcheck.sh /custom-docker-entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/custom-docker-entrypoint.sh"]

@@ -3,13 +3,21 @@
 from dagster import Definitions
 
 from . import assets
-from .jobs import build_python_packages_job, initialize_environment_job, launch_services_job
+from .jobs import (
+    build_python_packages_job,
+    initialize_environment_job,
+    launch_services_job,
+    stop_all_services_job,
+    stop_app_services_job,
+    stop_autotest_services_job,
+)
 from .resources import compose_env_resource, process_checker_resource
 
 # Collect all assets
 ALL_ASSETS = [
     # Service assets
     *assets.ALL_IMAGE_ASSETS,
+    assets.build_python_packages_asset,
     assets.update_secrets_asset,
     assets.postgres_service,
     assets.postgres_init_dependency_gate_service,
@@ -44,15 +52,25 @@ ALL_ASSETS = [
     assets.api_server_autotest_service,
     assets.celery_worker_autotest_service,
     assets.webui_server_autotest_service,
-    assets.dev_server_service,
     # Script-based assets
     assets.initialize_environment_asset,
+    # Teardown assets
+    assets.stop_all_services_asset,
+    assets.stop_app_services_asset,
+    assets.stop_autotest_services_asset,
 ]
 
 # Main Dagster definitions object
 defs = Definitions(
     assets=ALL_ASSETS,
-    jobs=[launch_services_job, initialize_environment_job, build_python_packages_job],
+    jobs=[
+        launch_services_job,
+        initialize_environment_job,
+        build_python_packages_job,
+        stop_all_services_job,
+        stop_app_services_job,
+        stop_autotest_services_job,
+    ],
     resources={
         "compose_env": compose_env_resource,
         "process_checker": process_checker_resource,

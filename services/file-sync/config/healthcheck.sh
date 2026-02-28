@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Health check for dev-server
+# Health check for dev-tools
 # Dynamically verifies Mutagen sync sessions for running autotest containers
 
 set -e

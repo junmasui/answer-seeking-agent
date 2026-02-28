@@ -148,7 +148,7 @@ USER ${USER_ID}:${GROUP_ID}
 RUN \
     set -eux ; \
     uv venv --allow-existing \
-    && uv sync --extra cuda12 --dev --all-packages
+    && uv sync --extra cuda12 --dev --all-packages --no-editable
 
 # Build start the server
 CMD ["/run_api_server.sh"]

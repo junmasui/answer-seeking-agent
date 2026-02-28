@@ -5,7 +5,7 @@ from typing import Dict
 from dagster import RetryPolicy, asset
 
 from ..helpers import _run_init_container, _start_service
-from .images import opensearch_image, redis_image, seaweedfs_image, weaviate_image
+from .images import file_sync_image, opensearch_image, redis_image, seaweedfs_image, weaviate_image
 from .scripts import update_secrets_asset
 
 
@@ -91,3 +91,15 @@ def seaweedfs_init_mlflow_service(context) -> Dict[str, str]:
     """Initialize SeaweedFS bucket for MLflow artifacts."""
     _run_init_container(context, "seaweedfs-init-mlflow")
     return {"status": "completed"}
+
+
+@asset(
+    name="file-sync",
+    required_resource_keys={"compose_env", "process_checker"},
+    deps=[file_sync_image, update_secrets_asset],
+    retry_policy=RetryPolicy(max_retries=15),
+)
+def file_sync_service(context) -> Dict[str, str]:
+    """Start file-sync service for mutagen synchronization."""
+    _start_service(context, "file-sync")
+    return {"status": "ready"}

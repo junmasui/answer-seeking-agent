@@ -1,6 +1,6 @@
 services:
-  dev-server:
-    image: 'localhost/localhost/answers-dev-server:python-3.12-cuda12'
+  dev-tools:
+    image: 'localhost/localhost/answers-dev-tools:python-3.12-cuda12'
 
     environment:
       GPU_MODE: cuda12

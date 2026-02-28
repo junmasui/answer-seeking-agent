@@ -19,3 +19,36 @@ CUSTOM_IMAGE_DIRS = [
     "webui-server",
     # "dev-server",
 ]
+
+# ---------------------------------------------------------------------------
+# Service groups for selective stop/start operations
+# ---------------------------------------------------------------------------
+
+# Production-like frontend and backend services
+APP_PROD_SERVICES = [
+    "api-server",
+    "celery-worker",
+    "celery-flower",
+    "celery-exporter",
+    "webui-server",
+]
+
+# Autotest frontend and backend services
+APP_AUTOTEST_SERVICES = [
+    "api-server-autotest",
+    "celery-worker-autotest",
+    "celery-flower-autotest",
+    "webui-server-autotest",
+]
+
+# Automated test runner containers
+AUTOMATED_TEST_SERVICES = [
+    "automated-pytest",
+    "automated-vitest",
+]
+
+# All application services (prod + autotest + automated tests)
+ALL_APP_SERVICES = APP_PROD_SERVICES + APP_AUTOTEST_SERVICES + AUTOMATED_TEST_SERVICES
+
+# Autotest and automated test services only
+AUTOTEST_AND_TEST_SERVICES = APP_AUTOTEST_SERVICES + AUTOMATED_TEST_SERVICES
