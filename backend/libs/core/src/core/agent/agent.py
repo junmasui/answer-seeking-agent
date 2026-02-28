@@ -9,7 +9,6 @@ from typing import Optional
 from core_public import Answer, Citation
 from langgraph.errors import GraphRecursionError
 from langgraph.pregel import Pregel
-from opentelemetry import trace
 
 from ..doc_mgr import list_document_sets
 from ..lib_config import get_lib_config
@@ -92,45 +91,33 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     latest_value = {}
     try:
         user_id_str = user_id.hex if isinstance(user_id, uuid.UUID) else str(user_id) if user_id else None
-        extra_data = {'thread_id': thread_id.hex}
-        if user_id:
-            extra_data['user_id'] = user_id_str
 
-        # Attach metadata so that both the OpenTelemetryCallbackHandler (injected
-        # automatically by CustomInstrumentor) and the MlflowLangchainTracer see
-        # session / user context on every span.  MLflow uses metadata.thread_id to
-        # set TraceMetadataKey.TRACE_SESSION.
+        # configurable.thread_id is required by the LangGraph checkpointer for
+        # conversation-state persistence — it is NOT a tracing concern.
+        # All tracing / observability context lives in metadata and is
+        # picked up automatically by the CustomInstrumentor monkey-patch on
+        # Pregel.astream (which injects the OpenTelemetryCallbackHandler and
+        # sets agent.* span attributes from metadata).
         run_config = {
             'recursion_limit': 30,
-            'configurable': extra_data,
+            'configurable': {
+                'thread_id': thread_id.hex,
+            },
             'metadata': {
                 'thread_id': thread_id.hex,
                 'user_id': user_id_str or '',
                 'session_id': thread_id.hex,
+                'question_preview': user_input[:500],
+                'document_set_count': len(doc_set_ids),
             },
         }
 
-        # Start an explicit OTel span wrapping the entire graph execution so that
-        # it appears as a single top-level trace in Jaeger *and* MLflow (via the
-        # OTel Collector's otlphttp/mlflow exporter).
-        # The CustomInstrumentor monkey-patch on Pregel.astream will inject the
-        # OpenTelemetryCallbackHandler into the config automatically.
-        tracer = trace.get_tracer(__name__)
-        with tracer.start_as_current_span(
-            'seek_answer',
-            attributes={
-                'agent.question': user_input[:500],
-                'agent.thread_id': thread_id.hex,
-                'agent.user_id': user_id_str or '',
-                'agent.document_set_count': len(doc_set_ids),
-            },
-        ):
-            async for output in graph.astream(input=graph_input, config=run_config):
-                for key, value in output.items():
-                    # Node
-                    logger.info("Node '%s':", key)
-                    if isinstance(value, dict):
-                        latest_value.update(value)
+        async for output in graph.astream(input=graph_input, config=run_config):
+            for key, value in output.items():
+                # Node
+                logger.info("Node '%s':", key)
+                if isinstance(value, dict):
+                    latest_value.update(value)
     except GraphRecursionError as e:
         logger.error('Graph recursion error', exc_info=e)
     except Exception as e:

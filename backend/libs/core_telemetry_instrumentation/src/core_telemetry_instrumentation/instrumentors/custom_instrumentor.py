@@ -56,8 +56,9 @@ def _handle_request_wrapper(
     kwargs: dict[str, typing.Any],
     get_tracer: typing.Callable[[], Tracer],
     span_name: str,
+    span_attributes: dict | None = None,
 ):
-    span_attributes = {}
+    span_attributes = span_attributes or {}
     metric_attributes = {}
 
     tracer = get_tracer()
@@ -93,8 +94,9 @@ async def _handle_async_request_wrapper(
     kwargs: dict[str, typing.Any],
     get_tracer: typing.Callable[[], Tracer],
     span_name: str,
+    span_attributes: dict | None = None,
 ):
-    span_attributes = {}
+    span_attributes = span_attributes or {}
     metric_attributes = {}
 
     tracer = get_tracer()
@@ -129,9 +131,10 @@ def _handle_gen_wrapper(
     kwargs: dict[str, typing.Any],
     get_tracer: typing.Callable[[], Tracer],
     span_name: str,
+    span_attributes: dict | None = None,
 ):
     """Wrapper for sync generator functions (functions that yield)."""
-    span_attributes = {}
+    span_attributes = span_attributes or {}
     metric_attributes = {}
 
     tracer = get_tracer()
@@ -164,9 +167,10 @@ async def _handle_async_gen_wrapper(
     kwargs: dict[str, typing.Any],
     get_tracer: typing.Callable[[], Tracer],
     span_name: str,
+    span_attributes: dict | None = None,
 ):
     """Wrapper for async generator functions (async functions that yield)."""
-    span_attributes = {}
+    span_attributes = span_attributes or {}
     metric_attributes = {}
 
     tracer = get_tracer()
@@ -194,8 +198,19 @@ async def _handle_async_gen_wrapper(
 
 
 
-def _ensure_telemetry_in_config(args, kwargs, span_name):
+def _ensure_telemetry_in_config(args, kwargs, span_name) -> dict[str, str | int]:
+    """Inject OpenTelemetryCallbackHandler into the LangGraph run config and return span attributes.
 
+    The function reads ``metadata`` first (preferred) with a fallback to
+    ``configurable`` for ``session_id`` / ``user_id``.  This allows callers
+    (e.g. ``seek_answer``) to put tracing-only context in ``metadata`` while
+    reserving ``configurable`` for functional keys (``thread_id`` for the
+    checkpointer).
+
+    Returns a dict of ``agent.*`` span attributes extracted from config
+    metadata so that the calling wrapper can set them on the auto-created
+    OTel span.
+    """
     logger.info(f"ENSURE TELEMETRY for {span_name}")
 
     # When Pregel.stream is called, its `config` argument will be positional with
@@ -205,12 +220,17 @@ def _ensure_telemetry_in_config(args, kwargs, span_name):
     else:
         config = kwargs.get('config', None)
 
+    span_attrs: dict[str, str | int] = {}
+
     # Context management in async generators/coroutines is tricky with manual spans.
     # We rely on the CustomMlflowLangchainTracer injected into callbacks to handle the trace hierarchy.
     if config:
+        metadata = config.get('metadata', {}) or {}
         extra_data = config.get('configurable', {}) or {}
-        session_id = extra_data.get('thread_id', None)
-        user_id = extra_data.get('user_id', None)
+
+        # Prefer metadata (tracing context) over configurable (functional context)
+        session_id = metadata.get('session_id') or extra_data.get('thread_id')
+        user_id = metadata.get('user_id') or extra_data.get('user_id')
 
         callbacks = config.get('callbacks', None)
         if callbacks is None:
@@ -219,15 +239,25 @@ def _ensure_telemetry_in_config(args, kwargs, span_name):
 
         # Check if our custom tracer is present
         has_telemetry = any(isinstance(handler, OpenTelemetryCallbackHandler) for handler in callbacks)
-        
+
         if not has_telemetry:
-            # We need to configure the tracer. 
-            # MLFlow tracer usually doesn't need args, but we might want to pass session_id if needed separately?
-            # Creating a fresh instance.
             callback = get_callback_handler(session_id=session_id, user_id=user_id)
             callbacks.append(callback)
             config['callbacks'] = callbacks
             logger.info(f"WRAPPER: Added OpenTelemetryCallbackHandler to {span_name}")
+
+        # Build span attributes from metadata so the wrapper can set them on
+        # the auto-created OTel span (replaces the hand-rolled span in agent.py).
+        if metadata.get('question_preview'):
+            span_attrs['agent.question'] = metadata['question_preview']
+        if metadata.get('thread_id'):
+            span_attrs['agent.thread_id'] = metadata['thread_id']
+        if user_id:
+            span_attrs['agent.user_id'] = user_id
+        if metadata.get('document_set_count') is not None:
+            span_attrs['agent.document_set_count'] = metadata['document_set_count']
+
+    return span_attrs
 
 
 def _handle_lang_graph_wrapper(
@@ -238,9 +268,7 @@ def _handle_lang_graph_wrapper(
     get_tracer: typing.Callable[[], Tracer],
     span_name: str,
 ):
-    span_attributes = {}
-
-    _ensure_telemetry_in_config(args, kwargs, span_name)
+    span_attributes = _ensure_telemetry_in_config(args, kwargs, span_name)
 
     return _handle_request_wrapper(
         wrapped=wrapped,
@@ -248,7 +276,8 @@ def _handle_lang_graph_wrapper(
         args=args,
         kwargs=kwargs,
         get_tracer=get_tracer,
-        span_name=span_name)
+        span_name=span_name,
+        span_attributes=span_attributes)
 
 
 def _handle_lang_graph_gen_wrapper(
@@ -259,7 +288,7 @@ def _handle_lang_graph_gen_wrapper(
     get_tracer: typing.Callable[[], Tracer],
     span_name: str,
 ):
-    _ensure_telemetry_in_config(args, kwargs, span_name)
+    span_attributes = _ensure_telemetry_in_config(args, kwargs, span_name)
 
     for x in _handle_gen_wrapper(
         wrapped=wrapped,
@@ -267,7 +296,8 @@ def _handle_lang_graph_gen_wrapper(
         args=args,
         kwargs=kwargs,
         get_tracer=get_tracer,
-        span_name=span_name):
+        span_name=span_name,
+        span_attributes=span_attributes):
         yield x
 
 
@@ -280,7 +310,7 @@ async def _handle_async_lang_graph_wrapper(
     span_name: str,
 ):
     """Wrapper for async methods that return a coroutine (ainvoke, abatch)."""
-    _ensure_telemetry_in_config(args, kwargs, span_name)
+    span_attributes = _ensure_telemetry_in_config(args, kwargs, span_name)
 
     return await _handle_async_request_wrapper(
         wrapped=wrapped,
@@ -288,7 +318,8 @@ async def _handle_async_lang_graph_wrapper(
         args=args,
         kwargs=kwargs,
         get_tracer=get_tracer,
-        span_name=span_name)
+        span_name=span_name,
+        span_attributes=span_attributes)
 
 
 async def _handle_async_lang_graph_gen_wrapper(
@@ -300,7 +331,7 @@ async def _handle_async_lang_graph_gen_wrapper(
     span_name: str,
 ):
     """Wrapper for async methods that return an async generator (astream)."""
-    _ensure_telemetry_in_config(args, kwargs, span_name)
+    span_attributes = _ensure_telemetry_in_config(args, kwargs, span_name)
 
     async for x in _handle_async_gen_wrapper(
         wrapped=wrapped,
@@ -308,7 +339,8 @@ async def _handle_async_lang_graph_gen_wrapper(
         args=args,
         kwargs=kwargs,
         get_tracer=get_tracer,
-        span_name=span_name):
+        span_name=span_name,
+        span_attributes=span_attributes):
         yield x
 
 
