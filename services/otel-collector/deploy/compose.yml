@@ -20,9 +20,17 @@ services:
             ## - /mnt/bindfs/docker-containers-bindfs:/var/lib/docker/containers:ro
             ## - /var/run/docker.sock:/var/run/docker.sock:ro
 
+        env_file:
+            - otel-collector.env
+
         environment:
             OTEL_ENVIRONMENT: development
             POD_NAME: otel-collector
+            # NOTE: MLFLOW_EXPERIMENT_ID is intentionally NOT set here.
+            # The experiment-id header is hardcoded in otel-collector-config.yaml
+            # due to a regression in OTel Collector v0.139–v0.144 that breaks
+            # env-var substitution for configopaque.String header values.
+            # See the config file comment for details.
         command: [ "--config=/etc/otelcol-contrib/otel-collector-config.yaml" ]
         # NOTE:
         # The official contrib image is based on the "scratch" image. It copies only the

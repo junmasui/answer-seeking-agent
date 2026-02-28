@@ -166,6 +166,31 @@ exporters:
     tls:
       insecure: true
 
+  # OTLP HTTP exporter for traces to MLflow Tracking Server
+  # MLflow exposes an OTLP/HTTP endpoint at /v1/traces that accepts
+  # standard OpenTelemetry protobuf trace data.
+  # Ref: https://mlflow.org/docs/latest/llms/tracing/opentelemetry/ingest
+  #
+  # NOTE: The experiment-id header is hardcoded instead of using
+  # ${MLFLOW_EXPERIMENT_ID} because OTel Collector v0.139–v0.144 has a
+  # regression where the env provider YAML-reparses bare integers into
+  # Go int values that cannot be assigned to configopaque.String headers,
+  # and quoting the env var leaks literal '"' characters into the HTTP
+  # header value.  Revisit after upgrading to collector >= v0.145.0.
+  # See: https://github.com/open-telemetry/opentelemetry-collector/issues/10937
+  otlphttp/mlflow:
+    endpoint: http://mlflow:5000
+    headers:
+      x-mlflow-experiment-id: "0"
+    tls:
+      insecure: true
+    compression: gzip
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 120s
+
   otlphttp/logs:
     endpoint: "http://loki:3100/otlp"
     tls:
@@ -212,7 +237,7 @@ service:
     traces:
       receivers: [otlp, zipkin]
       processors: [memory_limiter, resource, attributes, batch/traces]
-      exporters: [otlp/jaeger, debug/traces]
+      exporters: [otlp/jaeger, otlphttp/mlflow, debug/traces]
 
     # Logs pipeline (if needed)
     logs:

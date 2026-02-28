@@ -57,6 +57,11 @@ from .services import (
     traefik_service,
     webui_server_service,
 )
+from .teardown import (
+    stop_all_services_asset,
+    stop_app_services_asset,
+    stop_autotest_services_asset,
+)
 
 __all__ = [
     # Images
@@ -115,4 +120,8 @@ __all__ = [
     "initialize_environment_asset",
     "update_secrets_asset",
     "build_python_packages_asset",
+    # Teardown
+    "stop_all_services_asset",
+    "stop_app_services_asset",
+    "stop_autotest_services_asset",
 ]

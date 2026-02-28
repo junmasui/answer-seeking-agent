@@ -16,6 +16,23 @@
 > [!IMPORTANT]
 > All `docker compose` commands **MUST** be executed from the `services/` directory.
 
+### Host Socket Bind-Mount (not Docker-in-Docker)
+
+The dev-tools container bind-mounts the **host's** Docker socket (`/var/run/docker.sock`). Every `docker` / `docker compose` command you run inside the dev container talks to the **host Docker daemon**.
+
+This means:
+
+| What | Resolved where | Example |
+|---|---|---|
+| Compose volume bind-mount paths | **Host** filesystem | `../config/foo.yaml` resolves from the compose file's host-side parent |
+| `docker exec … <cmd>` | Inside the **target** container | Filesystem is that container's own rootfs |
+| `docker inspect` mount sources | **Host** paths | You will see `/home/jun/…`, not `/app/…` |
+
+> [!CAUTION]
+> **Never use absolute `/app/…` paths in compose volume mounts.** The `/app` directory only exists inside the dev container, not on the host. Always use **relative paths** from the compose file's location. Docker Compose resolves relative paths from the compose file's position on the host disk, which works because the host and dev container share the same file tree via the `../../:/app` bind-mount.
+
+### Compose File Structure
+
 The orchestration setup uses `services/common.compose.yml` which includes individual service configurations. Many of these configurations (located in `services/<service>/deploy/`) depend on shared resources defined in:
 
 - [components.compose.yml](file:///home/jun/research/answer-seeking-agent/services/components.compose.yml): Defines common networks and secrets.

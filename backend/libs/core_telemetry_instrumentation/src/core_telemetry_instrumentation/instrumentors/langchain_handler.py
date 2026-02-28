@@ -257,13 +257,7 @@ class OpenTelemetryCallbackHandler(BaseCallbackHandler):
         span = self.span_tracker.get_span(run_id_str)
 
         if span:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.set_attribute('error.type', type(error).__name__)
-            span.set_attribute('error.message', str(error))
-            span.end()
-
-            self._spans.pop(run_id_str, None)
-            self._run_start_times.pop(run_id_str, None)
+            self.span_tracker.end_span(run_id_str, status=Status(StatusCode.ERROR, str(error)), error=error)
 
     def on_retriever_start(
         self,

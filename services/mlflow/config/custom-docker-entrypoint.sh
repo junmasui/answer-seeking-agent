@@ -17,9 +17,13 @@ export MLFLOW_BACKEND_STORE_URI="postgresql://${MLFLOW_POSTGRES_USER_NAME:-mlflo
 export AWS_ACCESS_KEY_ID="${MLFLOW_S3_ACCESS_KEY:-mlflow}"
 export AWS_SECRET_ACCESS_KEY="${S3_SECRET_KEY}"
 
+# Upgrade DB schema (required for 2.x → 3.x migration; no-op if already current)
+mlflow db upgrade "${MLFLOW_BACKEND_STORE_URI}"
+
 exec mlflow server \
     --host 0.0.0.0 \
     --port 5000 \
     --backend-store-uri "${MLFLOW_BACKEND_STORE_URI}" \
     --default-artifact-root s3://mlflow \
-    --serve-artifacts
+    --serve-artifacts \
+    --allowed-hosts "*"

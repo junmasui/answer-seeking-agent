@@ -58,7 +58,7 @@ class CustomDistro(OpenTelemetryDistro):
             'celery',
             'botocore',
             # "google_generativeai",
-            'langchain',
+            # 'langchain',
             'openai',
             'system-metrics',
             # "transformers",

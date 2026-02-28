@@ -24,6 +24,21 @@
 - `docs/` and the various `README*.md` files explain installation heuristics.
 - Secrets live in `secrets/` and are not committed; keep them out of commits and gantry.
 
+## Dev Container & Docker Architecture
+
+The development environment runs inside a **dev-tools** container managed by VS Code Dev Containers (see `.devcontainer/devcontainer.json`). This is **not** Docker-in-Docker. The host's Docker socket is bind-mounted into the dev container:
+
+```
+/var/run/docker.sock:/var/run/docker.sock:ro
+```
+
+All `docker` and `docker compose` CLI commands executed inside the dev container talk directly to the **host's Docker daemon**. Key consequences:
+
+- **Bind-mount paths are resolved on the host filesystem**, not inside the dev container. The project root is at `/app` inside the container but at a different path on the host (e.g. `/home/jun/research/answer-seeking-agent`). Compose files use paths relative to their own location, and Docker Compose resolves those relative to the compose file's position on the **host** disk — this works correctly because the host and container see the same file tree via the `../../:/app` mount.
+- **Never use absolute `/app/…` paths in compose volume mounts.** Relative paths (e.g. `../config/foo.yaml`) work because Compose resolves them from the compose file's host-side location. An absolute `/app/…` path would fail because `/app` does not exist on the host.
+- **`docker inspect` shows host-side source paths** in mount listings (e.g. `/home/jun/research/…`), not `/app/…` paths.
+- **`docker exec`** runs inside the target container's own filesystem, which is independent of both the host and the dev container.
+
 ## MCP Recommendations
 
 - **PostgreSQL**: For inspecting `pgvector` database.

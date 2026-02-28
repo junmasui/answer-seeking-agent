@@ -1,30 +1,12 @@
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.zipkin.json import ZipkinExporter
-from opentelemetry.sdk.resources import Resource
+import logging
 
-print('IMPORTING CONFIG')
+logger = logging.getLogger(__name__)
+
 
 def init(app):
-    print('EXECUTING CONFIG.INIT')
-    # Create resource with custom attributes
-    resource = Resource.create({
-        "service.name": "nemo_guardrails",
-        "service.version": "1.0",
-        "env": "production"
-    })
-    
-    # Create tracer provider with resource
-    tracer_provider = TracerProvider(resource=resource)
-
-    # Set global tracer provider
-    trace.set_tracer_provider(tracer_provider)
-    tracer_provider = trace.get_tracer_provider()
-
-    # Create Zipkin exporter pointing to OTel Collector's Zipkin receiver
-    zipkin_exporter = ZipkinExporter(endpoint="http://otel-collector:9411/api/v2/spans")
-
-    # Add span processor
-    span_processor = BatchSpanProcessor(zipkin_exporter)
-    tracer_provider.add_span_processor(span_processor)
+    # Tracing is handled entirely by the opentelemetry-instrument CLI wrapper
+    # and the env vars in opentelemetry-instrument.env.  Do NOT create a second
+    # TracerProvider or exporter here — that causes every span to be exported
+    # twice (once via OTLP, once via Zipkin) resulting in duplicate span IDs
+    # in Jaeger and broken span nesting.
+    logger.info('nemo guardrails config.init (tracing configured via opentelemetry-instrument CLI)')

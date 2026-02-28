@@ -9,6 +9,7 @@ from typing import Optional
 from core_public import Answer, Citation
 from langgraph.errors import GraphRecursionError
 from langgraph.pregel import Pregel
+from opentelemetry import trace
 
 from ..doc_mgr import list_document_sets
 from ..lib_config import get_lib_config
@@ -81,21 +82,6 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     graph = get_compiled_agent_graph()
     logger.info('streaming_mode: %s', graph.stream_mode)
 
-    # Initialize telemetry callback handlers
-    callback_handlers = []
-
-    # # OpenTelemetry/OpenLLMetry handler (new implementation)
-    # from core_telemetry import get_callback_handler
-    #
-    # # Get callback handler
-    # otel_handler = get_callback_handler(
-    #      session_id=thread_id.hex,
-    #      user_id=user_id.hex if isinstance(user_id, uuid.UUID) else user_id
-    # )
-    #
-    # if otel_handler:
-    #     callback_handlers.append(otel_handler)
-
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
     logger.info('\n=============================\n=\n=\n=\n=')
@@ -105,19 +91,46 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     # And because we are not static, we avoid TypedDict and its subclasses (ex: GraphState).
     latest_value = {}
     try:
+        user_id_str = user_id.hex if isinstance(user_id, uuid.UUID) else str(user_id) if user_id else None
         extra_data = {'thread_id': thread_id.hex}
         if user_id:
-            extra_data['user_id'] = user_id.hex
-        run_config = {'recursion_limit': 30, 'configurable': extra_data}
-        if callback_handlers:
-            run_config['callbacks'] = callback_handlers
-        print(f'GRAPH TYPE {type(graph)}')
-        async for output in graph.astream(input=graph_input, config=run_config):
-            for key, value in output.items():
-                # Node
-                logger.info("Node '%s':", key)
-                if isinstance(value, dict):
-                    latest_value.update(value)
+            extra_data['user_id'] = user_id_str
+
+        # Attach metadata so that both the OpenTelemetryCallbackHandler (injected
+        # automatically by CustomInstrumentor) and the MlflowLangchainTracer see
+        # session / user context on every span.  MLflow uses metadata.thread_id to
+        # set TraceMetadataKey.TRACE_SESSION.
+        run_config = {
+            'recursion_limit': 30,
+            'configurable': extra_data,
+            'metadata': {
+                'thread_id': thread_id.hex,
+                'user_id': user_id_str or '',
+                'session_id': thread_id.hex,
+            },
+        }
+
+        # Start an explicit OTel span wrapping the entire graph execution so that
+        # it appears as a single top-level trace in Jaeger *and* MLflow (via the
+        # OTel Collector's otlphttp/mlflow exporter).
+        # The CustomInstrumentor monkey-patch on Pregel.astream will inject the
+        # OpenTelemetryCallbackHandler into the config automatically.
+        tracer = trace.get_tracer(__name__)
+        with tracer.start_as_current_span(
+            'seek_answer',
+            attributes={
+                'agent.question': user_input[:500],
+                'agent.thread_id': thread_id.hex,
+                'agent.user_id': user_id_str or '',
+                'agent.document_set_count': len(doc_set_ids),
+            },
+        ):
+            async for output in graph.astream(input=graph_input, config=run_config):
+                for key, value in output.items():
+                    # Node
+                    logger.info("Node '%s':", key)
+                    if isinstance(value, dict):
+                        latest_value.update(value)
     except GraphRecursionError as e:
         logger.error('Graph recursion error', exc_info=e)
     except Exception as e:
