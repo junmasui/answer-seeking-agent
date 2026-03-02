@@ -1,0 +1,596 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# ---------------------------------------------------------------------------
+# Taskfile.yml — Orchestrates the answer-seeking-agent service stack.
+#
+# Install:  https://taskfile.dev/installation/
+# Run:      task launch          (bring up everything)
+#           task teardown        (bring down everything)
+#           task --list          (show all tasks)
+# ---------------------------------------------------------------------------
+version: "3"
+
+vars:
+  SCRIPTS: "{{.TASKFILE_DIR}}/scripts"
+
+env:
+  GPU_MODE: '{{.GPU_MODE | default "cuda12"}}'
+
+# ---------------------------------------------------------------------------
+# Top-level aggregate tasks
+# ---------------------------------------------------------------------------
+tasks:
+
+  # =========================================================================
+  # LAUNCH / TEARDOWN
+  # =========================================================================
+
+  launch:
+    desc: "Launch the full service stack"
+    deps:
+      - api-server
+      - celery-worker
+      - webui-server
+      - api-server-autotest
+      - celery-worker-autotest
+      - webui-server-autotest
+      - grafana
+      - mlflow
+      - otel-collector-docker
+
+  teardown:
+    desc: "Stop all services, remove containers and orphans"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" --all
+
+  teardown:app:
+    desc: "Stop app services (prod + autotest + automated tests)"
+    cmd: >-
+      bash "{{.SCRIPTS}}/stop-services.sh"
+      api-server celery-worker celery-flower celery-exporter webui-server
+      api-server-autotest celery-worker-autotest celery-flower-autotest webui-server-autotest
+      automated-pytest automated-vitest
+
+  teardown:autotest:
+    desc: "Stop autotest and automated-test services only"
+    cmd: >-
+      bash "{{.SCRIPTS}}/stop-services.sh"
+      api-server-autotest celery-worker-autotest celery-flower-autotest webui-server-autotest
+      automated-pytest automated-vitest
+
+  # =========================================================================
+  # STOP INDIVIDUAL SERVICES
+  # =========================================================================
+
+  # --- Database ---
+  stop:postgres:
+    desc: "Stop PostgreSQL"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" postgres
+
+  # --- Infrastructure ---
+  stop:redis:
+    desc: "Stop Redis"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" redis
+
+  stop:opensearch:
+    desc: "Stop OpenSearch"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" opensearch
+
+  stop:weaviate:
+    desc: "Stop Weaviate"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" weaviate
+
+  stop:seaweedfs:
+    desc: "Stop SeaweedFS"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" seaweedfs
+
+  stop:file-sync:
+    desc: "Stop file-sync"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" file-sync
+
+  # --- Authentication ---
+  stop:keycloak:
+    desc: "Stop Keycloak"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" keycloak
+
+  # --- Observability ---
+  stop:alertmanager:
+    desc: "Stop Alertmanager"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" alertmanager
+
+  stop:prometheus:
+    desc: "Stop Prometheus"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" prometheus
+
+  stop:loki:
+    desc: "Stop Loki"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" loki
+
+  stop:jaeger:
+    desc: "Stop Jaeger"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" jaeger
+
+  stop:grafana:
+    desc: "Stop Grafana"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" grafana
+
+  stop:otel-collector:
+    desc: "Stop OpenTelemetry collector"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" otel-collector
+
+  stop:otel-collector-docker:
+    desc: "Stop OpenTelemetry collector for Docker metrics"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" otel-collector-docker
+
+  stop:mlflow:
+    desc: "Stop MLflow"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" mlflow
+
+  # --- Application ---
+  stop:traefik:
+    desc: "Stop Traefik"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" traefik
+
+  stop:slim-util:
+    desc: "Stop slim-util"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" slim-util
+
+  stop:nemo-guardrails:
+    desc: "Stop NeMo Guardrails"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" nemo-guardrails
+
+  stop:presidio-analyzer:
+    desc: "Stop Presidio Analyzer"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" presidio-analyzer
+
+  stop:api-server:
+    desc: "Stop API server"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" api-server
+
+  stop:celery-worker:
+    desc: "Stop Celery worker"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" celery-worker
+
+  stop:webui-server:
+    desc: "Stop Web UI server"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" webui-server
+
+  # --- Autotest ---
+  stop:api-server-autotest:
+    desc: "Stop API server (autotest)"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" api-server-autotest
+
+  stop:celery-worker-autotest:
+    desc: "Stop Celery worker (autotest)"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" celery-worker-autotest
+
+  stop:webui-server-autotest:
+    desc: "Stop Web UI server (autotest)"
+    cmd: bash "{{.SCRIPTS}}/stop-services.sh" webui-server-autotest
+
+  # =========================================================================
+  # SCRIPTS
+  # =========================================================================
+
+  update-secrets:
+    desc: "Generate auto-managed secrets files"
+    dir: "{{.TASKFILE_DIR}}/../services"
+    cmd: bash scripts/update_secrets.sh
+    sources:
+      - "{{.TASKFILE_DIR}}/../services/scripts/update_secrets.sh"
+
+  initialize-environment:
+    desc: "Run certificate generation"
+    dir: "{{.TASKFILE_DIR}}/../services"
+    cmd: bash scripts/make_certs.sh
+
+  # =========================================================================
+  # IMAGE BUILDS — Group 1 (independent)
+  # =========================================================================
+
+  image:slim-util:
+    desc: "Build slim-util image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" slim-util
+    sources:
+      - "../services/slim-util/build/**/*"
+
+  image:seaweedfs:
+    desc: "Build seaweedfs image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" seaweedfs
+    sources:
+      - "../services/seaweedfs/build/**/*"
+
+  image:redis:
+    desc: "Build redis image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" redis
+    sources:
+      - "../services/redis/build/**/*"
+
+  image:opensearch:
+    desc: "Build opensearch image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" opensearch
+    sources:
+      - "../services/opensearch/build/**/*"
+
+  image:traefik:
+    desc: "Build traefik image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" traefik
+    sources:
+      - "../services/traefik/build/**/*"
+
+  image:weaviate:
+    desc: "Build weaviate image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" weaviate
+    sources:
+      - "../services/weaviate/build/**/*"
+
+  image:api-server:
+    desc: "Build api-server image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" api-server
+    sources:
+      - "../services/api-server/build/**/*"
+
+  image:mlflow:
+    desc: "Build mlflow image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" mlflow
+    sources:
+      - "../services/mlflow/build/**/*"
+
+  image:file-sync:
+    desc: "Build file-sync image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" file-sync
+    sources:
+      - "../services/file-sync/build/**/*"
+
+  # Group 1 aggregate
+  images:group1:
+    desc: "Build all independent images (group 1)"
+    deps:
+      - image:slim-util
+      - image:seaweedfs
+      - image:redis
+      - image:opensearch
+      - image:traefik
+      - image:weaviate
+      - image:api-server
+      - image:mlflow
+      - image:file-sync
+
+  # =========================================================================
+  # IMAGE BUILDS — build-python-packages (depends on group 1)
+  # =========================================================================
+
+  build-python-packages:
+    desc: "Build Python packages for the project"
+    deps: [images:group1]
+    dir: "{{.TASKFILE_DIR}}/../services"
+    cmd: bash scripts/build_python_packages.sh
+
+  # =========================================================================
+  # IMAGE BUILDS — Group 2 (depend on python packages)
+  # =========================================================================
+
+  image:nemo:
+    desc: "Build nemo image"
+    deps: [build-python-packages]
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" nemo
+    sources:
+      - "../services/nemo/build/**/*"
+
+  image:webui-server:
+    desc: "Build webui-server image"
+    cmd: bash "{{.SCRIPTS}}/build-image.sh" webui-server
+    sources:
+      - "../services/webui-server/build/**/*"
+
+  # All images aggregate
+  images:
+    desc: "Build all Docker images"
+    deps:
+      - images:group1
+      - image:nemo
+      - image:webui-server
+
+  # =========================================================================
+  # DATABASE SERVICES
+  # =========================================================================
+
+  postgres:
+    desc: "Start PostgreSQL"
+    deps: [image:slim-util, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" postgres
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" postgres
+
+  postgres-init-dependency-gate:
+    desc: "Wait for Postgres readiness gate"
+    deps: [postgres]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-init-dependency-gate
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-init-dependency-gate
+
+  postgres-init:
+    desc: "Initialize main PostgreSQL database"
+    deps: [postgres-init-dependency-gate]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-init
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-init
+
+  postgres-keycloak-init:
+    desc: "Initialize Keycloak PostgreSQL database"
+    deps: [postgres-init-dependency-gate]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-keycloak-init
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-keycloak-init
+
+  postgres-mlflow-init:
+    desc: "Initialize MLflow PostgreSQL database"
+    deps: [postgres-init-dependency-gate]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-mlflow-init
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-mlflow-init
+
+  postgres-init-autotest:
+    desc: "Initialize autotest PostgreSQL database"
+    deps: [postgres-init-dependency-gate]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-init-autotest
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-init-autotest
+
+  # =========================================================================
+  # INFRASTRUCTURE SERVICES
+  # =========================================================================
+
+  redis:
+    desc: "Start Redis"
+    deps: [image:redis, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" redis
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" redis
+
+  opensearch:
+    desc: "Start OpenSearch"
+    deps: [image:opensearch, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" opensearch
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" opensearch
+
+  weaviate:
+    desc: "Start Weaviate"
+    deps: [image:weaviate, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" weaviate
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" weaviate
+
+  seaweedfs:
+    desc: "Start SeaweedFS"
+    deps: [image:seaweedfs, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" seaweedfs
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" seaweedfs
+
+  seaweedfs-init:
+    desc: "Initialize SeaweedFS buckets"
+    deps: [seaweedfs]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" seaweedfs-init
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" seaweedfs-init
+
+  seaweedfs-init-autotest:
+    desc: "Initialize SeaweedFS buckets for autotest"
+    deps: [seaweedfs]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" seaweedfs-init-autotest
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" seaweedfs-init-autotest
+
+  seaweedfs-init-mlflow:
+    desc: "Initialize SeaweedFS bucket for MLflow"
+    deps: [seaweedfs]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" seaweedfs-init-mlflow
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" seaweedfs-init-mlflow
+
+  file-sync:
+    desc: "Start file-sync service"
+    deps: [image:file-sync, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" file-sync
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" file-sync
+
+  # =========================================================================
+  # AUTHENTICATION
+  # =========================================================================
+
+  keycloak:
+    desc: "Start Keycloak"
+    deps: [postgres-keycloak-init]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" keycloak
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" keycloak
+
+  keycloak-init:
+    desc: "Initialize Keycloak realm"
+    deps: [keycloak]
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" keycloak-init
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" keycloak-init
+
+  # =========================================================================
+  # OBSERVABILITY
+  # =========================================================================
+
+  alertmanager:
+    desc: "Start Alertmanager"
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" alertmanager
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" alertmanager
+
+  prometheus:
+    desc: "Start Prometheus"
+    deps: [alertmanager]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" prometheus
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" prometheus
+
+  loki:
+    desc: "Start Loki"
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" loki
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" loki
+
+  jaeger:
+    desc: "Start Jaeger"
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" jaeger
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" jaeger
+
+  grafana:
+    desc: "Start Grafana"
+    deps: [prometheus, loki, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" grafana
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" grafana
+
+  otel-collector:
+    desc: "Start OpenTelemetry collector"
+    deps: [loki, jaeger, prometheus]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" otel-collector
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" otel-collector
+
+  otel-collector-docker:
+    desc: "Start OpenTelemetry collector for Docker metrics"
+    deps: [loki, jaeger, prometheus]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" otel-collector-docker
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" otel-collector-docker
+
+  mlflow:
+    desc: "Start MLflow tracking server"
+    deps: [image:mlflow, postgres-mlflow-init, seaweedfs-init-mlflow]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" mlflow
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" mlflow
+
+  # =========================================================================
+  # APPLICATION SERVICES
+  # =========================================================================
+
+  traefik:
+    desc: "Start Traefik reverse proxy"
+    deps: [image:traefik]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" traefik
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" traefik
+
+  slim-util:
+    desc: "Start slim-util"
+    deps: [image:slim-util]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" slim-util
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" slim-util
+
+  nemo-guardrails:
+    desc: "Start NeMo Guardrails"
+    deps: [image:nemo, update-secrets]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" nemo-guardrails
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" nemo-guardrails
+
+  presidio-analyzer:
+    desc: "Start Presidio Analyzer"
+    deps: [build-python-packages]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" presidio-analyzer
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" presidio-analyzer
+
+  api-server:
+    desc: "Start API server"
+    deps:
+      - image:api-server
+      - postgres-init
+      - redis
+      - opensearch
+      - weaviate
+      - seaweedfs-init
+      - keycloak-init
+      - otel-collector
+      - traefik
+      - presidio-analyzer
+      - nemo-guardrails
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" api-server
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" api-server
+
+  celery-worker:
+    desc: "Start Celery worker"
+    deps:
+      - image:api-server
+      - postgres-init
+      - redis
+      - opensearch
+      - weaviate
+      - seaweedfs-init
+      - keycloak-init
+      - otel-collector
+      - traefik
+      - presidio-analyzer
+      - nemo-guardrails
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" celery-worker
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" celery-worker
+
+  webui-server:
+    desc: "Start Web UI server"
+    deps: [image:webui-server, api-server, traefik]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" webui-server
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" webui-server
+
+  # =========================================================================
+  # AUTOTEST SERVICES
+  # =========================================================================
+
+  backend-autotest-dependency-gate:
+    desc: "Wait for autotest dependencies"
+    deps:
+      - postgres-init-autotest
+      - seaweedfs-init-autotest
+      - redis
+      - weaviate
+    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" backend-autotest-dependency-gate
+    status:
+      - bash "{{.SCRIPTS}}/is-init-done.sh" backend-autotest-dependency-gate
+
+  api-server-autotest:
+    desc: "Start API server (autotest)"
+    deps:
+      - backend-autotest-dependency-gate
+      - keycloak-init
+      - otel-collector
+      - traefik
+      - presidio-analyzer
+      - nemo-guardrails
+      - file-sync
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" api-server-autotest
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" api-server-autotest
+
+  celery-worker-autotest:
+    desc: "Start Celery worker (autotest)"
+    deps:
+      - backend-autotest-dependency-gate
+      - keycloak-init
+      - otel-collector
+      - traefik
+      - presidio-analyzer
+      - nemo-guardrails
+      - file-sync
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" celery-worker-autotest
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" celery-worker-autotest
+
+  webui-server-autotest:
+    desc: "Start Web UI server (autotest)"
+    deps: [api-server-autotest, traefik, file-sync]
+    cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" webui-server-autotest
+    status:
+      - bash "{{.SCRIPTS}}/is-service-running.sh" webui-server-autotest

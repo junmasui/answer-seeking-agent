@@ -1,91 +1,140 @@
-# Dagster Operations
+# Ops — Taskfile Orchestration
 
-Host-based Dagster orchestration for the answer-seeking-agent project.
+Task-based orchestration for the answer-seeking-agent service stack, powered by [Task](https://taskfile.dev/).
 
-## Setup
+## Prerequisites
 
-Install dependencies using uv:
+Install the `task` CLI: <https://taskfile.dev/installation/>
+
+```bash
+# Linux (recommended)
+sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+# macOS
+brew install go-task
+```
+
+The helper scripts require `jq` for JSON parsing:
+
+```bash
+# Debian/Ubuntu
+sudo apt-get install jq
+
+# macOS
+brew install jq
+```
+
+## Quick Start
 
 ```bash
 cd ops
-uv sync
+
+# Launch the full stack
+task launch
+
+# Tear down everything
+task teardown
+
+# List all available tasks
+task --list
 ```
 
-This creates an isolated virtual environment in `ops/.venv/` without polluting your host system.
+## Running Individual Services
 
-Set the Dagster home directory:
+Every service is a standalone task. Dependencies are resolved automatically:
 
 ```bash
-export DAGSTER_HOME="$(pwd)/.dagster"
+# Start just PostgreSQL (builds images + runs secrets first)
+task postgres
+
+# Start the API server (starts all transitive dependencies)
+task api-server
+
+# Build all Docker images without starting services
+task images
 ```
 
-This tells Dagster to store its metadata, logs, and SQLite database in `ops/.dagster/`. You may want to add this to your shell configuration file (e.g., `~/.bashrc` or `~/.zshrc`) to avoid setting it each time.
-
-## Running Dagster
-
-### Development Server
-
-Start the Dagster webserver and daemon:
+## Teardown
 
 ```bash
-cd ops
-uv run dagster dev
+# Stop everything, remove containers and orphans
+task teardown
+
+# Stop only app services (prod + autotest + automated tests)
+task teardown:app
+
+# Stop only autotest services
+task teardown:autotest
 ```
 
-The UI will be available at <http://localhost:3000>
+## Environment Variables
 
-### Running Jobs
+| Variable | Default | Description |
+|---|---|---|
+| `GPU_MODE` | `cuda12` | GPU mode: `cuda12` or `cpu-only` |
+| `COMPOSE_FILE` | *(auto)* | Override the compose file list |
 
-The recommended way to run jobs is from the Dagster UI at <http://localhost:3000> after starting `dagster dev`.
-
-Alternatively, you can use the CLI to execute jobs immediately (with `dagster dev` **stopped**):
+These can be set in your shell or passed inline:
 
 ```bash
-cd ops
-uv run dg job launch --job launch_services
+GPU_MODE=cpu-only task launch
 ```
 
-Or using the older command:
+## Idempotency
+
+All service tasks include `status:` checks. If a service is already running and healthy, it is skipped. Init containers that already exited with code 0 are also skipped. To force a restart, tear down first:
 
 ```bash
-cd ops
-uv run dagster job execute -m jobs -j launch_services
+task teardown && task launch
 ```
-
-> [!NOTE]
-> The `dg` command is Dagster's newer CLI interface. Both commands execute jobs synchronously in standalone mode.
 
 ## Project Structure
 
 ```text
 ops/
-├── jobs/                    # Python module containing Dagster definitions
-│   ├── __init__.py         # Exports main 'defs' object
-│   ├── constants.py        # Path constants and configuration
-│   ├── resources.py        # Dagster resources
-│   ├── helpers.py          # Helper functions
-│   ├── jobs.py            # Job definitions
-│   └── assets/            # Asset definitions organized by domain
-│       ├── __init__.py
-│       ├── images.py      # Docker image building
-│       ├── databases.py   # Database services
-│       ├── infrastructure.py  # Redis, OpenSearch, Weaviate, SeaweedFS
-│       ├── auth.py        # Keycloak authentication
-│       ├── observability.py  # Prometheus, Grafana, Jaeger, Loki
-│       ├── services.py    # Application services
-│       ├── autotest.py    # Test environment services
-│       └── scripts.py     # Script-based operations
-├── pyproject.toml         # Python dependencies
-├── workspace.yaml         # Dagster workspace configuration
-└── .dagster/             # Dagster home (SQLite DB, logs)
+├── Taskfile.yml              # Task definitions and dependency graph
+├── scripts/                  # Helper shell scripts
+│   ├── compose-env.sh        # Shared env setup (COMPOSE_FILE, GPU_MODE, SERVICES_ROOT)
+│   ├── wait-healthy.sh       # Start long-running service + health-check polling
+│   ├── run-init-container.sh # Run one-shot init container idempotently
+│   ├── build-image.sh        # Build a custom Docker image
+│   ├── stop-services.sh      # Stop and remove services
+│   ├── is-service-running.sh # Status check: is service running and healthy?
+│   └── is-init-done.sh       # Status check: did init container exit 0?
+└── README.md
 ```
 
-## Environment
+## Dependency Graph Overview
 
-Dagster home is set to `ops/.dagster/` which contains:
+```text
+images:group1  (slim-util, seaweedfs, redis, opensearch, traefik, weaviate, api-server, mlflow, file-sync)
+    │
+    ├── build-python-packages
+    │       ├── image:nemo
+    │       └── presidio-analyzer
+    │
+    └── images  (= group1 + nemo + webui-server)
 
-- SQLite database for run history and asset metadata
-- Logs and execution artifacts
-- Scheduler state
-
-All data stays within the `ops/` directory for easy cleanup if needed.
+update-secrets ─────────────────────────────────────┐
+                                                    │
+postgres ── postgres-init-dependency-gate ──┬── postgres-init ──────────── api-server / celery-worker
+                                           ├── postgres-keycloak-init ── keycloak ── keycloak-init ─┤
+                                           ├── postgres-mlflow-init ──── mlflow                     │
+                                           └── postgres-init-autotest ── backend-autotest-dep-gate  │
+                                                                                                    │
+redis ──────────────────────────────────────────────────────────────────────────────────────────────┤
+opensearch ─────────────────────────────────────────────────────────────────────────────────────────┤
+weaviate ───────────────────────────────────────────────────────────────────────────────────────────┤
+seaweedfs ── seaweedfs-init ────────────────────────────────────────────────────────────────────────┤
+                                                                                                    │
+prometheus ─┬── grafana                                                                             │
+loki ───────┤                                                                                       │
+jaeger ─────┴── otel-collector ─────────────────────────────────────────────────────────────────────┤
+                                                                                                    │
+traefik ────────────────────────────────────────────────────────────────────────────────────────────┤
+nemo-guardrails ────────────────────────────────────────────────────────────────────────────────────┤
+presidio-analyzer ──────────────────────────────────────────────────────────────────────────────────┘
+                                                                                                    │
+                                                                            api-server ── webui-server
+                                                                            celery-worker
+```
