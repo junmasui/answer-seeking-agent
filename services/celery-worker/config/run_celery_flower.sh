@@ -56,6 +56,10 @@ if [ -z "${WATCH_DEBOUNCE_SECS:-}" ]; then
     WATCH_DEBOUNCE_SECS=5.0
 fi
 
+# Signal readiness for the two-phase Docker health check.
+# At this point the Python environment is fully synced.
+touch "${HEALTHCHECK_READY_FILE:-/tmp/app-ready}"
+
 uv run --frozen --no-sync \
    -- \
    watchmedo auto-restart \

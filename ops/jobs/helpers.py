@@ -276,7 +276,7 @@ def _stop_services(context, services: List[str]) -> None:
 def _stop_all_services(context) -> None:
     """Stop and remove all Docker Compose services, networks, and orphans."""
     env = context.resources.compose_env.env
-    cmd = ["docker", "compose", "down", "--remove-orphans"]
+    cmd = ["docker", "compose", "--profile", "all", "down", "--remove-orphans"]
     result = _run_subprocess(cmd, env, cwd=str(SERVICES_ROOT))
     context.log.info("docker compose down (exit=%s)", result.returncode)
 

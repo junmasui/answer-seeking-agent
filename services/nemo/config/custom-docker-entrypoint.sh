@@ -19,4 +19,9 @@ uv add langchain-openai
 # Process with original entrypoint, which can be discovered
 # from the host command-line with:
 #   docker inspect nemoguardrails:latest | jq '.[0].Config.Entrypoint'
+
+# Signal readiness for the two-phase Docker health check.
+# At this point all pip installs are complete.
+touch "${HEALTHCHECK_READY_FILE:-/tmp/app-ready}"
+
 exec uv run opentelemetry-instrument nemoguardrails "$@"

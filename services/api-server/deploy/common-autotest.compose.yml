@@ -37,6 +37,7 @@ services:
     environment:
       DEBUGGER_LISTEN: true
       JWT_WRITE_CLAIM_MISSING_OK: true
+      HEALTHCHECK_URL: 'http://127.0.0.1:8100/status'
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
@@ -60,6 +61,7 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_api_server.sh:/run_api_server.sh:ro
+      - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
@@ -92,14 +94,12 @@ services:
               capabilities: [gpu]
 
     healthcheck:
-      # When this service start for the first time, there is multiple minutes while the
-      # python environment is sync'ed to the requirements file then when the FastAPI server
-      # is starting up. A health-check based on API pinging will fail during the sync and the
-      # start up.
-      #
-      # For now, we just check if python3 can run. Later, we will  try to come up  
-      ## test: ['CMD', 'curl', '-f', 'http://localhost']
-      test: ['CMD', 'python3', '--version']
+      # Two-phase health check:
+      #   Phase 1 — While the Python environment is syncing, the sentinel
+      #   file does not exist and the script returns exit 0.
+      #   Phase 2 — Once the FastAPI lifespan writes /tmp/app-ready the
+      #   script curls the existing lightweight /status endpoint.
+      test: ['CMD', 'bash', '/healthcheck.sh']
       interval: 30s
       timeout: 15s
       retries: 5
