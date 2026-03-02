@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import os
+from pathlib import Path
 
 from celery.app.log import TaskFormatter
 from celery.signals import (
@@ -15,9 +17,12 @@ from core_telemetry_distro.verifier import verify_distro
 from early_init.load_otel import load_custom_configurator_by_entry_point, load_custom_distro_by_entry_point
 from log_config_monitor import get_logging_conf_monitor
 
+from . import health_server
 from .metrics import child_exit, start_metrics
 
 logger = logging.getLogger(__name__)
+
+_READY_FILE = Path(os.environ.get('HEALTHCHECK_READY_FILE', '/tmp/app-ready'))
 
 
 @after_setup_task_logger.connect
@@ -59,10 +64,16 @@ def handle_worker_ready(**_kwargs):
     """
     Handles worker ready signal.
 
-    Called when the worker is ready to receive tasks. Logs the worker ready status for monitoring
-    purposes.
+    Called when the worker is ready to receive tasks. Starts a lightweight HTTP
+    health-check server and writes the readiness sentinel so that the two-phase
+    Docker health check can switch to an active HTTP probe.
     """
     logger.info('worker ready')
+
+    health_server.start()
+
+    _READY_FILE.touch()
+    logger.info('Readiness sentinel written to %s', _READY_FILE)
 
 
 @worker_process_init.connect
@@ -92,10 +103,16 @@ def handle_worker_shutting_down(sig, how, exitcode, **_kwargs):
     """
     Handle worker shutdown signal.
 
-    Called when the main worker is shutting down. Stops the logging configuration monitor and logs
-    shutdown details including signal, method, and exit code.
+    Called when the main worker is shutting down. Stops the health-check server,
+    removes the readiness sentinel, stops the logging configuration monitor, and
+    logs shutdown details including signal, method, and exit code.
     """
     logger.info('worker process shutting down %s %s %s', sig, how, exitcode)
+
+    health_server.stop()
+
+    _READY_FILE.unlink(missing_ok=True)
+    logger.info('Readiness sentinel removed')
 
     get_logging_conf_monitor().stop()
 

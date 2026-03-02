@@ -2,6 +2,7 @@ import logging
 # Standard Library
 # ...
 import os
+from pathlib import Path
 
 # Configure MLFlow to use the global OTel TracerProvider (from our Distro)
 os.environ['MLFLOW_USE_DEFAULT_TRACER_PROVIDER'] = 'false'
@@ -15,11 +16,13 @@ from core_telemetry_distro.verifier import verify_distro
 from fastapi import FastAPI
 from log_config_monitor import get_logging_conf_monitor
 
-from .middlewares import ErrorLoggingMiddleware
+from .middlewares import ErrorLoggingMiddleware, HealthCheckMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
 from .routers import admin, answer, document_sets, documents, health, prompt_versions, prompts, status, tasks
 
 logger = logging.getLogger(__name__)
+
+_READY_FILE = Path(os.environ.get('HEALTHCHECK_READY_FILE', '/tmp/app-ready'))
 
 
 @asynccontextmanager
@@ -42,7 +45,16 @@ async def lifespan(fastapi_app: FastAPI):
     configure_sender(is_worker=False)
     await send_start_up()
 
+    # Signal readiness so the two-phase Docker health check can switch
+    # from the passive "exit 0" phase to an active HTTP probe.
+    _READY_FILE.touch()
+    logger.info('Readiness sentinel written to %s', _READY_FILE)
+
     yield
+
+    # Clean up sentinel so a container restart goes back to phase-1.
+    _READY_FILE.unlink(missing_ok=True)
+    logger.info('Readiness sentinel removed')
 
     logger.info('Logging config watcher stopping')
     get_logging_conf_monitor().stop()
@@ -52,6 +64,7 @@ app = FastAPI(lifespan=lifespan, title='Seeking Answers', version='1.0.0')
 
 app.add_middleware(DynamicRootPathMiddleware)
 app.add_middleware(ErrorLoggingMiddleware)
+app.add_middleware(HealthCheckMiddleware)
 
 app.include_router(router=admin.router, prefix='/admin')
 app.include_router(router=answer.router, prefix='/answer')

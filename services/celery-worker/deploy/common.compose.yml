@@ -6,6 +6,7 @@ services:
 
     environment:
       DEBUGGER_LISTEN: true
+      HEALTHCHECK_URL: 'http://127.0.0.1:8101/status'
       # Only environment variables that are important to a Docker environment
       # will be configured here. The reason is that changes to environment variables
       # configured here do require a restart before they take effect:
@@ -26,6 +27,7 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       ##SRC - ../build/run_celery_worker.sh:/run_celery_worker.sh:ro
+      - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-init-signal-1:/init-signal
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
@@ -56,15 +58,13 @@ services:
               capabilities: [gpu]
 
     healthcheck:
-      # When this service starts for the first time, it may take several minutes to sync
-      # the python environment and start the service. A healthcheck based on
-      # pinging would fail during this period.
-      #
-      # For now, we verify that python3 is executable.
-      # Note: If switching to a network-based check, use http://127.0.0.1 to avoid
-      # IPv6 resolution issues with 'localhost'.
-      ## test: ['CMD', 'curl', '-f', 'http://127.0.0.1']
-      test: ['CMD', 'python3', '--version']
+      # Two-phase health check:
+      #   Phase 1 — While the Python environment is syncing, the sentinel
+      #   file does not exist and the script returns exit 0.
+      #   Phase 2 — Once the Celery worker_ready signal fires it starts a
+      #   tiny HTTP health server on port 8101 and writes /tmp/app-ready.
+      #   The script then curls that endpoint.
+      test: ['CMD', 'bash', '/healthcheck.sh']
       interval: 30s
       timeout: 15s
       retries: 5
@@ -82,7 +82,7 @@ services:
       # configured here do require a restart before they take effect:
       # application-centric ones should be designed to avoiid a Docker container restart.
 
-
+      HEALTHCHECK_URL: 'http://127.0.0.1:5555/'
       GPU_MODE: cpu
     env_file:
       - backend.env
@@ -96,6 +96,7 @@ services:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       ##SRC - ../build/run_celery_flower.sh:/run_celery_flower.sh:ro
+      - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-init-signal-1:/init-signal
       ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
@@ -117,15 +118,12 @@ services:
     command: [ '/run_celery_flower.sh' ]
 
     healthcheck:
-      # When this service starts for the first time, it may take several minutes to sync
-      # the python environment and start the service. A healthcheck based on
-      # pinging would fail during this period.
-      #
-      # For now, we verify that python3 is executable.
-      # Note: If switching to a network-based check, use http://127.0.0.1 to avoid
-      # IPv6 resolution issues with 'localhost'.
-      ## test: ['CMD', 'curl', '-f', 'http://127.0.0.1']
-      test: ['CMD', 'python3', '--version']
+      # Two-phase health check:
+      #   Phase 1 — While the Python environment is syncing, the sentinel
+      #   file does not exist and the script returns exit 0.
+      #   Phase 2 — Once the run script writes /tmp/app-ready and Flower
+      #   starts, the script curls Flower's root endpoint.
+      test: ['CMD', 'bash', '/healthcheck.sh']
       interval: 30s
       timeout: 15s
       retries: 5

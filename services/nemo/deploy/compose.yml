@@ -10,12 +10,15 @@ services:
         env_file:
             - nemo.env
             - opentelemetry-instrument.env
+        environment:
+            HEALTHCHECK_URL: 'http://127.0.0.1:8000/'
         ports:
             - '27500:8000'
         networks:
             - agent-poc
         volumes:
             - ../../dist:/dist:ro
+            - ../config/healthcheck.sh:/healthcheck.sh:ro
             ##SRC - ../config/config:/config:ro
             ##SRC - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
             ##SRC - ../config/docker/pyproject.toml:/app/pyproject.toml
@@ -28,10 +31,14 @@ services:
         command: [ "server", "--config=/config" ]
 
         healthcheck:
-            # Use the IPv4 loopback address. When 'localhost' is used, curl will try to use
-            # the IPv6 ::1 address where there is no listening port.
-            test: [ 'CMD', 'curl', '-f', 'http://127.0.0.1:8000/' ]
+            # Two-phase health check:
+            #   Phase 1 — While packages are being installed in the entrypoint,
+            #   the sentinel file does not exist and the script returns exit 0.
+            #   Phase 2 — Once the entrypoint writes /tmp/app-ready and the
+            #   NeMo Guardrails server starts, the script curls the root endpoint
+            #   with the X-Health-Check header to tag the OTel span.
+            test: [ 'CMD', 'bash', '/healthcheck.sh' ]
             interval: 30s
             timeout: 5s
             retries: 5
-            start_period: 5s
+            start_period: 30s
