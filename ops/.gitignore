@@ -1,19 +1,4 @@
-# UV virtual environment (isolated Python dependencies)
-.venv/
-
-# Dagster home directory (SQLite DB, logs, run history)
-.dagster/
-
-# Python compilation artifacts
+# Python compilation artifacts (from helper scripts if any)
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Testing cache
-.pytest_cache/
-
-# Linter cache
-.ruff_cache/
-
-# Python package metadata
-*.egg-info/

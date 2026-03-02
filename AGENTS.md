@@ -20,7 +20,7 @@
 - `backend/` is a Python `uv` workspace that hosts the FastAPI services, workers, and shared libs. **See [backend/AGENTS.md](backend/AGENTS.md)**.
 - `frontend/` is a Vue 3 + Vite SPA with ESLint-driven lint scripts. **See [frontend/AGENTS.md](frontend/AGENTS.md)**.
 - `services/` contains Docker Compose definitions for the distributed stack. **See [services/AGENTS.md](services/AGENTS.md)**.
-- `ops/` contains Dagster orchestration code. **See [ops/AGENTS.md](ops/AGENTS.md)**.
+- `ops/` contains Taskfile-based orchestration for launching the service stack. **See [ops/AGENTS.md](ops/AGENTS.md)**.
 - `docs/` and the various `README*.md` files explain installation heuristics.
 - Secrets live in `secrets/` and are not committed; keep them out of commits and gantry.
 

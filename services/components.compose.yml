@@ -11,8 +11,6 @@ networks:
           gateway: 172.31.1.1
 
 secrets:
-  minio_secrets:
-    file: ./secrets/minio.secrets.env
   postgres_secrets:
     file: ./secrets/postgres.secrets.env
   redis_secrets:
@@ -40,8 +38,6 @@ secrets:
     file: ./secrets/answers.api-key.secrets.env
   answers_jwt_secrets:
     file: ./secrets/answers.jwt.secrets.env
-  answers_minio_secrets:
-    file: ./secrets/answers.minio.secrets.env
   answers_postgres_secrets:
     file: ./secrets/answers.postgres.secrets.env
   answers_seaweedfs_secrets:
