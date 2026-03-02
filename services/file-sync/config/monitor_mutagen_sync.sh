@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Continuously monitor for new autotest containers and create sync sessions
+LOCK_FILE="/tmp/mutagen-sync-monitor.lock"
 
 echo "Starting mutagen sync monitor..."
 
 while true; do
-    # Run sync creation script which will detect and create sessions for new containers
-    if [ -f /start_mutagen_sync.sh ]; then
-        bash /start_mutagen_sync.sh 2>&1 | grep -v "already exists" || true
+    # Short-circuit: skip if no autotest/automated-test containers are running
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -qE '(autotest|automated-)'; then
+        # Use flock to prevent overlapping runs
+        (
+            flock -n 9 || { echo "Sync already in progress, skipping"; exit 0; }
+            bash /start_mutagen_sync.sh 2>&1 || true
+        ) 9>"$LOCK_FILE"
     fi
-    
-    # Check every 5 seconds for new containers
-    sleep 5
+
+    sleep 30
 done

@@ -33,6 +33,10 @@ EOF
 main() {
     setup_ssh_config
 
+    # Terminate any stale mutagen sessions from previous runs
+    echo "Cleaning up stale mutagen sessions..."
+    mutagen sync terminate --all 2>/dev/null || true
+
     echo "Starting supervisord..."
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 }

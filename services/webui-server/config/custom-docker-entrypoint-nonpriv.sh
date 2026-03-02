@@ -20,7 +20,7 @@ done
 
 
 # Only run if codebase sync is enabled
-if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
+if [ "${ENABLE_MUTAGEN_SYNC:-false}" = "true" ]; then
 
     MUTAGEN_SYNC_FILE="/app/frontend/.mutagen-sync-id"
     echo "Waiting for codebase sync... (looking for $MUTAGEN_SYNC_FILE)"

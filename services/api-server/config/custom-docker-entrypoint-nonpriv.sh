@@ -6,7 +6,7 @@ set -eu
 mkdir -p /app/backend
 cd /app/backend
 
-if [ "${USE_CODEBASE_SYNC:-false}" = "true" ]; then
+if [ "${ENABLE_MUTAGEN_SYNC:-false}" = "true" ]; then
 
     MUTAGEN_SYNC_FILE="/app/backend/.mutagen-sync-id"
 

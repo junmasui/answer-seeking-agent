@@ -87,7 +87,7 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       GPU_MODE: cpu
-      USE_CODEBASE_SYNC: false
+      ENABLE_MUTAGEN_SYNC: false
       USE_BOOTSTRAP_INSTALL: false
       #
       PYTHONPYCACHEPREFIX: /home/python/.pycache
