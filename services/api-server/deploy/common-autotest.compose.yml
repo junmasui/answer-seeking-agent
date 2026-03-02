@@ -48,9 +48,9 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       ##
-      USE_CODEBASE_SYNC: true
-      USE_BOOTSTRAP_INSTALL: true
-      ENABLE_SSHD: true
+      ENABLE_MUTAGEN_SYNC: 'true'
+      USE_BOOTSTRAP_INSTALL: 'true'
+      ENABLE_SSHD: 'true'
       PYTHONPYCACHEPREFIX: /home/python/.pycache
     env_file:
       - automated-test.env
@@ -131,9 +131,9 @@ services:
       ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
       ##
       ##
-      USE_CODEBASE_SYNC: true
-      USE_BOOTSTRAP_INSTALL: true
-      ENABLE_SSHD: true
+      ENABLE_MUTAGEN_SYNC: 'true'
+      USE_BOOTSTRAP_INSTALL: 'true'
+      ENABLE_SSHD: 'true'
       PYTHONPYCACHEPREFIX: /home/python/.pycache
       APP_AUTORESTART: 'false'
     env_file:

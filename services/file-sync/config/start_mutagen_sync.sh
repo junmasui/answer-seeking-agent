@@ -58,12 +58,7 @@ create_session() {
     local source="$2"
     local dest="$3"
 
-    set +e
-    mutagen sync list 2>/dev/null | grep -q "Name: ${name}"
-    local exists=$?
-    set -e
-
-    if [ "$exists" -eq 0 ]; then
+    if mutagen sync list "${name}" >/dev/null 2>&1; then
         echo "Mutagen session already exists: ${name}"
         return
     fi
@@ -72,10 +67,18 @@ create_session() {
     mutagen sync create \
         --name "${name}" \
         --mode "${MUTAGEN_SYNC_MODE}" \
-        --no-ignore-vcs \
         --ignore ".venv" \
         --ignore "node_modules" \
         --ignore ".git" \
+        --ignore "__pycache__" \
+        --ignore "*.pyc" \
+        --ignore ".ruff_cache" \
+        --ignore ".pytest_cache" \
+        --ignore ".coverage" \
+        --ignore ".mypy_cache" \
+        --ignore "*.egg-info" \
+        --ignore "dist" \
+        --ignore "build" \
         "${source}" \
         "${dest}"
 }

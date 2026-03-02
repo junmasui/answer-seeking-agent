@@ -10,9 +10,9 @@ services:
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
       CHOKIDAR_USEPOLLING: 'true'
-      USE_CODEBASE_SYNC: true
-      USE_BOOTSTRAP_INSTALL: true
-      ENABLE_SSHD: true
+      ENABLE_MUTAGEN_SYNC: 'true'
+      USE_BOOTSTRAP_INSTALL: 'true'
+      ENABLE_SSHD: 'true'
     #   - NODE_ENV=production
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
     ## traffic to go thru the reserve-proxy server at 15173.
@@ -48,9 +48,9 @@ services:
       # will be configured here. All other environment variables are extracted
       # to .env files for easier and more isolated management.
       CHOKIDAR_USEPOLLING: 'true'
-      USE_CODEBASE_SYNC: true
-      USE_BOOTSTRAP_INSTALL: true
-      ENABLE_SSHD: true
+      ENABLE_MUTAGEN_SYNC: 'true'
+      USE_BOOTSTRAP_INSTALL: 'true'
+      ENABLE_SSHD: 'true'
       APP_AUTORESTART: 'false'
     #   - NODE_ENV=production
     ## Do not expose 5173 ... To prevent XSS (cross site scripting) usage, we want all
