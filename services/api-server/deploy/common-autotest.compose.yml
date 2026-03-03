@@ -1,34 +1,4 @@
 services:
-  backend-autotest-dependency-gate:
-    restart: 'no'
-
-    image: localhost/localhost/debian-slim-util:1.0
-    profiles: [ backend-autotest, infrastructure, all ]
-
-    env_file:
-      - automated-test.env
-    networks:
-      - agent-poc
-    volumes:
-      - backend-autotest-init-signal-1:/init-signal
-      - ../config/run_dev_dependency_gate.sh:/run_dev_dependency_gate.sh:ro
-      - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-      - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
-    secrets:
-      - answers_postgres_autotest_secrets
-      - answers_seaweedfs_autotest_secrets
-      - checkpoints_postgres_autotest_secrets
-      - redis_secrets
-      - weaviate_secrets
-
-    mem_limit: 128m
-    memswap_limit: 128m
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
-    entrypoint: 'bash'
-    command: [ /run_dev_dependency_gate.sh ]
-
-
   api-server-autotest:
     image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
     profiles: [ backend-autotest, all ]
@@ -62,8 +32,6 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_api_server.sh:/run_api_server.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
-      - backend-autotest-init-signal-1:/init-signal
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../config/supervisord.conf:/etc/supervisord.conf:ro
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
@@ -142,11 +110,9 @@ services:
     networks:
       - agent-poc
     volumes:
-      - backend-autotest-init-signal-1:/init-signal
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_automated_test.sh:/run_automated_test.sh:ro
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       - ../config/mount_helper.sh:/usr/local/bin/mount_helper.sh:ro
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
@@ -172,14 +138,6 @@ services:
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_automated_test.sh' ]
 
-
-#
-# Named volumes are not created until the dependent service
-# is started.
-#
-volumes:
-  backend-autotest-init-signal-1:
-    driver: local
 
 networks:
   agent-poc:

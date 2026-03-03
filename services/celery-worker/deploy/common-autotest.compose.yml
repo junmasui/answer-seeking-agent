@@ -36,7 +36,6 @@ services:
       ##SRC - ../build/run_celery_worker.sh:/run_celery_worker.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro
@@ -110,7 +109,6 @@ services:
       ##SRC - ../build/run_celery_flower.sh:/run_celery_flower.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-autotest-init-signal-1:/init-signal
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro

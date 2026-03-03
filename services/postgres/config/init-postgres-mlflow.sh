@@ -18,13 +18,6 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 [ -z "${MLFLOW_POSTGRES_USER_NAME:-}" ] && echo "missing MLFLOW_POSTGRES_USER_NAME" && exit 1
 [ -z "${MLFLOW_POSTGRES_USER_PASSWORD:-}" ] && echo "missing MLFLOW_POSTGRES_USER_PASSWORD" && exit 1
 
-# Wait for dependency-gate to open.
-#
-
-. /wait_for_gate.sh
-
-wait_for_dependency_gate /init-signal/postgres-gate
-
 export PGPASSWORD="$POSTGRES_PASSWORD"
 
 envsubst < /init-mlflow-db.sql.template > /init-mlflow-db.sql

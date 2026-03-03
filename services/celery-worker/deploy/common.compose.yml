@@ -30,7 +30,6 @@ services:
       - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-init-signal-1:/init-signal
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
     secrets:
       - answers_secrets
       - answers_jwt_secrets
@@ -98,7 +97,6 @@ services:
       ##SRC - ../build/run_celery_flower.sh:/run_celery_flower.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-init-signal-1:/init-signal
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - answers_secrets

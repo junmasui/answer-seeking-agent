@@ -24,13 +24,6 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
 
 
-# Wait for dependency-gate to open.
-#
-
-. /wait_for_gate.sh
-
-wait_for_dependency_gate /init-signal/postgres-gate
-
 export PGPASSWORD="$POSTGRES_PASSWORD"
 
 envsubst < /init-db.sql.template > /init-db.sql
