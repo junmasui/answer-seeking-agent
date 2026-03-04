@@ -14,6 +14,9 @@ vars:
 
 env:
   GPU_MODE: '{{.GPU_MODE | default "cuda12"}}'
+  NO_COLOR: "1"
+
+run: once
 
 # ---------------------------------------------------------------------------
 # Top-level aggregate tasks
@@ -40,6 +43,13 @@ tasks:
   teardown:
     desc: "Stop all services, remove containers and orphans"
     cmd: bash "{{.SCRIPTS}}/stop-services.sh" --all
+
+  teardown:hard:
+    desc: "Force-stop and remove all project containers (bypasses compose file parsing)"
+    cmds:
+      - echo "Containers to stop/remove:" && docker ps -a --filter "label=com.docker.compose.project=agent" --format '  {{ "{{" }}.Names{{ "}}" }}  ({{ "{{" }}.Status{{ "}}" }})' || true
+      - docker ps -q --filter "label=com.docker.compose.project=agent" | xargs -r docker stop
+      - docker ps -aq --filter "label=com.docker.compose.project=agent" | xargs -r docker rm -f
 
   teardown:app:
     desc: "Stop app services (prod + autotest + automated tests)"
@@ -300,37 +310,30 @@ tasks:
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" postgres
 
-  postgres-init-dependency-gate:
-    desc: "Wait for Postgres readiness gate"
-    deps: [postgres]
-    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-init-dependency-gate
-    status:
-      - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-init-dependency-gate
-
   postgres-init:
     desc: "Initialize main PostgreSQL database"
-    deps: [postgres-init-dependency-gate]
+    deps: [postgres]
     cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-init
     status:
       - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-init
 
   postgres-keycloak-init:
     desc: "Initialize Keycloak PostgreSQL database"
-    deps: [postgres-init-dependency-gate]
+    deps: [postgres]
     cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-keycloak-init
     status:
       - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-keycloak-init
 
   postgres-mlflow-init:
     desc: "Initialize MLflow PostgreSQL database"
-    deps: [postgres-init-dependency-gate]
+    deps: [postgres]
     cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-mlflow-init
     status:
       - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-mlflow-init
 
   postgres-init-autotest:
     desc: "Initialize autotest PostgreSQL database"
-    deps: [postgres-init-dependency-gate]
+    deps: [postgres]
     cmd: bash "{{.SCRIPTS}}/run-init-container.sh" postgres-init-autotest
     status:
       - bash "{{.SCRIPTS}}/is-init-done.sh" postgres-init-autotest
@@ -549,21 +552,13 @@ tasks:
   # AUTOTEST SERVICES
   # =========================================================================
 
-  backend-autotest-dependency-gate:
-    desc: "Wait for autotest dependencies"
+  api-server-autotest:
+    desc: "Start API server (autotest)"
     deps:
       - postgres-init-autotest
       - seaweedfs-init-autotest
       - redis
       - weaviate
-    cmd: bash "{{.SCRIPTS}}/run-init-container.sh" backend-autotest-dependency-gate
-    status:
-      - bash "{{.SCRIPTS}}/is-init-done.sh" backend-autotest-dependency-gate
-
-  api-server-autotest:
-    desc: "Start API server (autotest)"
-    deps:
-      - backend-autotest-dependency-gate
       - keycloak-init
       - otel-collector
       - traefik
@@ -577,7 +572,10 @@ tasks:
   celery-worker-autotest:
     desc: "Start Celery worker (autotest)"
     deps:
-      - backend-autotest-dependency-gate
+      - postgres-init-autotest
+      - seaweedfs-init-autotest
+      - redis
+      - weaviate
       - keycloak-init
       - otel-collector
       - traefik

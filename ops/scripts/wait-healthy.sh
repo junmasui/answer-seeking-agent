@@ -32,14 +32,14 @@ get_state() {
     local json
     json="$(docker compose ps --format json -a "$SERVICE" 2>/dev/null | head -1)" || true
     if [[ -z "$json" || "$json" == "[]" ]]; then
-        echo "false '' '' -1"
+        echo "false|||-1"
         return
     fi
     local state health exit_code
     state="$(echo "$json" | jq -r '.State // ""')"
     health="$(echo "$json" | jq -r '.Health // ""')"
     exit_code="$(echo "$json" | jq -r '.ExitCode // -1')"
-    echo "true $state $health $exit_code"
+    echo "true|$state|$health|$exit_code"
 }
 
 is_running_ok() {
@@ -56,7 +56,7 @@ force_remove() {
 # Pre-check
 # ------------------------------------------------------------------
 
-read -r exists state health exit_code <<< "$(get_state)"
+IFS='|' read -r exists state health exit_code <<< "$(get_state)"
 echo "[wait-healthy] pre-check $SERVICE: exists=$exists state=$state health=$health exit_code=$exit_code"
 
 if is_running_ok "$exists" "$state" "$health"; then
@@ -85,7 +85,7 @@ docker compose up -d "$SERVICE"
 
 deadline=$((SECONDS + TIMEOUT))
 while true; do
-    read -r exists state health exit_code <<< "$(get_state)"
+    IFS='|' read -r exists state health exit_code <<< "$(get_state)"
     echo "[wait-healthy] poll $SERVICE: state=$state health=$health"
 
     if is_running_ok "$exists" "$state" "$health"; then

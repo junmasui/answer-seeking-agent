@@ -28,7 +28,6 @@ services:
       - ../config/run_api_server.sh:/run_api_server.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
       - backend-init-signal-1:/init-signal
-      ##SRC - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - answers_secrets
@@ -111,7 +110,6 @@ services:
       - ../../dist:/dist
       # Mount source directory
       - ../../../backend:/app/backend
-      ## - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
 

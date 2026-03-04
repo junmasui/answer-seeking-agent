@@ -42,31 +42,6 @@ services:
             retries: 10
             start_period: 5s
 
-    postgres-init-dependency-gate:
-        restart: 'no'
-
-        image: localhost/localhost/debian-slim-util:1.0
-        profiles: [ postgres, infrastructure-core, infrastructure, all, run-and-done ]
-
-        env_file:
-            - postgres.env
-        networks:
-            - agent-poc
-        volumes:
-            - postgres-init-signal-1:/init-signal
-            - ../config/run_dependency_gate.sh:/run_dependency_gate.sh:ro
-            - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
-            - ../../dependency-gate/wait_for_resource.sh:/wait_for_resource.sh:ro
-        secrets:
-            - postgres_secrets
-
-        mem_limit: 128m
-        memswap_limit: 128m
-        # set shared memory limit when using docker-compose
-        shm_size: 128mb
-        entrypoint: 'bash'
-        command: [ /run_dependency_gate.sh ]
-
     postgres-init:
 
         image: localhost/localhost/debian-slim-util:1.0
@@ -78,8 +53,6 @@ services:
         networks:
             - agent-poc
         volumes:
-            - postgres-init-signal-1:/init-signal
-            - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
             - ../config/init-db.sql.template:/init-db.sql.template:ro
             - ../config/init-postgres.sh:/init-postgres.sh:ro
         secrets:
@@ -103,8 +76,6 @@ services:
         networks:
             - agent-poc
         volumes:
-            - postgres-init-signal-1:/init-signal
-            - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
             - ../config/init-keycloak-db.sql.template:/init-keycloak-db.sql.template:ro
             - ../config/init-postgres-keycloak.sh:/init-postgres-keycloak.sh:ro
         secrets:
@@ -127,8 +98,6 @@ services:
         networks:
             - agent-poc
         volumes:
-            - postgres-init-signal-1:/init-signal
-            - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
             - ../config/init-mlflow-db.sql.template:/init-mlflow-db.sql.template:ro
             - ../config/init-postgres-mlflow.sh:/init-postgres-mlflow.sh:ro
         secrets:
@@ -151,8 +120,6 @@ services:
         networks:
             - agent-poc
         volumes:
-            - postgres-init-signal-1:/init-signal
-            - ../../dependency-gate/wait_for_gate.sh:/wait_for_gate.sh:ro
             - ../config/init-db.sql.template:/init-db.sql.template:ro
             - ../config/init-postgres.sh:/init-postgres.sh:ro
         secrets:
@@ -167,6 +134,4 @@ services:
 
 volumes:
     postgres-data-1:
-        driver: local
-    postgres-init-signal-1:
         driver: local
