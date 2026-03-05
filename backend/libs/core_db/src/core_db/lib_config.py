@@ -82,7 +82,7 @@ class LibrarySettings(BaseSettings):
 
     alembic_ini_path: Union[FilePath] = Field(default='./alembic.ini', validation_alias='ALEMBIC_INI_PATH')
 
-    postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
+    postgres_agent_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_AGENT_CONNECTION_URL')
     postgres_vectors_schema: str = Field(default='vectors', validation_alias='POSTGRES_VECTORS_SCHEMA')
 
     postgres_checkpoints_connection_url: PostgresDsn = Field(

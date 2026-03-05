@@ -27,7 +27,7 @@ async def create_tables_if_not_exists():
     """
     logger.info('creating tables that are absent')
 
-    engine = get_async_engine(DataDomain.ANSWERS)
+    engine = get_async_engine(DataDomain.AGENT)
 
     actual_schema_version = await get_current_version(engine)
     expected_schema_version = get_head_revision()
@@ -74,7 +74,7 @@ async def get_current_version(engine):
     """Return the current Alembic version applied to the database."""
 
     def _reflect(conn):
-        reflected_metadata = MetaData(schema='answers')
+        reflected_metadata = MetaData(schema='agent')
         reflected_metadata.reflect(bind=conn)
         return reflected_metadata
 
@@ -92,7 +92,7 @@ async def get_current_version(engine):
                     SELECT FROM
                         information_schema.tables
                     WHERE
-                        table_schema = 'answers' AND
+                        table_schema = 'agent' AND
                         table_name = 'alembic_version'
                 );""")
             )
@@ -190,7 +190,7 @@ async def _create_tables_if_new(engine):
     """
 
     def _create(conn):
-        reflected_metadata = MetaData(schema='answers')
+        reflected_metadata = MetaData(schema='agent')
         reflected_metadata.reflect(bind=conn)
 
         reflected_tables = reflected_metadata.tables
@@ -199,7 +199,7 @@ async def _create_tables_if_new(engine):
         # Although not in the declared schema, this will show up in the actual schema,
         # and its appearance will cause the migrations to be short-circuited.
         if reflected_tables is not None:
-            reflected_tables = [table for table in reflected_tables if table not in ['answers.alembic_version']]
+            reflected_tables = [table for table in reflected_tables if table not in ['agent.alembic_version']]
 
         if reflected_tables is not None and len(reflected_tables) > 0:
             logger.info('database is not empty. use formal migration tools.')
@@ -252,7 +252,7 @@ async def _run_migrations(engine):
 async def drop_all_tables():
     """Drops all tables for model objects defined with this module's `Base`."""
     logger.info('dropping all registered tables')
-    engine = get_async_engine(DataDomain.ANSWERS)
+    engine = get_async_engine(DataDomain.AGENT)
 
     async with engine.begin() as conn:
         # Drop any custom enums types and cascade to any dependencies.

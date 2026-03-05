@@ -18,7 +18,7 @@ from log_config_monitor import get_logging_conf_monitor
 
 from .middlewares import ErrorLoggingMiddleware, HealthCheckMiddleware
 from .middlewares.dynamic_root_path import DynamicRootPathMiddleware
-from .routers import admin, answer, document_sets, documents, health, prompt_versions, prompts, status, tasks
+from .routers import admin, agent, document_sets, documents, health, prompt_versions, prompts, status, tasks
 
 logger = logging.getLogger(__name__)
 
@@ -60,14 +60,14 @@ async def lifespan(fastapi_app: FastAPI):
     get_logging_conf_monitor().stop()
 
 
-app = FastAPI(lifespan=lifespan, title='Seeking Answers', version='1.0.0')
+app = FastAPI(lifespan=lifespan, title='Seeking Agent', version='1.0.0')
 
 app.add_middleware(DynamicRootPathMiddleware)
 app.add_middleware(ErrorLoggingMiddleware)
 app.add_middleware(HealthCheckMiddleware)
 
 app.include_router(router=admin.router, prefix='/admin')
-app.include_router(router=answer.router, prefix='/answer')
+app.include_router(router=agent.router, prefix='/agent')
 app.include_router(router=document_sets.router, prefix='/document-sets')
 app.include_router(router=documents.router, prefix='/documents')
 app.include_router(router=health.router, prefix='/health')
@@ -85,4 +85,4 @@ async def handle_root():
 
     Returns a simple tag line.
     """
-    return {'Tag': 'Seeking answers'}
+    return {'Tag': 'Seeking agent'}

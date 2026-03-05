@@ -6,7 +6,7 @@ from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 async def get_tracking_stats():
     """Return the count of records and maximum updated_date time in the tracking table."""
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         stmt = select(func.count().label('doc_count'), func.max(DbTrackedDocument.update_time).label('max_update_time'))

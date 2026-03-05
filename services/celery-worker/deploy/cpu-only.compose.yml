@@ -1,7 +1,7 @@
 services:
 
   celery-worker:
-    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    image: 'localhost/localhost/agent-backend:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu

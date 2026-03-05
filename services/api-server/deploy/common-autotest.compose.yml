@@ -1,6 +1,6 @@
 services:
   api-server-autotest:
-    image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend-dev:python-3.12-cuda12'
     profiles: [ backend-autotest, all ]
     privileged: true
 
@@ -26,7 +26,7 @@ services:
       - automated-test.env
       - opentelemetry-instrument.env
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
@@ -36,11 +36,11 @@ services:
       - ../config/supervisord.conf:/etc/supervisord.conf:ro
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
     secrets:
-      - answers_secrets
-      - answers_api_key_autotest_secrets
-      - answers_jwt_autotest_secrets
-      - answers_seaweedfs_autotest_secrets
-      - answers_postgres_autotest_secrets
+      - agent_secrets
+      - agent_api_key_autotest_secrets
+      - agent_jwt_autotest_secrets
+      - agent_seaweedfs_autotest_secrets
+      - agent_postgres_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
@@ -76,7 +76,7 @@ services:
 
 
   automated-pytest:
-    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
+    image: 'localhost/localhost/agent-backend-dev:python-3.12-cpu'
     profiles: [ backend-autotest, automated-pytest, all ]
     privileged: true
 
@@ -108,7 +108,7 @@ services:
       - automated-test.env
       - opentelemetry-instrument.env
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.
@@ -121,11 +121,11 @@ services:
       ##SRC - backend-autotest-home-4:/home/python
       ##SRC - backend-autotest-venv-4:/app/backend/.venv
     secrets:
-      - answers_secrets
-      - answers_api_key_autotest_secrets
-      - answers_jwt_autotest_secrets
-      - answers_seaweedfs_autotest_secrets
-      - answers_postgres_autotest_secrets
+      - agent_secrets
+      - agent_api_key_autotest_secrets
+      - agent_jwt_autotest_secrets
+      - agent_seaweedfs_autotest_secrets
+      - agent_postgres_autotest_secrets
       - celery_flower_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
@@ -140,6 +140,6 @@ services:
 
 
 networks:
-  agent-poc:
-    name: agent_agent-poc
+  agent-net:
+    name: agent_agent-net
     external: true

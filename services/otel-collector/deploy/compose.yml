@@ -14,7 +14,7 @@ services:
             - "21777:1777" # pprof endpoint
             - "55679:55679" # zpages endpoint
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/otel-collector-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
             ## - /mnt/bindfs/docker-containers-bindfs:/var/lib/docker/containers:ro
@@ -57,7 +57,7 @@ services:
         #   - "9411:9411"   # Zipkin receiver
         #   - "13133:13133" # Health check endpoint
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/otel-collector-docker-config.yaml:/etc/otelcol-contrib/otel-collector-config.yaml:ro
             - /var/lib/docker/containers:/var/lib/docker/containers:ro

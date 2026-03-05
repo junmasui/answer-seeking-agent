@@ -17,7 +17,7 @@ async def update_prompt_record(prompt_uuid):
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         async with session.begin():

@@ -15,7 +15,7 @@ services:
         ports:
             - '27500:8000'
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../../dist:/dist:ro
             - ../config/healthcheck.sh:/healthcheck.sh:ro
@@ -24,7 +24,7 @@ services:
             ##SRC - ../config/docker/pyproject.toml:/app/pyproject.toml
             ##SRC - ../config/docker/uv.lock:/app/uv.lock:ro
         secrets:
-            - answers_secrets
+            - agent_secrets
 
         entrypoint: [ '/custom-docker-entrypoint.sh' ]
         # The option --config=/config is required for multi-config support.

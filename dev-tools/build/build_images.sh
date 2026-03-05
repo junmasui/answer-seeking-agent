@@ -35,8 +35,8 @@ mkdir -p "$CACHE_DIR"
 CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=max"
 
 required_images=(
-  "localhost/localhost/answers-frontend:node-22-bookworm"
-  "localhost/localhost/answers-backend:python-3.12-cpu"
+  "localhost/localhost/agent-frontend:node-22-bookworm"
+  "localhost/localhost/agent-backend:python-3.12-cpu"
 )
 
 missing_images=()
@@ -71,10 +71,10 @@ docker buildx build --builder default \
   $CACHE_OPTS \
   --file Dockerfile \
   --build-context config-dir=../config \
-  --build-context node-source=docker-image://localhost/localhost/answers-frontend:node-22-bookworm \
-  --build-context backend-source=docker-image://localhost/localhost/answers-backend:python-3.12-cpu \
+  --build-context node-source=docker-image://localhost/localhost/agent-frontend:node-22-bookworm \
+  --build-context backend-source=docker-image://localhost/localhost/agent-backend:python-3.12-cpu \
   --target dev \
-  --tag localhost/localhost/answers-dev-tools:python-3.12-cpu \
+  --tag localhost/localhost/agent-dev-tools:python-3.12-cpu \
   --progress plain \
   --load \
   . 2>&1 \
@@ -90,10 +90,10 @@ docker buildx build --builder default \
   $CACHE_OPTS \
   --file cuda12.Dockerfile \
   --build-context config-dir=../config \
-  --build-context node-source=docker-image://localhost/localhost/answers-frontend:node-22-bookworm \
-  --build-context backend-source=docker-image://localhost/localhost/answers-backend:python-3.12-cuda12 \
+  --build-context node-source=docker-image://localhost/localhost/agent-frontend:node-22-bookworm \
+  --build-context backend-source=docker-image://localhost/localhost/agent-backend:python-3.12-cuda12 \
   --target dev \
-  --tag localhost/localhost/answers-dev-tools:python-3.12-cuda12 \
+  --tag localhost/localhost/agent-dev-tools:python-3.12-cuda12 \
   --progress plain \
   --load \
   . 2>&1 \

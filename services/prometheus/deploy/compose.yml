@@ -9,7 +9,7 @@ services:
         ports:
             - 29090:9090
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
             - ../config/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
@@ -57,7 +57,7 @@ services:
         ports:
             - 29093:9093
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
 

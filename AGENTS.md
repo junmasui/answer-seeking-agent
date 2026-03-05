@@ -2,7 +2,7 @@
 
 ## Project Overview & Goals
 
-**System**: A distributed "Answer Seeking Agent" that ingests documents, processes them via ML pipelines, and serves answers through a FastAPI backend and Vue frontend.
+**System**: A distributed "Answer Seeking Agent" that ingests documents, processes them via ML pipelines, and serves agent through a FastAPI backend and Vue frontend.
 **Goals**:
 
 1. **Reliability**: The system must be robust, with self-healing services and comprehensive error handling.

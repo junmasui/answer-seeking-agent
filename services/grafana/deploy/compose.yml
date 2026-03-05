@@ -14,7 +14,7 @@ services:
         ports:
             - 23000:3000
         networks:
-            - agent-poc
+            - agent-net
         secrets:
             - grafana_secrets
 

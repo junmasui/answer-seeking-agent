@@ -30,7 +30,7 @@ async def add_or_update_document(
     if not isinstance(document_set_uuid, uuid.UUID):
         raise TypeError('document_set_uuid must be a UUID object')
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         async with session.begin():

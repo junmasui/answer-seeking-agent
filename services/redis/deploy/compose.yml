@@ -9,7 +9,7 @@ services:
         ports:
             - '26379:6379'
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - redis-data-1:/data
             - ../config/redis.conf.template:/redis.conf.template:ro

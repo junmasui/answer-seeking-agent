@@ -18,7 +18,7 @@ from core_db.lib_config import get_lib_config
 # This import will load our declared schema
 import core_db.db_models
 
-db_url = get_lib_config().postgres_answers_connection_url
+db_url = get_lib_config().postgres_agent_connection_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

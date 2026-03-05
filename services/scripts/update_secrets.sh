@@ -54,40 +54,40 @@ function generate_secret ()  {
 }
 
 
-# Answers JWT
+# Agent JWT
 
-SECRETS_FILE=./secrets/answers.jwt.secrets.env
+SECRETS_FILE=./secrets/agent.jwt.secrets.env
 VAR_NAME=APPLICATION_JWT_SECRET
 DESCR="$VAR_NAME is created thru openssl rand -hex 32."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.jwt.autotest.secrets.env
+SECRETS_FILE=./secrets/agent.jwt.autotest.secrets.env
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" openssl-32 "" "$DESCR"
 
 
-# Answers API keys
+# Agent API keys
 
-SECRETS_FILE=./secrets/answers.api-key.secrets.env
+SECRETS_FILE=./secrets/agent.api-key.secrets.env
 VAR_NAME=APPLICATION_API_KEY_1
-VALUE_PREFIX=answers_1_
-DESCR="Answers API key."
+VALUE_PREFIX=agent_1_
+DESCR="Agent API key."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.api-key.autotest.secrets.env
-VALUE_PREFIX=answers_dev_1_
+SECRETS_FILE=./secrets/agent.api-key.autotest.secrets.env
+VALUE_PREFIX=agent_dev_1_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 VAR_NAME=APPLICATION_API_KEY_2
-VALUE_PREFIX=answers_dev_2_
+VALUE_PREFIX=agent_dev_2_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 VAR_NAME=APPLICATION_API_KEY_3
-VALUE_PREFIX=answers_dev_3_
+VALUE_PREFIX=agent_dev_3_
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
@@ -130,14 +130,14 @@ DESCR="seaweedfs's root account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/answers.seaweedfs.secrets.env
+SECRETS_FILE=./secrets/agent.seaweedfs.secrets.env
 VAR_NAME=S3_SECRET_KEY
 VALUE_PREFIX=backend_seaweedfs_
 DESCR="Backend's seaweedfs account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.seaweedfs.autotest.secrets.env
+SECRETS_FILE=./secrets/agent.seaweedfs.autotest.secrets.env
 VALUE_PREFIX=backend_seaweedfs_dev_
 DESCR="Backend Test's seaweedfs account's password."
 
@@ -163,16 +163,16 @@ DESCR="Postgres's root account's password."
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
 
-SECRETS_FILE=./secrets/answers.postgres.secrets.env
-VAR_NAME=ANSWERS_POSTGRES_USER_PASSWORD
-VALUE_PREFIX=answers_postgres_
-DESCR="backend's Answers Postgres account's password."
+SECRETS_FILE=./secrets/agent.postgres.secrets.env
+VAR_NAME=AGENT_POSTGRES_USER_PASSWORD
+VALUE_PREFIX=agent_postgres_
+DESCR="backend's Agent Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 
-SECRETS_FILE=./secrets/answers.postgres.autotest.secrets.env
-VALUE_PREFIX=answers_postgres_dev_
-DESCR="backend test's Answers Postgres account's password."
+SECRETS_FILE=./secrets/agent.postgres.autotest.secrets.env
+VALUE_PREFIX=agent_postgres_dev_
+DESCR="backend test's Agent Postgres account's password."
 
 generate_secret "$SECRETS_FILE" "$VAR_NAME" "gpg-16-safe" "$VALUE_PREFIX" "$DESCR"
 

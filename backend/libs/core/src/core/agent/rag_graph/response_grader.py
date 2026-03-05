@@ -33,7 +33,7 @@ async def get_response_grader():
 @arunnable
 async def grade_response(state: GraphState):
     """
-    Determines whether the generation is grounded in the document and answers question.
+    Determines whether the generation is grounded in the document and agent question.
 
     Args:
         state (dict): The current graph state

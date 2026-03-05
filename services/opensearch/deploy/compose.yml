@@ -13,7 +13,7 @@ services:
             - "29200:9200" # HTTP
             - "29600:9600" # Transport
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - opensearch-data-1:/usr/share/opensearch/data
         secrets:

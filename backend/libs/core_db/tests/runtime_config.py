@@ -17,7 +17,7 @@ Key Components:
 
 Usage:
     config = get_test_config()
-    db_url = config.postgres_answers_connection_url
+    db_url = config.postgres_agent_connection_url
 """
 
 import os
@@ -76,7 +76,7 @@ class RuntimeSettings(BaseSettings):
 
     skip_tear_down: bool = Field(default=False, validation_alias='SKIP_TEAR_DOWN')
 
-    postgres_answers_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_ANSWERS_CONNECTION_URL')
+    postgres_agent_connection_url: PostgresDsn = Field(default='', validation_alias='POSTGRES_AGENT_CONNECTION_URL')
 
 
 @cache

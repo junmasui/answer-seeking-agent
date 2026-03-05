@@ -11,7 +11,7 @@ async def add_or_update_document_set(
     name: str, is_new_doc_default: bool, is_public_viewable: bool, user_id: uuid.UUID, ocr_strategy: str = 'hi_res'
 ):
     """Adds or updates the document set."""
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         async with session.begin():

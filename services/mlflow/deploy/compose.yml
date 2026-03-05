@@ -11,7 +11,7 @@ services:
         ports:
             - "25005:5000"
         networks:
-            - agent-poc
+            - agent-net
         secrets:
             - mlflow_postgres_secrets
             - mlflow_seaweedfs_secrets
@@ -32,6 +32,6 @@ services:
         memswap_limit: 3g
 
 networks:
-    agent-poc:
+    agent-net:
         external: true
-        name: agent_agent-poc
+        name: agent_agent-net

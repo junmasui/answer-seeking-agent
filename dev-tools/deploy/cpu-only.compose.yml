@@ -1,6 +1,6 @@
 services:
   dev-tools:
-    image: 'localhost/localhost/answers-dev-tools:python-3.12-cpu'
+    image: 'localhost/localhost/agent-dev-tools:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu

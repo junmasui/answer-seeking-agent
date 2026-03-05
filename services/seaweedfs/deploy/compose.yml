@@ -17,7 +17,7 @@ services:
             - '29002:9002' # Filer port
 
         networks:
-            - agent-poc
+            - agent-net
 
         volumes:
             - seaweedfs-data:/data
@@ -58,14 +58,14 @@ services:
             - seaweedfs.env
             - seaweedfs.init.env
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
             - seaweedfs-init-signal:/init-signal
             - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
         secrets:
             - seaweedfs_secrets
-            - answers_seaweedfs_secrets
+            - agent_seaweedfs_secrets
 
         # init-seaweedfs.sh will now refer to 'weed shell'
         command: /init-seaweedfs.sh
@@ -80,14 +80,14 @@ services:
             - seaweedfs.env
             - seaweedfs.init.autotest.env
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
             - seaweedfs-init-signal:/init-signal
             - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
         secrets:
             - seaweedfs_secrets
-            - answers_seaweedfs_autotest_secrets
+            - agent_seaweedfs_autotest_secrets
 
         # init-seaweedfs.sh will now refer to 'weed shell'
         command: /init-seaweedfs.sh
@@ -97,11 +97,11 @@ services:
         image: localhost/localhost/init-seaweedfs:latest
         profiles: [ infrastructure, all ]
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
         secrets:
-            - answers_seaweedfs_secrets
+            - agent_seaweedfs_secrets
         environment:
             # We reuse the same secrets file but we expect CODEBASE_ACCESS_KEY/SECRET_KEY to be present or defaulted in the script if not
             - SEAWEEDFS_FILER=seaweedfs:9002
@@ -119,7 +119,7 @@ services:
         image: localhost/localhost/init-seaweedfs:latest
         profiles: [ infrastructure, all ]
         networks:
-            - agent-poc
+            - agent-net
         env_file:
             - seaweedfs.env
             - seaweedfs.init.mlflow.env

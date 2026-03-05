@@ -14,7 +14,7 @@ async def delete_tracking_record(doc_uuid):
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session, session.begin():
         stmt = delete(DbTrackedDocument).where(DbTrackedDocument.id == doc_uuid)

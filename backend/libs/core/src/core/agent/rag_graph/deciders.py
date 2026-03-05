@@ -106,7 +106,7 @@ def check_for_relevant_documents(state: GraphState):
 
 def check_response_quality(state: GraphState):
     """
-    Determines whether the generation the answers question.
+    Determines whether the generation the agent question.
 
     Args:
         state (dict): The current graph state

@@ -12,7 +12,7 @@ services:
             - mutagen_ssh_private_key
             - mutagen_sshd_authorized_keys
         networks:
-            - agent-poc
+            - agent-net
         healthcheck:
             test: [ "CMD-SHELL", "bash /healthcheck.sh" ]
             interval: 10s

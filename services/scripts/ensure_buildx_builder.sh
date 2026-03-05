@@ -11,7 +11,7 @@
 # the builder; if that fails we remove the broken instance and recreate it.
 #
 
-BUILDER_NAME="answers-optimized-builder"
+BUILDER_NAME="agent-optimized-builder"
 
 _create_builder() {
     echo "Creating optimized builder: $BUILDER_NAME"

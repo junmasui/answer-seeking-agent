@@ -1,7 +1,7 @@
 
 services:
   webui-server-autotest:
-    image: 'localhost/localhost/answers-frontend-dev:node-22-bookworm'
+    image: 'localhost/localhost/agent-frontend-dev:node-22-bookworm'
     profiles: [ frontend-autotest, all ]
     privileged: true
 
@@ -19,7 +19,7 @@ services:
     # ports:
     #   - '5173:5173'
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       - ../config/run_webui_server.sh:/run_webui_server.sh:ro
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
@@ -39,7 +39,7 @@ services:
     user: root
 
   automated-vitest:
-    image: 'localhost/localhost/answers-frontend-test-xvfb:node-22-bookworm'
+    image: 'localhost/localhost/agent-frontend-test-xvfb:node-22-bookworm'
     profiles: [ frontend-autotest, all ]
     privileged: true
 
@@ -58,7 +58,7 @@ services:
     # ports:
     #   - '5173:5173'
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       - ../config/run_automated_tests.sh:/run_automated_tests.sh:ro
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro

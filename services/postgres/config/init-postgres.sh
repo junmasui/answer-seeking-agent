@@ -16,9 +16,9 @@ export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 [ -z "${POSTGRES_USER:-}" ] && echo "missing POSTGRES_USER" && exit 1
 [ -z "${POSTGRES_PASSWORD:-}" ] && echo "missing POSTGRES_PASSWORD" && exit 1
 
-[ -z "${ANSWERS_POSTGRES_DATABASE:-}" ] && echo "missing ANSWERS_POSTGRES_DATABASE" && exit 1
-[ -z "${ANSWERS_POSTGRES_USER_NAME:-}" ] && echo "missing ANSWERS_POSTGRES_USER_NAME" && exit 1
-[ -z "${ANSWERS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing ANSWERS_POSTGRES_USER_PASSWORD" && exit 1
+[ -z "${AGENT_POSTGRES_DATABASE:-}" ] && echo "missing AGENT_POSTGRES_DATABASE" && exit 1
+[ -z "${AGENT_POSTGRES_USER_NAME:-}" ] && echo "missing AGENT_POSTGRES_USER_NAME" && exit 1
+[ -z "${AGENT_POSTGRES_USER_PASSWORD:-}" ] && echo "missing AGENT_POSTGRES_USER_PASSWORD" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_NAME:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_NAME" && exit 1
 [ -z "${CHECKPOINTS_POSTGRES_USER_PASSWORD:-}" ] && echo "missing CHECKPOINTS_POSTGRES_USER_PASSWORD" && exit 1
 

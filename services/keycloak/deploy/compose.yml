@@ -11,7 +11,7 @@ services:
         ports:
             - "28080:8080"
         networks:
-            - agent-poc
+            - agent-net
         secrets:
             - keycloak_postgres_secrets
             - keycloak_admin_secrets
@@ -49,9 +49,9 @@ services:
             - /init_keycloak.sh
 
         networks:
-            - agent-poc
+            - agent-net
 
 networks:
-    agent-poc:
+    agent-net:
         external: true
-        name: agent_agent-poc
+        name: agent_agent-net

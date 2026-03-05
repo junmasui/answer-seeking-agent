@@ -1,6 +1,6 @@
 
 networks:
-  agent-poc:
+  agent-net:
     driver: bridge
     driver_opts:
       com.docker.network.bridge.enable_ip_masquerade: 'true'
@@ -31,30 +31,30 @@ secrets:
   celery_flower_autotest_secrets:
     file: ./secrets/celery-flower.autotest.secrets.env
 
-  answers_secrets:
+  agent_secrets:
     file: ./secrets.env
 
-  answers_api_key_secrets:
-    file: ./secrets/answers.api-key.secrets.env
-  answers_jwt_secrets:
-    file: ./secrets/answers.jwt.secrets.env
-  answers_postgres_secrets:
-    file: ./secrets/answers.postgres.secrets.env
-  answers_seaweedfs_secrets:
-    file: ./secrets/answers.seaweedfs.secrets.env
+  agent_api_key_secrets:
+    file: ./secrets/agent.api-key.secrets.env
+  agent_jwt_secrets:
+    file: ./secrets/agent.jwt.secrets.env
+  agent_postgres_secrets:
+    file: ./secrets/agent.postgres.secrets.env
+  agent_seaweedfs_secrets:
+    file: ./secrets/agent.seaweedfs.secrets.env
   checkpoints_postgres_secrets:
     file: ./secrets/checkpoints.postgres.secrets.env
 
-  answers_api_key_autotest_secrets:
-    file: ./secrets/answers.api-key.autotest.secrets.env
-  answers_jwt_autotest_secrets:
-    file: ./secrets/answers.jwt.autotest.secrets.env
-  answers_minio_autotest_secrets:
-    file: ./secrets/answers.minio.autotest.secrets.env
-  answers_postgres_autotest_secrets:
-    file: ./secrets/answers.postgres.autotest.secrets.env
-  answers_seaweedfs_autotest_secrets:
-    file: ./secrets/answers.seaweedfs.autotest.secrets.env
+  agent_api_key_autotest_secrets:
+    file: ./secrets/agent.api-key.autotest.secrets.env
+  agent_jwt_autotest_secrets:
+    file: ./secrets/agent.jwt.autotest.secrets.env
+  agent_minio_autotest_secrets:
+    file: ./secrets/agent.minio.autotest.secrets.env
+  agent_postgres_autotest_secrets:
+    file: ./secrets/agent.postgres.autotest.secrets.env
+  agent_seaweedfs_autotest_secrets:
+    file: ./secrets/agent.seaweedfs.autotest.secrets.env
   checkpoints_postgres_autotest_secrets:
     file: ./secrets/checkpoints.postgres.autotest.secrets.env
 

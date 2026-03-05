@@ -17,7 +17,7 @@ services:
       - automated-pytest.env
       - opentelemetry-instrument.env
     networks:
-      - agent-poc
+      - agent-net
 
     healthcheck:
       test: ["CMD-SHELL", "bash /healthcheck.sh"]
@@ -45,11 +45,11 @@ services:
       # Mount supervisord config
       - ../config/supervisord.conf:/etc/supervisord.conf:ro
     secrets:
-      - answers_secrets
-      - answers_api_key_autotest_secrets
-      - answers_jwt_autotest_secrets
-      - answers_minio_autotest_secrets
-      - answers_postgres_autotest_secrets
+      - agent_secrets
+      - agent_api_key_autotest_secrets
+      - agent_jwt_autotest_secrets
+      - agent_minio_autotest_secrets
+      - agent_postgres_autotest_secrets
       - checkpoints_postgres_autotest_secrets
       - redis_secrets
       - weaviate_secrets
@@ -59,9 +59,9 @@ services:
     command: [ '/start_dev.sh' ]
 
 networks:
-  agent-poc:
+  agent-net:
     external: true
-    name: agent_agent-poc
+    name: agent_agent-net
 
 volumes:
   dev-tools-venv:

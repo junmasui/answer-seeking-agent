@@ -17,7 +17,7 @@ services:
         ports:
             - '25432:5432'
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - postgres-data-1:/var/lib/postgresql/data
             - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
@@ -51,13 +51,13 @@ services:
         env_file:
             - postgres-init.env
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-db.sql.template:/init-db.sql.template:ro
             - ../config/init-postgres.sh:/init-postgres.sh:ro
         secrets:
             - postgres_secrets
-            - answers_postgres_secrets
+            - agent_postgres_secrets
             - checkpoints_postgres_secrets
 
         entrypoint: [ '/bin/bash' ]
@@ -74,7 +74,7 @@ services:
         env_file:
             - postgres-keycloak-init.env
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-keycloak-db.sql.template:/init-keycloak-db.sql.template:ro
             - ../config/init-postgres-keycloak.sh:/init-postgres-keycloak.sh:ro
@@ -96,7 +96,7 @@ services:
         env_file:
             - postgres-mlflow-init.env
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-mlflow-db.sql.template:/init-mlflow-db.sql.template:ro
             - ../config/init-postgres-mlflow.sh:/init-postgres-mlflow.sh:ro
@@ -118,13 +118,13 @@ services:
         env_file:
             - postgres-init.autotest.env
         networks:
-            - agent-poc
+            - agent-net
         volumes:
             - ../config/init-db.sql.template:/init-db.sql.template:ro
             - ../config/init-postgres.sh:/init-postgres.sh:ro
         secrets:
             - postgres_secrets
-            - answers_postgres_autotest_secrets
+            - agent_postgres_autotest_secrets
             - checkpoints_postgres_autotest_secrets
 
         entrypoint: [ '/bin/bash' ]

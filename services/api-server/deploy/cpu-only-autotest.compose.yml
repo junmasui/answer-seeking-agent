@@ -1,7 +1,7 @@
 services:
 
   api-server-autotest:
-    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
+    image: 'localhost/localhost/agent-backend-dev:python-3.12-cpu'
 
     environment:
       GPU_MODE: cpu

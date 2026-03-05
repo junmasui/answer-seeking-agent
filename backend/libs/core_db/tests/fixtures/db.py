@@ -10,7 +10,7 @@ def get_connection_str():
     """Return the connection string for the PostgreSQL database from the global configuration."""
     config = get_test_config()
 
-    connection_url = config.postgres_answers_connection_url
+    connection_url = config.postgres_agent_connection_url
 
     # The connection string must use psycopg3!
     if not connection_url.scheme == 'postgresql+psycopg':

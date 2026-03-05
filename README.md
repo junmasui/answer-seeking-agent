@@ -1,7 +1,7 @@
 # READ ME
 
 An experimental RAG agent for seeking
-answers in documents  to complex questions.
+agent in documents  to complex questions.
 
 ## OVERVIEW
 
