@@ -40,9 +40,6 @@ COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
 COPY --from=config-dir ./webui_mount_helper.sh /usr/local/bin/webui_mount_helper.sh
 COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 
-COPY --from=dependency-gate-dir ./wait_for_resource.sh /
-
-
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \

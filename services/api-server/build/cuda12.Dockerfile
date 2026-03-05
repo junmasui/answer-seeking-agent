@@ -190,9 +190,6 @@ COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
 COPY --from=celery-config-dir ./run_celery_worker.sh /
 COPY --from=celery-config-dir ./run_celery_flower.sh /
 
-COPY --from=dependency-gate-dir ./wait_for_gate.sh /
-COPY --from=dependency-gate-dir ./wait_for_resource.sh /
-
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
     && chmod a+x /run_celery_worker.sh \
