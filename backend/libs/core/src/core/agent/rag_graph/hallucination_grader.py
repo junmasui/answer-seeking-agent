@@ -1,5 +1,5 @@
 """
-This module provides the node that evaluates whether an generated answer contains hallucinations.
+This module provides the node that evaluates whether an generated response contains hallucinations.
 
 See: Hallucination Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
@@ -33,7 +33,7 @@ async def get_hallucination_grader():
 @arunnable
 async def grade_hallucination(state: GraphState):
     """
-    Determines whether the generation is grounded in the document and agent question.
+    Determines whether the generation is grounded in the document and agent input.
 
     Args:
         state (dict): The current graph state

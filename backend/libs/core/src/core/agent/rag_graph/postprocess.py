@@ -22,8 +22,8 @@ def add_response_to_history(state: GraphState):
     response = state.response
     citations = state.citations
 
-    # The content of an AIMessage should be a string. Store only the answer
-    # intho this field. This avoid serialization issues with the LLM API.
+    # The content of an AIMessage should be a string. Store only the response
+    # into this field. This avoids serialization issues with the LLM API.
     content = response
 
     # Store citations in additional_kwargs to preserve them in history

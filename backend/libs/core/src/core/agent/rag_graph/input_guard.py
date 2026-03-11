@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @arunnable
 async def check_input_with_nemo(state: GraphState):
     """
-    Determines .
+    Determines input safety using Nemo Guardrails.
 
     Args:
         state (dict): The current graph state
@@ -26,9 +26,9 @@ async def check_input_with_nemo(state: GraphState):
 
     """
     logger.info('---CHECK INPUT WITH NEMO GUARDRAILS---')
-    question = state.question
+    user_input = state.input
 
-    result = await execute_nemo_guardrails_check('input_check', [{'role': 'user', 'content': question}])
+    result = await execute_nemo_guardrails_check('input_check', [{'role': 'user', 'content': user_input}])
 
     # Guard against missing keys. If 'output_data' or 'triggered_input_rail' are missing,
     # treat as if no rail was triggered (same behavior as triggered_rail == False).
@@ -47,7 +47,7 @@ async def check_input_with_nemo(state: GraphState):
 @arunnable
 async def check_input_with_presidio(state: GraphState):
     """
-    Determines .
+    Determines input safety using Presidio.
 
     Args:
         state (dict): The current graph state
@@ -57,9 +57,9 @@ async def check_input_with_presidio(state: GraphState):
 
     """
     logger.info('---CHECK INPUT WITH PRESIDIO---')
-    question = state.question
+    user_input = state.input
 
-    result = await execute_presidio_check(question)
+    result = await execute_presidio_check(user_input)
 
     result = [x for x in result if x.get('score', 0.0) < 0.2]
     result = [x for x in result if x.get('entity_type', None) not in ['PERSON', 'LOCATION', 'DATE_TIME']]

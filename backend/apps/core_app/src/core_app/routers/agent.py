@@ -1,8 +1,8 @@
 import logging
 from typing import Annotated
 
-from core import get_mermaid_graph, seek_answer
-from core_public import Answer, AnswerRequestBody
+from core import get_mermaid_graph, process_input
+from core_public import AgentResponse, AgentRequestBody
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import Response
 
@@ -13,36 +13,36 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get('', response_model=Answer)  # Empty path handles no trailing slash without using 307 redirect.
-@router.get('/', response_model=Answer)
-async def handle_question(
-    params: Annotated[AnswerRequestBody, Depends()],
+@router.get('', response_model=AgentResponse)  # Empty path handles no trailing slash without using 307 redirect.
+@router.get('/', response_model=AgentResponse)
+async def handle_input(
+    params: Annotated[AgentRequestBody, Depends()],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
-    """Handle a question submitted via GET request and return an answer."""
+    """Handle an input submitted via GET request and return a response."""
     user_id = current_user.user_id if current_user is not None else None
 
-    answer = await seek_answer(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
+    response = await process_input(user_input=params.input, thread_id=params.thread_id, user_id=user_id)
 
-    logger.info('returning %s', answer)
+    logger.info('returning %s', response)
 
-    return answer
+    return response
 
 
-@router.post('', response_model=Answer)  # Empty path handles no trailing slash without using 307 redirect.
-@router.post('/', response_model=Answer)
-async def handler_question(
-    body: Annotated[AnswerRequestBody, Body(...)],
+@router.post('', response_model=AgentResponse)  # Empty path handles no trailing slash without using 307 redirect.
+@router.post('/', response_model=AgentResponse)
+async def handle_input_post(
+    body: Annotated[AgentRequestBody, Body(...)],
     current_user: Annotated[User, Depends(get_scoped_current_user(Scope.QUERY, missing_ok=True))] = None,
 ):
-    """Handle a question submitted via POST request and return an answer."""
+    """Handle an input submitted via POST request and return a response."""
     user_id = current_user.userid if current_user is not None else None
 
-    answer = await seek_answer(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
+    response = await process_input(user_input=body.input, thread_id=body.thread_id, user_id=user_id)
 
-    logger.info('returning %s', answer)
+    logger.info('returning %s', response)
 
-    return answer
+    return response
 
 
 @router.get('/mermaid')

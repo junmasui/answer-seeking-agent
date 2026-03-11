@@ -1,9 +1,9 @@
 """
-Rewrite user questions for better document retrieval relevancy.
+Rewrite user input for better document retrieval relevancy.
 
-This module provides the node that rewrites the user questions for more relevant document retrieval.
+This module provides the node that rewrites the user input for more relevant document retrieval.
 
-See: Question Re-writer in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
+See: Input Re-writer in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
 
 import logging
@@ -19,59 +19,59 @@ from .prompt_util import get_chat_prompt
 logger = logging.getLogger(__name__)
 
 
-async def get_question_rewriter():
+async def get_input_rewriter():
     """
-    Initializes and returns a question rewriting chain.
+    Initializes and returns an input rewriting chain.
 
-    The chain consists of a language model, a prompt for rewriting questions, and an output parser.
-    It's configured to run with the name 'question_rewriter'.
+    The chain consists of a language model, a prompt for rewriting input, and an output parser.
+    It's configured to run with the name 'input_rewriter'.
     """
     # LLM
     llm = get_chat_llm()
 
-    rewrite_prompt = await get_chat_prompt(prompt_name=AgentPromptName.REWRITE_QUERY)
+    rewrite_prompt = await get_chat_prompt(prompt_name=AgentPromptName.REWRITE_INPUT)
 
     chain = rewrite_prompt | llm | StrOutputParser()
 
-    chain = chain.with_config({'run_name': 'question_rewriter'})
+    chain = chain.with_config({'run_name': 'input_rewriter'})
 
     return chain
 
 
 @arunnable
-async def rewrite_question(state: GraphState):
+async def rewrite_input(state: GraphState):
     """
-    Transform the query to produce a better question.
+    Transform the query to produce a better input.
 
     Args:
         state (dict): The current graph state
 
     Returns:
-        dict: Updates to the graph state with the rewritten question
+        dict: Updates to the graph state with the rewritten input
 
     """
     logger.info('---TRANSFORM QUERY---')
-    question = state.question
+    user_input = state.input
     query_rewrite_count = state.query_rewrite_count
 
-    question_rewriter = await get_question_rewriter()
+    input_rewriter = await get_input_rewriter()
 
-    # Re-write question
-    better_question = await question_rewriter.ainvoke(
-        input={'question': question}, config={'metadata': {'chain_name': rewrite_question.name}}
+    # Re-write input
+    better_input = await input_rewriter.ainvoke(
+        input={'user_input': user_input}, config={'metadata': {'chain_name': rewrite_input.name}}
     )
 
-    # Update agent state with rewritten question.
+    # Update agent state with rewritten input.
     messages = [msg for msg in state.messages if msg.type == 'human']
     if len(messages) > 1:
         # Keep only the last human message
         messages = [messages[-1]]
 
     message = messages[-1]
-    updated_message = message.model_copy(update={'content': better_question})
+    updated_message = message.model_copy(update={'content': better_input})
 
     state_updates = {
-        'question': better_question,
+        'input': better_input,
         'messages': [updated_message],
         'query_rewrite_count': query_rewrite_count + 1,
     }

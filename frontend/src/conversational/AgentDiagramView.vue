@@ -186,7 +186,7 @@ async function downloadMermaidDiagram() {
       headers.Authorization = auth
     }
 
-    const response = await fetch('/api/answer/mermaid', {
+    const response = await fetch('/api/agent/mermaid', {
       method: 'GET',
       headers
     })
