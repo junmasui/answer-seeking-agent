@@ -5,11 +5,11 @@ services:
         image: localhost/localhost/debian-slim-util:1.0
         profiles: [ run-and-done ]
         networks:
-            - agent-poc
+            - agent-net
         stdin_open: true
         tty: true
         entrypoint: [ /bin/bash ]
 
 networks:
-    agent-poc:
+    agent-net:
         external: true

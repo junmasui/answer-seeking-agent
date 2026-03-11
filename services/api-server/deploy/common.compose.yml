@@ -1,6 +1,6 @@
 services:
   api-server:
-    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend:python-3.12-cuda12'
     profiles: [  api-server, backend, all ]
 
     environment:
@@ -19,7 +19,7 @@ services:
       - backend.env
       - opentelemetry-instrument.env
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       # Mount the project directory to /app in the container
       ### - ../../../backend:/app
@@ -30,11 +30,11 @@ services:
       - backend-init-signal-1:/init-signal
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
-      - answers_secrets
-      - answers_api_key_secrets
-      - answers_jwt_secrets
-      - answers_seaweedfs_secrets
-      - answers_postgres_secrets
+      - agent_secrets
+      - agent_api_key_secrets
+      - agent_jwt_secrets
+      - agent_seaweedfs_secrets
+      - agent_postgres_secrets
       - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
@@ -70,7 +70,7 @@ services:
 
 
   python-build:
-    image: 'localhost/localhost/answers-backend-dev:python-3.12-cpu'
+    image: 'localhost/localhost/agent-backend-dev:python-3.12-cpu'
     profiles: [
       python-build
     ]
@@ -101,7 +101,7 @@ services:
     security_opt:
       - apparmor:unconfined
     networks:
-      agent-poc: {}
+      agent-net: {}
     volumes:
       # Mount important scripts into the container when we are
       # avoiding rebuilding images to capture their latest version.

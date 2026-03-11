@@ -1,7 +1,7 @@
 services:
   celery-worker:
 
-    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend:python-3.12-cuda12'
     profiles: [  celery, backend, all ]
 
     environment:
@@ -20,7 +20,7 @@ services:
       - backend.env
       - opentelemetry-instrument.env
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       # Mount the project directory to /app in the container
       ##SRC - ../../../backend:/app
@@ -31,10 +31,10 @@ services:
       - backend-init-signal-1:/init-signal
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
-      - answers_secrets
-      - answers_jwt_secrets
-      - answers_seaweedfs_secrets
-      - answers_postgres_secrets
+      - agent_secrets
+      - agent_jwt_secrets
+      - agent_seaweedfs_secrets
+      - agent_postgres_secrets
       - checkpoints_postgres_secrets
       - redis_secrets
       - weaviate_secrets
@@ -72,7 +72,7 @@ services:
           
   celery-flower:
 
-    image: 'localhost/localhost/answers-backend:python-3.12-cpu'
+    image: 'localhost/localhost/agent-backend:python-3.12-cpu'
     profiles: [ celery, backend, all ]
 
     environment:
@@ -88,7 +88,7 @@ services:
     ports: # use if it is necessary to expose the container to the host machine
       - '25555:5555'
     networks:
-      agent-poc: {}
+      agent-net: {}
     volumes:
       # Mount the project directory to /app in the container
       ##SRC - ../../../backend:/app
@@ -99,10 +99,10 @@ services:
       - backend-init-signal-1:/init-signal
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
-      - answers_secrets
-      - answers_jwt_secrets
-      - answers_seaweedfs_secrets
-      - answers_postgres_secrets
+      - agent_secrets
+      - agent_jwt_secrets
+      - agent_seaweedfs_secrets
+      - agent_postgres_secrets
       - celery_flower_secrets
       - checkpoints_postgres_secrets
       - redis_secrets
@@ -140,7 +140,7 @@ services:
     ports:
       - '29808:9808'
     networks:
-      agent-poc: {}
+      agent-net: {}
     volumes:
       - backend-init-signal-1:/init-signal
       - ../config/custom-docker-entrypoint.exporter.sh:/custom-docker-entrypoint.exporter.sh:ro

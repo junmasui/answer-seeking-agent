@@ -17,7 +17,7 @@ fi
 
 # Discover which autotest containers are currently running
 # Look for containers in our network that match autotest patterns
-NETWORK="${COMPOSE_PROJECT_NAME:-agent-poc}"
+NETWORK="${COMPOSE_PROJECT_NAME:-agent-net}"
 
 # Get list of running containers in our network that match autotest/automated patterns
 BACKEND_CONTAINERS=$(docker ps --filter "network=${NETWORK}" --format "{{.Names}}" 2>/dev/null | grep -E "(api-server-autotest|automated-pytest|celery-worker-autotest|celery-flower-autotest)" || echo "")

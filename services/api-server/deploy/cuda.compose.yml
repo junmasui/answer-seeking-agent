@@ -1,6 +1,6 @@
 services:
   api-server:
-    image: 'localhost/localhost/answers-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend:python-3.12-cuda12'
 
     environment:
       GPU_MODE: cuda12

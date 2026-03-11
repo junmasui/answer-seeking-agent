@@ -14,7 +14,7 @@ async def delete_prompt(prompt_uuid):
     if isinstance(prompt_uuid, str):
         prompt_uuid = uuid.UUID(hex=prompt_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session, session.begin():
         stmt = delete(DbPrompt).where(DbPrompt.id == prompt_uuid)

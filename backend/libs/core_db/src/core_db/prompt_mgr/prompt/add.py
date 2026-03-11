@@ -9,7 +9,7 @@ from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 async def add_or_update_prompt(name: str, owner_type: OwnerType, user_id: uuid.UUID):
     """Adds or updates the prompt."""
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         async with session.begin():

@@ -69,5 +69,5 @@ The `COMPOSE_FILE` environment variable **MUST** be set to include both the comm
 - [ ] **Profile**: Assign a profile (e.g., `backend` or `infrastructure`).
 - [ ] **Healthcheck**: Implement a `healthcheck` in the compose definition.
 - [ ] **Logs**: Verify logs appear in `docker compose logs <service>`.
-- [ ] **Networking**: Ensure it uses the `agent-poc` network to talk to other containers by service name.
+- [ ] **Networking**: Ensure it uses the `agent-net` network to talk to other containers by service name.
 - [ ] **Persistence**: Use top-level named volumes to persist data across service down-up cycles.

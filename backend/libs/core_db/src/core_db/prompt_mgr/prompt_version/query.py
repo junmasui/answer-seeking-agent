@@ -22,7 +22,7 @@ async def get_prompt_version(prompt_version_uuid_list: list[str | uuid.UUID]):
 
     prompt_version_uuid_list = [_ensure_uuid(item) for item in prompt_version_uuid_list]
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         where = [DbPromptVersion.id.in_(prompt_version_uuid_list)]
@@ -102,7 +102,7 @@ async def list_prompt_versions(
     """Return prompts when matched to specified propmt UUID."""
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     join_prompt = True
 

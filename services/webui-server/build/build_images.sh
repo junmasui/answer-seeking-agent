@@ -43,7 +43,7 @@ $DOCKER build \
   --build-context dependency-gate-dir=../../dependency-gate \
   --build-context frontend-dir=../../../frontend/ \
   --target production \
-  --tag localhost/localhost/answers-frontend:node-22-bookworm \
+  --tag localhost/localhost/agent-frontend:node-22-bookworm \
   --progress plain \
   . 2>&1 \
 | tee $LOG_DIR/build-frontend.log
@@ -56,7 +56,7 @@ $DOCKER build \
   --build-context dependency-gate-dir=../../dependency-gate \
   --build-context frontend-dir=../../../frontend/ \
   --target dev \
-  --tag localhost/localhost/answers-frontend-dev:node-22-bookworm \
+  --tag localhost/localhost/agent-frontend-dev:node-22-bookworm \
   --progress plain \
   . 2>&1 \
 | tee $LOG_DIR/build-frontend-dev.log
@@ -69,7 +69,7 @@ $DOCKER build \
   --build-context dependency-gate-dir=../../dependency-gate \
   --build-context frontend-dir=../../../frontend/ \
   --target test-xvfb \
-  --tag localhost/localhost/answers-frontend-test-xvfb:node-22-bookworm \
+  --tag localhost/localhost/agent-frontend-test-xvfb:node-22-bookworm \
   --progress plain \
   . 2>&1 \
 | tee $LOG_DIR/build-frontend-test-xvfb.log

@@ -21,7 +21,7 @@ def get_connection_str():
     """Return the connection string for the PostgreSQL database from the global configuration."""
     config = get_test_config()
 
-    connection_url = config.postgres_answers_connection_url
+    connection_url = config.postgres_agent_connection_url
 
     # The connection string must use psycopg3!
     if not connection_url.scheme == 'postgresql+psycopg':
@@ -66,7 +66,7 @@ def sql_sessionmaker(sql_engine) -> Generator[sessionmaker, None, None]:
 @pytest.fixture(scope='module')
 def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     """Returns a Metadata object for the database."""
-    metadata = MetaData(schema='answers')
+    metadata = MetaData(schema='agent')
 
     metadata.reflect(bind=sql_engine)
 
@@ -76,7 +76,7 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
 
     # # Explicitly override column metadata known to be a custom datatype.
     # # The normal reflection mechanism does not know our custom datatypes.
-    # if 'answers.tracked_documents' in metadata.tables:
+    # if 'agent.tracked_documents' in metadata.tables:
     #     reflected_table = Table(
     #         'tracked_documents',
     #         metadata,
@@ -84,9 +84,9 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     #         autoload_with=sql_engine,
     #         extend_existing=True
     #     )
-    #     metadata.tables['answers.tracked_documents'] = reflected_table
+    #     metadata.tables['agent.tracked_documents'] = reflected_table
 
-    # if 'answers.prompt' in metadata.tables:
+    # if 'agent.prompt' in metadata.tables:
     #     reflected_table = Table(
     #         'prompt',
     #         metadata,
@@ -94,7 +94,7 @@ def reflected_metadata(sql_engine) -> Generator[MetaData, None, None]:
     #         autoload_with=sql_engine,
     #         extend_existing=True
     #     )
-    #     metadata.tables['answers.prompt'] = reflected_table
+    #     metadata.tables['agent.prompt'] = reflected_table
 
     yield metadata
 

@@ -7,7 +7,7 @@ MUTAGEN_SSH_PORT="${MUTAGEN_SSH_PORT:-22}"
 MUTAGEN_SSH_KEY_PATH="${MUTAGEN_SSH_KEY_PATH:-/run/secrets/mutagen_ssh_private_key}"
 MUTAGEN_SYNC_MODE="${MUTAGEN_SYNC_MODE:-one-way-replica}"
 # Detect the actual network name - it may have project prefix
-NETWORK=$(docker network ls --format "{{.Name}}" | grep -E "agent-poc$" | head -1)
+NETWORK=$(docker network ls --format "{{.Name}}" | grep -E "agent-net$" | head -1)
 
 # Discover running autotest containers dynamically
 echo "Discovering running autotest containers..."

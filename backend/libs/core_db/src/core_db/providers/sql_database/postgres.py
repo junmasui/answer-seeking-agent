@@ -36,8 +36,8 @@ def get_connection_str(db_schema: DataDomain):
     config = get_lib_config()
 
     match db_schema:
-        case DataDomain.ANSWERS:
-            connection_url = config.postgres_answers_connection_url
+        case DataDomain.AGENT:
+            connection_url = config.postgres_agent_connection_url
         case DataDomain.VECTORS:
             raise NotImplementedError
         case DataDomain.CHECKPOINTS:
@@ -130,13 +130,13 @@ async def ping_async_sql_database(db_schema: DataDomain) -> PingResult:
     Pings the specified SQL database schema to check its health and connectivity.
 
     This function attempts to connect to the database and execute a simple query
-    against the specified schema. For the 'ANSWERS' schema, it specifically checks
-    for the existence of the 'answers' schema and the count of records in the
+    against the specified schema. For the 'AGENT' schema, it specifically checks
+    for the existence of the 'agent' schema and the count of records in the
     tracked_documents table. For other schemas, a simple 'SELECT 1'
     is used as a basic connectivity test.
 
     Args:
-        db_schema: The DataDomain schema to ping (e.g., ANSWERS, VECTORS, CHECKPOINTS).
+        db_schema: The DataDomain schema to ping (e.g., AGENT, VECTORS, CHECKPOINTS).
 
     Returns:
         PingResult: An object containing the ping status (GOOD or BAD),
@@ -146,10 +146,10 @@ async def ping_async_sql_database(db_schema: DataDomain) -> PingResult:
     try:
         engine = get_async_engine(db_schema)
         async with engine.connect() as connection:
-            if db_schema == DataDomain.ANSWERS:
-                # Check if the 'answers' schema exists
+            if db_schema == DataDomain.AGENT:
+                # Check if the 'agent' schema exists
                 schema_check_result = await connection.execute(
-                    text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'answers';")
+                    text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'agent';")
                 )
                 if not schema_check_result.fetchone():
                     # If the schema doesn't exist, we can't connect to it in a meaningful
@@ -162,7 +162,7 @@ async def ping_async_sql_database(db_schema: DataDomain) -> PingResult:
                 # If the schema exists, query for the count of records in the
                 # tracked_documents table.
                 table_name = DbTrackedDocument.__tablename__
-                count_query = text(f'SELECT COUNT(*) FROM answers.{table_name}')
+                count_query = text(f'SELECT COUNT(*) FROM agent.{table_name}')
                 record_count_result = await connection.execute(count_query)
                 record_count = record_count_result.scalar_one_or_none()
 

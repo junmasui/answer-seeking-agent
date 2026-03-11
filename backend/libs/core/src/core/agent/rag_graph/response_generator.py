@@ -20,7 +20,7 @@ async def response_generator():
     """
     Create a response generation chain for RAG (Retrieval-Augmented Generation).
 
-    Combines a chat prompt, language model, and answer citation parser to generate answers from
+    Combines a chat prompt, language model, and answer citation parser to generate agent from
     retrieved documents with proper citation extraction.
     """
     prompt = await get_chat_prompt(prompt_name=AgentPromptName.GENERATE_ANSWER)

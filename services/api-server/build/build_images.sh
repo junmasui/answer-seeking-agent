@@ -91,7 +91,7 @@ echo "========================================"
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target production \
-    --tag localhost/localhost/answers-backend:python-3.12-cpu \
+    --tag localhost/localhost/agent-backend:python-3.12-cpu \
     --progress plain \
     . 2>&1 \
   | tee $LOG_DIR/build-backend-python-cpu.log
@@ -111,7 +111,7 @@ PID_CPU_PROD=$!
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target production \
-    --tag localhost/localhost/answers-backend:python-3.12-cuda12 \
+    --tag localhost/localhost/agent-backend:python-3.12-cuda12 \
     --progress plain \
     . 2>&1 \
   | tee $LOG_DIR/build-backend-python-cuda12.log
@@ -142,7 +142,7 @@ echo "========================================"
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target dev \
-    --tag localhost/localhost/answers-backend-dev:python-3.12-cpu \
+    --tag localhost/localhost/agent-backend-dev:python-3.12-cpu \
     --progress plain \
     . 2>&1 \
   | tee $LOG_DIR/build-backend-dev-python-cpu.log
@@ -162,7 +162,7 @@ PID_CPU_DEV=$!
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target dev \
-    --tag localhost/localhost/answers-backend-dev:python-3.12-cuda12 \
+    --tag localhost/localhost/agent-backend-dev:python-3.12-cuda12 \
     --progress plain \
     . 2>&1 \
   | tee $LOG_DIR/build-backend-dev-python-cuda12.log

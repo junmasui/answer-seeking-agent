@@ -34,7 +34,7 @@ class Answer(CamelModel):
     question: str = Field(description="User's question.")
     answer: str = Field(description="Answer to the user's question with citations.")
     citations: list[Citation] = Field(description='List of citations.')
-    thread_id: UUID = Field(description='Conversation UUID. A conversation is a sequence of questions and answers.')
+    thread_id: UUID = Field(description='Conversation UUID. A conversation is a sequence of questions and agent.')
     user_id: Optional[UUID] = Field(default=None, description='User UUID associated this question and answer.')
 
 
@@ -50,5 +50,5 @@ class AnswerRequestBody(CamelModel):
 
     input: str
     thread_id: Optional[UUID] = Field(
-        default=None, description='Conversation UUID. A conversation is a sequence of questions and answers.'
+        default=None, description='Conversation UUID. A conversation is a sequence of questions and agent.'
     )

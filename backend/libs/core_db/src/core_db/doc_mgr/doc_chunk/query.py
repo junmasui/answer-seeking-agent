@@ -12,7 +12,7 @@ async def list_document_chunks(doc_uuid: uuid.UUID | str) -> Sequence[DbTrackedD
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         stmt = select(DbTrackedDocumentChunk).where(DbTrackedDocumentChunk.tracked_document_id == doc_uuid)
@@ -25,7 +25,7 @@ async def list_document_chunk_vector_ids(doc_uuid: uuid.UUID | str) -> list[str]
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         stmt = select(DbTrackedDocumentChunk.vector_id).where(DbTrackedDocumentChunk.tracked_document_id == doc_uuid)

@@ -16,7 +16,7 @@ services:
     ports:
       - '27600:3000'
     networks:
-      - agent-poc
+      - agent-net
     environment:
       - NLP_CONF_FILE=/conf/transformers.yaml
       - RECOGNIZER_REGISTRY_CONF_FILE=/conf/custom_recognizers.yaml
@@ -52,7 +52,7 @@ services:
     ports:
       - '27601:5001'
     networks:
-      - agent-poc
+      - agent-net
     volumes:
       - ../../dist:/dist:ro
       - ../config/run_presidio_anonymizer.sh:/run_presidio_anonymizer.sh:ro

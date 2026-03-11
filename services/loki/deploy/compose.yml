@@ -10,7 +10,7 @@ services:
         command:
             - -config.file=/etc/loki/local-config.yml
         networks:
-            - agent-poc
+            - agent-net
 
         healthcheck:
             # Use the IPv4 loopback address. When 'localhost' is used, wget will try to use

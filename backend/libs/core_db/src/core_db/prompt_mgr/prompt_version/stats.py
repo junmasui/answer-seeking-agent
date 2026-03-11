@@ -6,7 +6,7 @@ from core_db.providers.sql_database import DataDomain, get_async_sessionmaker
 
 async def get_prompt_version_stats():
     """Return the count of records and maximum updated_date time in the prompt version table."""
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         stmt = select(

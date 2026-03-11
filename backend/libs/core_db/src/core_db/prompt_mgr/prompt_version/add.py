@@ -19,7 +19,7 @@ async def add_or_update_prompt_version(
     if status == None:
         status = PromptStatus.ACTIVE
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         # We want to know auto-increment the version number.

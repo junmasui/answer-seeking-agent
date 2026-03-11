@@ -51,9 +51,9 @@ fi
 
 # Determine image tag based on GPU mode
 if [[ "$GPU_MODE" == "cuda12" ]]; then
-    IMAGE_TAG="localhost/localhost/answers-dev-tools:python-3.12-cuda12"
+    IMAGE_TAG="localhost/localhost/agent-dev-tools:python-3.12-cuda12"
 else
-    IMAGE_TAG="localhost/localhost/answers-dev-tools:python-3.12-cpu"
+    IMAGE_TAG="localhost/localhost/agent-dev-tools:python-3.12-cpu"
 fi
 
 # Check if image exists
@@ -93,7 +93,7 @@ DOCKER_ARGS=(
     "--name" "$CONTAINER_NAME"
     "--user" "root"
     "--privileged"
-    "--network" "agent_agent-poc"
+    "--network" "agent_agent-net"
     "-e" "GPU_MODE=$GPU_MODE"
     "-e" "RUN_AS_UID=$RUN_AS_UID"
     "-e" "RUN_AS_GID=$RUN_AS_GID"

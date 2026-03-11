@@ -1,6 +1,6 @@
 services:
   celery-worker-autotest:
-    image: 'localhost/localhost/answers-backend-dev:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend-dev:python-3.12-cuda12'
 
     environment:
       GPU_MODE: cuda12

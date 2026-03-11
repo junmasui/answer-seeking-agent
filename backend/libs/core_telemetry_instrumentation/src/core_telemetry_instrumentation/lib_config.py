@@ -56,7 +56,7 @@ class TelemetrySettings(BaseModel):
     service_name: Annotated[
         str,
         Field(
-            default='answers-agent',
+            default='agent-agent',
             validation_alias='OTEL_SERVICE_NAME',
             description='Service name for OpenTelemetry traces and metrics.',
         ),

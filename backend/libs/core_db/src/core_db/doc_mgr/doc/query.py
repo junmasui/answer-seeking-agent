@@ -22,7 +22,7 @@ async def get_documents(doc_uuid_list: list[str | uuid.UUID]) -> Sequence[DbTrac
 
     doc_uuid_list = [_ensure_uuid(item) for item in doc_uuid_list]
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         stmt = select(DbTrackedDocument).where(DbTrackedDocument.id.in_(doc_uuid_list))
@@ -76,7 +76,7 @@ async def list_tracking_records(
     """
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     # Determine if we need to explicitly join the related table for sorting inside the
     # primary SQL query. The relationship between SQLAlchemy classes is used only for

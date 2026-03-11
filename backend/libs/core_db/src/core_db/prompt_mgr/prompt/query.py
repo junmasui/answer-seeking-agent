@@ -21,7 +21,7 @@ async def get_prompt(prompt_uuid_list: list[str | uuid.UUID], owner_type: Option
 
     prompt_uuid_list = [_ensure_uuid(item) for item in prompt_uuid_list]
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         where = [DbPrompt.id.in_(prompt_uuid_list)]
@@ -119,7 +119,7 @@ async def list_prompts(
     """Return prompts when matched to specified propmt UUID."""
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         paginate = start is not None and length is not None

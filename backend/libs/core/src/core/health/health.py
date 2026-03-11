@@ -21,15 +21,15 @@ async def system_health_check():
         'chat_llm': PingResult(status=PingStatus.BAD, message='Check not performed').model_dump(),  # Added chat_llm
     }
 
-    # Ping PostgreSQL 'answers' schema
+    # Ping PostgreSQL 'agent' schema
     try:
-        pg_answers_status = await ping_async_sql_database(DataDomain.ANSWERS)
-        system_health['sql_database'] = pg_answers_status.model_dump()
+        pg_agent_status = await ping_async_sql_database(DataDomain.AGENT)
+        system_health['sql_database'] = pg_agent_status.model_dump()
     except Exception as e:
-        logger.error("Error during PostgreSQL 'answers' schema health check", exc_info=e)
+        logger.error("Error during PostgreSQL 'agent' schema health check", exc_info=e)
         # Ensure the error is captured in the health status
         system_health['sql_database'] = PingResult(
-            status=PingStatus.BAD, message="PostgreSQL 'answers' schema check failed unexpectedly.", error=str(e)
+            status=PingStatus.BAD, message="PostgreSQL 'agent' schema check failed unexpectedly.", error=str(e)
         ).model_dump()
 
     # Ping S3 file store

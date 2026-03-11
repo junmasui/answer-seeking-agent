@@ -30,6 +30,7 @@ tasks:
   launch:
     desc: "Launch the full service stack"
     deps:
+      - initialize-networks
       - api-server
       - celery-worker
       - webui-server
@@ -180,9 +181,15 @@ tasks:
   # SCRIPTS
   # =========================================================================
 
+  initialize-networks:
+    desc: "Ensure the internal Docker network exists"
+    cmds:
+      - docker network inspect agent_agent-net >/dev/null 2>&1 || docker network create agent_agent-net
+
   update-secrets:
     desc: "Generate auto-managed secrets files"
     dir: "{{.TASKFILE_DIR}}/../services"
+    deps: [initialize-networks]
     cmd: bash scripts/update_secrets.sh
     sources:
       - "{{.TASKFILE_DIR}}/../services/scripts/update_secrets.sh"
@@ -190,6 +197,7 @@ tasks:
   initialize-environment:
     desc: "Run certificate generation"
     dir: "{{.TASKFILE_DIR}}/../services"
+    deps: [initialize-networks]
     cmd: bash scripts/make_certs.sh
 
   # =========================================================================
@@ -422,25 +430,28 @@ tasks:
 
   alertmanager:
     desc: "Start Alertmanager"
+    deps: [initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" alertmanager
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" alertmanager
 
   prometheus:
     desc: "Start Prometheus"
-    deps: [alertmanager]
+    deps: [alertmanager, initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" prometheus
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" prometheus
 
   loki:
     desc: "Start Loki"
+    deps: [initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" loki
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" loki
 
   jaeger:
     desc: "Start Jaeger"
+    deps: [initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" jaeger
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" jaeger
@@ -454,14 +465,14 @@ tasks:
 
   otel-collector:
     desc: "Start OpenTelemetry collector"
-    deps: [loki, jaeger, prometheus]
+    deps: [loki, jaeger, prometheus, initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" otel-collector
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" otel-collector
 
   otel-collector-docker:
     desc: "Start OpenTelemetry collector for Docker metrics"
-    deps: [loki, jaeger, prometheus]
+    deps: [loki, jaeger, prometheus, initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" otel-collector-docker
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" otel-collector-docker
@@ -479,14 +490,14 @@ tasks:
 
   traefik:
     desc: "Start Traefik reverse proxy"
-    deps: [image:traefik]
+    deps: [image:traefik, initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" traefik
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" traefik
 
   slim-util:
     desc: "Start slim-util"
-    deps: [image:slim-util]
+    deps: [image:slim-util, initialize-networks]
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" slim-util
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" slim-util

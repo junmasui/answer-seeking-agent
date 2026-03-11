@@ -17,7 +17,7 @@ async def update_tracking_record(doc_uuid):
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         async with session.begin():

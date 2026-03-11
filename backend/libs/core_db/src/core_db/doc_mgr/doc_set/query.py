@@ -21,7 +21,7 @@ async def get_document_sets(doc_set_uuid_list: list[str | uuid.UUID]):
 
     doc_set_uuid_list = [_ensure_uuid(item) for item in doc_set_uuid_list]
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         stmt = select(DbTrackedDocumentSet).where(DbTrackedDocumentSet.id.in_(doc_set_uuid_list))
@@ -44,7 +44,7 @@ async def list_tracking_document_sets(
     """Return tracking set when matched to specified document UUID."""
     order_by = _build_order_by(sort_by)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         paginate = start is not None and length is not None

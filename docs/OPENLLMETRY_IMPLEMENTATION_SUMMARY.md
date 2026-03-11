@@ -102,7 +102,7 @@ from core.telemetry import initialize_telemetry
 # Will automatically choose OpenLLMetry if available
 initialize_telemetry(
     method='auto',
-    service_name='answers-agent',
+    service_name='agent-agent',
     environment='production'
 )
 ```

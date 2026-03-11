@@ -12,7 +12,7 @@ async def replace_document_chunks(doc_uuid: uuid.UUID | str, chunk_data: Iterabl
     if isinstance(doc_uuid, str):
         doc_uuid = uuid.UUID(hex=doc_uuid)
 
-    sessionmaker = get_async_sessionmaker(DataDomain.ANSWERS)
+    sessionmaker = get_async_sessionmaker(DataDomain.AGENT)
 
     async with sessionmaker() as session:
         async with session.begin():
