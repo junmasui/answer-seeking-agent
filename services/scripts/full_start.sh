@@ -21,7 +21,7 @@ done
 if [ -z "${GPU_MODE:-}" ]; then
     echo "GPU mode missing"
     exit 1
-elif [ "$GPU_MODE" == "cuda12" ]; then
+elif [ "$GPU_MODE" == "cuda13" ]; then
     export COMPOSE_FILE=common.compose.yml:cuda.compose.yml
 elif [ "$GPU_MODE" == "cpu" ]; then
     export COMPOSE_FILE=common.compose.yml:cpu-only.compose.yml

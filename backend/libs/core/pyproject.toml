@@ -44,26 +44,22 @@ dependencies = [
 
 [project.optional-dependencies]
 cpu = [
-  "torch==2.9.1",
-  "torchaudio>=2.5.1",
-  "torchvision>=0.20.0"
+  "torch==2.10.0",
 ]
-cuda12 = [
-  "torch==2.9.1",
-  "torchaudio>=2.5.1",
-  "torchvision>=0.20.0"
+cuda13 = [
+  "torch==2.10.0",
 ]
 
 
 [tool.uv]
-# Explicit declaration that the "cpu" and "cuda12" extras are in conflict
+# Explicit declaration that the "cpu" and "cuda13" extras are in conflict
 #
 # See: https://github.com/astral-sh/uv/blob/main/docs/reference/settings.md#conflicts--conflicts-
 #
 conflicts = [
     [
       { extra = "cpu" },
-      { extra = "cuda12" },
+      { extra = "cuda13" },
     ],
 ]
 

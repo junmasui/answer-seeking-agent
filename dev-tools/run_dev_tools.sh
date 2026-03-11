@@ -8,7 +8,7 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 # Interactive launcher for dev-tools container
 #
 # This script provides a convenient way to run the dev-tools container
-# interactively without needing Docker Compose.
+# interactively using Docker Compose.
 #
 
 # Default values
@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --gpu-mode=MODE    GPU mode: cpu or cuda12 (default: cpu)"
+            echo "  --gpu-mode=MODE    GPU mode: cpu or cuda13 (default: cpu)"
             echo "  --detach           Run container in background (detached mode)"
             echo "  --help             Show this help message"
             exit 0
@@ -44,16 +44,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate GPU mode
-if [[ "$GPU_MODE" != "cpu" && "$GPU_MODE" != "cuda12" ]]; then
-    echo "Error: Invalid GPU mode '$GPU_MODE'. Must be 'cpu' or 'cuda12'" >&2
+if [[ "$GPU_MODE" != "cpu" && "$GPU_MODE" != "cuda13" ]]; then
+    echo "Error: Invalid GPU mode '$GPU_MODE'. Must be 'cpu' or 'cuda13'" >&2
     exit 1
 fi
 
-# Determine image tag based on GPU mode
-if [[ "$GPU_MODE" == "cuda12" ]]; then
-    IMAGE_TAG="localhost/localhost/agent-dev-tools:python-3.12-cuda12"
+# Determine image tag and compose override based on GPU mode
+if [[ "$GPU_MODE" == "cuda13" ]]; then
+    IMAGE_TAG="localhost/localhost/agent-dev-tools:python-3.12-cuda13"
+    COMPOSE_OVERRIDE="cuda.compose.yml"
 else
     IMAGE_TAG="localhost/localhost/agent-dev-tools:python-3.12-cpu"
+    COMPOSE_OVERRIDE="cpu-only.compose.yml"
 fi
 
 # Check if image exists
@@ -80,60 +82,18 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     fi
 fi
 
-# Get user/group ID from environment or current user
-RUN_AS_UID="${DEV_UID:-$(id -u)}"
-RUN_AS_GID="${DEV_GID:-$(id -g)}"
+# Export user/group ID for compose interpolation
+export DEV_UID="${DEV_UID:-$(id -u)}"
+export DEV_GID="${DEV_GID:-$(id -g)}"
 
-# Determine repository root (parent directory of dev-tools)
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# Change to compose file directory so relative paths in compose files resolve correctly
+cd "$(dirname "$0")/deploy"
 
-# Build docker run command
-DOCKER_ARGS=(
-    "run"
-    "--name" "$CONTAINER_NAME"
-    "--user" "root"
-    "--privileged"
-    "--network" "agent_agent-net"
-    "-e" "GPU_MODE=$GPU_MODE"
-    "-e" "RUN_AS_UID=$RUN_AS_UID"
-    "-e" "RUN_AS_GID=$RUN_AS_GID"
-    "-e" "USE_CODEBASE_SYNC=false"
-    "-e" "USE_BOOTSTRAP_INSTALL=true"
-    "-e" "ENABLE_SSHD=false"
-    "-e" "ENABLE_MUTAGEN_SYNC=false"
-    "-e" "PYTHONPYCACHEPREFIX=/home/python/.pycache"
-    "-v" "$REPO_ROOT:/app"
-    "-v" "dev-tools-venv:/app/backend/.venv"
-    "-v" "dev-tools-node-modules:/app/frontend/node_modules"
-    "-v" "/var/run/docker.sock:/var/run/docker.sock:ro"
-)
+COMPOSE=(docker compose -f common.compose.yml -f "$COMPOSE_OVERRIDE")
 
-# Add GPU support if needed
-if [[ "$GPU_MODE" == "cuda12" ]]; then
-    DOCKER_ARGS+=(
-        "--gpus" "all"
-    )
-fi
-
-# Add interactive/detach flags
 if [[ "$DETACH_MODE" == true ]]; then
-    DOCKER_ARGS+=("-d")
-    COMMAND=("sleep" "infinity")
     echo "Starting dev-tools container in detached mode..."
-else
-    DOCKER_ARGS+=("-it")
-    COMMAND=("bash")
-    echo "Starting interactive dev-tools container..."
-fi
-
-# Add image and command
-DOCKER_ARGS+=("$IMAGE_TAG")
-DOCKER_ARGS+=("${COMMAND[@]}")
-
-# Run the container
-docker "${DOCKER_ARGS[@]}"
-
-if [[ "$DETACH_MODE" == true ]]; then
+    "${COMPOSE[@]}" run -d --name "$CONTAINER_NAME" dev-tools sleep infinity
     echo ""
     echo "Container started successfully!"
     echo "To attach to the container, run:"
@@ -141,4 +101,7 @@ if [[ "$DETACH_MODE" == true ]]; then
     echo ""
     echo "To stop the container, run:"
     echo "  docker rm -f $CONTAINER_NAME"
+else
+    echo "Starting interactive dev-tools container..."
+    "${COMPOSE[@]}" run --name "$CONTAINER_NAME" dev-tools bash
 fi

@@ -1,9 +1,9 @@
 services:
   dev-tools:
-    image: 'localhost/localhost/agent-dev-tools:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-dev-tools:python-3.12-cuda13'
 
     environment:
-      GPU_MODE: cuda12
+      GPU_MODE: cuda13
 
     deploy:
       resources:

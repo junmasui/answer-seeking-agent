@@ -60,14 +60,14 @@ addopts = [
 
 [tool.uv]
 required-environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
-# Explicit declaration that the "cpu" and "cuda12" extras are in conflict
+# Explicit declaration that the "cpu" and "cuda13" extras are in conflict
 #
 # See: https://github.com/astral-sh/uv/blob/main/docs/reference/settings.md#conflicts--conflicts-
 #
 conflicts = [
     [
       { extra = "cpu" },
-      { extra = "cuda12" },
+      { extra = "cuda13" },
     ],
 ]
 
@@ -171,15 +171,15 @@ migrations = { workspace = true }
 # PyTorch package sources with CPU/CUDA variants
 torch = [
     { index = "pytorch-cpu", extra = "cpu" },
-    { index = "pytorch-cuda12", extra = "cuda12" }
+    { index = "pytorch-cuda13", extra = "cuda13" }
 ]
 torchaudio = [
     { index = "pytorch-cpu", extra = "cpu" },
-    { index = "pytorch-cuda12", extra = "cuda12" }
+    { index = "pytorch-cuda13", extra = "cuda13" }
 ]
 torchvision = [
     { index = "pytorch-cpu", extra = "cpu" },
-    { index = "pytorch-cuda12", extra = "cuda12" }
+    { index = "pytorch-cuda13", extra = "cuda13" }
 ]
 
 [[tool.uv.index]]
@@ -188,6 +188,6 @@ url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
 [[tool.uv.index]]
-name = "pytorch-cuda12"
+name = "pytorch-cuda13"
 url = "https://download.pytorch.org/whl/cu126"
 explicit = true

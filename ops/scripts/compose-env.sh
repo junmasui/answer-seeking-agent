@@ -8,12 +8,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export SERVICES_ROOT="$(cd "$SCRIPT_DIR/../../services" && pwd)"
 
-# GPU mode (default: cuda12)
-export GPU_MODE="${GPU_MODE:-cuda12}"
+# GPU mode (default: cuda13)
+export GPU_MODE="${GPU_MODE:-cuda13}"
 
 # Build the COMPOSE_FILE list unless already provided
 if [[ -z "${COMPOSE_FILE:-}" ]]; then
-    if [[ "$GPU_MODE" == "cuda12" ]]; then
+    if [[ "$GPU_MODE" == "cuda13" ]]; then
         export COMPOSE_FILE="common.compose.yml:cuda.compose.yml"
     else
         export COMPOSE_FILE="common.compose.yml:cpu-only.compose.yml"

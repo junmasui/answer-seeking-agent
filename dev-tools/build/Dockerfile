@@ -34,10 +34,12 @@ COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.s
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
 COPY --from=config-dir ./supervisord.conf /etc/supervisord.conf
 COPY --from=config-dir ./stop_supervisor.sh /stop_supervisor.sh
+COPY --from=config-dir ./dev_mount_helper.sh /usr/local/bin/dev_mount_helper.sh
 
 RUN chmod a+x /custom-docker-entrypoint.sh \
     && chmod a+x /custom-docker-entrypoint-nonpriv.sh \
     && chmod a+x /stop_supervisor.sh \
+    && chmod a+x /usr/local/bin/dev_mount_helper.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint.sh \
     && chown ${USER_ID}:${GROUP_ID} /custom-docker-entrypoint-nonpriv.sh
 
@@ -46,9 +48,17 @@ WORKDIR /app
 
 RUN chown -R ${USER_ID}:${GROUP_ID} /app/
 
+#
+# Create internal storage directories for .venv and node_modules.
+# These are bind-mounted over /app at runtime by dev_mount_helper.sh.
+#
+RUN mkdir -p /home/python/.venv-storage \
+    && mkdir -p /home/python/node_modules-storage \
+    && chown ${USER_ID}:${GROUP_ID} /home/python/.venv-storage \
+    && chown ${USER_ID}:${GROUP_ID} /home/python/node_modules-storage
 
-
-RUN \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
@@ -63,7 +73,8 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
@@ -77,7 +88,8 @@ RUN \
     && rm -rf /var/lib/apt/lists/*
 
 # antigravity editor needs curl git and tar
-RUN \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \

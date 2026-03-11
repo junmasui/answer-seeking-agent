@@ -26,6 +26,11 @@ echo "Configuring passwordless sudo for user ${USERNAME} (UID ${RUN_AS_UID})..."
 echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/${USERNAME}"
 chmod 0440 "/etc/sudoers.d/${USERNAME}"
 
+# Set up internal bind mounts (.venv-storage and node_modules-storage over /app)
+if [ -x /usr/local/bin/dev_mount_helper.sh ]; then
+    /usr/local/bin/dev_mount_helper.sh
+fi
+
 # Fix ownership of mounted volumes
 if [ -d /app/backend/.venv ]; then
     echo "Fixing ownership of /app/backend/.venv..."

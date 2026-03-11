@@ -7,9 +7,10 @@ services:
 
     environment:
       DEBUGGER_LISTEN: true
-      USE_CODEBASE_SYNC: true
+      USE_CODEBASE_SYNC: false
       USE_BOOTSTRAP_INSTALL: true
-      ENABLE_SSHD: true
+      ENABLE_SSHD: false
+      ENABLE_MUTAGEN_SYNC: false
       RUN_AS_UID: ${DEV_UID:-1000}
       RUN_AS_GID: ${DEV_GID:-1000}
       PYTHONPYCACHEPREFIX: /home/python/.pycache
@@ -19,52 +20,21 @@ services:
     networks:
       - agent-net
 
-    healthcheck:
-      test: ["CMD-SHELL", "bash /healthcheck.sh"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
-      start_period: 30s
-
     volumes:
       # Mount docker socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount host codebase
       - ../../:/app
-      # Mask .venv and node_modules
-      - dev-tools-venv:/app/backend/.venv
-      - dev-tools-node-modules:/app/frontend/node_modules
       # Mount entrypoint
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       # Mount non-privileged entrypoint
       - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
-      # Mount healthcheck script
-      - ../config/healthcheck.sh:/healthcheck.sh:ro
-      # Mount start script
-      - ../config/start_dev.sh:/start_dev.sh:ro
       # Mount supervisord config
       - ../config/supervisord.conf:/etc/supervisord.conf:ro
-    secrets:
-      - agent_secrets
-      - agent_api_key_autotest_secrets
-      - agent_jwt_autotest_secrets
-      - agent_minio_autotest_secrets
-      - agent_postgres_autotest_secrets
-      - checkpoints_postgres_autotest_secrets
-      - redis_secrets
-      - weaviate_secrets
 
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
-    # Command to run the dev startup script
-    command: [ '/start_dev.sh' ]
 
 networks:
   agent-net:
     external: true
     name: agent_agent-net
-
-volumes:
-  dev-tools-venv:
-    driver: local
-  dev-tools-node-modules:
-    driver: local
