@@ -48,8 +48,8 @@ if [ -d "/app/backend" ]; then
             fi
 
             # Sync the virtual environment (persistent across restarts now)
-            if [ "$GPU_MODE" == "cuda12" ]; then
-                uv sync  --extra cuda12 --dev --all-packages
+            if [ "$GPU_MODE" == "cuda13" ]; then
+                uv sync  --extra cuda13 --dev --all-packages
             elif [ "$GPU_MODE" == "cpu" ]; then
                 uv sync  --extra cpu --dev --all-packages
             else

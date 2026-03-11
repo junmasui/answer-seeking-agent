@@ -1,3 +1,3 @@
 
 uv lock
-uv sync  --extra cuda12 --dev --all-packages
+uv sync  --extra cuda13 --dev --all-packages

@@ -106,7 +106,7 @@ cpu = [
 ]
 
 # PyTorch CUDA variant
-cuda12 = [
+cuda13 = [
   "torch>=2.5.1",
   "torchaudio>=2.5.1",
   "torchvision>=0.20.0"
@@ -155,7 +155,7 @@ cpu = [
   "torchaudio>=2.5.1",
   "torchvision>=0.20.0"
 ]
-cuda12 = [
+cuda13 = [
   "torch>=2.5.1",
   "torchaudio>=2.5.1",
   "torchvision>=0.20.0"

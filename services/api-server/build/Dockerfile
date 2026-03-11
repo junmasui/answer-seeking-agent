@@ -6,7 +6,8 @@ FROM docker.io/python:3.12.10-slim-bookworm AS python3.12-cpu
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-RUN \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
@@ -27,21 +28,22 @@ RUN \
     ( id -g ${GROUP_ID} > /dev/null 2>&1 ) || groupadd -g ${GROUP_ID} python ; \
     ( id -u ${USER_ID} > /dev/null 2>&1 ) || useradd -m -u ${USER_ID} -g ${GROUP_ID} python ;
 
-RUN \
+RUN --mount=type=cache,target=/root/.cache/pip \
     set -eux ; \
     #
     # Install uv package manager
     #
-    pip install --no-cache-dir uv
+    pip install uv
 
-FROM python3.12-cpu AS production-base
+FROM python3.12-cpu AS python3.12-cpu-heavy
 
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
 
-RUN \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     #
@@ -80,6 +82,8 @@ RUN \
     && cd .. \
     && rm -rf pandoc-3.7.0*
 
+FROM python3.12-cpu-heavy AS production-base
+
 #
 # These script live in the parent of this dockerfile's directory, so we must define
 # the parent as a named build-context on the command line.
@@ -87,6 +91,10 @@ RUN \
 # Copy in Dockerfile has a slightly different syntax. When copying a file to
 # a directory, the destination must end with a trailing slash.
 # See: https://docs.docker.com/reference/dockerfile/#destination-1
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
 
 COPY --from=config-dir ./custom-docker-entrypoint.sh /custom-docker-entrypoint.sh
 COPY --from=config-dir ./custom-docker-entrypoint-nonpriv.sh /custom-docker-entrypoint-nonpriv.sh
@@ -142,10 +150,9 @@ ARG GROUP_ID=1000
 
 USER ${USER_ID}:${GROUP_ID}
 
-RUN \
-    set -eux ; \
+RUN set -eux ; \
     uv venv --allow-existing \
-    && uv sync --extra cuda12 --dev --all-packages --no-editable
+    && uv sync --extra cuda13 --dev --all-packages --no-editable
 
 # Build start the server
 CMD ["/run_api_server.sh"]
@@ -161,7 +168,8 @@ ARG GROUP_ID=1000
 
 USER root
 
-RUN \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux ; \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \

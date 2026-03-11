@@ -5,7 +5,7 @@ ARG GROUP_ID=1000
 
 
 #
-# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/base/Dockerfile
+# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/13.1.1/ubuntu2404/base/Dockerfile
 #
 
 
@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Install the CUDA libraries installed in the base NVIDIA image.
 #
 
-ENV NV_CUDA_CUDART_VERSION=12.6.77-1
+ENV NV_CUDA_CUDART_VERSION=13.1.80-1
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -51,8 +51,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64 /" > /etc/apt/sources.list.d/cuda.list ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-    cuda-compat-12-6 \
-    cuda-cudart-12-6=${NV_CUDA_CUDART_VERSION} \
+    cuda-compat-13-1 \
+    cuda-cudart-13-1=${NV_CUDA_CUDART_VERSION} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -73,14 +73,13 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 # Install the CUDA libraries installed in the runtime NVIDIA image.
 #
 #
-# See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/Dockerfile
+# See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/13.1.1/ubuntu2404/runtime/Dockerfile
 #
-ENV NV_CUDA_LIB_VERSION=12.6.3-1
-ENV NV_LIBNPP_VERSION=12.3.1.54-1
-ENV NV_NVTX_VERSION=12.6.77-1
-ENV NV_LIBCUSPARSE_VERSION=12.5.4.2-1
-ENV NV_LIBCUBLAS_VERSION=12.6.4.1-1
-ENV NV_LIBNCCL_PACKAGE_VERSION=2.23.4-1+cuda13.6
+ENV NV_CUDA_LIB_VERSION=13.1.1-1
+ENV NV_LIBNPP_VERSION=13.0.3.3-1
+ENV NV_NVTX_VERSION=13.1.115-1
+ENV NV_LIBCUSPARSE_VERSION=12.7.3.1-1
+ENV NV_LIBCUBLAS_VERSION=13.2.1.1-1
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -88,24 +87,22 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-    cuda-libraries-12-6=${NV_CUDA_LIB_VERSION} \
-    cuda-nvtx-12-6=${NV_NVTX_VERSION} \
-    libcublas-12-6=${NV_LIBCUBLAS_VERSION} \
-    libcusparse-12-6=${NV_LIBCUSPARSE_VERSION} \
-    libnpp-12-6=${NV_LIBNPP_VERSION} \
+    cuda-libraries-13-1=${NV_CUDA_LIB_VERSION} \
+    cuda-nvtx-13-1=${NV_NVTX_VERSION} \
+    libcublas-13-1=${NV_LIBCUBLAS_VERSION} \
+    libcusparse-13-1=${NV_LIBCUSPARSE_VERSION} \
+    libnpp-13-1=${NV_LIBNPP_VERSION} \
     && apt-get clean \
-    && apt-mark hold libcublas-12-6 \
+    && apt-mark hold libcublas-13-1 \
     && rm -rf /var/lib/apt/lists/*
-#         libnccl2=${NV_LIBNCCL_PACKAGE_VERSION} \
-#    && apt-mark hold libcublas-12-6 libnccl2 \
 
 
 #
 # Install the CUDNN libraries installed in the runtime NVIDIA image.
 #
-# See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/12.6.3/ubuntu2404/runtime/cudnn/Dockerfile
+# See: https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/13.1.1/ubuntu2404/runtime/cudnn/Dockerfile
 #
-ENV NV_CUDNN_VERSION=9.5.1.17-1
+ENV NV_CUDNN_VERSION=9.17.1.4-1
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -113,10 +110,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     export DEBIAN_FRONTEND=noninteractive ; \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-    libcudnn9-cuda-12=${NV_CUDNN_VERSION} \
+    libcudnn9-cuda-13=${NV_CUDNN_VERSION} \
     && apt-get clean \
     && apt-mark hold \
-    libcudnn9-cuda-12 \
+    libcudnn9-cuda-13 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/root/.cache/pip \

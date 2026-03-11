@@ -87,8 +87,8 @@ if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
 
     EXTRA_ARGS=""
 
-    if [ "$GPU_MODE" == "cuda12" ]; then
-        EXTRA_ARGS="--extra cuda12"
+    if [ "$GPU_MODE" == "cuda13" ]; then
+        EXTRA_ARGS="--extra cuda13"
     elif [ "$GPU_MODE" == "cpu" ]; then
         EXTRA_ARGS="--extra cpu"
     else

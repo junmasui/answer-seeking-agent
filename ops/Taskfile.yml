@@ -13,7 +13,7 @@ vars:
   SCRIPTS: "{{.TASKFILE_DIR}}/scripts"
 
 env:
-  GPU_MODE: '{{.GPU_MODE | default "cuda12"}}'
+  GPU_MODE: '{{.GPU_MODE | default "cuda13"}}'
   NO_COLOR: "1"
 
 run: once

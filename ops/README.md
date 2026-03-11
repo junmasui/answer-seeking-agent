@@ -71,7 +71,7 @@ task teardown:autotest
 
 | Variable | Default | Description |
 |---|---|---|
-| `GPU_MODE` | `cuda12` | GPU mode: `cuda12` or `cpu-only` |
+| `GPU_MODE` | `cuda13` | GPU mode: `cuda13` or `cpu-only` |
 | `COMPOSE_FILE` | *(auto)* | Override the compose file list |
 
 These can be set in your shell or passed inline:

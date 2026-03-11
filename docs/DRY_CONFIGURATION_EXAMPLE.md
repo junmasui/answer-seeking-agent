@@ -50,7 +50,7 @@ api-testing = [
 [project.optional-dependencies]
 # Inherit workspace CPU/CUDA definitions
 cpu = []     # References workspace torch[cpu] configuration
-cuda12 = []  # References workspace torch[cuda12] configuration
+cuda13 = []  # References workspace torch[cuda13] configuration
 
 # Add project-specific optionals
 monitoring = [

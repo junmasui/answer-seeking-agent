@@ -54,7 +54,7 @@ api = [
 [project.optional-dependencies]
 # Inherit from workspace CPU/CUDA options
 cpu = []  # Will use workspace-defined torch CPU variant
-cuda12 = []  # Will use workspace-defined torch CUDA variant
+cuda13 = []  # Will use workspace-defined torch CUDA variant
 
 # Project-specific optional dependencies
 monitoring = [

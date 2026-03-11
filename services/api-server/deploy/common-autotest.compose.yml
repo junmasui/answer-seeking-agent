@@ -1,6 +1,6 @@
 services:
   api-server-autotest:
-    image: 'localhost/localhost/agent-backend-dev:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend-dev:python-3.12-cuda13'
     profiles: [ backend-autotest, all ]
     privileged: true
 
@@ -15,7 +15,7 @@ services:
 
 
       ##
-      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ## Override YML is responsible for setting GPU_MODE to 'cuda13' or 'cpu'
       ##
       ##
       ENABLE_MUTAGEN_SYNC: 'true'
@@ -92,11 +92,11 @@ services:
       # https://github.com/docker/compose/issues/6029
       PYTHONUNBUFFERED: 1
       ##
-      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ## Override YML is responsible for setting GPU_MODE to 'cuda13' or 'cpu'
       ##
       GPU_MODE: cpu
       ##
-      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ## Override YML is responsible for setting GPU_MODE to 'cuda13' or 'cpu'
       ##
       ##
       ENABLE_MUTAGEN_SYNC: 'true'

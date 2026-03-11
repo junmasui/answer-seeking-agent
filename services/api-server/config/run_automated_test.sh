@@ -8,7 +8,7 @@ SECRETS_MOUNT="${SECRETS_MOUNT:-/run/secrets}"
 # shellcheck disable=SC2046
 export $( grep -h -v "^#" "${SECRETS_MOUNT}"/*_secrets | xargs -n1 )
 
-if [ "$GPU_MODE" == "cuda12" ]; then
+if [ "$GPU_MODE" == "cuda13" ]; then
     nvidia-smi
 fi
 
@@ -17,8 +17,8 @@ fi
 SYNC_CMD="uv sync --frozen --dev --all-packages"
 EXTRA_ARGS=""
 
-if [ "$GPU_MODE" == "cuda12" ]; then
-    EXTRA_ARGS="--extra cuda12"
+if [ "$GPU_MODE" == "cuda13" ]; then
+    EXTRA_ARGS="--extra cuda13"
 elif [ "$GPU_MODE" == "cpu" ]; then
     EXTRA_ARGS="--extra cpu"
 else

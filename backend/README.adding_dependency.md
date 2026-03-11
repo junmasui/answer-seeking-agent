@@ -21,8 +21,8 @@ uv add --no-sync mypackage
 Synchronize the environment to the specifications
 
 ```bash
-## uv sync  --extra cuda12 --dev
+## uv sync  --extra cuda13 --dev
 
 # For workspaces:
-uv sync  --extra cuda12 --dev --all-packages
+uv sync  --extra cuda13 --dev --all-packages
 ```

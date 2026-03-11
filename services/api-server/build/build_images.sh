@@ -6,7 +6,7 @@ set -o pipefail  # Use right-most non-zero exit code from a pipe.
 
 #
 # Build a general image that is based on the official Python 3.12 on Debian 12 (Bookworm)
-# with CUDA 12 and CUDNN 9 installed.
+# with CUDA 13 and CUDNN 9 installed.
 #
 # NOTE: Use environment variables BUILDKIT_PROGRESS, BUILDKIT_COLOR, etc to
 #       control the progress output.
@@ -29,7 +29,7 @@ CACHE_DIR=../../../.buildkit-cache
 mkdir -p "$CACHE_DIR"
 
 # Cache configuration for all builds
-CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=max"
+CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=min"
 
 echo "========================================"
 echo "GROUP 1: Building base images in parallel"
@@ -52,18 +52,18 @@ echo "========================================"
 PID_CPU_BASE=$!
 
 #
-# Build an image with CUDA12 installed on Python 3.12 on Debian 12
+# Build an image with CUDA13 installed on Python 3.12 on Debian 12
 #
 (
   $DOCKER build \
     $DOCKER_BUILD_OPTS \
     $CACHE_OPTS \
-    --file cuda12.Dockerfile \
-    --target python3.12-cuda12-cudnn9 \
-    --tag localhost/localhost/python:3.12.10-bookworm-cuda12-cudnn9 \
+    --file cuda13.Dockerfile \
+    --target python3.12-cuda13-cudnn9 \
+    --tag localhost/localhost/python:3.12.10-bookworm-cuda13-cudnn9 \
     --progress plain \
     . 2>&1 \
-  | tee $LOG_DIR/build-python-bookworm-cuda12-cudnn9.log
+  | tee $LOG_DIR/build-python-bookworm-cuda13-cudnn9.log
 ) &
 PID_CUDA_BASE=$!
 
@@ -91,6 +91,57 @@ echo "========================================"
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target production \
+    --tag localhost/localhost/agent-backend:python-3.12-cpu-heavy \
+    --progress plain \
+    . 2>&1 \
+  | tee $LOG_DIR/build-backend-python-cpu-heavy.log
+) &
+PID_CPU_PROD=$!
+
+#
+# Build a backend image with Python 3.12 on Debian 12 with CUDA 13
+#
+(
+  $DOCKER build \
+    $DOCKER_BUILD_OPTS \
+    $CACHE_OPTS \
+    --file cuda13.Dockerfile \
+    --build-context config-dir=../config \
+    --build-context celery-config-dir=../../celery-worker/config \
+    --build-context dependency-gate-dir=../../dependency-gate \
+    --build-context backend-dir=../../../backend \
+    --target production \
+    --tag localhost/localhost/agent-backend:python-3.12-cuda13-heavy \
+    --progress plain \
+    . 2>&1 \
+  | tee $LOG_DIR/build-backend-python-cuda13-heavy.log
+) &
+PID_CUDA_PROD=$!
+
+# Wait for both production images to complete
+echo "Waiting for production backend builds to complete..."
+wait $PID_CPU_PROD
+wait $PID_CUDA_PROD
+echo "✓ Production backend images completed"
+
+echo ""
+echo "========================================"
+echo "GROUP 3: Building production backend images in parallel"
+echo "========================================"
+
+#
+# Build a backend image with Python 3.12 on Debian 12
+#
+(
+  $DOCKER build \
+    $DOCKER_BUILD_OPTS \
+    $CACHE_OPTS \
+    --file Dockerfile \
+    --build-context config-dir=../config \
+    --build-context celery-config-dir=../../celery-worker/config \
+    --build-context dependency-gate-dir=../../dependency-gate \
+    --build-context backend-dir=../../../backend \
+    --target production \
     --tag localhost/localhost/agent-backend:python-3.12-cpu \
     --progress plain \
     . 2>&1 \
@@ -99,22 +150,22 @@ echo "========================================"
 PID_CPU_PROD=$!
 
 #
-# Build a backend image with Python 3.12 on Debian 12 with CUDA 12
+# Build a backend image with Python 3.12 on Debian 12 with CUDA 13
 #
 (
   $DOCKER build \
     $DOCKER_BUILD_OPTS \
     $CACHE_OPTS \
-    --file cuda12.Dockerfile \
+    --file cuda13.Dockerfile \
     --build-context config-dir=../config \
     --build-context celery-config-dir=../../celery-worker/config \
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target production \
-    --tag localhost/localhost/agent-backend:python-3.12-cuda12 \
+    --tag localhost/localhost/agent-backend:python-3.12-cuda13 \
     --progress plain \
     . 2>&1 \
-  | tee $LOG_DIR/build-backend-python-cuda12.log
+  | tee $LOG_DIR/build-backend-python-cuda13.log
 ) &
 PID_CUDA_PROD=$!
 
@@ -150,22 +201,22 @@ echo "========================================"
 PID_CPU_DEV=$!
 
 #
-# Build a dev backend image with Python 3.12 on Debian 12 with CUDA 12
+# Build a dev backend image with Python 3.12 on Debian 12 with CUDA 13
 #
 (
   $DOCKER build \
     $DOCKER_BUILD_OPTS \
     $CACHE_OPTS \
-    --file cuda12.Dockerfile \
+    --file cuda13.Dockerfile \
     --build-context config-dir=../config \
     --build-context celery-config-dir=../../celery-worker/config \
     --build-context dependency-gate-dir=../../dependency-gate \
     --build-context backend-dir=../../../backend \
     --target dev \
-    --tag localhost/localhost/agent-backend-dev:python-3.12-cuda12 \
+    --tag localhost/localhost/agent-backend-dev:python-3.12-cuda13 \
     --progress plain \
     . 2>&1 \
-  | tee $LOG_DIR/build-backend-dev-python-cuda12.log
+  | tee $LOG_DIR/build-backend-dev-python-cuda13.log
 ) &
 PID_CUDA_DEV=$!
 
@@ -180,9 +231,5 @@ echo "========================================"
 echo "All builds completed successfully!"
 echo "========================================"
 
-#
-# Clean up old cache (keep last 50GB)
-#
-echo ""
-echo "Pruning old build cache..."
-docker buildx prune --builder "$BUILDER_NAME" --keep-storage 50GB --force
+# Cache GC is handled automatically by the BuildKit daemon
+# (--oci-worker-gc-keepstorage=50GB configured in ensure_buildx_builder.sh)

@@ -32,7 +32,7 @@ mkdir -p $LOG_DIR
 mkdir -p "$CACHE_DIR"
 
 # Cache configuration for all builds
-CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=max"
+CACHE_OPTS="--cache-from type=local,src=$CACHE_DIR --cache-to type=local,dest=$CACHE_DIR,mode=min"
 
 required_images=(
   "localhost/localhost/agent-frontend:node-22-bookworm"
@@ -88,19 +88,15 @@ docker buildx build --builder default \
 docker buildx build --builder default \
   $DOCKER_BUILD_OPTS \
   $CACHE_OPTS \
-  --file cuda12.Dockerfile \
+  --file cuda13.Dockerfile \
   --build-context config-dir=../config \
   --build-context node-source=docker-image://localhost/localhost/agent-frontend:node-22-bookworm \
-  --build-context backend-source=docker-image://localhost/localhost/agent-backend:python-3.12-cuda12 \
+  --build-context backend-source=docker-image://localhost/localhost/agent-backend:python-3.12-cuda13 \
   --target dev \
-  --tag localhost/localhost/agent-dev-tools:python-3.12-cuda12 \
+  --tag localhost/localhost/agent-dev-tools:python-3.12-cuda13 \
   --progress plain \
   --load \
   . 2>&1 \
-| tee $LOG_DIR/build-dev-tools-python-cuda12.log
+| tee $LOG_DIR/build-dev-tools-python-cuda13.log
 
-#
-# Clean up old cache (keep last 50GB)
-#
-echo "Pruning old build cache..."
-docker buildx prune --builder "$BUILDER_NAME" --keep-storage 50GB --force
+# Cache GC is handled automatically by the BuildKit daemon

@@ -1,7 +1,7 @@
 services:
   celery-worker:
 
-    image: 'localhost/localhost/agent-backend:python-3.12-cuda12'
+    image: 'localhost/localhost/agent-backend:python-3.12-cuda13'
     profiles: [  celery, backend, all ]
 
     environment:
@@ -14,7 +14,7 @@ services:
 
 
       ##
-      ## Override YML is responsible for setting GPU_MODE to 'cuda12' or 'cpu'
+      ## Override YML is responsible for setting GPU_MODE to 'cuda13' or 'cpu'
       ##
     env_file:
       - backend.env

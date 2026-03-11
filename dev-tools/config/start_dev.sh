@@ -24,14 +24,14 @@ if [ -d "/app/backend" ]; then
     cd /app/backend
 
     if [ -n "${GPU_MODE:-}" ] && [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
-        if [ "$GPU_MODE" == "cuda12" ]; then
+        if [ "$GPU_MODE" == "cuda13" ]; then
             nvidia-smi
         fi
 
         # NOTE: Run compile_requirements.sh after changes to dependencies
         #
-        if [ "$GPU_MODE" == "cuda12" ]; then
-            uv sync  --extra cuda12 --dev --all-packages
+        if [ "$GPU_MODE" == "cuda13" ]; then
+            uv sync  --extra cuda13 --dev --all-packages
         elif [ "$GPU_MODE" == "cpu" ]; then
             uv sync  --extra cpu --dev --all-packages
         else
