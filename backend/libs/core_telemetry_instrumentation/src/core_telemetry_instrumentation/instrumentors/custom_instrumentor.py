@@ -203,7 +203,7 @@ def _ensure_telemetry_in_config(args, kwargs, span_name) -> dict[str, str | int]
 
     The function reads ``metadata`` first (preferred) with a fallback to
     ``configurable`` for ``session_id`` / ``user_id``.  This allows callers
-    (e.g. ``seek_answer``) to put tracing-only context in ``metadata`` while
+    (e.g. ``process_input``) to put tracing-only context in ``metadata`` while
     reserving ``configurable`` for functional keys (``thread_id`` for the
     checkpointer).
 
@@ -248,8 +248,8 @@ def _ensure_telemetry_in_config(args, kwargs, span_name) -> dict[str, str | int]
 
         # Build span attributes from metadata so the wrapper can set them on
         # the auto-created OTel span (replaces the hand-rolled span in agent.py).
-        if metadata.get('question_preview'):
-            span_attrs['agent.question'] = metadata['question_preview']
+        if metadata.get('input_preview'):
+            span_attrs['agent.input'] = metadata['input_preview']
         if metadata.get('thread_id'):
             span_attrs['agent.thread_id'] = metadata['thread_id']
         if user_id:

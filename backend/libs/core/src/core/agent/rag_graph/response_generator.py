@@ -1,5 +1,5 @@
 """
-This module provides the node that generates an answer from the retrieved documents.
+This module provides the node that generates a response from the retrieved documents.
 
 See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state
 """
@@ -20,10 +20,10 @@ async def response_generator():
     """
     Create a response generation chain for RAG (Retrieval-Augmented Generation).
 
-    Combines a chat prompt, language model, and answer citation parser to generate agent from
+    Combines a chat prompt, language model, and response citation parser to generate response from
     retrieved documents with proper citation extraction.
     """
-    prompt = await get_chat_prompt(prompt_name=AgentPromptName.GENERATE_ANSWER)
+    prompt = await get_chat_prompt(prompt_name=AgentPromptName.GENERATE_RESPONSE)
 
     # LLM
     llm = get_chat_llm()
@@ -43,7 +43,7 @@ async def response_generator():
 @arunnable
 async def generate_response(state: GraphState):
     """
-    Generate an response using the RAG agent.
+    Generate a response using the RAG agent.
 
     Args:
         state (dict): The current graph state
@@ -52,8 +52,8 @@ async def generate_response(state: GraphState):
         dict: Updates to the graph state with the generated response and citations
 
     """
-    logger.info('---GENERATE ANSWER---')
-    question = state.question
+    logger.info('---GENERATE RESPONSE---')
+    user_input = state.input
     documents = state.documents
     history = state.messages
     response_generation_count = state.response_generation_count
@@ -64,7 +64,7 @@ async def generate_response(state: GraphState):
 
     # RAG generation
     result = await chain.ainvoke(
-        input={'documents': documents, 'chat_history': history, 'question': question},
+        input={'documents': documents, 'chat_history': history, 'user_input': user_input},
         config={'configurable': {'documents': documents}, 'metadata': {'chain_name': generate_response.name}},
     )
 

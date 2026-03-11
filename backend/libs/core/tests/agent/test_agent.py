@@ -10,9 +10,9 @@ pp = pprint.PrettyPrinter(indent=2, width=120)
 
 
 @pytest.mark.asyncio
-async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker):
-    """Test a simple question to the /answer/ endpoint and validate the response structure."""
-    path = '/answer/'
+async def test_simple_input(api_server, ingested_doc_table, sql_sessionmaker):
+    """Test a simple input to the /agent/ endpoint and validate the response structure."""
+    path = '/agent/'
 
     data = {'input': 'When did deep learning emerge?'}
 
@@ -28,12 +28,12 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
         assert False, f"threadId '{resp['threadId']}' is not a valid UUID"
     assert isinstance(thread_id, uuid.UUID)
 
-    assert 'question' in resp
-    assert resp['question'] == data['input']
+    assert 'input' in resp
+    assert resp['input'] == data['input']
 
-    assert 'answer' in resp
-    assert isinstance(resp['answer'], str)
-    assert len(resp['answer']) > 40
+    assert 'response' in resp
+    assert isinstance(resp['response'], str)
+    assert len(resp['response']) > 40
 
     assert 'citations' in resp
     assert isinstance(resp['citations'], list)
@@ -68,8 +68,8 @@ async def test_simple_question(api_server, ingested_doc_table, sql_sessionmaker)
 
 @pytest.mark.asyncio
 async def test_simple_thread(api_server, ingested_doc_table, sql_sessionmaker):
-    """Test a simple question to the /answer/ endpoint and validate the response structure."""
-    path = '/answer/'
+    """Test a simple input to the /agent/ endpoint and validate the response structure."""
+    path = '/agent/'
 
     data = {'input': 'When did deep learning emerge?'}
 
@@ -95,12 +95,12 @@ async def test_simple_thread(api_server, ingested_doc_table, sql_sessionmaker):
         assert False, f"threadId '{resp['threadId']}' is not a valid UUID"
     assert isinstance(thread_id, uuid.UUID)
 
-    assert 'question' in resp
-    assert resp['question'] == data['input']
+    assert 'input' in resp
+    assert resp['input'] == data['input']
 
-    assert 'answer' in resp
-    assert isinstance(resp['answer'], str)
-    assert len(resp['answer']) > 40
+    assert 'response' in resp
+    assert isinstance(resp['response'], str)
+    assert len(resp['response']) > 40
 
     assert 'citations' in resp
     assert isinstance(resp['citations'], list)

@@ -6,7 +6,7 @@ import uuid
 from functools import cache
 from typing import Optional
 
-from core_public import Answer, Citation
+from core_public import AgentResponse, Citation
 from langgraph.errors import GraphRecursionError
 from langgraph.pregel import Pregel
 
@@ -60,11 +60,11 @@ def get_mermaid_graph():
     return mermaid_graph
 
 
-async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[uuid.UUID | str]):
+async def process_input(user_input: str, thread_id: Optional[uuid.UUID], user_id: Optional[uuid.UUID | str]):
     """
-    Seek an answer to the user's input using the agent graph.
+    Seek a response to the user's input using the agent graph.
 
-    This involves retrieving documents, generating an answer, and applying guardrails.
+    This involves retrieving documents, generating a response, and applying guardrails.
     """
     logger.info('user input: %s  thread_id: %s', user_input, thread_id)
 
@@ -84,7 +84,7 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
     # See https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_updates/
 
     logger.info('\n=============================\n=\n=\n=\n=')
-    graph_input = {'question': user_input, 'document_set_ids': doc_set_ids}
+    graph_input = {'input': user_input, 'document_set_ids': doc_set_ids}
     # Capture into a dict, not TypedDict. We want to make zero assumptions about the
     # graph's stream output's keys. In other words, the set of keys is dynamic not static.
     # And because we are not static, we avoid TypedDict and its subclasses (ex: GraphState).
@@ -107,7 +107,7 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
                 'thread_id': thread_id.hex,
                 'user_id': user_id_str or '',
                 'session_id': thread_id.hex,
-                'question_preview': user_input[:500],
+                'input_preview': user_input[:500],
                 'document_set_count': len(doc_set_ids),
             },
         }
@@ -124,12 +124,12 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
         logger.error('General error', exc_info=e)
     logger.info('\n=\n=\n=\n=\n=============================')
 
-    # If we haven't assigned the answer yet, then pull it from the
+    # If we haven't assigned the response yet, then pull it from the
     # generated output.
-    answer = latest_value.get('response', '')
+    response_text = latest_value.get('response', '')
     citations = []
 
-    if answer:
+    if response_text:
         citations = latest_value.get('citations', [])
         citations = [
             Citation(
@@ -143,8 +143,8 @@ async def seek_answer(user_input: str, thread_id: Optional[uuid.UUID], user_id: 
         ]
     else:
         # If there was no generate output (for example, because there was an error),
-        # then set it to a hard-wired generic answer.
-        answer = 'I cannot find the answer to this question at this moment'
+        # then set it to a hard-wired generic response.
+        response_text = 'I cannot find a response to this input at this moment'
 
-    logger.info('answer: %s', answer)
-    return Answer(question=user_input, answer=answer, citations=citations, thread_id=thread_id, user_id=user_id)
+    logger.info('response: %s', response_text)
+    return AgentResponse(input=user_input, response=response_text, citations=citations, thread_id=thread_id, user_id=user_id)

@@ -1,5 +1,5 @@
 """
-This module provides the node that retreives documents for answering an user question.
+This module provides the node that retreives documents for responding to an user input.
 
 See https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#graph-state
 """
@@ -33,7 +33,7 @@ async def query_documents(state: GraphState):
 
     """
     logger.info('---RETRIEVE---')
-    question = state.question
+    user_input = state.input
 
     kwargs = {}
 
@@ -63,7 +63,7 @@ async def query_documents(state: GraphState):
 
     # Retrieval
     documents = await retriever.ainvoke(
-        input=question, config={'metadata': {'chain_name': query_documents.name}}, **kwargs
+        input=user_input, config={'metadata': {'chain_name': query_documents.name}}, **kwargs
     )
 
     # Remove irrelevant metadata. It's stuff that we don't need for processing

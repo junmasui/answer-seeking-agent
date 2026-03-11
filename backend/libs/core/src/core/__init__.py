@@ -1,5 +1,5 @@
 from . import db_event_handlers as _db_event_handlers  # noqa: F401
-from .agent import get_mermaid_graph, seek_answer
+from .agent import get_mermaid_graph, process_input
 from .doc_mgr import (
     delete_document,
     get_document_set_statistics,
@@ -19,7 +19,7 @@ from .ingest import ingest_documents, reset_worker_data
 # Explicitly define the exported names: these names are the contract of this module.
 __all__ = [
     'get_mermaid_graph',
-    'seek_answer',
+    'process_input',
     'delete_document',
     'get_document_set_statistics',
     'get_document_statistics',

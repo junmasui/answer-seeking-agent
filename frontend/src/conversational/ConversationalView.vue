@@ -115,7 +115,7 @@ async function submit() {
       headers.Authorization = auth
     }
 
-    const response = await fetch('/api/answer/', {
+    const response = await fetch('/api/agent/', {
       method: 'POST',
       headers,
       body: JSON.stringify(queryParams, null, 2)
@@ -140,7 +140,7 @@ async function submit() {
 
     threadId.value = data?.threadId ?? ''
 
-    let message = data?.answer ?? ''
+    let message = data?.response ?? ''
     if (data?.citations) {
       message += '\n\n<p></p>'
 

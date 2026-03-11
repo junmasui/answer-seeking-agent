@@ -24,13 +24,13 @@ class GraphState(BaseModel):
         Optional[int], Field(default=None, description='ID for the next message to be processed.')
     ]
 
-    question: Annotated[str, Field(description="The user's current question.")]
+    input: Annotated[str, Field(description="The user's current input.")]
 
     query_rewrite_count: Annotated[
         int,
         Field(
             default=0,
-            description='The number of times the question has been rewritten.',
+            description='The number of times the user input has been rewritten.',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -38,7 +38,7 @@ class GraphState(BaseModel):
         Optional[List[UUID]],
         Field(
             default=None,
-            description='IDs of document sets relevant to the question.',
+            description='IDs of document sets relevant to the user input.',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -65,14 +65,14 @@ class GraphState(BaseModel):
     response: Annotated[
         Optional[str],
         Field(
-            default=None, description='The final answer to be presented.', json_schema_extra={'reset_on_start': True}
+            default=None, description='The final response to be presented.', json_schema_extra={'reset_on_start': True}
         ),
     ]
     citations: Annotated[
         Optional[List[Dict[str, str]]],
         Field(
             default=None,
-            description='List of citations supporting the answer.',
+            description='List of citations supporting the response.',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -80,7 +80,7 @@ class GraphState(BaseModel):
         int,
         Field(
             default=0,
-            description='The number of times the answer has been generated.',
+            description='The number of times the response has been generated.',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -141,11 +141,11 @@ class GraphState(BaseModel):
         ),
     ]
 
-    answer_grade: Annotated[
+    response_grade: Annotated[
         Optional[ResponseOverallGrade],
         Field(
             default=None,
-            description='Overall grade for generated answer quality.',
+            description='Overall grade for generated response quality.',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -153,15 +153,15 @@ class GraphState(BaseModel):
         Optional[str],
         Field(
             default=None,
-            description='Is the answer factually grounded in provided documents?',
+            description='Is the response factually grounded in provided documents?',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
-    answer_addresses_question: Annotated[
+    response_addresses_input: Annotated[
         Optional[str],
         Field(
             default=None,
-            description="Does the answer address the user's question?",
+            description="Does the response address the user's input?",
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -169,7 +169,7 @@ class GraphState(BaseModel):
         Optional[Annotated[int, Field(ge=0, le=100)]],
         Field(
             default=None,
-            description='NeMo Guardrails score for answer safety (0-100).',
+            description='NeMo Guardrails score for response safety (0-100).',
             json_schema_extra={'reset_on_start': True},
         ),
     ]
@@ -177,7 +177,7 @@ class GraphState(BaseModel):
         Optional[Annotated[int, Field(ge=0, le=100)]],
         Field(
             default=None,
-            description='Presidio score for PII in the answer (0-100).',
+            description='Presidio score for PII in the response (0-100).',
             json_schema_extra={'reset_on_start': True},
         ),
     ]

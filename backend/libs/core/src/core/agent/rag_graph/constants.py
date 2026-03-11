@@ -10,11 +10,11 @@ class NodeName(StrEnum):
     """
 
     RESET_STATE_ON_START = 'reset_state_on_start'
-    ADD_QUERY_TO_HISTORY = 'add_query_to_history'
+    ADD_INPUT_TO_HISTORY = 'add_input_to_history'
     ADD_RESPONSE_TO_HISTORY = 'add_response_to_history'
     QUERY_DOCUMENTS = 'query_documents'
     GRADE_RELEVANCIES = 'grade_relevancies'
-    REWRITE_QUERY = 'rewrite_query'
+    REWRITE_INPUT = 'rewrite_input'
     GRADE_HALLUCINATION = 'grade_hallucination'
     GRADE_RESPONSE = 'grade_response'
     RETRIEVE_DOCUMENTS = 'retrieve_documents'

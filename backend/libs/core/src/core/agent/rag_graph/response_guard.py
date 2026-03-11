@@ -26,10 +26,10 @@ async def check_output_with_nemo(state: GraphState):
 
     """
     logger.info('---CHECK RESPONSE WITH NEMO GUARDRAILS---')
-    question = state.question
+    user_input = state.input
     generation = state.generation
 
-    messages = [{'role': 'user', 'content': question}, {'role': 'assistant', 'content': generation}]
+    messages = [{'role': 'user', 'content': user_input}, {'role': 'assistant', 'content': generation}]
     result = await execute_nemo_guardrails_check('output_check', messages)
 
     # Safely extract nested keys. If the expected structure isn't present,
@@ -77,7 +77,7 @@ def build_response_guard_subgraph():
     Build and return a StateGraph for the response guard subgraph.
 
     This subgraph is responsible for ensuring the quality and safety of the
-    generated response by grading the answer, checking for hallucinations,
+    generated response by grading the response, checking for hallucinations,
     and detecting sensitive or toxic content.
 
     Returns:

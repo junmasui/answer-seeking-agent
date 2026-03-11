@@ -1,8 +1,8 @@
 """
-Evaluate if retrieved documents are relevant to the user's question.
+Evaluate if retrieved documents are relevant to the user input.
 
 This module provides a node that evaluates whether retrieved documents are relevant to the
-user's question.
+user input.
 
 See: Retrieval Grader in https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_self_rag/#llms
 """
@@ -36,7 +36,7 @@ async def get_retrieval_grader():
 @arunnable
 async def grade_document_relevancies(state: GraphState):
     """
-    Determines whether the retrieved documents are relevant to the question.
+    Determines whether the retrieved documents are relevant to the user input.
 
     Args:
         state (dict): The current graph state
@@ -45,9 +45,9 @@ async def grade_document_relevancies(state: GraphState):
         state updates (dict): Updates with relevant documents
 
     """
-    logger.info('---CHECK DOCUMENT RELEVANCE TO QUESTION---')
+    logger.info('---CHECK DOCUMENT RELEVANCE TO INPUT---')
 
-    question = state.question
+    user_input = state.input
     documents = state.documents
 
     retrieval_grader = await get_retrieval_grader()
@@ -56,7 +56,7 @@ async def grade_document_relevancies(state: GraphState):
     document_relevancy = []
     for doc in documents:
         score = await retrieval_grader.ainvoke(
-            input={'question': question, 'document': doc.page_content},
+            input={'user_input': user_input, 'document': doc.page_content},
             config={'metadata': {'chain_name': grade_document_relevancies.name}},
         )
         grade = score.binary_score if score is not None else 'no'

@@ -20,9 +20,9 @@ def prepare_state(state: GraphState):
         'document_relevancy': None,
         'nemo_retrieval_check': None,
         'presidio_retrieval_check': None,
-        'answer_grade': None,
+        'response_grade': None,
         'grounded_in_facts': None,
-        'answer_addresses_question': None,
+        'response_addresses_input': None,
         'nemo_output_check': None,
         'presidio_output_check': None,
     }
@@ -32,7 +32,7 @@ def prepare_state(state: GraphState):
 
 def add_input_to_history(state: GraphState):
     """
-    Capture raw question.
+    Capture user input.
 
     Args:
         state (dict): The current graph state
@@ -43,7 +43,7 @@ def add_input_to_history(state: GraphState):
     """
     logger.info('---ADD INPUT TO CHAT HISTORY---')
 
-    question = state.question
+    user_input = state.input
 
     # Update agent state with new user-input entries in the message histories.
 
@@ -52,8 +52,8 @@ def add_input_to_history(state: GraphState):
     next_message_id += 1
 
     state_updates = {
-        'messages': [HumanMessage(content=question, id=message_id)],
-        'original_messages': [HumanMessage(content=question, id=message_id)],
+        'messages': [HumanMessage(content=user_input, id=message_id)],
+        'original_messages': [HumanMessage(content=user_input, id=message_id)],
         'next_message_id': next_message_id,
     }
 

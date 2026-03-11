@@ -25,11 +25,11 @@ def check_if_safe_input(state: GraphState):
 
     if not accept_input:
         # All documents have been filtered check_relevance
-        # We will re-generate a new query
+        # We will re-generate a new input
         logger.info('---DECISION: REJECT USER INPUT---')
         overall_grade = UserInputGrade.REJECT_USER_INPUT
     else:
-        # We have relevant documents, so generate answer
+        # We have relevant documents, so generate response
         logger.info('---DECISION: ACCEPT USER INPUT---')
         overall_grade = UserInputGrade.ACCEPT_USER_INPUT
 
@@ -39,7 +39,7 @@ def check_if_safe_input(state: GraphState):
 @runnable
 def gather_relevant_documents(state: GraphState):
     """
-    Determines whether the retrieved documents are relevant to the question.
+    Determines whether the retrieved documents are relevant to the user input.
 
     Args:
         state (dict): The current graph state
@@ -48,7 +48,7 @@ def gather_relevant_documents(state: GraphState):
         state updates (dict): Updates with relevant documents
 
     """
-    logger.info('---CHECK DOCUMENT RELEVANCE TO QUESTION---')
+    logger.info('---CHECK DOCUMENT RELEVANCE TO INPUT---')
 
     documents = state.documents
 
@@ -79,7 +79,7 @@ def gather_relevant_documents(state: GraphState):
 @runnable
 def check_for_relevant_documents(state: GraphState):
     """
-    Determines whether to generate an answer, or re-generate a question.
+    Determines whether to generate a response, or re-generate an input.
 
     Args:
         state (dict): The current graph state
@@ -94,11 +94,11 @@ def check_for_relevant_documents(state: GraphState):
 
     if not filtered_documents:
         # All documents have been filtered check_relevance
-        # We will re-generate a new query
-        logger.info('---DECISION: NO DOCUMENTS ARE RELEVANT TO QUESTIION---')
+        # We will re-generate a new input
+        logger.info('---DECISION: NO DOCUMENTS ARE RELEVANT TO INPUT---')
         overall_grade = RetrievalOverallGrade.NO_RELEVANT_DOCS
     else:
-        # We have relevant documents, so generate answer
+        # We have relevant documents, so generate response
         logger.info('---DECISION: GENERATE---')
         overall_grade = RetrievalOverallGrade.RELEVANT_DOCS_FOUND
     return {'retrieval_grade': overall_grade}
@@ -106,7 +106,7 @@ def check_for_relevant_documents(state: GraphState):
 
 def check_response_quality(state: GraphState):
     """
-    Determines whether the generation the agent question.
+    Determines whether the generation addresses the user input.
 
     Args:
         state (dict): The current graph state
@@ -115,13 +115,13 @@ def check_response_quality(state: GraphState):
         str: Decision for next node to call
 
     """
-    grade = state.answer_addresses_question
+    grade = state.response_addresses_input
 
     if grade != 'yes':
-        logger.info('---DECISION: GENERATION DOES NOT ADDRESS QUESTION---')
+        logger.info('---DECISION: GENERATION DOES NOT ADDRESS INPUT---')
         overall_grade = ResponseOverallGrade.REDO_RESPONSE_GENERATION
     else:
-        logger.info('---DECISION: GENERATION ADDRESSES QUESTION---')
+        logger.info('---DECISION: GENERATION ADDRESSES INPUT---')
         grade = state.grounded_in_facts
         if grade != 'yes':
             logger.info('---DECISION: GENERATION IS NOT GROUNDED IN FACTS FROM DOCUMENTS---')
@@ -130,4 +130,4 @@ def check_response_quality(state: GraphState):
             logger.info('---DECISION: GENERATION IS GROUNDED IN FACTS FROM DOCUMENTS---')
             overall_grade = ResponseOverallGrade.ACCEPT_RESPONSE
 
-    return {'answer_grade': overall_grade}
+    return {'response_grade': overall_grade}

@@ -1,6 +1,6 @@
 import enum
 
-from .agent import Answer, AnswerRequestBody, Citation
+from .agent import AgentResponse, AgentRequestBody, Citation
 from .base import OwnerType
 from .doc import (
     BulkDeleteRequestBody,
@@ -33,8 +33,8 @@ from .prompt_version import (
 
 # Explicitly define the exported names: these names are the contract of this module.
 __all__ = [
-    'Answer',
-    'AnswerRequestBody',
+    'AgentResponse',
+    'AgentRequestBody',
     'Citation',
     'BulkDeleteRequestBody',
     'Document',

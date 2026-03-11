@@ -24,31 +24,31 @@ class Citation(CamelModel):
     page_number: Optional[int] = Field(default=None, description='Page number of text within source document.')
 
 
-class Answer(CamelModel):
+class AgentResponse(CamelModel):
     """
-    Represents an answer to a user's question.
+    Represents a response from an agent.
 
-    The data includes the question, answer, citations, and conversation context.
+    The data includes the input, response, citations, and conversation context.
     """
 
-    question: str = Field(description="User's question.")
-    answer: str = Field(description="Answer to the user's question with citations.")
+    input: str = Field(description="User's input.")
+    response: str = Field(description="Response to the user's input with citations.")
     citations: list[Citation] = Field(description='List of citations.')
-    thread_id: UUID = Field(description='Conversation UUID. A conversation is a sequence of questions and agent.')
-    user_id: Optional[UUID] = Field(default=None, description='User UUID associated this question and answer.')
+    thread_id: UUID = Field(description='Conversation UUID. A conversation is a sequence of inputs and responses.')
+    user_id: Optional[UUID] = Field(default=None, description='User UUID associated with this input and response.')
 
 
 #
 # Operator Models
 #
-class AnswerRequestBody(CamelModel):
+class AgentRequestBody(CamelModel):
     """
-    Represents the request body for seeking an answer.
+    Represents the request body for seeking a response.
 
     The body includes the user's input and optional conversation thread ID.
     """
 
     input: str
     thread_id: Optional[UUID] = Field(
-        default=None, description='Conversation UUID. A conversation is a sequence of questions and agent.'
+        default=None, description='Conversation UUID. A conversation is a sequence of inputs and responses.'
     )
