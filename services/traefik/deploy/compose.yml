@@ -9,7 +9,9 @@ services:
             - '25180:25180'
             - '25183:25183'
         networks:
-            - agent-net
+            agent-net:
+                aliases:
+                    - web-gateway
         volumes:
             # Local docker engine's UNIX socket
             - /var/run/docker.sock:/var/run/docker.sock:ro

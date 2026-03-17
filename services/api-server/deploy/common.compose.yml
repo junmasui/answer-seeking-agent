@@ -27,7 +27,6 @@ services:
       # avoiding rebuilding images to capture their latest version.
       - ../config/run_api_server.sh:/run_api_server.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
-      - backend-init-signal-1:/init-signal
       - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
     secrets:
       - agent_secrets
@@ -87,7 +86,8 @@ services:
       ##
       GPU_MODE: cpu
       ENABLE_MUTAGEN_SYNC: false
-      USE_BOOTSTRAP_INSTALL: false
+      USE_BOOTSTRAP_INSTALL: true
+      SKIP_VENV_WAIT: true
       #
       PYTHONPYCACHEPREFIX: /home/python/.pycache
       # Codebase bucket credentials
@@ -126,5 +126,4 @@ services:
 # is started.
 #
 volumes:
-  backend-init-signal-1:
-    driver: local
+  {}

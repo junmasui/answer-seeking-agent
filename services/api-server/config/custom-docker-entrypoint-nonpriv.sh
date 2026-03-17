@@ -112,18 +112,23 @@ if [ "${USE_BOOTSTRAP_INSTALL:-false}" = "true" ]; then
     set -e
 fi
 
-# Wait for valid virtual environment
-attempt=0
-while [ ! -f ".venv/bin/activate" ]; do
-    echo "Waiting for .venv/bin/activate..."
-    sleep 1
-    attempt=$((attempt+1))
-    if [ $attempt -ge 10 ]; then
-         echo "Error: .venv/bin/activate not found after 10 seconds."
-         ls -la .venv || true
-         exit 1
-    fi
-done
+# Wait for valid virtual environment.
+# Skip when the container's own command is responsible for creating the venv
+# (e.g. python-build), to avoid a deadlock where the entrypoint waits for a
+# venv that only the command itself would produce.
+if [ "${USE_BOOTSTRAP_INSTALL:-false}" != "true" ]; then
+    attempt=0
+    while [ ! -f ".venv/bin/activate" ]; do
+        echo "Waiting for .venv/bin/activate..."
+        sleep 1
+        attempt=$((attempt+1))
+        if [ $attempt -ge 30 ]; then
+             echo "Error: .venv/bin/activate not found after 30 seconds."
+             ls -la .venv || true
+             exit 1
+        fi
+    done
+fi
 
 source .venv/bin/activate
 

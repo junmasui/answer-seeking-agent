@@ -61,7 +61,6 @@ services:
             - agent-net
         volumes:
             - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
-            - seaweedfs-init-signal:/init-signal
             - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
         secrets:
             - seaweedfs_secrets
@@ -83,7 +82,6 @@ services:
             - agent-net
         volumes:
             - ../config/init-seaweedfs.sh:/init-seaweedfs.sh:ro
-            - seaweedfs-init-signal:/init-signal
             - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
         secrets:
             - seaweedfs_secrets
@@ -137,6 +135,4 @@ services:
 volumes:
     seaweedfs-data:
 
-        driver: local
-    seaweedfs-init-signal:
         driver: local
