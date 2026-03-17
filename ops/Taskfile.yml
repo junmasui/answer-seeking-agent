@@ -58,14 +58,14 @@ tasks:
       bash "{{.SCRIPTS}}/stop-services.sh"
       api-server celery-worker celery-flower celery-exporter webui-server
       api-server-autotest celery-worker-autotest celery-flower-autotest webui-server-autotest
-      automated-pytest automated-vitest
+      automated-pytest automated-vitest automated-playwright
 
   teardown:autotest:
     desc: "Stop autotest and automated-test services only"
     cmd: >-
       bash "{{.SCRIPTS}}/stop-services.sh"
       api-server-autotest celery-worker-autotest celery-flower-autotest webui-server-autotest
-      automated-pytest automated-vitest
+      automated-pytest automated-vitest automated-playwright
 
   # =========================================================================
   # STOP INDIVIDUAL SERVICES
@@ -280,6 +280,12 @@ tasks:
     desc: "Build Python packages for the project"
     deps: [images:group1]
     dir: "{{.TASKFILE_DIR}}/../services"
+    sources:
+      - "../backend/uv.lock"
+      - "../backend/**/pyproject.toml"
+      - "../backend/**/*.py"
+    generates:
+      - "dist/*.whl"
     cmd: bash scripts/build_python_packages.sh
 
   # =========================================================================
@@ -603,3 +609,22 @@ tasks:
     cmd: bash "{{.SCRIPTS}}/wait-healthy.sh" webui-server-autotest
     status:
       - bash "{{.SCRIPTS}}/is-service-running.sh" webui-server-autotest
+
+  # =========================================================================
+  # AUTOMATED TESTS
+  # =========================================================================
+
+  test:pytest:
+    desc: "Run backend automated tests (pytest)"
+    deps: [api-server-autotest]
+    cmd: bash "{{.SCRIPTS}}/run-test.sh" automated-pytest
+
+  test:vitest:
+    desc: "Run frontend automated tests (vitest)"
+    deps: [webui-server-autotest]
+    cmd: bash "{{.SCRIPTS}}/run-test.sh" automated-vitest
+
+  test:playwright:
+    desc: "Run E2E tests (playwright)"
+    deps: [webui-server-autotest]
+    cmd: bash "{{.SCRIPTS}}/run-test.sh" automated-playwright

@@ -11,7 +11,8 @@ export default defineConfig({
         },
         allowedHosts: [
             'webui-server',
-            'webui-server-autotest'
+            'webui-server-autotest',
+            'web-gateway'
         ],
     },
     test: {

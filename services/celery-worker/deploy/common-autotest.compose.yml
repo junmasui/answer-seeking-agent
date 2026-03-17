@@ -35,7 +35,6 @@ services:
       # avoiding rebuilding images to capture their latest version.
       ##SRC - ../build/run_celery_worker.sh:/run_celery_worker.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
-      - backend-autotest-init-signal-1:/init-signal
       ##SRC - ./custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro
@@ -108,7 +107,6 @@ services:
       # avoiding rebuilding images to capture their latest version.
       ##SRC - ../build/run_celery_flower.sh:/run_celery_flower.sh:ro
       - ../config/healthcheck.sh:/healthcheck.sh:ro
-      - backend-autotest-init-signal-1:/init-signal
       ##SRC - ../build/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
       - ../../api-server/config/supervisord.conf:/etc/supervisord.conf:ro

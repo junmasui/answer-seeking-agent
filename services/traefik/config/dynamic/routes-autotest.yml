@@ -1,14 +1,14 @@
 http:
   routers:
     webui-autotest-router:
-      rule: "Host(`localhost`)"
+      rule: "Host(`localhost`) || Host(`web-gateway`)"
       entryPoints:
         - websecure-autotest
       service: webui-autotest-service
       tls: {}
 
     api-autotest-router:
-      rule: "Host(`localhost`) && PathPrefix(`/api/`)"
+      rule: "(Host(`localhost`) || Host(`web-gateway`)) && PathPrefix(`/api/`)"
       entryPoints:
         - websecure-autotest
       service: api-autotest-service

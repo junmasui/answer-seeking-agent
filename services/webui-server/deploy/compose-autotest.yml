@@ -77,3 +77,27 @@ services:
     entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
     command: [ '/run_automated_tests.sh' ]
     user: root
+
+  automated-playwright:
+    image: 'localhost/localhost/agent-frontend-test-xvfb:node-22-bookworm'
+    profiles: [ frontend-autotest, all ]
+    privileged: true
+
+    environment:
+      ENABLE_MUTAGEN_SYNC: 'false'
+      ENABLE_SSHD: 'false'
+
+    networks:
+      - agent-net
+    volumes:
+      - ../config/run_playwright_tests.sh:/run_playwright_tests.sh:ro
+      - ../config/custom-docker-entrypoint-nonpriv.sh:/custom-docker-entrypoint-nonpriv.sh:ro
+      - ../config/custom-docker-entrypoint.sh:/custom-docker-entrypoint.sh:ro
+      - ../../../e2e:/app/e2e
+
+    secrets:
+      - mutagen_sshd_authorized_keys
+
+    entrypoint: [ 'bash', '/custom-docker-entrypoint.sh' ]
+    command: [ '/run_playwright_tests.sh' ]
+    user: root

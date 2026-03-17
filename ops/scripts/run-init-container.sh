@@ -5,8 +5,8 @@
 #
 # Behaviour:
 #   1. If the container already exited with code 0 → skip.
-#   2. If it exists in any other state → remove and re-run.
-#   3. Start the container, wait for it to exit, verify exit code 0.
+#   2. Start the container in foreground, wait for it to exit.
+#   3. Propagate the exit code.
 
 set -euo pipefail
 
@@ -37,7 +37,7 @@ get_state() {
 }
 
 # ------------------------------------------------------------------
-# Pre-check
+# Pre-check (Idempotency)
 # ------------------------------------------------------------------
 
 read -r exists state exit_code <<< "$(get_state)"
@@ -48,34 +48,17 @@ if [[ "$exists" == "true" && "$state" == "exited" && "$exit_code" == "0" ]]; the
     exit 0
 fi
 
-if [[ "$exists" == "true" ]]; then
-    echo "[init] Removing old container $SERVICE (state=$state exit=$exit_code)..."
-    docker compose rm -f -s "$SERVICE" 2>/dev/null || true
-fi
-
 # ------------------------------------------------------------------
 # Run
 # ------------------------------------------------------------------
 
 echo "[init] Starting init container $SERVICE ..."
-docker compose up -d "$SERVICE"
 
-echo "[init] Waiting for $SERVICE to exit ..."
-if docker compose wait "$SERVICE" 2>/dev/null; then
-    echo "[init] $SERVICE completed successfully."
-    exit 0
-fi
-
-# Fallback: docker compose wait can be flaky — inspect directly
-container_id="$(docker compose ps -q -a "$SERVICE" 2>/dev/null)" || true
-if [[ -n "$container_id" ]]; then
-    actual_exit="$(docker inspect --format '{{.State.ExitCode}}' "$container_id" 2>/dev/null)" || true
-    if [[ "$actual_exit" == "0" ]]; then
-        echo "[init] WARNING: docker compose wait reported failure but container exited 0 — proceeding."
-        exit 0
-    fi
-fi
-
-echo "[init] ERROR: $SERVICE failed." >&2
-docker compose logs --tail 50 "$SERVICE" >&2 || true
-exit 1
+# Use --force-recreate to ensure we don't just restart a failed container.
+# Use --abort-on-container-exit to return to shell when done.
+# Use --exit-code-from to propagate the container's status.
+docker compose up \
+    --force-recreate \
+    --abort-on-container-exit \
+    --exit-code-from "$SERVICE" \
+    "$SERVICE"
